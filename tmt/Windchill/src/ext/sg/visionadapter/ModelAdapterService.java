@@ -22,31 +22,30 @@ import ext.tmt.utils.Debug;
 public class ModelAdapterService {
 
 	private static MongoClient mongo;
-	
-	private static String PATH_PROPERTIES="vision.properties";
-	
+
+	private static String PATH_PROPERTIES = "vision.properties";
+
 	private static DB db;
-	
-	
-	  public static void main(String[] args) throws IOException {
-			 String filePath=getCodebasePath()+File.separator+PATH_PROPERTIES;
-			  FileInputStream	fis = new FileInputStream(filePath); 
-			  Debug.P("----->>>FileIO:"+fis.available());
-	  }
-	
-	
+
+	public static void main(String[] args) throws IOException {
+		String filePath = getCodebasePath() + File.separator + PATH_PROPERTIES;
+		FileInputStream fis = new FileInputStream(filePath);
+		Debug.P("----->>>FileIO:" + fis.available());
+	}
+
 	public static DB getDataBase(String dbName) {
-		if(db == null){
+		if (db == null) {
 			db = new ModelAdapterService().createDBFromProperties(dbName);
 		}
 		return db;
 	}
-	
+
 	private DB createDBFromProperties(String dbName) {
 		InputStream is = null;
 		FileInputStream fis = null;
 		try {
-			 String filePath=getCodebasePath()+File.separator+PATH_PROPERTIES;
+			String filePath = getCodebasePath() + File.separator
+					+ PATH_PROPERTIES;
 			fis = new FileInputStream(filePath); //$NON-NLS-1$
 			is = new BufferedInputStream(fis);
 			Properties props = new Properties();
@@ -70,7 +69,7 @@ public class ModelAdapterService {
 		}
 		return null;
 	}
-	
+
 	public MongoClient createMongoClient(Properties props)
 			throws UnknownHostException {
 		String host = props.getProperty("db.host"); //$NON-NLS-1$
@@ -109,17 +108,16 @@ public class ModelAdapterService {
 			return new MongoClient(address, builder.build());
 		}
 	}
-	
-	
+
 	/**
 	 * 获得本机codeBase目录地址
+	 * 
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	private static String getCodebasePath() throws IOException{
+	private static String getCodebasePath() throws IOException {
 		WTProperties wtproperties = WTProperties.getLocalProperties();
 		return wtproperties.getProperty("wt.codebase.location");
 	}
-	
 
 }
