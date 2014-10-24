@@ -13,28 +13,30 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
-import com.mongodb.ServerAddress;
 import com.mongodb.MongoClientOptions.Builder;
+import com.mongodb.ServerAddress;
+import com.sg.visionadapter.persistence.IPersistenceService;
 
-public class ModelAdapterService {
+public class ModelServiceFactory {
 
-	private static MongoClient mongo;
+	private MongoClient mongo;
 
-	private static DB db;
-	
-	public static void main(String[] args) {
-		db = getDataBase(null);
-		DBCollection doc = db.getCollection("document");
-		System.out.println(doc.count());
+	private DB db;
+
+	public ModelServiceFactory() {
 	}
-	
-	public static DBCollection getCollection(String collectionName){
+
+	public void start(String confPath) {
+		db = createDBFromProperties(confPath);
+	}
+
+	public DBCollection getCollection(String collectionName) {
 		return db.getCollection(collectionName);
 	}
 
-	public static DB getDataBase(String confPath) {
+	public DB getDataBase(String confPath) {
 		if (db == null) {
-			db = new ModelAdapterService().createDBFromProperties(confPath);
+			db = new ModelServiceFactory().createDBFromProperties(confPath);
 		}
 		return db;
 	}
@@ -43,10 +45,10 @@ public class ModelAdapterService {
 		InputStream is = null;
 		FileInputStream fis = null;
 		try {
-			if(confPath == null){
+			if (confPath == null) {
 				URL url = getClass().getResource("vision.properties");
 				fis = new FileInputStream(url.getPath()); //$NON-NLS-1$
-			}else{
+			} else {
 				fis = new FileInputStream(confPath); //$NON-NLS-1$
 			}
 			is = new BufferedInputStream(fis);
@@ -111,5 +113,13 @@ public class ModelAdapterService {
 		}
 	}
 
+	public <T extends IPersistenceService> T createModelObject(Class<T> t,
+			String collectionName) throws InstantiationException,
+			IllegalAccessException {
+		DBCollection col = getCollection(collectionName);
+		T instance = t.newInstance();
+		instance.setCollection(col);
+		return instance;
+	}
 
 }
