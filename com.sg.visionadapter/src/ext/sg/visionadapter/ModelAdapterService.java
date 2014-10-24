@@ -1,4 +1,4 @@
-package com.sg.visionadapter;
+package ext.sg.visionadapter;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -19,6 +19,8 @@ public class ModelAdapterService {
 
 	private static MongoClient mongo;
 	
+	private static String PATH_PROPERTIES="vision.properties";
+	
 	private static DB db;
 	
 	public static DB getDataBase(String dbName) {
@@ -32,7 +34,7 @@ public class ModelAdapterService {
 		InputStream is = null;
 		FileInputStream fis = null;
 		try {
-			URL url = getClass().getResource("db.properties");
+			 String codebasepath=Gen
 			fis = new FileInputStream(url.getPath()); //$NON-NLS-1$
 			is = new BufferedInputStream(fis);
 			Properties props = new Properties();
