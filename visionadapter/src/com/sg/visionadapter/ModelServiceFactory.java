@@ -15,7 +15,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.ServerAddress;
-import com.sg.visionadapter.persistence.IPersistenceService;
 
 public class ModelServiceFactory {
 
@@ -23,22 +22,20 @@ public class ModelServiceFactory {
 
 	private DB db;
 
+	public static ModelServiceFactory service;
+
 	public ModelServiceFactory() {
 	}
 
 	public void start(String confPath) {
-		db = createDBFromProperties(confPath);
+		if (service == null) {
+			service = this;
+			db = createDBFromProperties(confPath);
+		}
 	}
 
 	public DBCollection getCollection(String collectionName) {
 		return db.getCollection(collectionName);
-	}
-
-	public DB getDataBase(String confPath) {
-		if (db == null) {
-			db = new ModelServiceFactory().createDBFromProperties(confPath);
-		}
-		return db;
 	}
 
 	private DB createDBFromProperties(String confPath) {
@@ -74,7 +71,7 @@ public class ModelServiceFactory {
 		return null;
 	}
 
-	public MongoClient createMongoClient(Properties props)
+	private MongoClient createMongoClient(Properties props)
 			throws UnknownHostException {
 		String host = props.getProperty("db.host"); //$NON-NLS-1$
 		String _port = props.getProperty("db.port");
@@ -113,11 +110,10 @@ public class ModelServiceFactory {
 		}
 	}
 
-	public <T extends IPersistenceService> T createModelObject(Class<T> t,
-			String collectionName) throws InstantiationException,
-			IllegalAccessException {
-		DBCollection col = getCollection(collectionName);
+	public <T extends IPersistenceService> T get(Class<T> t)
+			throws InstantiationException, IllegalAccessException {
 		T instance = t.newInstance();
+		DBCollection col = getCollection(instance.getCollectionName());
 		instance.setCollection(col);
 		return instance;
 	}
