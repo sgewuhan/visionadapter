@@ -7,7 +7,7 @@ import org.bson.types.ObjectId;
  * @author zhonghua
  *
  */
-public final class Product extends BasicPart  implements IProjectRelative{
+public final class VTProduct extends BasicPart  implements IProjectRelative{
 
 	private static final String FORMULAR = "formularnumber";
 	

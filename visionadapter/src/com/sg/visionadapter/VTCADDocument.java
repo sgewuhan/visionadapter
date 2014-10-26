@@ -8,7 +8,7 @@ import org.bson.types.ObjectId;
  * @author zhonghua
  *
  */
-public final class CADDocument extends BasicDocument implements
+public final class VTCADDocument extends BasicDocument implements
 		IProjectRelative, IProductRelative {
 
 	private static final String PART_TYPE0 = "parttype0";

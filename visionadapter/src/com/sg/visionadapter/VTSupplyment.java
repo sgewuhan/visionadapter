@@ -5,7 +5,7 @@ package com.sg.visionadapter;
  * @author zhonghua
  *
  */
-public final class Supplyment extends BasicPart {
+public final class VTSupplyment extends BasicPart {
 
 	private static final String MATERIAL_GROUP = "materialgroup";
 

@@ -7,7 +7,7 @@ import org.bson.types.ObjectId;
  * @author zhonghua
  *
  */
-public final class Part extends BasicPart  implements IProjectRelative,IProductRelative{
+public final class VTPart extends BasicPart  implements IProjectRelative,IProductRelative{
 
 	
 	private final static String PARTTYPE1 = "parttype1";

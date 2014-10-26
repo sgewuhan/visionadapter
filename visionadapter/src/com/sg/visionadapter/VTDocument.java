@@ -14,7 +14,7 @@ import com.mongodb.DBObject;
  * @author zhonghua
  *
  */
-public final class Document extends BasicDocument implements IProjectRelative {
+public final class VTDocument extends BasicDocument implements IProjectRelative {
 
 	private static final String PRODUCT_NUMBER = "productnumber";
 
@@ -26,7 +26,7 @@ public final class Document extends BasicDocument implements IProjectRelative {
 
 	private static final String URL = "url";
 
-	public Document(){
+	public VTDocument(){
 		
 	}
 	
