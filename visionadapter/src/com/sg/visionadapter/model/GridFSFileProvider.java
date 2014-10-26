@@ -38,6 +38,10 @@ public class GridFSFileProvider implements IFileProvider {
 		return (String) fileData.get(F_FILENAME);
 	}
 
+	/**
+	 * 获得文件流，请调用后关闭
+	 * @return 
+	 */
 	public InputStream getInputSteam() {
 		checkFileData();
 		String dbName = (String) fileData.get(F_DB);
