@@ -1,5 +1,7 @@
 package com.sg.visionadapter.model;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.sg.visionadapter.ModelServiceFactory;
@@ -27,11 +29,11 @@ public abstract class BasicDocument extends VisionObject {
 	 * 
 	 * @return
 	 */
-	public String getFolderId() {
-		return (String) get(FOLDER_ID);
+	public ObjectId getFolderId() {
+		return (ObjectId) get(FOLDER_ID);
 	}
 
-	public void setFolderId(String folderId) {
+	public void setFolderId(ObjectId folderId) {
 		put(FOLDER_ID, folderId);
 	}
 

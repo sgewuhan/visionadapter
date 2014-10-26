@@ -1,9 +1,9 @@
 package com.sg.visionadapter.persistence;
 
 import com.sg.visionadapter.PersistenceService;
-import com.sg.visionadapter.model.Document;
+import com.sg.visionadapter.model.Folder;
 
-public class FolderPersistence extends PersistenceService<Document>{
+public class FolderPersistence extends PersistenceService<Folder>{
 
 	@Override
 	public String getCollectionName() {

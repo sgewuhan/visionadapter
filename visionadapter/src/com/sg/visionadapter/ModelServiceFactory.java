@@ -20,7 +20,7 @@ import com.mongodb.ServerAddress;
 public class ModelServiceFactory {
 
 	private static ConcurrentHashMap<String, MongoClient> clients;
-	
+
 	private DB defaultDB;
 
 	public static ModelServiceFactory service;
@@ -28,6 +28,11 @@ public class ModelServiceFactory {
 	public ModelServiceFactory() {
 	}
 
+	/**
+	 * 
+	 * @param confFolder
+	 *            配置文件的目录名
+	 */
 	public void start(String confFolder) {
 		if (service == null) {
 			service = this;
@@ -37,12 +42,13 @@ public class ModelServiceFactory {
 	}
 
 	public DB getDB(String dbname) {
-		if(dbname == null){
+		if (dbname == null) {
 			throw new IllegalArgumentException("dbname cannot null");
 		}
 		MongoClient client = clients.get(dbname);
-		if(client == null){
-			throw new IllegalArgumentException("db does not registed,name:" +dbname);
+		if (client == null) {
+			throw new IllegalArgumentException("db does not registed,name:"
+					+ dbname);
 		}
 		return client.getDB(dbname);
 	}
@@ -55,24 +61,31 @@ public class ModelServiceFactory {
 		File folder;
 		if (confFolder == null) {
 			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
-					+ "/configuration/";//$NON-NLS-1$
+					+ File.separator + "conf" + File.separator;//$NON-NLS-1$
 			folder = new File(folderName);
-		}else{
+		} else {
 			folder = new File(confFolder);
 		}
-		
+
 		FilenameFilter filter = new FilenameFilter() {
 			@Override
 			public boolean accept(File file, String name) {
 				return name.toLowerCase().endsWith(".dbconf");
 			}
 		};
-		String[] files = folder.list(filter );
+		File[] files = folder.listFiles(filter);
+		if (files == null) {
+			throw new IllegalArgumentException(
+					"does not contains .dbconf files in designated folder");
+		}
 		for (int i = 0; i < files.length; i++) {
-			createClient(new File(files[i]));
+			createClient(files[i]);
+		}
+		if(defaultDB == null){
+			defaultDB = clients.get("pm2").getDB("pm2");
 		}
 	}
-	
+
 	private MongoClient createClient(File file) {
 		InputStream is = null;
 		FileInputStream fis = null;
@@ -82,10 +95,18 @@ public class ModelServiceFactory {
 			props.load(is);
 			MongoClient mongo = createMongoClient(props);
 			String name = props.getProperty("db.name"); //$NON-NLS-1$
-			if(name!=null&&!name.isEmpty()){
+			String dbname;
+			if (name != null && !name.isEmpty()) {
+				dbname = name;
 				clients.put(name, mongo);
-			}else{
-				clients.put(file.getName().substring(0,file.getName().lastIndexOf(".")), mongo);
+			} else {
+				dbname = file.getName().substring(0,
+						file.getName().lastIndexOf("."));
+				clients.put(dbname, mongo);
+			}
+			boolean isDefault = "true".equals(props.getProperty("default")); //$NON-NLS-1$
+			if (isDefault) {
+				defaultDB = mongo.getDB(dbname);
 			}
 			return mongo;
 		} catch (Exception e) {
@@ -151,7 +172,5 @@ public class ModelServiceFactory {
 		instance.setCollection(col);
 		return instance;
 	}
-
-
 
 }

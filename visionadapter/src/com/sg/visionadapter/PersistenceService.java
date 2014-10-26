@@ -26,6 +26,18 @@ public abstract class PersistenceService<T extends VisionObject> implements IPer
 		this.collection = col;
 		this.collection.setObjectClass(entityClass);
 	}
+	
+	
+	public List<T> find(T obj){
+		DBCursor cur = collection.find(obj);
+		List<T> result = (List<T>) cur.toArray();
+		for (int i = 0; i < result.size(); i++) {
+			result.get(i).setCollection(collection);
+		}
+		cur.close();
+		return result;
+	}
+
 
 	/**
 	 * 
@@ -73,6 +85,5 @@ public abstract class PersistenceService<T extends VisionObject> implements IPer
 		result.setCollection(collection);
 		return result;
 	}
-
 
 }

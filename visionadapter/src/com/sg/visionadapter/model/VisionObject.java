@@ -63,14 +63,14 @@ public class VisionObject extends BasicDBObject {
 	/**
 	 * 公共属性：获得pm中的名称
 	 */
-	public String getDesc() {
+	public String getCommonName() {
 		return (String) get(DESC);
 	}
 
 	/**
 	 * 公共属性：设置pm中的名称
 	 */
-	public void setDesc(String desc) {
+	public void setCommonName(String desc) {
 		put(DESC, desc);
 	}
 
@@ -242,9 +242,13 @@ public class VisionObject extends BasicDBObject {
 	public boolean isSync() {
 		return getSyncDate() != null;
 	}
+	
+	public void setAsync(){
+		put(SYNC_DATE, null);
+	}
 
-	private void setSyncDate(Date date) {
-		put(SYNC_DATE, date);
+	public void setSync() {
+		put(SYNC_DATE, new Date());
 	}
 
 	public void setCollection(DBCollection collection) {
@@ -252,7 +256,7 @@ public class VisionObject extends BasicDBObject {
 	}
 
 	public WriteResult doInsert() throws Exception {
-		setSyncDate(new Date());
+		setSync();
 		extendPLMData();
 		WriteResult wr = collection.insert(this);
 		return wr;
@@ -275,7 +279,7 @@ public class VisionObject extends BasicDBObject {
 		if (dirtyKeys == null || dirtyKeys.isEmpty()) {
 			throw new Exception("no change");
 		}
-		setSyncDate(new Date());
+		setSync();
 		extendPLMData();
 		BasicDBObject set = new BasicDBObject();
 		Iterator<String> iter = dirtyKeys.iterator();
