@@ -141,5 +141,15 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 	public void setProjectWorkOrder(String projectWorkOrder) {
 		put(PROJECT_WORK_ORDER, projectWorkOrder);
 	}
+	
+
+	/**
+	 * »ñµÃÈÝÆ÷Ãû³Æ
+	 * 
+	 * @return
+	 */
+	public String getContainerName() {
+		return getFolder().getRoot().getContainerName();
+	}
 
 }
