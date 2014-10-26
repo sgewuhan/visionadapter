@@ -33,9 +33,11 @@ public class Demo {
 
 		// 3. test get document data by idarray
 		ObjectId[] idArray = new ObjectId[] {
-				new ObjectId("5282dacae0ccf8afc27a1a95"),
-				new ObjectId("5282dacae0ccf8afc27a1a9f") };
+
+				new ObjectId("5282dacae0ccf8afc27a1a9f"),
+				new ObjectId("5289bae4e0ccf7fae13fc532") };
 		List<PMDocument> result = docService.getObjects(idArray);
+
 		for (int i = 0; i < result.size(); i++) {
 			System.out.println(result.get(i).getCommonName());
 			PMFolder folder = result.get(i).getFolder();

@@ -81,7 +81,7 @@ public class ModelServiceFactory {
 		File folder;
 		if (confFolder == null) {
 			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
-					+ File.separator + "conf" + File.separator;//$NON-NLS-1$
+					+ File.separator + "visionconf" + File.separator;//$NON-NLS-1$
 			folder = new File(folderName);
 		} else {
 			folder = new File(confFolder);
