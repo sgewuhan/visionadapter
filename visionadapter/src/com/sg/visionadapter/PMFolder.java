@@ -8,11 +8,12 @@ import com.mongodb.BasicDBObject;
 
 /**
  * 文件夹对象
+ * 
  * @author zhonghua
  *
  */
 public class PMFolder extends VisionObject {
-	
+
 	private final static String PROJECT_ID = "projectId";
 
 	private final static String PARENT_FOLDER_ID = "parent_id";
@@ -20,6 +21,8 @@ public class PMFolder extends VisionObject {
 	private final static String IS_PROJECT_ROOT_FOLDER = "isflderroot";
 
 	private final static String ROOT_ID = "root_id";
+
+	private static final String CONTAINER_NAME = "containername";
 
 	/**
 	 * @return the projectId
@@ -66,7 +69,8 @@ public class PMFolder extends VisionObject {
 
 	/**
 	 * 
-	 * @param isProjectRoot 设置是否是项目的根文件夹
+	 * @param isProjectRoot
+	 *            设置是否是项目的根文件夹
 	 */
 	public void setProjectContainer(boolean isProjectRoot) {
 		put(IS_PROJECT_ROOT_FOLDER, isProjectRoot);
@@ -81,7 +85,8 @@ public class PMFolder extends VisionObject {
 	}
 
 	/**
-	 * @param rootId 根文件夹id, (即文件柜/容器id)
+	 * @param rootId
+	 *            根文件夹id, (即文件柜/容器id)
 	 */
 	public void setRootId(ObjectId rootId) {
 		put(ROOT_ID, rootId);
@@ -95,7 +100,16 @@ public class PMFolder extends VisionObject {
 		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				getRootId()));
 	}
-	
+
+	/**
+	 * 获得容器名称
+	 * 
+	 * @return
+	 */
+	public String getContainerName() {
+		PMFolder root = getRoot();
+		return root.getString(CONTAINER_NAME);
+	}
 
 	@Override
 	protected List<String> getMondatoryFields() {
