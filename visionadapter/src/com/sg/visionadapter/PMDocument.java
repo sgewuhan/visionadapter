@@ -143,13 +143,4 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 	}
 	
 
-	/**
-	 * »ñµÃÈÝÆ÷Ãû³Æ
-	 * 
-	 * @return
-	 */
-	public String getContainerName() {
-		return getFolder().getRoot().getContainerName();
-	}
-
 }
