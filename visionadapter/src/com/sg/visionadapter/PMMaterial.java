@@ -5,7 +5,7 @@ package com.sg.visionadapter;
  * @author zhonghua
  *
  */
-public final class Material extends BasicPart {
+public final class PMMaterial extends BasicPart {
 
 	private final static String MATERIAL_GROUP = "materialGroup";
 

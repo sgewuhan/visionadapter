@@ -1,9 +1,9 @@
 package com.sg.visionadapter.persistence;
 
-import com.sg.visionadapter.CADDocument;
+import com.sg.visionadapter.PMCADDocument;
 import com.sg.visionadapter.PersistenceService;
 
-public class CADDocumentPersistence extends PersistenceService<CADDocument>{
+public class CADDocumentPersistence extends PersistenceService<PMCADDocument>{
 
 
 	@Override

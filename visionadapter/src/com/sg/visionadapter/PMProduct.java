@@ -3,14 +3,13 @@ package com.sg.visionadapter;
 import org.bson.types.ObjectId;
 
 /**
- * 半成品对象
+ * 成品对象
  * @author zhonghua
  *
  */
-public final class Part extends BasicPart  implements IProjectRelative,IProductRelative{
+public final class PMProduct extends BasicPart  implements IProjectRelative{
 
-	
-	private final static String PARTTYPE1 = "parttype1";
+	private static final String FORMULAR = "formularnumber";
 	
 	
 	@Override
@@ -54,17 +53,17 @@ public final class Part extends BasicPart  implements IProjectRelative,IProductR
 	}
 
 	/**
-	 * @return the productNumber
+	 * @return 配方号
 	 */
-	public String getProductNumber() {
-		return (String) get(PARTTYPE1);
+	public String getFormularNumber() {
+		return (String) get(FORMULAR);
 	}
 
 	/**
-	 * @param productNumber the productNumber to set
+	 * @param formularNumber 配方号
 	 */
-	public void setProductNumber(String productNumber) {
-		put(PARTTYPE1, productNumber);
+	public void setFormularNumber(String formularNumber) {
+		put(FORMULAR,formularNumber);
 	}
 
 	

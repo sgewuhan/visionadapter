@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 
-import com.sg.visionadapter.CADDocument;
-import com.sg.visionadapter.Document;
-import com.sg.visionadapter.Folder;
+import com.sg.visionadapter.PMCADDocument;
+import com.sg.visionadapter.PMDocument;
+import com.sg.visionadapter.PMFolder;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.persistence.DocumentPersistence;
 import com.sg.visionadapter.persistence.FolderPersistence;
@@ -34,16 +34,18 @@ public class Demo {
 
 		// 3. test get document data by idarray
 		ObjectId[] idArray = new ObjectId[] {
+
 				new ObjectId("5282dacae0ccf8afc27a1a9f"),
 				new ObjectId("5289bae4e0ccf7fae13fc532") };
-		List<Document> result = docService.getObjects(idArray);
+		List<PMDocument> result = docService.getObjects(idArray);
+
 		for (int i = 0; i < result.size(); i++) {
 			System.out.println(result.get(i).getCommonName());
-			Folder folder = result.get(i).getFolder();
+			PMFolder folder = result.get(i).getFolder();
 			if (folder != null) {
 				System.out.println(folder.getCommonName());
 				ObjectId parentId = folder.getParentFolderId();
-				Folder parentFolder = folderService.get(parentId);
+				PMFolder parentFolder = folderService.get(parentId);
 				System.out.println(parentFolder.getCommonName());
 			}
 		}
@@ -51,10 +53,10 @@ public class Demo {
 		
 		//create cad document
 		
-//		CADDocument cadDocument = new CADDocument();
+//		PMCADDocument cadDocument = new PMCADDocument();
 //		cadDocument.setCommonName("Í¼Ö½ABC");
 //		cadDocument.setCreateBy("20092055", "ÍõÑÇÖÐ");
-//		Folder folder = folderService.getByPLMId(plmid);
+//		PMFolder folder = folderService.getByPLMId(plmid);
 //		ObjectId id = folder.get_id();
 //		cadDocument.setFolderId(folderId);
 		

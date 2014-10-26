@@ -66,7 +66,7 @@ public abstract class BasicDocument extends VisionObject {
 		DBCollection folderColletion = ModelServiceFactory.service
 				.getCollection("folder");
 		DBObject folder = folderColletion.findOne(
-				new BasicDBObject().append(Folder.PLM_ID, folderPLMId),
+				new BasicDBObject().append(PMFolder.PLM_ID, folderPLMId),
 				new BasicDBObject().append(_ID, 1));
 		ObjectId folderId = (ObjectId) folder.get(_ID);
 		setFolderId(folderId);
@@ -77,15 +77,15 @@ public abstract class BasicDocument extends VisionObject {
 	 * 
 	 * @return 对象所在的目录对象
 	 */
-	public Folder getFolder() {
+	public PMFolder getFolder() {
 		ObjectId folderId = getFolderId();
 		if (folderId == null) {
 			return null;
 		}
 		DBCollection folderColletion = ModelServiceFactory.service
 				.getCollection("folder");
-		folderColletion.setObjectClass(Folder.class);
-		return (Folder) collection.findOne(new BasicDBObject().append(_ID,
+		folderColletion.setObjectClass(PMFolder.class);
+		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				folderId));
 	}
 
@@ -96,7 +96,7 @@ public abstract class BasicDocument extends VisionObject {
 	 * 
 	 * </br>part对象，返回物资编号
 	 * 
-	 * </br>CADDocument,返回图纸对象编号（并非图号）
+	 * </br>PMCADDocument,返回图纸对象编号（并非图号）
 	 * 
 	 * @return 编号
 	 */
