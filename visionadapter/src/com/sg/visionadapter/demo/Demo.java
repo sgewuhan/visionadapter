@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 
+import com.sg.visionadapter.Document;
+import com.sg.visionadapter.Folder;
 import com.sg.visionadapter.ModelServiceFactory;
-import com.sg.visionadapter.model.Document;
-import com.sg.visionadapter.model.Folder;
 import com.sg.visionadapter.persistence.DocumentPersistence;
 import com.sg.visionadapter.persistence.FolderPersistence;
 

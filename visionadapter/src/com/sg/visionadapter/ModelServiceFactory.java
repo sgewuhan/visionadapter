@@ -17,6 +17,12 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
 import com.mongodb.ServerAddress;
 
+/**
+ * 模型服务工厂，用于创建mongodb的客户端，第一次调用，需调用start方法以启动模型服务
+ * 
+ * @author zhonghua
+ *
+ */
 public class ModelServiceFactory {
 
 	private static ConcurrentHashMap<String, MongoClient> clients;
@@ -29,6 +35,7 @@ public class ModelServiceFactory {
 	}
 
 	/**
+	 * 启动模型服务，传入配置文件所在的目录，start将读取配置文件中的[dbname].conf文件 并按照dbname获得数据库
 	 * 
 	 * @param confFolder
 	 *            配置文件的目录名
@@ -41,6 +48,13 @@ public class ModelServiceFactory {
 		}
 	}
 
+	/**
+	 * 获得名称为dbname的数据库
+	 * 
+	 * @param dbname
+	 *            数据库名称
+	 * @return 数据库
+	 */
 	public DB getDB(String dbname) {
 		if (dbname == null) {
 			throw new IllegalArgumentException("dbname cannot null");
@@ -53,6 +67,12 @@ public class ModelServiceFactory {
 		return client.getDB(dbname);
 	}
 
+	/**
+	 * 获得默认数据库的集合
+	 * 
+	 * @param collectionName
+	 * @return 数据库的集合
+	 */
 	public DBCollection getCollection(String collectionName) {
 		return defaultDB.getCollection(collectionName);
 	}
@@ -81,7 +101,7 @@ public class ModelServiceFactory {
 		for (int i = 0; i < files.length; i++) {
 			createClient(files[i]);
 		}
-		if(defaultDB == null){
+		if (defaultDB == null) {
 			defaultDB = clients.get("pm2").getDB("pm2");
 		}
 	}
