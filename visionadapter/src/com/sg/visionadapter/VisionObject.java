@@ -1,5 +1,6 @@
 package com.sg.visionadapter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,10 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
-import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -45,10 +44,6 @@ public abstract class VisionObject extends BasicDBObject {
 	protected static final String OWNER = "_owner";
 
 	public static final String SYNC_DATE = "syncdate";
-
-	protected static final String PLM_VAULT = "plmvault";
-
-	protected static final String PLM_CONTENT = "plmcontentvault";
 
 	protected DBCollection collection;
 
@@ -231,34 +226,6 @@ public abstract class VisionObject extends BasicDBObject {
 		put(OWNER, userId);
 	}
 
-	/**
-	 * 
-	 * @param plmVault
-	 *            设置PLM中保存的附件（PM系统将使用它来进行下载）
-	 */
-	public void setPLMAttachments(List<IFileProvider> plmVault) {
-		BasicBSONList list = new BasicDBList();
-		if (plmVault != null) {
-			for (int i = 0; i < plmVault.size(); i++) {
-				list.add(((IFileProvider) plmVault.get(i)).getFileData());
-			}
-		}
-		put(PLM_VAULT, list);
-	}
-
-	/**
-	 * 
-	 * @param fileProvider
-	 *            plm系统中的对象主文件
-	 */
-	public void setPLMContent(IFileProvider fileProvider) {
-		if (fileProvider != null) {
-			put(PLM_CONTENT, fileProvider.getFileData());
-		} else {
-			put(PLM_CONTENT, null);
-		}
-	}
-
 	/*
 	 * 获得最后一次PM同步到PLM的时间，如果为空表示没有同步
 	 */
@@ -369,17 +336,28 @@ public abstract class VisionObject extends BasicDBObject {
 	}
 
 	protected void checkInsert() {
-		String id = getPLMId();
-		if (id == null || id.isEmpty()) {
-			throw new IllegalArgumentException(
-					"plmid must not null or empty before insert or update, call setPLMId(xxx) before insert or update.");
-		}
+		checkMondatory();
+	}
 
-		Map<String, Object> data = getPLMData();
-		if (data == null || data.isEmpty()) {
-			throw new IllegalArgumentException(
-					"plmdata must not null or empty before insert or update, call setPLMData(xxx) before update.");
+	private void checkMondatory() {
+		List<String> fields = getMondatoryFields();
+		for (int i = 0; i < fields.size(); i++) {
+			String field = fields.get(i);
+			Object value = get(field);
+			if (value == null || value.toString().isEmpty()) {
+				throw new IllegalArgumentException(
+						field
+								+ " must not null or empty before insert or update, call setXXX(xxx) before insert or update.");
+			}
 		}
+	}
+
+	protected List<String> getMondatoryFields() {
+		List<String> fields = new ArrayList<String>();
+		fields.add(_ID);
+		fields.add(PLM_ID);
+		fields.add(PLM_DATA);
+		return fields;
 	}
 
 	protected void checkUpdate() {

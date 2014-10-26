@@ -1,5 +1,7 @@
 package com.sg.visionadapter;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
@@ -92,6 +94,15 @@ public class Folder extends VisionObject {
 	public Folder getRoot() {
 		return (Folder) collection.findOne(new BasicDBObject().append(_ID,
 				getRootId()));
+	}
+	
+
+	@Override
+	protected List<String> getMondatoryFields() {
+		List<String> result = super.getMondatoryFields();
+		result.add(PARENT_FOLDER_ID);
+		result.add(ROOT_ID);
+		return result;
 	}
 
 }

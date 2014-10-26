@@ -1,7 +1,11 @@
 package com.sg.visionadapter;
 
+import java.util.List;
+
+import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -29,6 +33,10 @@ public abstract class BasicDocument extends VisionObject {
 	protected static final String DESCRIPTION = "description";
 
 	protected static final String SECURITY = "security";
+
+	protected static final String PLM_VAULT = "plmvault";
+
+	protected static final String PLM_CONTENT = "plmcontentvault";
 
 	/**
 	 * 获得所在的目录id
@@ -70,11 +78,15 @@ public abstract class BasicDocument extends VisionObject {
 	 * @return 对象所在的目录对象
 	 */
 	public Folder getFolder() {
+		ObjectId folderId = getFolderId();
+		if (folderId == null) {
+			return null;
+		}
 		DBCollection folderColletion = ModelServiceFactory.service
 				.getCollection("folder");
 		folderColletion.setObjectClass(Folder.class);
 		return (Folder) collection.findOne(new BasicDBObject().append(_ID,
-				getFolderId()));
+				folderId));
 	}
 
 	/**
@@ -218,4 +230,42 @@ public abstract class BasicDocument extends VisionObject {
 		put(SECURITY, security);
 	}
 
+	/**
+	 * 
+	 * @param plmVault
+	 *            设置PLM中保存的附件（PM系统将使用它来进行下载）
+	 */
+	public void setPLMAttachments(List<IFileProvider> plmVault) {
+		BasicBSONList list = new BasicDBList();
+		if (plmVault != null) {
+			for (int i = 0; i < plmVault.size(); i++) {
+				list.add(((IFileProvider) plmVault.get(i)).getFileData());
+			}
+		}
+		put(PLM_VAULT, list);
+	}
+
+	/**
+	 * 
+	 * @param fileProvider
+	 *            plm系统中的对象主文件
+	 */
+	public void setPLMContent(IFileProvider fileProvider) {
+		if (fileProvider != null) {
+			put(PLM_CONTENT, fileProvider.getFileData());
+		} else {
+			put(PLM_CONTENT, null);
+		}
+	}
+
+	@Override
+	protected List<String> getMondatoryFields() {
+		List<String> result = super.getMondatoryFields();
+		result.add(DOCUMENTNUMBER);
+		result.add(FOLDER_ID);
+		result.add(MAJOR_VID);
+		result.add(SECOND_VID);
+		result.add(STATUS);
+		return result;
+	}
 }
