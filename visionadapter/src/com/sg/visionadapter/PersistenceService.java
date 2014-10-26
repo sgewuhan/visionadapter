@@ -157,4 +157,17 @@ public abstract class PersistenceService<T extends VisionObject> implements
 			IllegalAccessException {
 		return get(id, VisionObject.PLM_ID);
 	}
+
+	/**
+	 * 获得一个空的可持久化的对象
+	 * @return 空的可持久化的对象
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public T newInstance() throws InstantiationException,
+			IllegalAccessException {
+		T instance = entityClass.newInstance();
+		instance.setCollection(collection);
+		return instance;
+	}
 }
