@@ -2,8 +2,14 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+/**
+ * CAD图纸模型对象
+ * 
+ * @author zhonghua
+ *
+ */
 public final class CADDocument extends BasicDocument implements
-		IProjectRelative,IProductRelative {
+		IProjectRelative, IProductRelative {
 
 	private static final String PART_TYPE0 = "parttype0";
 
@@ -71,6 +77,7 @@ public final class CADDocument extends BasicDocument implements
 	/**
 	 * 
 	 * 零部件类型1，比如空簧部件类型
+	 * 
 	 * @return the partType1
 	 */
 	public String getPartType1() {

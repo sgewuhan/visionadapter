@@ -26,6 +26,10 @@ public final class Document extends BasicDocument implements IProjectRelative {
 
 	private static final String URL = "url";
 
+	public Document(){
+		
+	}
+	
 	/**
 	 * @return ³ÉÆ·±àÂë
 	 */

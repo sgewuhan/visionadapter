@@ -2,6 +2,11 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+/**
+ * 成品对象
+ * @author zhonghua
+ *
+ */
 public final class Product extends BasicPart  implements IProjectRelative{
 
 	private static final String FORMULAR = "formularnumber";

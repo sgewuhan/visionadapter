@@ -2,6 +2,11 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+/**
+ * 半成品对象
+ * @author zhonghua
+ *
+ */
 public final class Part extends BasicPart  implements IProjectRelative,IProductRelative{
 
 	

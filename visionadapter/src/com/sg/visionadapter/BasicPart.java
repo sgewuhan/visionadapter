@@ -1,8 +1,8 @@
 package com.sg.visionadapter;
 
 /**
- * 结构化文档
- * @author Administrator
+ * 抽象的零部件对象
+ * @author zhonghua
  *
  */
 public abstract class BasicPart extends BasicDocument {

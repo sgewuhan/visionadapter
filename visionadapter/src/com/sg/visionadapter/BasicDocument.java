@@ -5,6 +5,11 @@ import org.bson.types.ObjectId;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 
+/**
+ * 抽象的文档对象
+ * @author zhonghua
+ *
+ */
 public abstract class BasicDocument extends VisionObject {
 
 	protected static final String FOLDER_ID = "folder_id";

@@ -16,7 +16,13 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 
-public class VisionObject extends BasicDBObject {
+/**
+ * vision系统的可持久化对象
+ * 
+ * @author zhonghua
+ *
+ */
+public abstract class VisionObject extends BasicDBObject {
 
 	public static final String _ID = "_id";
 
@@ -50,7 +56,7 @@ public class VisionObject extends BasicDBObject {
 	 * 公共属性：获得pm中的编号
 	 */
 	public ObjectId get_id() {
-		return (ObjectId) get(_ID);
+		return getObjectId(_ID);
 	}
 
 	/**
@@ -64,7 +70,7 @@ public class VisionObject extends BasicDBObject {
 	 * 公共属性：获得pm中的名称
 	 */
 	public String getCommonName() {
-		return (String) get(DESC);
+		return getString(DESC);
 	}
 
 	/**
@@ -77,14 +83,14 @@ public class VisionObject extends BasicDBObject {
 	/**
 	 * 公共属性：获得pm中对应的plm系统的对象id
 	 */
-	public String getPlmId() {
-		return (String) get(PLM_ID);
+	public String getPLMId() {
+		return getString(PLM_ID);
 	}
 
 	/**
 	 * 公共属性：设置pm中对应的plm系统的对象id
 	 */
-	public void setPlmId(String plmId) {
+	public void setPLMId(String plmId) {
 		put(DESC, plmId);
 	}
 
@@ -94,7 +100,7 @@ public class VisionObject extends BasicDBObject {
 	 * @return plm系统的数据
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> getPlmData() {
+	public Map<String, Object> getPLMData() {
 		Object value = get(PLM_DATA);
 		if (value instanceof DBObject) {
 			return ((DBObject) value).toMap();
@@ -107,7 +113,7 @@ public class VisionObject extends BasicDBObject {
 	 * 
 	 * @param plmData
 	 */
-	public void setPlmData(Map<String, Object> plmData) {
+	public void setPLMData(Map<String, Object> plmData) {
 		put(PLM_DATA, new BasicDBObject(plmData));
 	}
 
@@ -137,8 +143,10 @@ public class VisionObject extends BasicDBObject {
 
 	/**
 	 * 
-	 * @param userId 创建者id
-	 * @param userName 创建者姓名
+	 * @param userId
+	 *            创建者id
+	 * @param userName
+	 *            创建者姓名
 	 */
 	public void setCreateBy(String userId, String userName) {
 		put(CREATE_BY,
@@ -152,7 +160,7 @@ public class VisionObject extends BasicDBObject {
 	 * @return 创建时间
 	 */
 	public Date getCreateOn() {
-		return (Date) get(CREATE_ON);
+		return getDate(CREATE_ON);
 	}
 
 	/**
@@ -182,8 +190,10 @@ public class VisionObject extends BasicDBObject {
 
 	/**
 	 * 
-	 * @param userId 修改者id
-	 * @param userName 修改者姓名
+	 * @param userId
+	 *            修改者id
+	 * @param userName
+	 *            修改者姓名
 	 */
 	public void setModifiedBy(String userId, String userName) {
 		put(MODIFIED_BY,
@@ -197,7 +207,7 @@ public class VisionObject extends BasicDBObject {
 	 * @return 修改时间
 	 */
 	public Date getModifiedOn() {
-		return (Date) get(MODIFIED_ON);
+		return getDate(MODIFIED_ON);
 	}
 
 	/**
@@ -206,13 +216,14 @@ public class VisionObject extends BasicDBObject {
 	 * @return 所有者userid
 	 */
 	public String getOwner() {
-		return (String) get(OWNER);
+		return getString(OWNER);
 	}
 
 	/**
 	 * 设置所有者
 	 * 
-	 * @param userId 所有者 userid
+	 * @param userId
+	 *            所有者 userid
 	 */
 	public void setOwner(String userId) {
 		put(OWNER, userId);
@@ -289,6 +300,7 @@ public class VisionObject extends BasicDBObject {
 	 * @throws Exception
 	 */
 	public WriteResult doInsert() throws Exception {
+		checkInsert();
 		setSync();
 		extendPLMData();
 		WriteResult wr = collection.insert(this);
@@ -299,7 +311,7 @@ public class VisionObject extends BasicDBObject {
 	 * 将PLM的元数据写入对象
 	 */
 	private void extendPLMData() {
-		Map<String, Object> data = getPlmData();
+		Map<String, Object> data = getPLMData();
 		Iterator<java.util.Map.Entry<String, Object>> iter = data.entrySet()
 				.iterator();
 		while (iter.hasNext()) {
@@ -318,6 +330,7 @@ public class VisionObject extends BasicDBObject {
 		if (dirtyKeys == null || dirtyKeys.isEmpty()) {
 			throw new Exception("no change");
 		}
+		checkUpdate();
 		setSync();
 		extendPLMData();
 		BasicDBObject set = new BasicDBObject();
@@ -337,7 +350,34 @@ public class VisionObject extends BasicDBObject {
 	 * @throws Exception
 	 */
 	public WriteResult doRemove() throws Exception {
+		checkRemove();
 		return collection.remove(new BasicDBObject().append(_ID, get_id()));
+	}
+
+	protected void checkInsert() {
+		String id = getPLMId();
+		if (id == null || id.isEmpty()) {
+			throw new IllegalArgumentException(
+					"plmid must not null or empty before insert or update, call setPLMId(xxx) before insert or update.");
+		}
+
+		Map<String, Object> data = getPLMData();
+		if (data == null || data.isEmpty()) {
+			throw new IllegalArgumentException(
+					"plmdata must not null or empty before insert or update, call setPLMData(xxx) before update.");
+		}
+	}
+
+	protected void checkUpdate() {
+		checkInsert();
+	}
+
+	protected void checkRemove() {
+		ObjectId id = get_id();
+		if (id == null) {
+			throw new IllegalArgumentException(
+					"id must not null before remove, call set_id(xxx) before remove.");
+		}
 	}
 
 	@Override
@@ -358,4 +398,5 @@ public class VisionObject extends BasicDBObject {
 	protected IFileProvider getGridFSFileProvider(DBObject fileData) {
 		return new GridFSFileProvider(fileData);
 	}
+
 }

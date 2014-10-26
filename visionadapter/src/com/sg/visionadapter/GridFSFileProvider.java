@@ -11,6 +11,11 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 
+/**
+ * 保存在GridFSFile中的文件
+ * @author zhonghua
+ *
+ */
 public class GridFSFileProvider implements IFileProvider {
 
 	private DBObject fileData;

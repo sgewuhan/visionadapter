@@ -4,6 +4,11 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 
+/**
+ * 文件夹对象
+ * @author zhonghua
+ *
+ */
 public class Folder extends VisionObject {
 	
 	private final static String PROJECT_ID = "projectId";
