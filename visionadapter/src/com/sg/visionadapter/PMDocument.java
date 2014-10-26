@@ -22,8 +22,6 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 
 	private static final String CONTENT = "contentvault";
 
-	private static final String DOCUMENT_TYPE = "documenttype";
-
 	private static final String URL = "url";
 
 	public PMDocument(){
@@ -74,20 +72,6 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 		return null;
 	}
 
-	/**
-	 * @return 文档类型
-	 */
-	public String getDocumentType() {
-		return (String) get(DOCUMENT_TYPE);
-	}
-
-	/**
-	 * 
-	 * @param documentType 设置的文档类型
-	 */
-	public void setDocumentType(String documentType) {
-		put(DOCUMENT_TYPE, documentType);
-	}
 
 	/**
 	 * 获得访问的url
