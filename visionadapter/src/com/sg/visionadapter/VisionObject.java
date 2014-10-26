@@ -24,6 +24,8 @@ import com.mongodb.WriteResult;
  */
 public abstract class VisionObject extends BasicDBObject {
 
+	protected static final String PLM_TYPE = "plmtype";
+
 	public static final String _ID = "_id";
 
 	protected static final String DESC = "desc";
@@ -301,10 +303,19 @@ public abstract class VisionObject extends BasicDBObject {
 	 */
 	public WriteResult doInsert() throws Exception {
 		checkInsert();
+		setPLMType();
 		setSync();
 		extendPLMData();
 		WriteResult wr = collection.insert(this);
 		return wr;
+	}
+
+	private void setPLMType() {
+		put(PLM_TYPE, getClass().getSimpleName().toLowerCase());
+	}
+
+	public String getPLMType() {
+		return getClass().getSimpleName().toLowerCase();
 	}
 
 	/**
@@ -337,6 +348,9 @@ public abstract class VisionObject extends BasicDBObject {
 		Iterator<String> iter = dirtyKeys.iterator();
 		while (iter.hasNext()) {
 			String key = iter.next();
+			if (key.equals(PLM_TYPE)) {
+				continue;
+			}
 			set.put(key, get(key));
 		}
 		return collection.update(new BasicDBObject().append(_ID, get_id()),
