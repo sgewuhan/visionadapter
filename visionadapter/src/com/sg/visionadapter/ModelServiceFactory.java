@@ -1,13 +1,14 @@
 package com.sg.visionadapter;
 
-import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -18,42 +19,75 @@ import com.mongodb.ServerAddress;
 
 public class ModelServiceFactory {
 
-	private MongoClient mongo;
-
-	private DB db;
+	private static ConcurrentHashMap<String, MongoClient> clients;
+	
+	private DB defaultDB;
 
 	public static ModelServiceFactory service;
 
 	public ModelServiceFactory() {
 	}
 
-	public void start(String confPath) {
+	public void start(String confFolder) {
 		if (service == null) {
 			service = this;
-			db = createDBFromProperties(confPath);
+			clients = new ConcurrentHashMap<String, MongoClient>();
+			loadDB(confFolder);
 		}
 	}
 
-	public DBCollection getCollection(String collectionName) {
-		return db.getCollection(collectionName);
+	public DB getDB(String dbname) {
+		if(dbname == null){
+			throw new IllegalArgumentException("dbname cannot null");
+		}
+		MongoClient client = clients.get(dbname);
+		if(client == null){
+			throw new IllegalArgumentException("db does not registed,name:" +dbname);
+		}
+		return client.getDB(dbname);
 	}
 
-	private DB createDBFromProperties(String confPath) {
+	public DBCollection getCollection(String collectionName) {
+		return defaultDB.getCollection(collectionName);
+	}
+
+	private void loadDB(String confFolder) {
+		File folder;
+		if (confFolder == null) {
+			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
+					+ "/configuration/";//$NON-NLS-1$
+			folder = new File(folderName);
+		}else{
+			folder = new File(confFolder);
+		}
+		
+		FilenameFilter filter = new FilenameFilter() {
+			@Override
+			public boolean accept(File file, String name) {
+				return name.toLowerCase().endsWith(".dbconf");
+			}
+		};
+		String[] files = folder.list(filter );
+		for (int i = 0; i < files.length; i++) {
+			createClient(new File(files[i]));
+		}
+	}
+	
+	private MongoClient createClient(File file) {
 		InputStream is = null;
 		FileInputStream fis = null;
 		try {
-			if (confPath == null) {
-				URL url = getClass().getResource("vision.properties");
-				fis = new FileInputStream(url.getPath()); //$NON-NLS-1$
-			} else {
-				fis = new FileInputStream(confPath); //$NON-NLS-1$
-			}
-			is = new BufferedInputStream(fis);
+			is = new FileInputStream(file);
 			Properties props = new Properties();
 			props.load(is);
-			mongo = createMongoClient(props);
-			db = mongo.getDB(props.getProperty("db.name"));
-			return db;
+			MongoClient mongo = createMongoClient(props);
+			String name = props.getProperty("db.name"); //$NON-NLS-1$
+			if(name!=null&&!name.isEmpty()){
+				clients.put(name, mongo);
+			}else{
+				clients.put(file.getName().substring(0,file.getName().lastIndexOf(".")), mongo);
+			}
+			return mongo;
 		} catch (Exception e) {
 		} finally {
 			if (fis != null)
@@ -117,5 +151,7 @@ public class ModelServiceFactory {
 		instance.setCollection(col);
 		return instance;
 	}
+
+
 
 }
