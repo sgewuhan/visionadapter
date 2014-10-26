@@ -72,7 +72,11 @@ public abstract class PersistenceService<T extends VisionObject> implements
 	 * @return 符合条件的对象
 	 */
 	public List<T> getObjects(ObjectId[] idArray) {
-		return getObjects(idArray, false);
+		return getObjects(idArray, VisionObject._ID, false);
+	}
+
+	public List<T> getObjectsByPLMId(String[] plmIdArray) {
+		return getObjects(plmIdArray, VisionObject.PLM_ID, false);
 	}
 
 	/**
@@ -83,13 +87,13 @@ public abstract class PersistenceService<T extends VisionObject> implements
 	 *            是否只获取不同步的数据
 	 * @return 符合条件的对象
 	 */
-	public List<T> getObjects(ObjectId[] idArray, boolean asynchronous) {
+	public List<T> getObjects(Object[] idArray, String idKey,
+			boolean asynchronous) {
 		BasicDBObject condition = new BasicDBObject();
 		condition.put(VisionObject.PLM_TYPE, entityClass.getSimpleName()
 				.toLowerCase());
 		if (idArray != null) {
-			condition.put(VisionObject._ID,
-					new BasicDBObject().append("$in", idArray));
+			condition.put(idKey, new BasicDBObject().append("$in", idArray));
 		}
 		if (asynchronous) {
 			condition.put(VisionObject.SYNC_DATE, null);
@@ -114,16 +118,43 @@ public abstract class PersistenceService<T extends VisionObject> implements
 	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
-	public T get(ObjectId id) throws InstantiationException,
+	public T get(Object id, String fieldName) throws InstantiationException,
 			IllegalAccessException {
 		if (id == null) {
 			throw new IllegalArgumentException("id must not empty");
 		}
-		T result = (T) collection.findOne(new BasicDBObject().append(
-				VisionObject._ID, id).append(VisionObject.PLM_TYPE,
+		T result = (T) collection.findOne(new BasicDBObject().append(fieldName,
+				id).append(VisionObject.PLM_TYPE,
 				entityClass.getSimpleName().toLowerCase()));
 		result.setCollection(collection);
 		return result;
 	}
 
+	/**
+	 * 根据oid 获得对象
+	 * 
+	 * @param id
+	 *            plm对象id
+	 * @return PM对象
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public T get(ObjectId id) throws InstantiationException,
+			IllegalAccessException {
+		return get(id, VisionObject._ID);
+	}
+
+	/**
+	 * 根据PLM系统的id获得对象
+	 * 
+	 * @param id
+	 *            plm 对象id
+	 * @return pm对象
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
+	public T getByPLMId(String id) throws InstantiationException,
+			IllegalAccessException {
+		return get(id, VisionObject.PLM_ID);
+	}
 }

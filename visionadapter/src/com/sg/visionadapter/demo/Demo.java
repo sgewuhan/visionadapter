@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 
+import com.sg.visionadapter.CADDocument;
 import com.sg.visionadapter.Document;
 import com.sg.visionadapter.Folder;
 import com.sg.visionadapter.ModelServiceFactory;
@@ -47,13 +48,16 @@ public class Demo {
 			}
 		}
 
-		// String path = folderService.getPath(new
-		// ObjectId("5444d6f7e5abe9723f5b1333"));
-		// System.out.println(path);
-		// 4. test set data
-		// docService.update(new ObjectId("5282dacae0ccf8afc27a1a95"), "desc",
-		// "SSSSSSSS");
-
+		
+		//create cad document
+		
+//		CADDocument cadDocument = new CADDocument();
+//		cadDocument.setCommonName("Õº÷ΩABC");
+//		cadDocument.setCreateBy("20092055", "Õı—«÷–");
+//		Folder folder = folderService.getByPLMId(plmid);
+//		ObjectId id = folder.get_id();
+//		cadDocument.setFolderId(folderId);
+		
 	}
 
 }

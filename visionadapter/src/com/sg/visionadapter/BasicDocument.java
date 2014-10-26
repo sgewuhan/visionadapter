@@ -4,9 +4,11 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 
 /**
  * 抽象的文档对象
+ * 
  * @author zhonghua
  *
  */
@@ -44,6 +46,22 @@ public abstract class BasicDocument extends VisionObject {
 	 */
 	public void setFolderId(ObjectId folderId) {
 		put(FOLDER_ID, folderId);
+	}
+
+	/**
+	 * 设置对象所在的目录id
+	 * 
+	 * @param folderPLMId
+	 *            目录对象的PLM对象id
+	 */
+	public void setFolderIdByPLMId(String folderPLMId) {
+		DBCollection folderColletion = ModelServiceFactory.service
+				.getCollection("folder");
+		DBObject folder = folderColletion.findOne(
+				new BasicDBObject().append(Folder.PLM_ID, folderPLMId),
+				new BasicDBObject().append(_ID, 1));
+		ObjectId folderId = (ObjectId) folder.get(_ID);
+		setFolderId(folderId);
 	}
 
 	/**
