@@ -1,9 +1,9 @@
 package com.sg.visionadapter.persistence;
 
-import com.sg.visionadapter.VTPart;
+import com.sg.visionadapter.PMPart;
 import com.sg.visionadapter.PersistenceService;
 
-public class PartPersistence extends PersistenceService<VTPart>{
+public class PartPersistence extends PersistenceService<PMPart>{
 
 	@Override
 	public String getCollectionName() {

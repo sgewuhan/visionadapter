@@ -37,7 +37,7 @@ public abstract class PersistenceService<T extends VisionObject> implements
 
 	/**
 	 * 查询符合条件的对象，例如，需要查询名称为abc的Document对象 </br><code>
-	 * VTDocument doc = new VTDocument();
+	 * PMDocument doc = new PMDocument();
 	 * </br>
 	 * doc.setCommonName("abc");
 	 * </br>

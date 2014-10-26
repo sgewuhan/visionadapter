@@ -1,9 +1,9 @@
 package com.sg.visionadapter.persistence;
 
-import com.sg.visionadapter.VTFolder;
+import com.sg.visionadapter.PMFolder;
 import com.sg.visionadapter.PersistenceService;
 
-public class FolderPersistence extends PersistenceService<VTFolder>{
+public class FolderPersistence extends PersistenceService<PMFolder>{
 
 	@Override
 	public String getCollectionName() {

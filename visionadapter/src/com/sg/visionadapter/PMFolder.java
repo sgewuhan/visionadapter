@@ -11,7 +11,7 @@ import com.mongodb.BasicDBObject;
  * @author zhonghua
  *
  */
-public class VTFolder extends VisionObject {
+public class PMFolder extends VisionObject {
 	
 	private final static String PROJECT_ID = "projectId";
 
@@ -43,8 +43,8 @@ public class VTFolder extends VisionObject {
 		return (ObjectId) get(PARENT_FOLDER_ID);
 	}
 
-	public VTFolder getParentFolder() {
-		return (VTFolder) collection.findOne(new BasicDBObject().append(_ID,
+	public PMFolder getParentFolder() {
+		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				getParentFolderId()));
 	}
 
@@ -91,8 +91,8 @@ public class VTFolder extends VisionObject {
 	 * 
 	 * @return ¸ùÎÄ¼þ¼Ð
 	 */
-	public VTFolder getRoot() {
-		return (VTFolder) collection.findOne(new BasicDBObject().append(_ID,
+	public PMFolder getRoot() {
+		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				getRootId()));
 	}
 	
