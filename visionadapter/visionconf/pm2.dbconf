@@ -1,6 +1,6 @@
+db.name=pm2
 db.host=127.0.0.1
-db.port=10001
-#db.replicaSet=192.168.56.102:10001 192.168.56.103:10001 192.168.56.101:10001
+db.port=27017
 db.options.autoConnectRetry=true
 db.options.connectionsPerHost=1000
 db.options.maxWaitTime=5000

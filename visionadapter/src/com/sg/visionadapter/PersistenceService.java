@@ -55,7 +55,7 @@ public abstract class PersistenceService<T extends VisionObject> implements
 	 */
 	public List<T> find(T obj) {
 		DBCursor cur = collection.find(obj.append(VisionObject.PLM_TYPE,
-				entityClass.getClass().getSimpleName().toLowerCase()));
+				obj.getClass().getSimpleName().toLowerCase()));
 		@SuppressWarnings("unchecked")
 		List<T> result = (List<T>) cur.toArray();
 		for (int i = 0; i < result.size(); i++) {
