@@ -41,7 +41,7 @@ public abstract class VisionObject extends BasicDBObject {
 
 	protected static final String MODIFIED_ON = "_mdate";
 
-	protected static final String OWNER = "_owner";
+	protected static final String OWNER = "owner";
 
 	public static final String SYNC_DATE = "syncdate";
 	
