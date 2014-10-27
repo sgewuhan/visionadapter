@@ -306,7 +306,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 */
 	public WriteResult doUpdate() throws Exception {
 		if (dirtyKeys == null || dirtyKeys.isEmpty()) {
-			throw new Exception("no change");
+			 return null;
 		}
 		checkUpdate();
 		setSync();
