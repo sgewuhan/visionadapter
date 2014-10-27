@@ -29,9 +29,9 @@ public abstract class VisionObject extends BasicDBObject {
 
 	protected static final String DESC = "desc";
 
-	protected static final String PLM_ID = "plmId";
+	protected static final String PLM_ID = "plmid";
 
-	protected static final String PLM_DATA = "plmData";
+	protected static final String PLM_DATA = "plmdata";
 
 	protected static final String CREATE_BY = "_caccount";
 
