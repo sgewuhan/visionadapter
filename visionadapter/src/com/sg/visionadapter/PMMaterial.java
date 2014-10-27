@@ -1,5 +1,7 @@
 package com.sg.visionadapter;
 
+import com.mongodb.WriteResult;
+
 /**
  * 原材料对象
  * @author zhonghua
@@ -7,7 +9,7 @@ package com.sg.visionadapter;
  */
 public final class PMMaterial extends BasicPart {
 
-	private final static String MATERIAL_GROUP = "materialGroup";
+	private final static String MATERIAL_GROUP = "materialgroup";
 
 	/**
 	 * @return the 物料组
@@ -20,7 +22,13 @@ public final class PMMaterial extends BasicPart {
 	 * @param materialGroup 设置物料组
 	 */
 	public void setMaterialGroup(String materialGroup) {
-		put(MATERIAL_GROUP,materialGroup);
+		setValue(MATERIAL_GROUP,materialGroup);
+	}
+	
+	@Override
+	public WriteResult doInsert() throws Exception {
+		put(EDITOR, "editor.document.material");
+		return super.doInsert();
 	}
 	
 }

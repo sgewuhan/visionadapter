@@ -2,6 +2,8 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+import com.mongodb.WriteResult;
+
 /**
  * 成品对象
  * @author zhonghua
@@ -19,7 +21,7 @@ public final class PMProduct extends BasicPart  implements IProjectRelative{
 
 	@Override
 	public void setProjectId(ObjectId projectId) {
-		put(PROJECT_ID, projectId);
+		setValue(PROJECT_ID, projectId);
 	}
 
 	@Override
@@ -29,7 +31,7 @@ public final class PMProduct extends BasicPart  implements IProjectRelative{
 
 	@Override
 	public void setProjectName(String projectDesc) {
-		put(PROJECT_DESC, projectDesc);
+		setValue(PROJECT_DESC, projectDesc);
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public final class PMProduct extends BasicPart  implements IProjectRelative{
 
 	@Override
 	public void setProjectNumber(String projectNumber) {
-		put(PROJECT_NUMBER, projectNumber);
+		setValue(PROJECT_NUMBER, projectNumber);
 	}
 
 	@Override
@@ -49,7 +51,7 @@ public final class PMProduct extends BasicPart  implements IProjectRelative{
 
 	@Override
 	public void setProjectWorkOrder(String projectWorkOrder) {
-		put(PROJECT_WORK_ORDER, projectWorkOrder);
+		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
 	}
 
 	/**
@@ -63,7 +65,13 @@ public final class PMProduct extends BasicPart  implements IProjectRelative{
 	 * @param formularNumber 配方号
 	 */
 	public void setFormularNumber(String formularNumber) {
-		put(FORMULAR,formularNumber);
+		setValue(FORMULAR,formularNumber);
+	}
+	
+	@Override
+	public WriteResult doInsert() throws Exception {
+		put(EDITOR, "editor.document.product");
+		return super.doInsert();
 	}
 
 	

@@ -2,6 +2,8 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+import com.mongodb.WriteResult;
+
 /**
  * CAD图纸模型对象
  * 
@@ -13,8 +15,6 @@ public final class PMCADDocument extends BasicDocument implements
 
 	private static final String PART_TYPE0 = "parttype0";
 
-	private static final String PART_TYPE1 = "parttype1";
-
 	private static final String PART_NUMBER = "partnumber";
 
 	@Override
@@ -24,7 +24,7 @@ public final class PMCADDocument extends BasicDocument implements
 
 	@Override
 	public void setProjectId(ObjectId projectId) {
-		put(PROJECT_ID, projectId);
+		setValue(PROJECT_ID, projectId);
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public final class PMCADDocument extends BasicDocument implements
 
 	@Override
 	public void setProjectName(String projectDesc) {
-		put(PROJECT_DESC, projectDesc);
+		setValue(PROJECT_DESC, projectDesc);
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public final class PMCADDocument extends BasicDocument implements
 
 	@Override
 	public void setProjectNumber(String projectNumber) {
-		put(PROJECT_NUMBER, projectNumber);
+		setValue(PROJECT_NUMBER, projectNumber);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public final class PMCADDocument extends BasicDocument implements
 
 	@Override
 	public void setProjectWorkOrder(String projectWorkOrder) {
-		put(PROJECT_WORK_ORDER, projectWorkOrder);
+		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
 	}
 
 	/**
@@ -71,26 +71,9 @@ public final class PMCADDocument extends BasicDocument implements
 	 */
 	@Override
 	public void setProductNumber(String productNumber) {
-		put(PRODUCT_NUMBER, productNumber);
+		setValue(PRODUCT_NUMBER, productNumber);
 	}
 
-	/**
-	 * 
-	 * 零部件类型1，比如空簧部件类型
-	 * 
-	 * @return the partType1
-	 */
-	public String getPartType1() {
-		return (String) get(PART_TYPE1);
-	}
-
-	/**
-	 * @param partType1
-	 *            零部件类型1
-	 */
-	public void setPartType1(String partType1) {
-		put(PART_TYPE1, partType1);
-	}
 
 	/**
 	 * 
@@ -105,7 +88,7 @@ public final class PMCADDocument extends BasicDocument implements
 	 *            零部件类型0
 	 */
 	public void setPartType0(String partType0) {
-		put(PART_TYPE0, partType0);
+		setValue(PART_TYPE0, partType0);
 	}
 
 	/**
@@ -120,7 +103,13 @@ public final class PMCADDocument extends BasicDocument implements
 	 *            要设置的图号partNumber
 	 */
 	public void setDrawingNumber(String partNumber) {
-		put(PART_NUMBER, partNumber);
+		setValue(PART_NUMBER, partNumber);
+	}
+	
+	@Override
+	public WriteResult doInsert() throws Exception {
+		put(EDITOR, "editor.document.cad");
+		return super.doInsert();
 	}
 
 }

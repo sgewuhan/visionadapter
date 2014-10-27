@@ -1,5 +1,7 @@
 package com.sg.visionadapter;
 
+import com.mongodb.WriteResult;
+
 /**
  * 客供件
  * @author zhonghua
@@ -23,7 +25,7 @@ public final class PMSupplyment extends BasicPart {
 	 *            物料组
 	 */
 	public void setMaterialGroup(String materialGroup) {
-		put(MATERIAL_GROUP, materialGroup);
+		setValue(MATERIAL_GROUP, materialGroup);
 	}
 
 	/**
@@ -38,7 +40,12 @@ public final class PMSupplyment extends BasicPart {
 	 *            设置客户名称
 	 */
 	public void setCustomerName(String customerName) {
-		put(CUSTOMER_NAME, customerName);
+		setValue(CUSTOMER_NAME, customerName);
 	}
 
+	@Override
+	public WriteResult doInsert() throws Exception {
+		put(EDITOR, "editor.document.supplyment");
+		return super.doInsert();
+	}
 }

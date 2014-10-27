@@ -44,6 +44,8 @@ public abstract class VisionObject extends BasicDBObject {
 	protected static final String OWNER = "_owner";
 
 	public static final String SYNC_DATE = "syncdate";
+	
+	public static final String EDITOR = "_editor";
 
 	protected DBCollection collection;
 

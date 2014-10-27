@@ -5,6 +5,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.WriteResult;
 
 /**
  * 文件夹对象
@@ -36,7 +37,7 @@ public class PMFolder extends VisionObject {
 	 *            the projectId to set
 	 */
 	public void setProjectId(Object projectId) {
-		put(PROJECT_ID, projectId);
+		setValue(PROJECT_ID, projectId);
 	}
 
 	/**
@@ -56,7 +57,7 @@ public class PMFolder extends VisionObject {
 	 *            the parentFolderId to set
 	 */
 	public void setParentFolderId(ObjectId parentFolderId) {
-		put(PARENT_FOLDER_ID, parentFolderId);
+		setValue(PARENT_FOLDER_ID, parentFolderId);
 	}
 
 	/**
@@ -73,7 +74,7 @@ public class PMFolder extends VisionObject {
 	 *            设置是否是项目的根文件夹
 	 */
 	public void setProjectContainer(boolean isProjectRoot) {
-		put(IS_PROJECT_ROOT_FOLDER, isProjectRoot);
+		setValue(IS_PROJECT_ROOT_FOLDER, isProjectRoot);
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class PMFolder extends VisionObject {
 	 *            根文件夹id, (即文件柜/容器id)
 	 */
 	public void setRootId(ObjectId rootId) {
-		put(ROOT_ID, rootId);
+		setValue(ROOT_ID, rootId);
 	}
 
 	/**
@@ -122,4 +123,8 @@ public class PMFolder extends VisionObject {
 		return result;
 	}
 
+	@Override
+	public WriteResult doInsert() throws Exception {
+		throw new Exception("PM Document can not insert by adapter.");
+	}
 }

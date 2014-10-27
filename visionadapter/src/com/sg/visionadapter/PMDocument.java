@@ -7,6 +7,7 @@ import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 
 /**
  * 文档 对应于 PLM系统中的文档，例如WTDocument
@@ -40,7 +41,7 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 	 *            要设置的成品编码
 	 */
 	public void setProductNumber(String productNumber) {
-		put(PRODUCT_NUMBER, productNumber);
+		setValue(PRODUCT_NUMBER, productNumber);
 	}
 
 	/**
@@ -83,7 +84,7 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 	}
 
 	protected void setUrl(String url) {
-		put(URL, url);
+		setValue(URL, url);
 	}
 
 	@Override
@@ -93,7 +94,7 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 
 	@Override
 	public void setProjectId(ObjectId projectId) {
-		put(PROJECT_ID, projectId);
+		setValue(PROJECT_ID, projectId);
 	}
 
 	@Override
@@ -103,7 +104,7 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 
 	@Override
 	public void setProjectName(String projectDesc) {
-		put(PROJECT_DESC, projectDesc);
+		setValue(PROJECT_DESC, projectDesc);
 	}
 
 	@Override
@@ -113,7 +114,7 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 
 	@Override
 	public void setProjectNumber(String projectNumber) {
-		put(PROJECT_NUMBER, projectNumber);
+		setValue(PROJECT_NUMBER, projectNumber);
 	}
 
 	@Override
@@ -123,8 +124,13 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 
 	@Override
 	public void setProjectWorkOrder(String projectWorkOrder) {
-		put(PROJECT_WORK_ORDER, projectWorkOrder);
+		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
 	}
 	
+	@Override
+	public WriteResult doInsert() throws Exception {
+		throw new Exception("PM Document can not insert by adapter.");
+//		return super.doInsert();
+	}
 
 }

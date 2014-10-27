@@ -2,6 +2,8 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+import com.mongodb.WriteResult;
+
 /**
  * 半成品对象
  * @author zhonghua
@@ -9,8 +11,6 @@ import org.bson.types.ObjectId;
  */
 public final class PMPart extends BasicPart  implements IProjectRelative,IProductRelative{
 
-	
-	private final static String PARTTYPE1 = "parttype1";
 	
 	
 	@Override
@@ -20,7 +20,7 @@ public final class PMPart extends BasicPart  implements IProjectRelative,IProduc
 
 	@Override
 	public void setProjectId(ObjectId projectId) {
-		put(PROJECT_ID, projectId);
+		setValue(PROJECT_ID, projectId);
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public final class PMPart extends BasicPart  implements IProjectRelative,IProduc
 
 	@Override
 	public void setProjectName(String projectDesc) {
-		put(PROJECT_DESC, projectDesc);
+		setValue(PROJECT_DESC, projectDesc);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public final class PMPart extends BasicPart  implements IProjectRelative,IProduc
 
 	@Override
 	public void setProjectNumber(String projectNumber) {
-		put(PROJECT_NUMBER, projectNumber);
+		setValue(PROJECT_NUMBER, projectNumber);
 	}
 
 	@Override
@@ -50,22 +50,27 @@ public final class PMPart extends BasicPart  implements IProjectRelative,IProduc
 
 	@Override
 	public void setProjectWorkOrder(String projectWorkOrder) {
-		put(PROJECT_WORK_ORDER, projectWorkOrder);
+		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
 	}
 
 	/**
 	 * @return the productNumber
 	 */
 	public String getProductNumber() {
-		return (String) get(PARTTYPE1);
+		return (String) get(PRODUCT_NUMBER);
 	}
 
 	/**
 	 * @param productNumber the productNumber to set
 	 */
 	public void setProductNumber(String productNumber) {
-		put(PARTTYPE1, productNumber);
+		setValue(PRODUCT_NUMBER, productNumber);
 	}
 
+	@Override
+	public WriteResult doInsert() throws Exception {
+		put(EDITOR, "editor.document.part");
+		return super.doInsert();
+	}
 	
 }
