@@ -268,4 +268,13 @@ public abstract class BasicDocument extends VisionObject {
 		result.add(STATUS);
 		return result;
 	}
+	
+	/**
+	 * »ñµÃÈÝÆ÷Ãû³Æ
+	 * 
+	 * @return
+	 */
+	public String getContainerName() {
+		return getFolder().getRoot().getContainerName();
+	}
 }
