@@ -97,8 +97,10 @@ public class PMFolder extends VisionObject {
 	 * @return ¸ùÎÄ¼þ¼Ð
 	 */
 	public PMFolder getRoot() {
+		ObjectId rootId = getRootId();
+		rootId = rootId==null?get_id():rootId;
 		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
-				getRootId()));
+				rootId));
 	}
 
 	/**
@@ -107,6 +109,7 @@ public class PMFolder extends VisionObject {
 	 * @return
 	 */
 	public String getContainerName() {
+		
 		PMFolder root = getRoot();
 		return root.getString(CONTAINER_NAME);
 	}

@@ -60,7 +60,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 * 公共属性：设置pm中的编号
 	 */
 	public void set_id(ObjectId _id) {
-		put(_ID, _id);
+		setValue(_ID, _id);
 	}
 
 	/**
@@ -74,7 +74,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 * 公共属性：设置pm中的名称
 	 */
 	public void setCommonName(String desc) {
-		put(DESC, desc);
+		setValue(DESC, desc);
 	}
 
 	/**
@@ -88,7 +88,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 * 公共属性：设置pm中对应的plm系统的对象id
 	 */
 	public void setPLMId(String plmId) {
-		put(DESC, plmId);
+		setValue(PLM_ID, plmId);
 	}
 
 	/**
@@ -111,7 +111,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 * @param plmData
 	 */
 	public void setPLMData(Map<String, Object> plmData) {
-		put(PLM_DATA, new BasicDBObject(plmData));
+		setValue(PLM_DATA, new BasicDBObject(plmData));
 	}
 
 	/**
@@ -146,7 +146,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 *            创建者姓名
 	 */
 	public void setCreateBy(String userId, String userName) {
-		put(CREATE_BY,
+		setValue(CREATE_BY,
 				new BasicDBObject().append("userid", userId).append("username",
 						userName));
 	}
@@ -193,7 +193,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 *            修改者姓名
 	 */
 	public void setModifiedBy(String userId, String userName) {
-		put(MODIFIED_BY,
+		setValue(MODIFIED_BY,
 				new BasicDBObject().append("userid", userId).append("username",
 						userName));
 	}
@@ -223,7 +223,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 *            所有者 userid
 	 */
 	public void setOwner(String userId) {
-		put(OWNER, userId);
+		setValue(OWNER, userId);
 	}
 
 	/*
@@ -244,14 +244,14 @@ public abstract class VisionObject extends BasicDBObject {
 	 * 设置为未同步
 	 */
 	public void setAsync() {
-		put(SYNC_DATE, null);
+		setValue(SYNC_DATE, null);
 	}
 
 	/**
 	 * 设置为已同步
 	 */
 	public void setSync() {
-		put(SYNC_DATE, new Date());
+		setValue(SYNC_DATE, new Date());
 	}
 
 	/**
@@ -278,7 +278,7 @@ public abstract class VisionObject extends BasicDBObject {
 	}
 
 	private void setPLMType() {
-		put(PLM_TYPE, getClass().getSimpleName().toLowerCase());
+		setValue(PLM_TYPE, getClass().getSimpleName().toLowerCase());
 	}
 
 	public String getPLMType() {
@@ -372,13 +372,12 @@ public abstract class VisionObject extends BasicDBObject {
 		}
 	}
 
-	@Override
-	final public Object put(String key, Object val) {
+	final public Object setValue(String key, Object val) {
 		if (dirtyKeys == null) {
 			dirtyKeys = new HashSet<String>();
 		}
 		dirtyKeys.add(key);
-		return super.put(key, val);
+		return put(key, val);
 	}
 
 	/**
