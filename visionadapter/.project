@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>codebase2</name>
+			<type>2</type>
+			<location>D:/ptc/Windchill_10.2/Windchill/codebase</location>
+		</link>
+	</linkedResources>
 </projectDescription>
