@@ -356,7 +356,6 @@ public abstract class VisionObject extends BasicDBObject {
 		List<String> fields = new ArrayList<String>();
 		fields.add(_ID);
 		fields.add(PLM_ID);
-		fields.add(PLM_DATA);
 		return fields;
 	}
 
