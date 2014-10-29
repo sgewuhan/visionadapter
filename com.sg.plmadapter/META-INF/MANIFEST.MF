@@ -1,0 +1,14 @@
+Bundle-ManifestVersion: 2
+Bundle-Name: Plmadapter
+Bundle-SymbolicName: com.sg.plmadapter;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: com.sg.plmadapter.PLMAdapter
+Bundle-Vendor: SG
+Require-Bundle: org.eclipse.core.runtime,
+ com.mobnut.db;bundle-version="1.0.0",
+ com.sg.business.model;bundle-version="1.0.0",
+ com.sg.thirdparty
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: libs/cxf-bundle-minimal-2.2.9.jar,
+ .

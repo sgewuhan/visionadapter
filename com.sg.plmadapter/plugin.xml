@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="com.mobnut.db.model.PrimaryObject"
+            class="com.sg.plmadapter.adapters.PDMAdapter">
+         <adapter
+               type="com.sg.business.model.IPDMServiceProvider">
+         </adapter>
+      </factory>
+   </extension>
+
+</plugin>
