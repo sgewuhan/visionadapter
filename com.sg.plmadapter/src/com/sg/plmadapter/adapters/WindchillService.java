@@ -63,20 +63,22 @@ public class WindchillService implements IPDMServiceProvider {
 		PMWebserviceService service = new PMWebserviceService(new URL(url));
 		windchill = service.getPort(PMWebservice.class);
 		Client client = ClientProxy.getClient(windchill);
+		
 		HTTPConduit http = (HTTPConduit) client.getConduit();
-
+		
 		HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
 		httpClientPolicy.setConnectionTimeout(36000);
 		httpClientPolicy.setAllowChunking(false);
 		httpClientPolicy.setReceiveTimeout(32000);
 
-		AuthorizationPolicy authorizationPolicy = new AuthorizationPolicy();
-		authorizationPolicy.setAuthorizationType("Basic");
-		authorizationPolicy.setUserName(username);
-		authorizationPolicy.setPassword(password);
+		AuthorizationPolicy policy = new AuthorizationPolicy();
+		policy.setAuthorizationType("Basic");
+		policy.setUserName(username);
+		policy.setPassword(password);
 		
-		http.setAuthorization(authorizationPolicy);
+		http.setAuthorization(policy);
 		http.setClient(httpClientPolicy);
+		
 	}
 
 	@Override
