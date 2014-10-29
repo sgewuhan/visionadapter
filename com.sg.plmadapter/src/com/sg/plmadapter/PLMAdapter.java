@@ -41,8 +41,8 @@ public class PLMAdapter implements BundleActivator {
 		if(serviceCache == null) {
 			return null;
 		}
-//		return serviceCache.get(key);
-		return null;
+		return serviceCache.get(key);
+//		return null;
 	}
 
 	public static void registeService(String key, IPDMServiceProvider service) {
