@@ -38,6 +38,9 @@ public class PLMAdapter implements BundleActivator {
 	}
 
 	public static IPDMServiceProvider getService(String key) {
+		if(serviceCache == null) {
+			return null;
+		}
 		return serviceCache.get(key);
 	}
 
