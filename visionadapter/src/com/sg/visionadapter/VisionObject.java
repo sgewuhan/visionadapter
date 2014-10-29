@@ -124,7 +124,7 @@ public abstract class VisionObject extends BasicDBObject {
 	public String getCreateByUserId() {
 		Object value = get(CREATE_BY);
 		if (value instanceof DBObject) {
-			((DBObject) value).get("userid");
+			return (String) ((DBObject) value).get("userid");
 		}
 		return null;
 	}
@@ -135,7 +135,7 @@ public abstract class VisionObject extends BasicDBObject {
 	public String getCreateByUserName() {
 		Object value = get(CREATE_BY);
 		if (value instanceof DBObject) {
-			((DBObject) value).get("username");
+			return (String) ((DBObject) value).get("username");
 		}
 		return null;
 	}
