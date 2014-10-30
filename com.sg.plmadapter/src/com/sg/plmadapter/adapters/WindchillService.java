@@ -155,16 +155,4 @@ public class WindchillService implements IPDMServiceProvider {
 		po.setValue(F_SYNC_DATE, null);
 	}
 
-	@Override
-	public int doInsertAfter(PrimaryObject po) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int doUpdateAfter(PrimaryObject po, String[] fields)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }
