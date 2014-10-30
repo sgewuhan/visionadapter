@@ -139,10 +139,12 @@ public class WindchillService implements IPDMServiceProvider {
 			throws Exception {
 		checkService();
 		WindchillSyncJob job = null;
-
 		if (po instanceof Folder) {
 			checkService();
 			job = new RemoveFolder(windchill, po);
+		}else if(po instanceof Document) {
+			checkService();
+			job = new RemoveDocument(windchill, po);
 		}
 		
 		if (job != null) {
