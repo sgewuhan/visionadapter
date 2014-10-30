@@ -1,6 +1,7 @@
 package com.sg.plmadapter.adapters;
 
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.bson.types.ObjectId;
 
 import com.mobnut.db.model.PrimaryObject;
 import com.sg.business.model.Document;
@@ -128,7 +129,7 @@ public class WindchillService implements IPDMServiceProvider {
 		if (po instanceof Folder) {
 			job = new RenameFolder(windchill, po);
 		}
-		
+
 		if (job != null) {
 			run(job, syncExcute);
 		}
@@ -142,11 +143,11 @@ public class WindchillService implements IPDMServiceProvider {
 		if (po instanceof Folder) {
 			checkService();
 			job = new RemoveFolder(windchill, po);
-		}else if(po instanceof Document) {
+		} else if (po instanceof Document) {
 			checkService();
 			job = new RemoveDocument(windchill, po);
 		}
-		
+
 		if (job != null) {
 			run(job, syncExcute);
 		}
@@ -155,6 +156,24 @@ public class WindchillService implements IPDMServiceProvider {
 	@Override
 	public void doRemoveBefore(PrimaryObject po) throws Exception {
 		po.setValue(F_SYNC_DATE, null);
+	}
+
+	@Override
+	public void doMoveBefore(PrimaryObject po) throws Exception {
+		po.setValue(F_SYNC_DATE, null);
+	}
+
+	@Override
+	public void doMoveAfter(PrimaryObject po,boolean syncExcute) throws Exception {
+		checkService();
+		WindchillSyncJob job = null;
+		if (po instanceof Document) {
+			checkService();
+			job = new MoveDocument(windchill, po);
+		}
+		if (job != null) {
+			run(job, syncExcute);
+		}
 	}
 
 }
