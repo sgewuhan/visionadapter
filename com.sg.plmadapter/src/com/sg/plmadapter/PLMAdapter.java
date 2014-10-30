@@ -1,6 +1,7 @@
 package com.sg.plmadapter;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -9,6 +10,7 @@ import com.sg.business.model.IPDMServiceProvider;
 
 public class PLMAdapter implements BundleActivator {
 
+	public static final String PLUGIN_ID = "com.sg.plmadapter";
 	private static BundleContext context;
 	private static ConcurrentHashMap<String, IPDMServiceProvider> serviceCache;
 

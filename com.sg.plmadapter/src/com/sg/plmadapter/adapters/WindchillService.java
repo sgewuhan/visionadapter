@@ -1,8 +1,5 @@
 package com.sg.plmadapter.adapters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
 import com.mobnut.db.model.PrimaryObject;
@@ -33,16 +30,12 @@ public class WindchillService implements IPDMServiceProvider {
 
 	private String password;
 
-	private PrimaryObject po;
-
 	private PMWebservice windchill;
 
-	public WindchillService(String url, String username, String password,
-			PrimaryObject po) {
+	public WindchillService(String url, String username, String password) {
 		this.url = url;
 		this.username = username;
 		this.password = password;
-		this.po = po;
 		// init();
 		initService();
 	}
@@ -54,6 +47,12 @@ public class WindchillService implements IPDMServiceProvider {
 		factory.setPassword(password);
 		factory.setServiceClass(PMWebservice.class);
 		windchill = (PMWebservice) factory.create();
+	}
+	
+	private void checkService() throws Exception{
+		if(windchill == null){
+			throw new Exception("Windchill 同步服务不可用");
+		}
 	}
 
 	/*
@@ -93,15 +92,15 @@ public class WindchillService implements IPDMServiceProvider {
 
 	@Override
 	public void doInsertAfter(PrimaryObject po) throws Exception {
+		checkService();
+		
 		if (po instanceof Folder) {
-			List<String> folderIds = new ArrayList<String>();
-			folderIds.add(po.get_id().toString());
-			windchill.createFolder(folderIds);
+			new InsertFolder(windchill,po.get_id().toString()).schedule();
 		} else if (po instanceof Document) {
-			String documentId = po.get_id().toString();
-			windchill.createDocument(documentId);
+			new InsertDocument(windchill,po.get_id().toString()).schedule();
 		}
 	}
+
 
 	@Override
 	public void doUpdateBefore(PrimaryObject po, String[] fields)
@@ -113,9 +112,9 @@ public class WindchillService implements IPDMServiceProvider {
 	public void doUpdateAfter(PrimaryObject po, String[] fields)
 			throws Exception {
 		if (po instanceof Folder) {
-			String id = po.get_id().toString();
 			String newFolderName = (String) po.getValue(fields[0]);
-			windchill.editFolder(id, newFolderName);
+			checkService();
+			new RenameFolder(windchill,po.get_id().toString(),newFolderName).schedule();
 		}
 	}
 
@@ -123,7 +122,8 @@ public class WindchillService implements IPDMServiceProvider {
 	public void doRemove(PrimaryObject po) throws Exception {
 		if(po instanceof Folder) {
 			String id = po.get_id().toString();
-			windchill.deleteFolder(id);
+			checkService();
+			new RemoveFolder(windchill,id).schedule();
 		}
 	}
 
