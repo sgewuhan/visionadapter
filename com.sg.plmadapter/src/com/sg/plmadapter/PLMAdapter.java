@@ -1,7 +1,6 @@
 package com.sg.plmadapter;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
