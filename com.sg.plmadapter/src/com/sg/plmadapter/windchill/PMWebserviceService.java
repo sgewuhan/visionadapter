@@ -26,7 +26,7 @@ public class PMWebserviceService extends Service {
     static {
         URL url = null;
         try {
-            url = new URL("http://10.99.190.133/Windchill/servlet/PMWebservice?wsdl");
+            url = new URL("http://lcy.yaozheng.com/Windchill/servlet/PMWebservice?wsdl");
         } catch (MalformedURLException e) {
             java.util.logging.Logger.getLogger(PMWebserviceService.class.getName())
                 .log(java.util.logging.Level.INFO, 

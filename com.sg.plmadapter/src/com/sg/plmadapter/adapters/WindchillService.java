@@ -1,24 +1,15 @@
 package com.sg.plmadapter.adapters;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.apache.cxf.endpoint.Client;
-import org.apache.cxf.frontend.ClientProxy;
-import org.apache.cxf.transport.Conduit;
-import org.apache.cxf.transport.http.HTTPConduit;
-import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
 import com.mobnut.db.model.PrimaryObject;
 import com.sg.business.model.Document;
 import com.sg.business.model.Folder;
 import com.sg.business.model.IPDMServiceProvider;
 import com.sg.plmadapter.windchill.PMWebservice;
-import com.sg.plmadapter.windchill.PMWebserviceService;
 
 public class WindchillService implements IPDMServiceProvider {
 
@@ -52,34 +43,40 @@ public class WindchillService implements IPDMServiceProvider {
 		this.username = username;
 		this.password = password;
 		this.po = po;
-		try {
-			init();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+		// init();
+		initService();
 	}
 
-	private void init() throws MalformedURLException {
-		PMWebserviceService service = new PMWebserviceService(new URL(url));
-		windchill = service.getPort(PMWebservice.class);
-		Client client = ClientProxy.getClient(windchill);
-		
-		HTTPConduit http = (HTTPConduit) client.getConduit();
-		
-		HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
-		httpClientPolicy.setConnectionTimeout(36000);
-		httpClientPolicy.setAllowChunking(false);
-		httpClientPolicy.setReceiveTimeout(32000);
-
-		AuthorizationPolicy policy = new AuthorizationPolicy();
-		policy.setAuthorizationType("Basic");
-		policy.setUserName(username);
-		policy.setPassword(password);
-		
-		http.setAuthorization(policy);
-		http.setClient(httpClientPolicy);
-		
+	private void initService() {
+		JaxWsProxyFactoryBean factory = new JaxWsProxyFactoryBean();
+		factory.setAddress(url);
+		factory.setUsername(username);
+		factory.setPassword(password);
+		factory.setServiceClass(PMWebservice.class);
+		windchill = (PMWebservice) factory.create();
 	}
+
+	/*
+	 * private void init() throws MalformedURLException { PMWebserviceService
+	 * service = new PMWebserviceService(new URL(url)); windchill =
+	 * service.getPort(PMWebservice.class); Client client =
+	 * ClientProxy.getClient(windchill);
+	 * 
+	 * HTTPConduit http = (HTTPConduit) client.getConduit();
+	 * 
+	 * HTTPClientPolicy httpClientPolicy = new HTTPClientPolicy();
+	 * httpClientPolicy.setConnectionTimeout(36000);
+	 * httpClientPolicy.setAllowChunking(false);
+	 * httpClientPolicy.setReceiveTimeout(32000);
+	 * 
+	 * AuthorizationPolicy policy = new AuthorizationPolicy();
+	 * policy.setAuthorizationType("Basic"); policy.setUserName(username);
+	 * policy.setPassword(password);
+	 * 
+	 * http.setAuthorization(policy); http.setClient(httpClientPolicy);
+	 * 
+	 * }
+	 */
 
 	@Override
 	public void doInsertBefore(PrimaryObject po) throws Exception {
@@ -96,25 +93,39 @@ public class WindchillService implements IPDMServiceProvider {
 
 	@Override
 	public void doInsertAfter(PrimaryObject po) throws Exception {
-		if(po instanceof Folder){
+		if (po instanceof Folder) {
 			List<String> folderIds = new ArrayList<String>();
 			folderIds.add(po.get_id().toString());
 			windchill.createFolder(folderIds);
+		} else if (po instanceof Document) {
+			String documentId = po.get_id().toString();
+			windchill.createDocument(documentId);
 		}
 	}
 
 	@Override
 	public void doUpdateBefore(PrimaryObject po, String[] fields)
 			throws Exception {
-		// TODO Auto-generated method stub
-
+		po.setValue(F_SYNC_DATE, null);
 	}
 
 	@Override
 	public void doUpdateAfter(PrimaryObject po, String[] fields)
 			throws Exception {
-		// TODO Auto-generated method stub
-
+		if (po instanceof Folder) {
+			String id = po.get_id().toString();
+			String newFolderName = (String) po.getValue(fields[0]);
+			windchill.editFolder(id, newFolderName);
+		}
 	}
+
+	@Override
+	public void doRemove(PrimaryObject po) throws Exception {
+		if(po instanceof Folder) {
+			String id = po.get_id().toString();
+			windchill.deleteFolder(id);
+		}
+	}
+
 
 }
