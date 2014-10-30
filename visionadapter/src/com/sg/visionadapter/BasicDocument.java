@@ -85,6 +85,7 @@ public abstract class BasicDocument extends VisionObject {
 		DBCollection folderColletion = ModelServiceFactory.service
 				.getCollection("folder");
 		folderColletion.setObjectClass(PMFolder.class);
+		setCollection(folderColletion);
 		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				folderId));
 	}
@@ -276,5 +277,10 @@ public abstract class BasicDocument extends VisionObject {
 	 */
 	public String getContainerName() {
 		return getFolder().getRoot().getContainerName();
+	}
+	
+	@Override
+	void setCollection(DBCollection collection) {
+		super.setCollection(collection);
 	}
 }
