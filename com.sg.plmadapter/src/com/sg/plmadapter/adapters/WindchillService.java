@@ -48,9 +48,9 @@ public class WindchillService implements IPDMServiceProvider {
 		factory.setServiceClass(PMWebservice.class);
 		windchill = (PMWebservice) factory.create();
 	}
-	
-	private void checkService() throws Exception{
-		if(windchill == null){
+
+	private void checkService() throws Exception {
+		if (windchill == null) {
 			throw new Exception("Windchill 同步服务不可用");
 		}
 	}
@@ -91,16 +91,27 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public void doInsertAfter(PrimaryObject po) throws Exception {
+	public void doInsertAfter(PrimaryObject po, boolean syncExcute)
+			throws Exception {
 		checkService();
-		
+		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
-			new InsertFolder(windchill,po.get_id().toString()).schedule();
+			job = new InsertFolder(windchill, po);
 		} else if (po instanceof Document) {
-			new InsertDocument(windchill,po.get_id().toString()).schedule();
+			job = new InsertDocument(windchill, po);
+		}
+		if (job != null) {
+			run(job, syncExcute);
 		}
 	}
 
+	private void run(WindchillSyncJob job, boolean syncExcute) throws Exception {
+		if (syncExcute) {
+			job.run();
+		} else {
+			job.schedule();
+		}
+	}
 
 	@Override
 	public void doUpdateBefore(PrimaryObject po, String[] fields)
@@ -109,23 +120,39 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public void doUpdateAfter(PrimaryObject po, String[] fields)
-			throws Exception {
+	public void doUpdateAfter(PrimaryObject po, String[] fields,
+			boolean syncExcute) throws Exception {
+		checkService();
+
+		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
-			String newFolderName = (String) po.getValue(fields[0]);
-			checkService();
-			new RenameFolder(windchill,po.get_id().toString(),newFolderName).schedule();
+			job = new RenameFolder(windchill, po);
+		}
+		
+		if (job != null) {
+			run(job, syncExcute);
 		}
 	}
 
 	@Override
-	public void doRemove(PrimaryObject po) throws Exception {
-		if(po instanceof Folder) {
-			String id = po.get_id().toString();
+	public void doRemoveAfter(PrimaryObject po, boolean syncExcute)
+			throws Exception {
+		checkService();
+		WindchillSyncJob job = null;
+
+		if (po instanceof Folder) {
 			checkService();
-			new RemoveFolder(windchill,id).schedule();
+			job = new RemoveFolder(windchill, po);
+		}
+		
+		if (job != null) {
+			run(job, syncExcute);
 		}
 	}
 
+	@Override
+	public void doRemoveBefore(PrimaryObject po) throws Exception {
+		po.setValue(F_SYNC_DATE, null);
+	}
 
 }
