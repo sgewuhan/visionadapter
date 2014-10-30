@@ -1,7 +1,12 @@
 package com.sg.plmadapter.adapters;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import com.mobnut.db.model.PrimaryObject;
+import com.sg.business.model.Document;
 import com.sg.business.model.Folder;
 import com.sg.business.model.IPDMServiceProvider;
 import com.sg.plmadapter.PLMAdapter;
@@ -19,26 +24,56 @@ public class PDMAdapter implements IAdapterFactory {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
+		Map<String, String> map = getContainerData(adaptableObject);
 		if (adaptableObject instanceof Folder) {
 			Folder folder = (Folder) adaptableObject;
-			Folder container = folder.getContainer();
-			Object type = container.getValue(Folder.F_CONTAINER_TYPE);
+			String type = map.get(Folder.F_CONTAINER_TYPE);
 			if (CONTAINER_WINDCHILL.equals(type)) {
-				String url = (String) container.getValue(F_WINDCHILL_ADDRESS);
-				IPDMServiceProvider service = PLMAdapter.getService(url);
-				if (service == null) {
-					String username = (String) container
-							.getValue(F_WINDCHILL_USERNAME);
-					String password = (String) container
-							.getValue(F_WINDCHILL_PASSWORD);
-					service = new WindchillService(url, username, password,
-							folder);
-					PLMAdapter.registeService(url, service);
-				}
-				return service;
+				return getProviderService(folder, map);
+			}
+		} else if (adaptableObject instanceof Document) {
+			Document document = (Document) adaptableObject;
+			String type = map.get(Folder.F_CONTAINER_TYPE);
+			if (CONTAINER_WINDCHILL.equals(type)) {
+				return getProviderService(document, map);
 			}
 		}
 		return null;
+	}
+
+	private Map<String, String> getContainerData(Object object) {
+		Map<String, String> map = new HashMap<String, String>();
+		Folder container = null;
+		if (object instanceof Folder) {
+			Folder folder = (Folder) object;
+			container = folder.getContainer();
+		} else if (object instanceof Document) {
+			Document document = (Document) object;
+			container = document.getFolder().getContainer();
+		}
+		if (container != null) {
+			String url = (String) container.getValue(F_WINDCHILL_ADDRESS);
+			String username = (String) container.getValue(F_WINDCHILL_USERNAME);
+			String password = (String) container.getValue(F_WINDCHILL_PASSWORD);
+			String type = (String) container.getValue(Folder.F_CONTAINER_TYPE);
+			map.put(F_WINDCHILL_ADDRESS, url);
+			map.put(F_WINDCHILL_USERNAME, username);
+			map.put(F_WINDCHILL_PASSWORD, password);
+			map.put(Folder.F_CONTAINER_TYPE, type);
+		}
+		return map;
+	}
+
+	private IPDMServiceProvider getProviderService(PrimaryObject po,
+			Map<String, String> map) {
+		String url = map.get(F_WINDCHILL_ADDRESS);
+		IPDMServiceProvider service = PLMAdapter.getService(url);
+		if (service == null) {
+			service = new WindchillService(url, map.get(F_WINDCHILL_USERNAME),
+					map.get(F_WINDCHILL_PASSWORD), po);
+			PLMAdapter.registeService(url, service);
+		}
+		return service;
 	}
 
 	@Override
