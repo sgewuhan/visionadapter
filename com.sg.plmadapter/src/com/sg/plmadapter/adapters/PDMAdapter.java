@@ -70,7 +70,7 @@ public class PDMAdapter implements IAdapterFactory {
 		IPDMServiceProvider service = PLMAdapter.getService(url);
 		if (service == null) {
 			service = new WindchillService(url, map.get(F_WINDCHILL_USERNAME),
-					map.get(F_WINDCHILL_PASSWORD), po);
+					map.get(F_WINDCHILL_PASSWORD));
 			PLMAdapter.registeService(url, service);
 		}
 		return service;

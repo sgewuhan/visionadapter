@@ -1,8 +1,5 @@
 package com.sg.plmadapter.adapters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 
 import com.mobnut.db.model.PrimaryObject;
@@ -33,16 +30,12 @@ public class WindchillService implements IPDMServiceProvider {
 
 	private String password;
 
-	private PrimaryObject po;
-
 	private PMWebservice windchill;
 
-	public WindchillService(String url, String username, String password,
-			PrimaryObject po) {
+	public WindchillService(String url, String username, String password) {
 		this.url = url;
 		this.username = username;
 		this.password = password;
-		this.po = po;
 		// init();
 		initService();
 	}
@@ -54,6 +47,12 @@ public class WindchillService implements IPDMServiceProvider {
 		factory.setPassword(password);
 		factory.setServiceClass(PMWebservice.class);
 		windchill = (PMWebservice) factory.create();
+	}
+
+	private void checkService() throws Exception {
+		if (windchill == null) {
+			throw new Exception("Windchill 同步服务不可用");
+		}
 	}
 
 	/*
@@ -92,16 +91,26 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public int doInsertAfter(PrimaryObject po) throws Exception {
+	public void doInsertAfter(PrimaryObject po, boolean syncExcute)
+			throws Exception {
+		checkService();
+		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
-			List<String> folderIds = new ArrayList<String>();
-			folderIds.add(po.get_id().toString());
-			return windchill.createFolder(folderIds);
+			job = new InsertFolder(windchill, po);
 		} else if (po instanceof Document) {
-			String documentId = po.get_id().toString();
-			return windchill.createDocument(documentId);
+			job = new InsertDocument(windchill, po);
 		}
-		return 0;
+		if (job != null) {
+			run(job, syncExcute);
+		}
+	}
+
+	private void run(WindchillSyncJob job, boolean syncExcute) throws Exception {
+		if (syncExcute) {
+			job.run();
+		} else {
+			job.schedule();
+		}
 	}
 
 	@Override
@@ -111,29 +120,51 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public int doUpdateAfter(PrimaryObject po, String[] fields)
-			throws Exception {
+	public void doUpdateAfter(PrimaryObject po, String[] fields,
+			boolean syncExcute) throws Exception {
+		checkService();
+
+		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
-			String id = po.get_id().toString();
-			String newFolderName = (String) po.getValue(fields[0]);
-			return windchill.editFolder(id, newFolderName);
-		}else if(po instanceof Document) {
-			String id = po.get_id().toString();
-			windchill.updateDocument(id);
+			job = new RenameFolder(windchill, po);
 		}
+		
+		if (job != null) {
+			run(job, syncExcute);
+		}
+	}
+
+	@Override
+	public void doRemoveAfter(PrimaryObject po, boolean syncExcute)
+			throws Exception {
+		checkService();
+		WindchillSyncJob job = null;
+
+		if (po instanceof Folder) {
+			checkService();
+			job = new RemoveFolder(windchill, po);
+		}
+		
+		if (job != null) {
+			run(job, syncExcute);
+		}
+	}
+
+	@Override
+	public void doRemoveBefore(PrimaryObject po) throws Exception {
+		po.setValue(F_SYNC_DATE, null);
+	}
+
+	@Override
+	public int doInsertAfter(PrimaryObject po) throws Exception {
+		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int doRemove(PrimaryObject po) throws Exception {
-		if(po instanceof Folder) {
-			String folderId = po.get_id().toString();
-			return windchill.deleteFolder(folderId);
-		}else if(po instanceof Document) {
-			String documentId = po.get_id().toString();
-			return windchill.deleteDocument(documentId);
-		}
+	public int doUpdateAfter(PrimaryObject po, String[] fields)
+			throws Exception {
+		// TODO Auto-generated method stub
 		return 0;
 	}
-	
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
 import com.mongodb.WriteResult;
 
 /**
@@ -100,6 +101,9 @@ public class PMFolder extends VisionObject {
 	public PMFolder getRoot() {
 		ObjectId rootId = getRootId();
 		rootId = rootId==null?get_id():rootId;
+		DBCollection folderColletion = ModelServiceFactory.service
+				.getCollection("folder");
+		folderColletion.setObjectClass(PMFolder.class);
 		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				rootId));
 	}
