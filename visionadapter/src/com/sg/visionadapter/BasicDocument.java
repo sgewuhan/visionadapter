@@ -82,12 +82,11 @@ public abstract class BasicDocument extends VisionObject {
 		if (folderId == null) {
 			return null;
 		}
-		DBCollection folderColletion = ModelServiceFactory.service
-				.getCollection("folder");
+		DBCollection folderColletion = ModelServiceFactory.service.getCollection("folder");
 		folderColletion.setObjectClass(PMFolder.class);
-		setCollection(folderColletion);
-		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
+		PMFolder folder = (PMFolder) folderColletion.findOne(new BasicDBObject().append(_ID,
 				folderId));
+		return folder;
 	}
 
 	/**

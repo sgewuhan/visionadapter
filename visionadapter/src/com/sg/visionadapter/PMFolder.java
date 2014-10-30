@@ -104,7 +104,6 @@ public class PMFolder extends VisionObject {
 		DBCollection folderColletion = ModelServiceFactory.service
 				.getCollection("folder");
 		folderColletion.setObjectClass(PMFolder.class);
-		setCollection(folderColletion);
 		return (PMFolder) collection.findOne(new BasicDBObject().append(_ID,
 				rootId));
 	}
