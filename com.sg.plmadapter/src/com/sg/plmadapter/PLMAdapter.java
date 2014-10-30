@@ -9,6 +9,7 @@ import com.sg.business.model.IPDMServiceProvider;
 
 public class PLMAdapter implements BundleActivator {
 
+	public static final String PLUGIN_ID = "com.sg.plmadapter";
 	private static BundleContext context;
 	private static ConcurrentHashMap<String, IPDMServiceProvider> serviceCache;
 
