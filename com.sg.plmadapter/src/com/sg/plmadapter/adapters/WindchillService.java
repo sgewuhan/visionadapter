@@ -92,15 +92,16 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public void doInsertAfter(PrimaryObject po) throws Exception {
+	public int doInsertAfter(PrimaryObject po) throws Exception {
 		if (po instanceof Folder) {
 			List<String> folderIds = new ArrayList<String>();
 			folderIds.add(po.get_id().toString());
-			windchill.createFolder(folderIds);
+			return windchill.createFolder(folderIds);
 		} else if (po instanceof Document) {
 			String documentId = po.get_id().toString();
-			windchill.createDocument(documentId);
+			return windchill.createDocument(documentId);
 		}
+		return 0;
 	}
 
 	@Override
@@ -110,22 +111,29 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public void doUpdateAfter(PrimaryObject po, String[] fields)
+	public int doUpdateAfter(PrimaryObject po, String[] fields)
 			throws Exception {
 		if (po instanceof Folder) {
 			String id = po.get_id().toString();
 			String newFolderName = (String) po.getValue(fields[0]);
-			windchill.editFolder(id, newFolderName);
+			return windchill.editFolder(id, newFolderName);
+		}else if(po instanceof Document) {
+			String id = po.get_id().toString();
+			windchill.updateDocument(id);
 		}
+		return 0;
 	}
 
 	@Override
-	public void doRemove(PrimaryObject po) throws Exception {
+	public int doRemove(PrimaryObject po) throws Exception {
 		if(po instanceof Folder) {
-			String id = po.get_id().toString();
-			windchill.deleteFolder(id);
+			String folderId = po.get_id().toString();
+			return windchill.deleteFolder(folderId);
+		}else if(po instanceof Document) {
+			String documentId = po.get_id().toString();
+			return windchill.deleteDocument(documentId);
 		}
+		return 0;
 	}
-
-
+	
 }
