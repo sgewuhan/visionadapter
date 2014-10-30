@@ -1,7 +1,5 @@
-package com.sg.visionadapter.persistence;
+package com.sg.visionadapter;
 
-import com.sg.visionadapter.PMPart;
-import com.sg.visionadapter.PersistenceService;
 
 public class PartPersistence extends PersistenceService<PMPart>{
 

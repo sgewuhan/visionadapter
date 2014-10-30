@@ -1,7 +1,5 @@
-package com.sg.visionadapter.persistence;
+package com.sg.visionadapter;
 
-import com.sg.visionadapter.PersistenceService;
-import com.sg.visionadapter.PMSupplyment;
 
 public class SupplymentPersistence extends PersistenceService<PMSupplyment>{
 
