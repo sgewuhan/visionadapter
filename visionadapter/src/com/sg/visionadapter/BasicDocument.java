@@ -86,6 +86,7 @@ public abstract class BasicDocument extends VisionObject {
 		folderColletion.setObjectClass(PMFolder.class);
 		PMFolder folder = (PMFolder) folderColletion.findOne(new BasicDBObject().append(_ID,
 				folderId));
+		folder.setCollection(folderColletion);
 		return folder;
 	}
 

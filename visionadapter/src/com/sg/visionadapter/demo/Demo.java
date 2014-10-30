@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 
+import com.sg.visionadapter.DocumentPersistence;
+import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
-import com.sg.visionadapter.persistence.DocumentPersistence;
-import com.sg.visionadapter.persistence.FolderPersistence;
 
 public class Demo {
 

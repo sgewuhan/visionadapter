@@ -1,7 +1,5 @@
-package com.sg.visionadapter.persistence;
+package com.sg.visionadapter;
 
-import com.sg.visionadapter.PMCADDocument;
-import com.sg.visionadapter.PersistenceService;
 
 public class CADDocumentPersistence extends PersistenceService<PMCADDocument>{
 

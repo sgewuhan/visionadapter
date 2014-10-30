@@ -1,7 +1,5 @@
-package com.sg.visionadapter.persistence;
+package com.sg.visionadapter;
 
-import com.sg.visionadapter.PMMaterial;
-import com.sg.visionadapter.PersistenceService;
 
 public class MaterialPersistence extends PersistenceService<PMMaterial>{
 

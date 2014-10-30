@@ -22,7 +22,7 @@ public abstract class PersistenceService<T extends VisionObject> implements
 
 	private Class<T> entityClass;
 
-	private DBCollection collection;
+	protected DBCollection collection;
 
 	@SuppressWarnings("unchecked")
 	protected PersistenceService() {

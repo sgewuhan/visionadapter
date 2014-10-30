@@ -25,11 +25,11 @@ public abstract class VisionObject extends BasicDBObject {
 
 	protected static final String PLM_TYPE = "plmtype";
 
-	public static final String _ID = "_id";
+	protected static final String _ID = "_id";
 
 	protected static final String DESC = "desc";
 
-	protected static final String PLM_ID = "plmid";
+	public static final String PLM_ID = "plmid";
 
 	protected static final String PLM_DATA = "plmdata";
 
