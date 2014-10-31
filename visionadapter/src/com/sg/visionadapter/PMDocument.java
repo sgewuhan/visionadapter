@@ -67,7 +67,11 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 	 */
 	public IFileProvider getContent() {
 		Object value = get(CONTENT);
-		if(value instanceof DBObject){
+		if(value instanceof BasicBSONList ){
+			if(((BasicBSONList) value).size()>0){
+				return getGridFSFileProvider((DBObject) ((BasicBSONList) value).get(0));
+			}
+		}else if(value instanceof DBObject){
 			return getGridFSFileProvider((DBObject) value);
 		}
 		return null;
