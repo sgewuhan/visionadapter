@@ -128,8 +128,9 @@ public class WindchillService implements IPDMServiceProvider {
 		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
 			job = new RenameFolder(windchill, po);
+		}else if(po instanceof Document) {
+			job = new UpdateDocument(windchill, po);
 		}
-
 		if (job != null) {
 			run(job, syncExcute);
 		}
