@@ -79,12 +79,12 @@ public class WindchillService implements IPDMServiceProvider {
 
 	@Override
 	public void doInsertBefore(PrimaryObject po) throws Exception {
-		
+
 		po.setValue(F_SYNC_DATE, null);
 		Object type = po.getValue(F_PLM_TYPE);
 		if (type == null) {
 			if (po instanceof Folder) {
-				//如果插入前，父目录未能正确插入windchill，抛出错误
+				// 如果插入前，父目录未能正确插入windchill，抛出错误
 				Folder parent = ((Folder) po).getParentFolder();
 				checkParentFolder(parent);
 				po.setValue(F_PLM_TYPE, PLM_TYPE_FOLDER);
@@ -97,12 +97,14 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	private void checkParentFolder(Folder parent) throws Exception {
-		if(parent==null){
+		if (parent == null) {
 			throw new Exception("无法获得父文件夹");
 		}
-		Object plmid = parent.getValue(F_PLM_ID);
-		if(plmid==null){
-			throw new Exception("无法获得在Windchill中的父文件夹");
+		if (!parent.isContainer()) {
+			Object plmid = parent.getValue(F_PLM_ID);
+			if (plmid == null) {
+				throw new Exception("无法获得在Windchill中的父文件夹");
+			}
 		}
 	}
 
@@ -143,7 +145,7 @@ public class WindchillService implements IPDMServiceProvider {
 		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
 			job = new RenameFolder(windchill, po);
-		}else if(po instanceof Document) {
+		} else if (po instanceof Document) {
 			job = new UpdateDocument(windchill, po);
 		}
 		if (job != null) {
@@ -180,7 +182,8 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public void doMoveAfter(PrimaryObject po,boolean syncExcute) throws Exception {
+	public void doMoveAfter(PrimaryObject po, boolean syncExcute)
+			throws Exception {
 		checkService();
 		WindchillSyncJob job = null;
 		if (po instanceof Document) {
