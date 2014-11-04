@@ -54,8 +54,8 @@ public abstract class PersistenceService<T extends VisionObject> implements
 	 * @return 满足条件的 对象列表
 	 */
 	public List<T> find(T obj) {
-		DBCursor cur = collection.find(obj.append(VisionObject.PLM_TYPE,
-				obj.getClass().getSimpleName().toLowerCase()));
+		DBCursor cur = collection.find(obj.append(VisionObject.PLM_TYPE, obj
+				.getClass().getSimpleName().toLowerCase()));
 		@SuppressWarnings("unchecked")
 		List<T> result = (List<T>) cur.toArray();
 		for (int i = 0; i < result.size(); i++) {
@@ -111,20 +111,22 @@ public abstract class PersistenceService<T extends VisionObject> implements
 
 	/**
 	 * 
-	 * @param id
-	 *            对象的id
+	 * @param value
+	 *            对象的值
+	 * @param fieldName
+	 *            值对应的字段名
 	 * @return id为传入参数的对象
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
 	@SuppressWarnings("unchecked")
-	public T get(Object id, String fieldName) throws InstantiationException,
+	public T get(Object value, String fieldName) throws InstantiationException,
 			IllegalAccessException {
-		if (id == null) {
+		if (value == null) {
 			throw new IllegalArgumentException("id must not empty");
 		}
 		T result = (T) collection.findOne(new BasicDBObject().append(fieldName,
-				id).append(VisionObject.PLM_TYPE,
+				value).append(VisionObject.PLM_TYPE,
 				entityClass.getSimpleName().toLowerCase()));
 		result.setCollection(collection);
 		return result;
@@ -160,6 +162,7 @@ public abstract class PersistenceService<T extends VisionObject> implements
 
 	/**
 	 * 获得一个空的可持久化的对象
+	 * 
 	 * @return 空的可持久化的对象
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException

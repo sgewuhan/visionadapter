@@ -44,8 +44,21 @@ public abstract class VisionObject extends BasicDBObject {
 	protected static final String OWNER = "owner";
 
 	public static final String SYNC_DATE = "syncdate";
-	
+
+	public static final String SYNC_CODE = "synccode";
+
+	public static final String SYNC_MSG = "syncmsg";
+
 	public static final String EDITOR = "_editor";
+
+	public static final int SUCCESS = 0;
+	
+	public static final int INSERT_ERR = 1;
+	
+	public static final int UPDATE_ERR = 2;
+	
+	public static final int DELETE_ERR = 3;
+
 
 	protected DBCollection collection;
 
@@ -148,9 +161,8 @@ public abstract class VisionObject extends BasicDBObject {
 	 *            创建者姓名
 	 */
 	public void setCreateBy(String userId, String userName) {
-		setValue(CREATE_BY,
-				new BasicDBObject().append("userid", userId).append("username",
-						userName));
+		setValue(CREATE_BY, new BasicDBObject().append("userid", userId)
+				.append("username", userName));
 	}
 
 	/**
@@ -195,9 +207,8 @@ public abstract class VisionObject extends BasicDBObject {
 	 *            修改者姓名
 	 */
 	public void setModifiedBy(String userId, String userName) {
-		setValue(MODIFIED_BY,
-				new BasicDBObject().append("userid", userId).append("username",
-						userName));
+		setValue(MODIFIED_BY, new BasicDBObject().append("userid", userId)
+				.append("username", userName));
 	}
 
 	/**
@@ -242,18 +253,14 @@ public abstract class VisionObject extends BasicDBObject {
 		return getSyncDate() != null;
 	}
 
-	/**
-	 * 设置为未同步
-	 */
-	public void setAsync() {
-		setValue(SYNC_DATE, null);
-	}
 
 	/**
 	 * 设置为已同步
 	 */
 	public void setSync() {
 		setValue(SYNC_DATE, new Date());
+		setValue(SYNC_CODE, SUCCESS);
+		setValue(SYNC_MSG, null);
 	}
 
 	/**
@@ -277,6 +284,17 @@ public abstract class VisionObject extends BasicDBObject {
 		extendPLMData();
 		WriteResult wr = collection.insert(this);
 		return wr;
+	}
+
+	public WriteResult doSetErrorMessage(int code, String message)
+			throws Exception {
+		BasicDBObject set = new BasicDBObject();
+		set.put(SYNC_DATE, null);
+		set.put(SYNC_CODE, code);
+		set.put(SYNC_MSG, message);
+
+		return collection.update(new BasicDBObject().append(_ID, get_id()),
+				new BasicDBObject("$set", set));
 	}
 
 	private void setPLMType() {
@@ -308,7 +326,7 @@ public abstract class VisionObject extends BasicDBObject {
 	 */
 	public WriteResult doUpdate() throws Exception {
 		if (dirtyKeys == null || dirtyKeys.isEmpty()) {
-			 return null;
+			return null;
 		}
 		checkUpdate();
 		setSync();
