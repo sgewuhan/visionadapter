@@ -26,8 +26,10 @@ public class ObjectFactory {
 
     private final static QName _CreateFolderResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "createFolderResponse");
     private final static QName _CreateDocumentResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "createDocumentResponse");
+    private final static QName _ChangeRevision_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "changeRevision");
     private final static QName _DeleteFolderResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "deleteFolderResponse");
     private final static QName _UpdateDocumentResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "updateDocumentResponse");
+    private final static QName _ChangeRevisionResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "changeRevisionResponse");
     private final static QName _CreateFolder_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "createFolder");
     private final static QName _DeleteDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "deleteDocument");
     private final static QName _MoveDocumentResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "moveDocumentResponse");
@@ -37,8 +39,8 @@ public class ObjectFactory {
     private final static QName _MoveDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "moveDocument");
     private final static QName _EditFolder_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "editFolder");
     private final static QName _DeleteFolder_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "deleteFolder");
-    private final static QName _UpdateDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "updateDocument");
     private final static QName _CreateDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "createDocument");
+    private final static QName _UpdateDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "updateDocument");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.sg.plmadapter.windchill
@@ -72,6 +74,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ChangeRevision }
+     * 
+     */
+    public ChangeRevision createChangeRevision() {
+        return new ChangeRevision();
+    }
+
+    /**
      * Create an instance of {@link DeleteFolderResponse }
      * 
      */
@@ -85,6 +95,14 @@ public class ObjectFactory {
      */
     public UpdateDocumentResponse createUpdateDocumentResponse() {
         return new UpdateDocumentResponse();
+    }
+
+    /**
+     * Create an instance of {@link ChangeRevisionResponse }
+     * 
+     */
+    public ChangeRevisionResponse createChangeRevisionResponse() {
+        return new ChangeRevisionResponse();
     }
 
     /**
@@ -186,6 +204,15 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ChangeRevision }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "changeRevision")
+    public JAXBElement<ChangeRevision> createChangeRevision(ChangeRevision value) {
+        return new JAXBElement<ChangeRevision>(_ChangeRevision_QNAME, ChangeRevision.class, null, value);
+    }
+
+    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link DeleteFolderResponse }{@code >}}
      * 
      */
@@ -201,6 +228,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "updateDocumentResponse")
     public JAXBElement<UpdateDocumentResponse> createUpdateDocumentResponse(UpdateDocumentResponse value) {
         return new JAXBElement<UpdateDocumentResponse>(_UpdateDocumentResponse_QNAME, UpdateDocumentResponse.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ChangeRevisionResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "changeRevisionResponse")
+    public JAXBElement<ChangeRevisionResponse> createChangeRevisionResponse(ChangeRevisionResponse value) {
+        return new JAXBElement<ChangeRevisionResponse>(_ChangeRevisionResponse_QNAME, ChangeRevisionResponse.class, null, value);
     }
 
     /**
@@ -285,21 +321,21 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link UpdateDocument }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "updateDocument")
-    public JAXBElement<UpdateDocument> createUpdateDocument(UpdateDocument value) {
-        return new JAXBElement<UpdateDocument>(_UpdateDocument_QNAME, UpdateDocument.class, null, value);
-    }
-
-    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link CreateDocument }{@code >}}
      * 
      */
     @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "createDocument")
     public JAXBElement<CreateDocument> createCreateDocument(CreateDocument value) {
         return new JAXBElement<CreateDocument>(_CreateDocument_QNAME, CreateDocument.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link UpdateDocument }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "updateDocument")
+    public JAXBElement<UpdateDocument> createUpdateDocument(UpdateDocument value) {
+        return new JAXBElement<UpdateDocument>(_UpdateDocument_QNAME, UpdateDocument.class, null, value);
     }
 
 }

@@ -105,6 +105,7 @@ public class WindchillService implements IPDMServiceProvider {
 			throw new Exception("无法获得在Windchill中的父文件夹");
 		}
 	}
+	
 
 	@Override
 	public void doInsertAfter(PrimaryObject po, boolean syncExcute)
@@ -132,7 +133,21 @@ public class WindchillService implements IPDMServiceProvider {
 	@Override
 	public void doUpdateBefore(PrimaryObject po, String[] fields)
 			throws Exception {
-		po.setValue(F_SYNC_DATE, null);
+		if(po instanceof Folder) {
+			po.setValue(F_SYNC_DATE, null);			
+		} else if(po instanceof Document) {
+			checkSyncDate(po);
+			po.setValue(F_SYNC_DATE, null);
+		}
+	}
+
+	private void checkSyncDate(PrimaryObject po) throws Exception {
+		Object syncDate = po.getValue(F_SYNC_DATE);
+		if(po instanceof Document) {
+		if(syncDate == null) {
+			throw new Exception("当前文档未在Windchill中同步");
+		}
+		}
 	}
 
 	@Override
@@ -192,4 +207,23 @@ public class WindchillService implements IPDMServiceProvider {
 		}
 	}
 
+	@Override
+	public void doChangeRevisionBefore(PrimaryObject po) throws Exception {
+		checkSyncDate(po);
+		po.setValue(F_SYNC_DATE, null);
+	}
+
+	@Override
+	public void doChangeRevisionAfter(PrimaryObject po, boolean syncExcute)
+			throws Exception {
+		checkService();
+		WindchillSyncJob job = null;
+		if (po instanceof Document) {
+			checkService();
+			job = new UpdateDocumentVersion(windchill, po);
+		}
+		if (job != null) {
+			run(job, syncExcute);
+		}
+	}
 }
