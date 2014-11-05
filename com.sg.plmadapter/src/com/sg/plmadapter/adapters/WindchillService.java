@@ -22,7 +22,7 @@ public class WindchillService implements IPDMServiceProvider {
 
 	private static final String F_SYNC_DATE = "syncdate";
 
-//	private static final String F_PLM_DATA = "plmdata";
+	// private static final String F_PLM_DATA = "plmdata";
 
 	private String url;
 
@@ -133,20 +133,23 @@ public class WindchillService implements IPDMServiceProvider {
 	@Override
 	public void doUpdateBefore(PrimaryObject po, String[] fields)
 			throws Exception {
-		po.reload(F_SYNC_DATE);
+		checkBeforeSync(po);
 		if (po instanceof Folder) {
 			po.setValue(F_SYNC_DATE, null);
 		} else if (po instanceof Document) {
-			checkSyncDate(po);
 			po.setValue(F_SYNC_DATE, null);
 		}
 	}
 
-	private void checkSyncDate(PrimaryObject po) throws Exception {
-		Object syncDate = po.getValue(F_SYNC_DATE);
+	private void checkBeforeSync(PrimaryObject po) throws Exception {
+		Object plmid = po.getValue(F_PLM_ID, true);
+		if (plmid == null) {
+			throw new Exception(po.getLabel() + "," + "无法获取Windchill对象");
+		}
+		Object syncDate = po.getValue(F_SYNC_DATE, true);
 		if (po instanceof Document) {
 			if (syncDate == null) {
-				throw new Exception("当前文档未在Windchill中同步");
+				throw new Exception(po.getLabel() + "," + "未在Windchill中同步，无法更新");
 			}
 		}
 	}
@@ -168,8 +171,11 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	@Override
-	public void doRemoveAfter(PrimaryObject po, boolean syncExcute)
-			throws Exception {
+	public void doRemoveBefore(PrimaryObject po) throws Exception {
+		checkBeforeSync(po);
+
+		po.setValue(F_SYNC_DATE, null);
+
 		checkService();
 		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
@@ -179,49 +185,61 @@ public class WindchillService implements IPDMServiceProvider {
 		}
 
 		if (job != null) {
-			run(job, syncExcute);
+			run(job, true);
 		}
 	}
 
 	@Override
-	public void doRemoveBefore(PrimaryObject po) throws Exception {
-		po.setValue(F_SYNC_DATE, null);
+	public void doMoveBefore(Document document) throws Exception {
+		checkBeforeSync(document);
+
+		Folder parent = document.getFolder();
+		checkParentFolder(parent);
+
+		document.setValue(F_SYNC_DATE, null);
 	}
 
 	@Override
-	public void doMoveBefore(PrimaryObject po) throws Exception {
-		po.setValue(F_SYNC_DATE, null);
-	}
-
-	@Override
-	public void doMoveAfter(PrimaryObject po, boolean syncExcute)
+	public void doMoveAfter(Document document, boolean syncExcute)
 			throws Exception {
-		checkService();
 		WindchillSyncJob job = null;
-		if (po instanceof Document) {
-			checkService();
-			job = new MoveDocument(windchill, po);
-		}
+		checkService();
+		job = new MoveDocument(windchill, document);
 		if (job != null) {
 			run(job, syncExcute);
 		}
 	}
 
 	@Override
-	public void doChangeRevisionBefore(PrimaryObject po) throws Exception {
-		checkSyncDate(po);
-		po.setValue(F_SYNC_DATE, null);
+	public void doChangeRevisionBefore(Document document) throws Exception {
+		checkBeforeSync(document);
+
+		document.setValue(F_SYNC_DATE, null);
 	}
 
 	@Override
-	public void doChangeRevisionAfter(PrimaryObject po, boolean syncExcute)
+	public void doChangeRevisionAfter(Document document, boolean syncExcute)
 			throws Exception {
-		checkService();
 		WindchillSyncJob job = null;
-		if (po instanceof Document) {
-			checkService();
-			job = new UpdateDocumentVersion(windchill, po);
+		checkService();
+		job = new UpdateDocumentVersion(windchill, document);
+		if (job != null) {
+			run(job, syncExcute);
 		}
+	}
+
+	@Override
+	public void doSetLifeCycleStatusBefore(Document document) throws Exception {
+		checkBeforeSync(document);
+		document.setValue(F_SYNC_DATE, null);
+	}
+
+	@Override
+	public void doSetLifeCycleStatusAfter(Document document, boolean syncExcute)
+			throws Exception {
+		WindchillSyncJob job = null;
+		checkService();
+		job = new SetLifeCycleStatus(windchill, document);
 		if (job != null) {
 			run(job, syncExcute);
 		}
