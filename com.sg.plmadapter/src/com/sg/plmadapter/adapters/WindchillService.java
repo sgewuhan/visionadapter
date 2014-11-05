@@ -79,7 +79,6 @@ public class WindchillService implements IPDMServiceProvider {
 
 	@Override
 	public void doInsertBefore(PrimaryObject po) throws Exception {
-
 		po.setValue(F_SYNC_DATE, null);
 		Object type = po.getValue(F_PLM_TYPE);
 		if (type == null) {
@@ -135,6 +134,7 @@ public class WindchillService implements IPDMServiceProvider {
 	@Override
 	public void doUpdateBefore(PrimaryObject po, String[] fields)
 			throws Exception {
+		po.reload(F_SYNC_DATE);
 		if(po instanceof Folder) {
 			po.setValue(F_SYNC_DATE, null);			
 		} else if(po instanceof Document) {
