@@ -12,7 +12,7 @@ public class SetLifeCycleStatus extends WindchillSyncJob {
 	@Override
 	protected void run(PMWebservice windchill, PrimaryObject po)
 			throws Exception {
-
+		windchill.changeLifecycleState(po.get_id().toString());
 	}
 
 }
