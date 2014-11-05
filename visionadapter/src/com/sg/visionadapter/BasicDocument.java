@@ -82,10 +82,11 @@ public abstract class BasicDocument extends VisionObject {
 		if (folderId == null) {
 			return null;
 		}
-		DBCollection folderColletion = ModelServiceFactory.service.getCollection("folder");
+		DBCollection folderColletion = ModelServiceFactory.service
+				.getCollection("folder");
 		folderColletion.setObjectClass(PMFolder.class);
-		PMFolder folder = (PMFolder) folderColletion.findOne(new BasicDBObject().append(_ID,
-				folderId));
+		PMFolder folder = (PMFolder) folderColletion
+				.findOne(new BasicDBObject().append(_ID, folderId));
 		folder.setCollection(folderColletion);
 		return folder;
 	}
@@ -131,6 +132,7 @@ public abstract class BasicDocument extends VisionObject {
 	 *            主要版本号
 	 */
 	public void setMajorVid(String majorVid) {
+		setValue(MAJOR_VID, majorVid);
 		put(MAJOR_VID, majorVid);
 	}
 
@@ -154,6 +156,7 @@ public abstract class BasicDocument extends VisionObject {
 	 *            次要版本号
 	 */
 	public void setSecondVid(int secondVid) {
+		setValue(SECOND_VID, new Integer(secondVid));
 		put(SECOND_VID, new Integer(secondVid));
 
 	}
@@ -269,7 +272,7 @@ public abstract class BasicDocument extends VisionObject {
 		result.add(STATUS);
 		return result;
 	}
-	
+
 	/**
 	 * 获得容器名称
 	 * 
@@ -278,7 +281,7 @@ public abstract class BasicDocument extends VisionObject {
 	public String getContainerName() {
 		return getFolder().getRoot().getContainerName();
 	}
-	
+
 	@Override
 	void setCollection(DBCollection collection) {
 		super.setCollection(collection);

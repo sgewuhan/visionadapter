@@ -175,7 +175,7 @@ public class WindchillService implements IPDMServiceProvider {
 		WindchillSyncJob job = null;
 		if (po instanceof Folder) {
 			checkService();
-			job = new RemoveFolder(windchill, po);
+				job = new RemoveFolder(windchill, po);				
 		} else if (po instanceof Document) {
 			checkService();
 			job = new RemoveDocument(windchill, po);
