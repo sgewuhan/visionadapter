@@ -22,7 +22,7 @@ public class WindchillService implements IPDMServiceProvider {
 
 	private static final String F_SYNC_DATE = "syncdate";
 
-	private static final String F_PLM_DATA = "plmdata";
+//	private static final String F_PLM_DATA = "plmdata";
 
 	private String url;
 
