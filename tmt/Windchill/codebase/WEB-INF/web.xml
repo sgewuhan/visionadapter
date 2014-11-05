@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0" metadata-complete="true">
+  <!-- Define the index.html as the default welcome file -->
+  <welcome-file-list>
+    <welcome-file>
+      index.html
+    </welcome-file>
+  </welcome-file-list>
+         
+  <!-- Core web app context parameters used by wt.servlet.ContextMonitor -->
+  <context-param>
+    <description>Server relative deployment path of web application</description>
+    <param-name>Web-App-Path</param-name>
+    <param-value>/Windchill</param-value>
+  </context-param>
+  <context-param>
+    <description>JMX MBean configuration file reference; web app searches for matching web app resource first, then tries as URL, file path, and finally as classloader reference</description>
+    <param-name>MBean-Config-File</param-name>
+    <param-value>WEB-INF/wtWebAppMBeans.xml</param-value>
+  </context-param>
+  <context-param>
+    <description>JMX MBean configuration file update check interval</description>
+    <param-name>MBean-Config-Check-Interval</param-name>
+    <param-value>180</param-value>
+  </context-param>
+  <context-param>
+    <description>Log4j configuration file reference; web app searches for matching web app resource first, then tries as URL, file path, and finally as classloader reference</description>
+    <param-name>log4j.configuration</param-name>
+    <param-value>WEB-INF/log4jWebApp.properties</param-value>
+  </context-param>
+  
+  <!-- Context parameters used by SessionMonitor (names must be of form wt.servlet.SessionMonitor.{writable JMX attribute name}) -->
+  <!-- Note: these settings will normally be overwritten by MBeanLoader injection after initial MBeanLoader save -->
+  <context-param>
+    <param-name>wt.servlet.SessionMonitor.MaxAverageActiveSessionsThreshold</param-name>
+    <param-value>200</param-value>
+  </context-param>
+  
+  <context-param>
+    <description>Location of Spring root web application context</description>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>config/mvc/applicationContext.xml</param-value>
+  </context-param>
+  
+  <context-param>
+    <description>Default Context class</description>
+    <param-name>contextClass</param-name>
+    <param-value>com.ptc.mvc.components.support.ComponentXmlWebApplicationContext</param-value>
+  </context-param>
+  
+  <context-param>
+    <description>Prefix of the REST end points</description>
+    <param-name>resteasy.servlet.mapping.prefix</param-name>
+    <param-value>/servlet/rest</param-value>
+  </context-param>
+  
+  <filter>
+    <description>Filter to monitor servlet requests as a whole; should always be first in filter list</description>
+    <filter-name>ServletRequestMonitor</filter-name>
+    <filter-class>wt.servlet.ServletRequestMonitorFilter</filter-class>
+    <!-- Initialization parameters for ServletRequestMonitor; must be writable JMX attributes of ServletRequestMonitorMBean -->
+    <!-- Note: these settings will normally be overwritten by MBeanLoader injection after initial MBeanLoader save -->
+    <init-param>
+      <param-name>MaxAverageActiveRequestsThreshold</param-name>
+      <param-value>45</param-value>
+    </init-param>
+    <init-param>
+      <param-name>RequestTimeWarnThreshold</param-name>
+      <param-value>8.0</param-value>
+    </init-param>
+  </filter>
+
+  <filter>
+    <description>Forbid access to selected resources</description>
+    <filter-name>ForbidResourceAccessFilter</filter-name>
+    <filter-class>wt.servlet.ForbidResourceAccessFilter</filter-class>
+  </filter>
+
+  <filter>
+    <description>Provides the ability to interrupt servlet requests either by parent request id or by request group name</description>
+    <filter-name>RequestInterrupter</filter-name>
+    <filter-class>wt.servlet.RequestInterrupter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Buffers the response to a temporary file prior to sending it to allow completion of response generation without client induced delays</description>
+    <filter-name>BufferToFileFilter</filter-name>
+    <filter-class>wt.servlet.BufferToFileFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Provides gzip compression of responses where applicable</description>
+    <filter-name>CompressionFilter</filter-name>
+    <filter-class>wt.servlet.CompressionFilter</filter-class>    
+  </filter>
+  
+  <filter>
+    <description>Filters out sensitive entries from properties responses</description>
+    <filter-name>PropertiesFilter</filter-name>
+    <filter-class>wt.servlet.PropertiesFilter</filter-class>
+    <init-param>
+      <param-name>propertiesToExclude</param-name>
+      <param-value>$(wt.properties.sensitiveProps)</param-value>
+    </init-param>
+  </filter>
+  
+  <filter>
+    <description>Filter allowing a trusted client to specify the remote user for the request</description>
+    <filter-name>TrustedAuthFilter</filter-name>
+    <filter-class>wt.httpgw.filter.TrustedAuthFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter to return Pack200 compressed (.jar.pack.gz) jars rather than original jars where possible; when Apache is used this is normally done there instead</description>
+    <filter-name>Pack200SupportFilter</filter-name>
+    <filter-class>wt.httpgw.filter.Pack200SupportFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter for decompressing incoming SimpleTaskDispatcher requests with a Content-Encoding of deflate or gzip</description>
+    <filter-name>SOAPDecompressionFilter</filter-name>
+    <filter-class>com.infoengine.util.DecompressionFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter for creating/destroying the WTContextBean as necessary</description>
+    <filter-name>WTContextBeanFilter</filter-name>
+    <filter-class>wt.httpgw.filter.WTContextBeanFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter for ensuring that InterSiteJmxProxy requests which use security sensitive JMX protocols are signed by the master site</description>
+    <filter-name>InterSiteJmxProxyFilter</filter-name>
+    <filter-class>wt.intersvrcom.InterSiteJmxProxyFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter for converting Netmarkets URL's with 7.0 or 8.0 JSP's names to URL's having 10.0 JSP's names.</description>
+    <filter-name>NetmarketsRedirectFilter</filter-name>
+    <filter-class>com.ptc.core.components.filter.NetmarketsRedirect</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter for converting TypeBasedIncludeServlet bookmarked InfoPage URL's to 10.0 InfoPage URL's.</description>
+    <filter-name>TypeBasedIncludeServletFilter</filter-name>
+    <filter-class>com.ptc.core.components.filter.TypeBasedIncludeServletFilter</filter-class>
+  </filter>
+  
+  <filter>
+    <description>Filter for converting Netmarkets URL's with 7.0 or 8.0 JSP's names to URL's having 10.0 JSP's names.</description>
+    <filter-name>TemplateProcessorRedirectFilter</filter-name>
+    <filter-class>com.ptc.core.components.filter.TemplateProcessorRedirect</filter-class>
+  </filter>
+  
+  <filter>
+    <description>WSDL Filter to return correct endpoint address</description>
+    <filter-name>WsdlServletFilter</filter-name>
+    <filter-class>com.ptc.jws.servlet.filter.WsdlServletFilter</filter-class>
+  </filter>
+  
+  <filter-mapping>
+    <filter-name>ServletRequestMonitor</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>ForbidResourceAccessFilter</filter-name>
+    <url-pattern>*.jspf</url-pattern>
+  </filter-mapping>
+
+  <filter-mapping>
+    <filter-name>RequestInterrupter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>BufferToFileFilter</filter-name>
+    <url-pattern>/servlet/XML4Cognos/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>CompressionFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>PropertiesFilter</filter-name>
+    <url-pattern>/wt.properties</url-pattern>
+    <dispatcher>REQUEST</dispatcher>
+    <dispatcher>FORWARD</dispatcher>
+    <dispatcher>INCLUDE</dispatcher>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>TrustedAuthFilter</filter-name>
+    <url-pattern>/servlet/XML4Cognos/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>TrustedAuthFilter</filter-name>
+    <url-pattern>/trustedAuth/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>Pack200SupportFilter</filter-name>
+    <url-pattern>*.jar</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>SOAPDecompressionFilter</filter-name>
+    <url-pattern>/servlet/SimpleTaskDispatcher/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>SOAPDecompressionFilter</filter-name>
+    <url-pattern>/protocolAuth/servlet/SimpleTaskDispatcher/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>SOAPDecompressionFilter</filter-name>
+    <url-pattern>/trustedAuth/servlet/SimpleTaskDispatcher/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>WTContextBeanFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>WTContextBeanFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+    <dispatcher>ERROR</dispatcher>
+  </filter-mapping>
+  
+ <!-- <filter-mapping>
+    <filter-name>WTContextBeanFilter</filter-name>
+    <url-pattern>/login/*</url-pattern>
+    <dispatcher>FORWARD</dispatcher>
+  </filter-mapping> --> 
+  
+  <filter-mapping>
+    <filter-name>InterSiteJmxProxyFilter</filter-name>
+    <url-pattern>/servlet/InterSiteJmxProxy/*</url-pattern>
+  </filter-mapping>
+  
+ <filter-mapping>
+    <filter-name>NetmarketsRedirectFilter</filter-name>
+    <url-pattern>/netmarkets/jsp/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>TypeBasedIncludeServletFilter</filter-name>
+    <url-pattern>/servlet/TypeBasedIncludeServlet/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>TemplateProcessorRedirectFilter</filter-name>
+    <url-pattern>/servlet/WindchillAuthGW/wt.enterprise.URLProcessor/URLTemplateAction/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>WsdlServletFilter</filter-name>
+    <url-pattern>/servlet/*</url-pattern>
+  </filter-mapping>
+  
+  <filter-mapping>
+    <filter-name>WsdlServletFilter</filter-name>
+    <url-pattern>/protocolAuth/servlet/*</url-pattern>
+  </filter-mapping>
+  
+  <listener>
+    <description>Provides top-level monitoring of entire web app context; should always be first in listener list</description>
+    <listener-class>wt.servlet.ContextMonitor</listener-class>
+  </listener>
+  
+  <listener>
+    <description>Monitors servlet session lifecycle activity</description>
+    <listener-class>wt.servlet.SessionMonitor</listener-class>
+  </listener>
+
+  <listener>
+    <description>Adds a nonce to the session to protect against CSRF attacks.</description>
+    <listener-class>com.ptc.core.appsec.CSRFSessionListener</listener-class>
+  </listener>
+  
+  <listener>
+    <description>Loads the Spring root web application context</description>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  
+  <listener>
+    <description>clean up upload*.tmp files</description>
+    <listener-class>com.ptc.netmarkets.util.misc.TempFileCleaner</listener-class>
+  </listener>
+  
+  <listener>
+    <description>Ensures timely destruction of SessionContexts tied to servlet sessions</description>
+    <listener-class>wt.session.SessionContextDestroyer</listener-class>
+  </listener>
+  
+  <listener>
+    <description>Web Services Listener</description>
+    <listener-class>com.sun.xml.ws.transport.http.servlet.WSServletContextListener</listener-class>
+  </listener>
+  
+  <servlet>
+    <description>Standard Info*Engine servlet for issuing requests to invoke standalone tasks on the configured task processor</description>
+    <servlet-name>IE</servlet-name>
+    <servlet-class>com.infoengine.IeServlet</servlet-class>
+    <init-param>
+      <param-name>config.properties</param-name>
+      <param-value>d:/ptc/Windchill_10.2/Windchill/codebase/WEB-INF/ie.properties</param-value>
+    </init-param>
+    <init-param>
+      <param-name>config.myName</param-name>
+      <param-value>com.plm.crh-tmt.servlet</param-value>
+    </init-param>
+    <init-param>
+      <param-name>config.namingServiceName</param-name>
+      <param-value>com.plm.crh-tmt.namingService</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <description>Info*Engine servlet for processing SOAP requests; typically for use in a standalone Info*Engine environment</description>
+    <servlet-name>RPC</servlet-name>
+    <servlet-class>com.infoengine.soap.SoapRPCRouter</servlet-class>
+    <init-param>
+      <param-name>config.properties</param-name>
+      <param-value>d:/ptc/Windchill_10.2/Windchill/codebase/WEB-INF/ie.properties</param-value>
+    </init-param>
+    <init-param>
+      <param-name>config.myName</param-name>
+      <param-value>com.plm.crh-tmt.rpc</param-value>
+    </init-param>
+    <init-param>
+      <param-name>config.namingServiceName</param-name>
+      <param-value>com.plm.crh-tmt.namingService</param-value>
+    </init-param>
+  </servlet>
+
+  <servlet>
+    <description>[Non-transparent] HTTP(S) proxy for JMX JSR 160 remoting communication</description>
+    <servlet-name>JmxProxyServlet</servlet-name>
+    <servlet-class>com.ptc.jmx.proxy.JmxProxyServlet</servlet-class>
+    <!-- Disallow special PTC connection protocols that do not provide their own authentication/security as we are not specifying any here either -->
+    <init-param>
+      <param-name>disallowJmxServiceUrl.1</param-name>
+      <param-value>service:jmx:ptcinprocess:.*</param-value>
+    </init-param>
+    <init-param>
+      <param-name>disallowJmxServiceUrl.2</param-name>
+      <param-value>service:jmx:ptcdsm:.*</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <description>RMI over HTTP(S) tunneling proxy</description>
+    <servlet-name>JavaRMIServlet</servlet-name>
+    <servlet-class>wt.tools.javarmi.JavaRMIServlet</servlet-class>
+    <init-param>
+      <param-name>maxPort</param-name>
+      <param-value>5011</param-value>
+    </init-param>
+    <init-param>
+      <param-name>minPort</param-name>
+      <param-value>5002</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Anonymous Gateway Servlet</description>
+    <servlet-name>WindchillGW</servlet-name>
+    <servlet-class>wt.httpgw.HTTPGatewayServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Authenticated Gateway Servlet</description>
+    <servlet-name>WindchillAuthGW</servlet-name>
+    <servlet-class>wt.httpgw.HTTPAuthGatewayServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>JMX proxy servlet for internal communication from master to remote vault sites</description>
+    <servlet-name>InterSiteJmxProxy</servlet-name>
+    <servlet-class>com.ptc.jmx.proxy.JmxProxyServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>General static file servlet</description>
+    <servlet-name>FileServlet</servlet-name>
+    <servlet-class>wt.httpgw.FileServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Attachments Edit Wizard Servlet</description>
+    <servlet-name>AttachmentsEditServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.AttachmentsEditServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>DTI Helper Servlet</description>
+    <servlet-name>DTIActionServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.nativeapp.msoi.server.DTIActionServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Remember checked out primary attachment download path servlet</description>
+    <servlet-name>RememberDownloadPathServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.RememberDownloadPathServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Attachment Download Direction Servlet</description>
+    <servlet-name>AttachmentsDownloadDirectionServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.AttachmentsDownloadDirectionServlet</servlet-class>
+    <init-param>
+      <param-name>forward-error</param-name>
+      <param-value>/netmarkets/jsp/attachments/download/error.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-confirm-jre</param-name>
+      <param-value>/netmarkets/jsp/attachments/download/confirm_jre.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-direct-download</param-name>
+      <param-value>/netmarkets/jsp/attachments/download/browser.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-applet-download</param-name>
+      <param-value>/servlet/AttachmentsDownloadAppletServlet</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-confirm-dti</param-name>
+      <param-value>/netmarkets/jsp/attachments/download/confirm_dti.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-detect-dti</param-name>
+      <param-value>/netmarkets/jsp/attachments/download/detect_dti.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-detect-jre</param-name>
+      <param-value>/netmarkets/jsp/attachments/download/detect_jre.jsp</param-value>
+    </init-param>
+    <init-param>
+      <param-name>forward-dti-download</param-name>
+      <param-value>/servlet/DTIActionServlet</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Attachment Applet Download Servlet</description>
+    <servlet-name>AttachmentsDownloadAppletServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.AttachmentsDownloadAppletServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Attachment URL Redirect Servlet</description>
+    <servlet-name>AttachmentsURLRedirectServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.AttachmentsURLRedirectServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Navigation List Servlet</description>
+    <servlet-name>navigation_list</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.navigation.NavigationListServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Servlet for building a Cache Descriptor for File Content that will be uploaded to the Content Cache Server</description>
+    <servlet-name>GetCacheDescriptorServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.GetCacheDescriptorServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Servlet for displaying a report of the preferences loaded in the system.</description>
+    <servlet-name>PreferenceReportServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlets.PreferenceReportServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet for preparing history data and sending it to timeline ajaxy component</description>
+    <servlet-name>TimelineHistoryController</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.history.timeline.TimelineHistoryController</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill servlet for passing SOAP requests directly to a configured embedded SimpleTaskDispatcher;behaves same manner as the RPC servlet but should be used instead in Windchill environments for improved performance</description>
+    <servlet-name>SimpleTaskDispatcher</servlet-name>
+    <servlet-class>com.ptc.core.adapter.server.impl.SimpleTaskDispatcherTunnel</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet for handling Cognos reporting integration</description>
+    <servlet-name>XML4Cognos</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.report.CognosXMLServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet for browsing the windchill codebase directory</description>
+    <servlet-name>FileDirectory</servlet-name>
+    <servlet-class>com.ptc.windchill.explorer.servlet.FileDirectoryServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet for enabling the use of JWS to run applet/application</description>
+    <servlet-name>JNLPGeneratorServlet</servlet-name>
+    <servlet-class>com.ptc.jws.JNLPGeneratorServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Simple servlet for rendering JFreeChart objects as images</description>
+    <servlet-name>JFreeChartServlet</servlet-name>
+    <servlet-class>wt.jfreechart.JFreeChartServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet for rendering tasks in the pdf format</description>
+    <servlet-name>ViewPDFServlet</servlet-name>
+    <servlet-class>com.ptc.netmarkets.work.servlet.ViewPDFServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet for passing timeline actions and context object to Feed class</description>
+    <servlet-name>PlanTimelineFeed</servlet-name>
+    <servlet-class>com.ptc.projectmanagement.server.servlet.PlanTimelineFeed</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>MVC Dispatcher Servlet</description>
+    <servlet-name>MVCDispatcher</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextClass</param-name>
+      <param-value>com.ptc.mvc.components.support.ComponentXmlWebApplicationContext</param-value>
+    </init-param>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet>
+    <description>Servlet to trigger file download for ProjectLink objects</description>
+    <servlet-name>PJLDownloadHelperServlet</servlet-name>
+    <servlet-class>com.ptc.projectmanagement.server.servlet.PJLDownloadHelperServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Bridge Servlet for Trusted Authentication Access</description>
+    <servlet-name>TrustedAuthBridgeServlet</servlet-name>
+    <servlet-class>wt.servlet.AuthBridgeServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Bridge Servlet for Protocol-based Authentication</description>
+    <servlet-name>ProtocolAuthBridgeServlet</servlet-name>
+    <servlet-class>wt.servlet.AuthBridgeServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Windchill Process Overview Download Servlet</description>
+    <servlet-name>ProcessOverviewDownloadServlet</servlet-name>
+    <servlet-class>com.ptc.netmarkets.work.servlet.ProcessOverviewDownloadServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>Content Replication Export Rule Servlet</description>
+    <servlet-name>ExportRuleServlet</servlet-name>
+    <servlet-class>com.ptc.windchill.enterprise.servlet.ExportRuleServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>WildFire Properties Servlet</description>
+    <servlet-name>ProwtGW</servlet-name>
+    <servlet-class>wt.httpgw.HTTPGatewayServlet</servlet-class>
+    <init-param>
+      <param-name>pathInfo</param-name>
+      <param-value>com.ptc.windchill.uwgm.proesrv.registry.Registrator/getServerInfo</param-value>
+    </init-param>
+  </servlet>
+  
+  <servlet>
+    <description>RMWebServices Servlet</description>
+    <servlet-name>RMWebServices</servlet-name>
+    <servlet-class>com.sun.xml.ws.transport.http.servlet.WSServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  <servlet>
+    <description>SpecEditorServlet</description>
+    <servlet-name>com.ptc.ddl.servlet.speced.SpecEditorServlet</servlet-name>
+    <servlet-class>com.ptc.ddl.servlet.speced.SpecEditorServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>XMLEngineServlet</description>
+    <servlet-name>com.ptc.ddl.servlet.speced.XMLEngineServlet</servlet-name>
+    <servlet-class>com.ptc.ddl.servlet.speced.XMLEngineServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>PTCXSLServlet</description>
+    <servlet-name>com.ptc.ddl.servlet.ptcxslservlet.PTCXSLServlet</servlet-name>
+    <servlet-class>com.ptc.ddl.servlet.ptcxslservlet.PTCXSLServlet</servlet-class>
+  </servlet>
+  
+  <servlet>
+    <description>RESTEasy Servlet</description>
+    <servlet-name>resteasy-servlet</servlet-name>
+    <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+    <init-param>
+      <param-name>javax.ws.rs.Application</param-name>
+      <param-value>com.ptc.windchill.rest.ApplicationConfig</param-value>
+    </init-param>
+  </servlet>
+<!--add by wxm 20140714   -->
+   <servlet>
+    <description>My Auth Login</description>
+    <servlet-name>MyAuthHttpServlet</servlet-name>
+    <servlet-class>ext.tmt.login.MyAuthHttpServlet</servlet-class>
+  </servlet>
+  
+   <servlet-mapping>
+    <servlet-name>MyAuthHttpServlet</servlet-name>
+    <url-pattern>/servlet/Login/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>IE</servlet-name>
+    <url-pattern>/servlet/IE/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>RPC</servlet-name>
+    <url-pattern>/servlet/RPC/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>JmxProxyServlet</servlet-name>
+    <url-pattern>/servlet/JmxProxyServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>JavaRMIServlet</servlet-name>
+    <url-pattern>/servlet/JavaRMIServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>WindchillGW</servlet-name>
+    <url-pattern>/servlet/WindchillGW/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>WindchillAuthGW</servlet-name>
+    <url-pattern>/servlet/WindchillAuthGW/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>InterSiteJmxProxy</servlet-name>
+    <url-pattern>/servlet/InterSiteJmxProxy/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>FileServlet</servlet-name>
+    <url-pattern>/servlet/FileServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>AttachmentsEditServlet</servlet-name>
+    <url-pattern>/servlet/AttachmentsEditServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>DTIActionServlet</servlet-name>
+    <url-pattern>/servlet/DTIActionServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>RememberDownloadPathServlet</servlet-name>
+    <url-pattern>/servlet/RememberDownloadPathServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>AttachmentsDownloadDirectionServlet</servlet-name>
+    <url-pattern>/servlet/AttachmentsDownloadDirectionServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>AttachmentsDownloadAppletServlet</servlet-name>
+    <url-pattern>/servlet/AttachmentsDownloadAppletServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>AttachmentsURLRedirectServlet</servlet-name>
+    <url-pattern>/servlet/AttachmentsURLRedirectServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>navigation_list</servlet-name>
+    <url-pattern>/servlet/navigation_list/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>GetCacheDescriptorServlet</servlet-name>
+    <url-pattern>/servlet/GetCacheDescriptorServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>PreferenceReportServlet</servlet-name>
+    <url-pattern>/servlet/PreferenceReportServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>TimelineHistoryController</servlet-name>
+    <url-pattern>/servlet/TimelineHistoryController/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>SimpleTaskDispatcher</servlet-name>
+    <url-pattern>/servlet/SimpleTaskDispatcher/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>XML4Cognos</servlet-name>
+    <url-pattern>/servlet/XML4Cognos/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>FileDirectory</servlet-name>
+    <url-pattern>/servlet/FileDirectory/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>JNLPGeneratorServlet</servlet-name>
+    <url-pattern>/servlet/JNLPGeneratorServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>JFreeChartServlet</servlet-name>
+    <url-pattern>/servlet/JFreeChartServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ViewPDFServlet</servlet-name>
+    <url-pattern>/servlet/ViewPDFServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>PlanTimelineFeed</servlet-name>
+    <url-pattern>/servlet/PlanTimelineFeed/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>MVCDispatcher</servlet-name>
+    <url-pattern>/servlet/WizardServlet/*</url-pattern>
+    <url-pattern>/servlet/ActionsMenu/*</url-pattern>
+    <url-pattern>/servlet/RecentList/*</url-pattern>
+  <!--    <url-pattern>/servlet/Navigation/*</url-pattern>-->
+    <url-pattern>/servlet/SuggestServlet/*</url-pattern>
+    <url-pattern>/servlet/TypeBasedIncludeServlet/*</url-pattern>
+    <url-pattern>/servlet/UIValidationAJAXServlet/*</url-pattern>
+    <url-pattern>/ptc1/*</url-pattern>
+    <url-pattern>/app/*</url-pattern>
+    <url-pattern>/gwt/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>PJLDownloadHelperServlet</servlet-name>
+    <url-pattern>/servlet/pjldownloadhelper</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>TrustedAuthBridgeServlet</servlet-name>
+    <url-pattern>/trustedAuth/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ProtocolAuthBridgeServlet</servlet-name>
+    <url-pattern>/protocolAuth/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ProcessOverviewDownloadServlet</servlet-name>
+    <url-pattern>/servlet/ProcessOverviewDownloadServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ExportRuleServlet</servlet-name>
+    <url-pattern>/servlet/ExportRuleServlet</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>ProwtGW</servlet-name>
+    <url-pattern>/servlet/ProwtGW/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>RMWebServices</servlet-name>
+    <url-pattern>/servlet/RMWebServices/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>com.ptc.ddl.servlet.speced.SpecEditorServlet</servlet-name>
+    <url-pattern>/servlet/com.ptc.ddl.servlet.speced.SpecEditorServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>com.ptc.ddl.servlet.speced.XMLEngineServlet</servlet-name>
+    <url-pattern>/servlet/com.ptc.ddl.servlet.speced.XMLEngineServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>com.ptc.ddl.servlet.ptcxslservlet.PTCXSLServlet</servlet-name>
+    <url-pattern>/servlet/com.ptc.ddl.servlet.ptcxslservlet.PTCXSLServlet/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>resteasy-servlet</servlet-name>
+    <url-pattern>/servlet/rest/*</url-pattern>
+  </servlet-mapping>
+  
+
+  <!-- Standard means of setting servlet session inactivity timeout.  Values
+       are in whole numbers of minutes.
+       
+       Without this element, the web application would obtain a default value
+       from the servlet engine, which is a quite reasonable 30 minutes in most
+       cases.  Thus, this element is included here mainly to make it quite
+       obvious where and how to change this value if necessary.
+   -->
+  <session-config>
+    <session-timeout>30</session-timeout>
+  </session-config>
+  
+  <error-page>
+    <exception-type>java.lang.Throwable</exception-type>
+    <location>/wtcore/error.jsp</location>
+  </error-page>
+  
+  <error-page>
+    <error-code>501</error-code>
+    <location>/wtcore/error.jsp</location>
+  </error-page>
+  
+  <jsp-config>
+    <taglib>
+      <taglib-uri>http://www.ptc.com/infoengine/taglib/core</taglib-uri>
+      <taglib-location>/WEB-INF/infoengine-core.tld</taglib-location>
+    </taglib>
+    <taglib>
+      <taglib-uri>http://www.ptc.com/infoengine/taglib/directory</taglib-uri>
+      <taglib-location>/WEB-INF/infoengine-directory.tld</taglib-location>
+    </taglib>
+    <taglib>
+      <taglib-uri>http://www.ptc.com/windchill/taglib/util</taglib-uri>
+      <taglib-location>/WEB-INF/util.tld</taglib-location>
+    </taglib>
+  </jsp-config>
+  
+  <env-entry>
+    <description>Name of context for log4j logging context; allows better web app separation of log4j logging</description>
+    <env-entry-name>logging-context</env-entry-name>
+    <env-entry-type>java.lang.String</env-entry-type>
+    <env-entry-value>webapp:/Windchill</env-entry-value>
+  </env-entry>
+  
+</web-app>
