@@ -4,8 +4,12 @@ package ext.tmt.integration.webservice.pm;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
@@ -13,9 +17,11 @@ import org.bson.types.ObjectId;
 import com.mongodb.WriteResult;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
+import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
+import com.sg.visionadapter.URLFileProvider;
 
 import ext.tmt.folder.api.FolderService;
 import ext.tmt.folder.impl.FolderServiceImpl;
@@ -437,8 +443,17 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //    	}
     	  return count;
     }
+
+
     
-    
+	
+	
+    /**
+     * 删除文档对象
+     * @param pm_docId
+     * @return
+     * @throws Exception
+     */
     public static int deleteWTDocumentEntry(String pm_docId)throws Exception{
     	
        Debug.P("------>>>Delete PM_DocumentID："+pm_docId);
@@ -674,9 +689,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 							WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion(doc);
 							LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
 							FolderHelper.assignLocation(newdoc,folder);
-							GenericUtil.changeState(newdoc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
 							PersistenceHelper.manager.save(newdoc);
-						    Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
+							GenericUtil.changeState(newdoc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
+							 PersistenceHelper.manager.refresh(newdoc);
+							Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
 							pm_document.setMajorVid(newdoc.getVersionIdentifier().getValue());
 							pm_document.setSecondVid(Integer.valueOf(newdoc.getIterationIdentifier().getValue()));
 							pm_document.doUpdate();

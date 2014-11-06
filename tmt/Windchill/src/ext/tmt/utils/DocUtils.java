@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;  
 import java.util.Map;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -91,6 +93,7 @@ import com.ptc.netmarkets.util.beans.NmCommandBean;
 import com.ptc.windchill.enterprise.copy.server.CoreMetaUtility;
 import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.PMDocument;
+import com.sg.visionadapter.URLFileProvider;
 
 import ext.tmt.integration.webservice.pm.ConstanUtil;
 
@@ -161,8 +164,8 @@ public class DocUtils implements RemoteAccess{
 		document.setNumber(doc_Number);
 		//容器对象
 	    String containerName=pmdoc.getContainerName();
+	    Debug.P("------>>>PM  ContainerName:"+containerName);
 		WTContainer container=GenericUtil.getWTContainerByName(containerName);
-		Debug.P("---New DOC Container Name-->WTContainerName:"+container.getContainerName());
 		
 //		EnumeratedType type[] = DocumentType.getDocumentTypeDefault().getSelectableValueSet();
 //		document.setDocType((DocumentType) type[1]);
@@ -199,31 +202,37 @@ public class DocUtils implements RemoteAccess{
 		 Debug.P("---New--->>WTDoc:"+document.getFolderPath() +"(LifecycleState:"+document.getLifeCycleName()+")   Success!!!");
 	
 		PersistenceHelper.manager.refresh(document);
+		
 		//文档
 		ByteArrayInputStream pins=null;
 		ByteArrayInputStream sins=null;
 		String contentUrl=pmdoc.getUrl();//PM主内容路径
-		IFileProvider content = pmdoc.getContent();//PM主文档流
-		if(content!=null){
-			   String pname=content.getFileName();//PM主文件名称
-		    	//上传主文档信息
-				ByteArrayOutputStream bout=new ByteArrayOutputStream();
-    			content.write(bout);
-    			pins=new ByteArrayInputStream(bout.toByteArray());
-    			linkDocument(document, pname, pins, "1", contentUrl);
-		}
+		try {
+			IFileProvider content = pmdoc.getContent();//PM主文档流
+			if(content!=null){
+				   String pname=content.getFileName();//PM主文件名称
+			    	//上传主文档信息
+					ByteArrayOutputStream bout=new ByteArrayOutputStream();
+	    			content.write(bout);
+	    			pins=new ByteArrayInputStream(bout.toByteArray());
+	    			linkDocument(document, pname, pins, "1", contentUrl);
+			}
 
-		
-//		//上传附件信息
-//		List<IFileProvider> attachments = pmdoc.getAttachments();
-//		if(attachments!=null&&attachments.size()>0){
-//			for (IFileProvider provider : attachments) {
-//				ByteArrayOutputStream bsout=new ByteArrayOutputStream();
-//				provider.write(bsout);
-//				sins=new ByteArrayInputStream(bsout.toByteArray());
-//				linkDocument(document, provider.getFileName(), sins, "0", null);
+			
+//			//上传附件信息
+//			List<IFileProvider> attachments = pmdoc.getAttachments();
+//			if(attachments!=null&&attachments.size()>0){
+//				for (IFileProvider provider : attachments) {
+//					ByteArrayOutputStream bsout=new ByteArrayOutputStream();
+//					provider.write(bsout);
+//					sins=new ByteArrayInputStream(bsout.toByteArray());
+//					linkDocument(document, provider.getFileName(), sins, "0", null);
+//				}
 //			}
-//		}
+		      } catch (IOException e) {
+			      e.printStackTrace();
+			      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
+		    }
 		
 		if (document != null) {
 		if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal()))
@@ -920,6 +929,30 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	
+	/**
+	 * 获得所有的附件的下载链接
+	 * @param holder
+	 * @return Map (key:附件的名称 ; value:附件的链接)
+	 * @throws Exception
+	 */
+	public static Map<String,String> getAllAttachementsDownloadURL(ContentHolder holder)throws Exception{
+		Map<String,String> map=new HashMap<String,String>();
+		if(holder!=null){
+			FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service.getContents(holder);
+			List<ApplicationData> attachements=getAttachmentAppicationData(holder);//获取文档对象的附件信息
+            for (ApplicationData app : attachements) {
+            	  String  fileName=app.getFileName();
+				 String app_url=ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
+			      if(!StringUtils.isEmpty(app_url)){
+			    	  app_url=UrlEncoder.encode(app_url);
+			    	  map.put(fileName, app_url);
+			      }
+            }
+		}
+     		  return map;
+	}
+	
+	
 
 	/**
 	 * 下载dbf文档到指定路径,并返回文件名
@@ -1319,29 +1352,24 @@ public class DocUtils implements RemoteAccess{
 	 * @return WTDocumnet
 	 * @throws WTException
 	 */
-	public static WTDocument updateWTDocument(WTDocument doc,PMDocument pm_document,HashMap ibas) throws WTException{
+	public static WTDocument updateWTDocument(WTDocument doc,PMDocument pm_document,HashMap ibas) throws Exception{
 		
 		Transaction trans = null;
+		String docName=pm_document.getCommonName();
 		try {
 			
 			trans = new Transaction();
 			trans.start();
 			
 			clearAllContent(doc);//清除历史文档信息
-           String docName=pm_document.getCommonName();
 			if (!doc.getName().equals(docName)) {//如果名称不一致则改名称
 				rename(doc, docName);
 			}
+			
 			if (ibas != null && !ibas.isEmpty()) {
 				LWCUtil.setValue( doc,ibas);
 			}
-             
-			//修改生命周期状态
-			String state=pm_document.getStatus();
-		     if(!StringUtils.isEmpty(state)){
-		    	 GenericUtil.changeState(doc, state);
-		     }
-			
+
 			//修改对象修改人字段
           //GenericUtil.changeWTPrincipalField(modifyUser, doc, SET_MODIFIER);
 		    PersistenceHelper.manager.refresh(doc);
@@ -1370,11 +1398,16 @@ public class DocUtils implements RemoteAccess{
 				}
 			}
 			
+			
 			   
-
+           //添加下载链接
+			addDownloadURL2PM(pm_document,doc);
 			trans.commit();
 			trans=null;
 			return doc;
+		}catch(IOException e){
+			e.printStackTrace();
+			throw new Exception("Windchill读取PM系统文档("+docName+")文件流异常!");
 		} catch (Exception e) {
 			e.printStackTrace();
 			if (trans != null){
@@ -1384,6 +1417,40 @@ public class DocUtils implements RemoteAccess{
 		     return doc;
 	}
 	   
+	
+	/**
+	 * 添加主内容和附件的下载链接地址
+	 * @param pm_document PM文档对象
+	 * @param doc Windchill文档对象
+	 * @throws Exception
+	 */
+	  private static void addDownloadURL2PM(PMDocument pm_document, WTDocument doc)
+				throws Exception {
+			//写内容文件链接
+			URLFileProvider fp = new URLFileProvider();
+			String fileName  =pm_document.getContent().getFileName();
+			String url = GenericUtil.getPrimaryContentUrl(doc);
+			fp.setFileName(fileName);
+			fp.setUrl(url);
+			pm_document.setPLMContent(fp);
+			//写附件
+			List<IFileProvider> attachement = new ArrayList<IFileProvider>();
+			Map<String, String> map = DocUtils.getAllAttachementsDownloadURL(doc);
+			Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
+			while(iterator.hasNext()){
+				Entry<String, String> entry = iterator.next();
+				fileName = entry.getKey();
+				url = entry.getValue();
+				fp = new URLFileProvider();
+				fp.setFileName(fileName);
+				fp.setUrl(url);
+				attachement.add(fp);
+			}
+			pm_document.setPLMAttachments(attachement);
+		}
+	
+	
+	
 	/**
 	 * 如果存在主文档内容则清除主文档内容
 	 * @param doc
