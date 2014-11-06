@@ -244,4 +244,10 @@ public class WindchillService implements IPDMServiceProvider {
 			run(job, syncExcute);
 		}
 	}
+
+	@Override
+	public void forceSync(PrimaryObject po) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 }
