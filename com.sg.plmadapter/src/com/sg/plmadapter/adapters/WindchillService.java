@@ -82,7 +82,7 @@ public class WindchillService implements IPDMServiceProvider {
 	public void doInsertBefore(PrimaryObject po) throws Exception {
 		po.setValue(F_SYNC_DATE, null);
 		setRequest(po, IPLM_Object.REQUEST_INSERT);
-		
+
 		Object type = po.getValue(F_PLM_TYPE);
 		if (type == null) {
 			if (po instanceof Folder) {
@@ -147,12 +147,12 @@ public class WindchillService implements IPDMServiceProvider {
 	}
 
 	private void setRequest(PrimaryObject po, String requestCode) {
-//		BasicBSONList request = (BasicBSONList) po
-//				.getValue(IPLM_Object.F_SYNC_REQUEST);
-//		if (request == null) {
-//			request = new BasicDBList();
-//		}
-//		request.add(0, requestCode);
+		// BasicBSONList request = (BasicBSONList) po
+		// .getValue(IPLM_Object.F_SYNC_REQUEST);
+		// if (request == null) {
+		// request = new BasicDBList();
+		// }
+		// request.add(0, requestCode);
 		po.setValue(IPLM_Object.F_SYNC_REQUEST, requestCode);
 	}
 
@@ -277,4 +277,24 @@ public class WindchillService implements IPDMServiceProvider {
 			run(job, true);
 		}
 	}
+
+	/*private void doSetRequest(PrimaryObject po, String requestCode) {
+		DBCollection col = getDocOrFolderCollection(po);
+		if(col != null) {	
+		col.update(po.queryThis(), new BasicDBObject().append("$set",
+				new BasicDBObject().append(IPLM_Object.F_SYNC_REQUEST,
+						requestCode)));
+		}
+	}
+
+	private DBCollection getDocOrFolderCollection(PrimaryObject po) {
+		if (po instanceof Document) {
+			return DBActivator.getCollection(IModelConstants.DB,
+					IModelConstants.C_DOCUMENT);
+		} else if (po instanceof Folder) {
+			return DBActivator.getCollection(IModelConstants.DB,
+					IModelConstants.C_FOLDER);
+		}
+		return null;
+	}*/
 }
