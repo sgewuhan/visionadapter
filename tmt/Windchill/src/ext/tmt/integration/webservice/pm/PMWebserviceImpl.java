@@ -674,7 +674,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 							WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion(doc);
 							LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
 							FolderHelper.assignLocation(newdoc,folder);
-							GenericUtil.changeState(doc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
+							GenericUtil.changeState(newdoc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
 							PersistenceHelper.manager.save(newdoc);
 						    Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
 							pm_document.setMajorVid(newdoc.getVersionIdentifier().getValue());
