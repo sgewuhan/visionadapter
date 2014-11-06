@@ -82,7 +82,7 @@ public class PMFolder extends VisionObject {
 
 	/**
 	 * 
-	 * @return 根文件夹id, （即文件柜/容器id）
+	 * @return 根文件夹id, （即资料库/容器id）
 	 */
 	public ObjectId getRootId() {
 		return (ObjectId) get(ROOT_ID);
@@ -90,7 +90,7 @@ public class PMFolder extends VisionObject {
 
 	/**
 	 * @param rootId
-	 *            根文件夹id, (即文件柜/容器id)
+	 *            根文件夹id, (即资料库/容器id)
 	 */
 	public void setRootId(ObjectId rootId) {
 		setValue(ROOT_ID, rootId);
