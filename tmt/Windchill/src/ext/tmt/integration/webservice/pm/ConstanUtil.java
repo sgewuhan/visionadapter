@@ -35,7 +35,7 @@ public class ConstanUtil {
 	public static String INWORK="working";//正在工作
 	public static String APPROVE="approving";//审核中
 	public static String RELEASED="released";//已发布
-	public static String  DESPOSED="desposed";//已废弃
+	public static String  DESPOSED="deposed";//已废弃
 	
 	//Windchill状态值
 	public static String WC_INWORK="WORKING";//

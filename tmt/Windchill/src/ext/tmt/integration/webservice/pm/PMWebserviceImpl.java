@@ -26,13 +26,17 @@ import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.LWCUtil;
+import ext.tmt.utils.VersionControlUtil;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
+import wt.fc.PersistenceServerHelper;
 import wt.folder.Folder;
+import wt.folder.FolderHelper;
 import wt.inf.container.WTContainer;
+import wt.lifecycle.LifeCycleHelper;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.part.WTPart;
@@ -327,12 +331,22 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
 	        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
 	        	PMFolder pmfolder=pm_document.getFolder();//获得文档所在的PM文件夹
-	        	String wc_foid=pmfolder.getPLMId();//Windchill 文件夹Oid 
-	        	if(StringUtils.isEmpty(wc_foid)) {throw new IllegalArgumentException("("+pm_document.getCommonName()+")的Folder未同步到Windchill,plmid为空 !");}
+	        	String wc_foid=pmfolder.getPLMId();//Windchill 文件夹 Oid 
+	        	boolean isContainer=pmfolder.isContainer();
+	        	String containerName=pmfolder.getContainerName();
+	        	Debug.P("----->>>>WC   Folder ID:"+wc_foid+"  是否为PM的容器文件夹:"+isContainer +"  ;ContaienrName:"+containerName);
 	        	try{
 	        		SessionHelper.manager.setAdministrator();
-	        		Persistable persistable=GenericUtil.getPersistableByOid(wc_foid);
-	        		if(persistable instanceof Folder){
+	        		  Persistable persistable=null;
+	        		  WTContainer container=null;
+	        		  if(!StringUtils.isEmpty(wc_foid)){
+	        				persistable=GenericUtil.getPersistableByOid(wc_foid);
+	        		  }else{//创建到容器下
+	        			   container=GenericUtil.getWTContainerByName(containerName);
+	        			   persistable=GenericUtil.createNewPath(container);
+	        		  }
+	        	
+	        		if(persistable instanceof Folder){//文件夹
 	        			Folder folder=(Folder)persistable;
 	                   //判断文档是否已创建
 	       			   boolean isEmpty=StringUtils.isEmpty(pm_document.getPLMId());
@@ -340,9 +354,11 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            			Map ibas=new HashMap();//软属性集合
 	            			setDocIBAValuesMap(ibas, pm_document);
 	        				document= DocUtils.createDocument(pm_document, null,VMUSER,ibas,folder);
-	        				//将文档添加到文件夹
-	        				FolderUtil.changeFolder(document,folder);
-	       
+	        				if(isContainer){//容器
+	        					GenericUtil.moveObject2Container(document, container,folder);
+	        				}else{//文件夹
+	        					FolderUtil.changeFolder(document,folder);
+	        				}
 	            		}
 	            		//回写Windchill信息到PM
 	            		String wcId=document.getPersistInfo().getObjectIdentifier().getStringValue();
@@ -478,26 +494,37 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //           Object[] vals = {pm_docId};
 //           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //       }else{
-    	   DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+    	     DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
     	 	 PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
     	 	 checkNull(pm_document);
     	 	//根据PM文件夹找到与之对应的Windchill文件夹Oid
-    	 	 FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
-    	 	 PMFolder folder=folderPersistence.get(pm_document.getFolderId());//PM文件夹对象
+    	      PMFolder folder=pm_document.getFolder();
+    	      checkNull(folder);
+    	 	 //判断文件夹是否为容器Root
+    	 	 boolean isContainer=folder.isContainer();
+    	 	 String containerName=folder.getContainerName();
     	 	 checkNull(folder);
-    	 	String wc_doc=pm_document.getPLMId();
     	 	 String wc_foid=folder.getPLMId();
-    		 Debug.P("---->>Windchill Folder ID:"+wc_foid+"  Windchill Doc ID:"+wc_doc);
+    		 Debug.P("---->>Windchill Folder ID:"+wc_foid+"  Windchill Doc ID:"+pm_document.getPLMId());
     		 
     	 	   try {
-    			    if(!StringUtils.isEmpty(wc_foid)&&!StringUtils.isEmpty(wc_doc)){
+    	 		  String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
+    			   if(!StringUtils.isEmpty(doc_num)){
     			    	SessionHelper.manager.setAdministrator();
-    			    	String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
-	         			Persistable object= GenericUtil.getObjectByNumber(doc_num);
+    			    	Persistable object= GenericUtil.getObjectByNumber(doc_num);
 	         			if(object instanceof WTDocument){
 	         				WTDocument doc=(WTDocument)object;
-	         				Folder folderObj=(Folder) GenericUtil.getPersistableByOid(wc_foid);
-	         				FolderUtil.changeFolder(doc, folderObj);//移动文档位置
+	         				Folder folderObj=null;
+	         				if(isContainer){//容器
+	         					WTContainer container=GenericUtil.getWTContainerByName(containerName);
+	         					folderObj=GenericUtil.createNewPath(container);
+	         					GenericUtil.moveObject2Container(doc, container, folderObj);//移动到容器目录下
+	         				}else{//文件夹
+	         					if(StringUtils.isEmpty(wc_foid)){throw new Exception("文档("+pm_document.getCommonName()+")目标文件夹("+folder.getCommonName()+")在Windchill系统不存在 ,无法执行移动操作!");}
+	         					folderObj=(Folder) GenericUtil.getPersistableByOid(wc_foid);
+	         					FolderUtil.changeFolder(doc, folderObj);//移动文档位置
+	         				}
+	         			
 	    			    	PersistenceHelper.manager.refresh(folderObj);
 	    			    	return 1;
 	         			}
@@ -638,14 +665,20 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				     Persistable object=GenericUtil.getObjectByNumber(doc_num);
 				     if(object instanceof WTDocument){
 							WTDocument doc=(WTDocument) object;
+							String tempName=doc.getLifeCycleName();
+							Folder folder = FolderHelper.service.getFolder(doc);
 							char currentVersion=doc.getVersionIdentifier().getValue().charAt(0);
 							if(currentVersion=='Z'){throw new Exception("当前版本为Z 无法继续修订!");}
-
-							VersionControlHelper.service.newVersion((Versioned) doc);
+							
+							Debug.P("------------->>>>Current Version:"+doc.getVersionIdentifier().getValue());
+							WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion(doc);
+							LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
+							FolderHelper.assignLocation(newdoc,folder);
 							GenericUtil.changeState(doc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
-							doc=(WTDocument) PersistenceHelper.manager.save(doc);
-							pm_document.setMajorVid(doc.getVersionIdentifier().getValue());
-							pm_document.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
+							PersistenceHelper.manager.save(newdoc);
+						    Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
+							pm_document.setMajorVid(newdoc.getVersionIdentifier().getValue());
+							pm_document.setSecondVid(Integer.valueOf(newdoc.getIterationIdentifier().getValue()));
 							pm_document.doUpdate();
 				     }
 				}
@@ -692,9 +725,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				}
 		      	 
 		  }
-		
-     	
 	 }
+	 
+	 
+
 
 
 }
