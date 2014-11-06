@@ -70,6 +70,7 @@ import wt.fc.QueryResult;
 import wt.fc.ReferenceFactory;
 import wt.fc.WTObject;
 import wt.fc.WTReference;
+import wt.fc.collections.WTValuedHashMap;
 import wt.folder.CabinetBased;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
@@ -80,6 +81,7 @@ import wt.httpgw.GatewayURL;
 import wt.httpgw.URLFactory;
 import wt.inf.container.ExchangeContainer;
 import wt.inf.container.OrgContainer;
+import wt.inf.container.WTContained;
 import wt.inf.container.WTContainer;
 import wt.inf.container.WTContainerHelper;
 import wt.inf.container.WTContainerRef;
@@ -126,7 +128,9 @@ import wt.query.SearchCondition;
 import wt.query.TableColumn;
 import wt.representation.PublishedContentLink;
 import wt.series.HarvardSeries;
+import wt.series.MultilevelSeries;
 import wt.series.Series;
+import wt.series.SeriesException;
 import wt.session.SessionContext;
 import wt.session.SessionHelper;
 import wt.session.SessionMgr;
@@ -142,7 +146,9 @@ import wt.util.WTPropertyVetoException;
 import wt.vc.Iterated;
 import wt.vc.IterationIdentifier;
 import wt.vc.Mastered;
+import wt.vc.VersionControlException;
 import wt.vc.VersionControlHelper;
+import wt.vc.VersionControlServerHelper;
 import wt.vc.VersionIdentifier;
 import wt.vc.Versioned;
 import wt.vc._IterationInfo;
@@ -2392,8 +2398,177 @@ public class GenericUtil implements RemoteAccess {
 		}
 		
 	
+		/**
+		 * 移动对象到容器下(包含产品库和存储库)
+		 * @param object
+		 * @param containerName
+		 */
+		public static void moveObject2Container(Persistable object,WTContainer container,Folder folder)throws Exception{
+			 WTValuedHashMap map = new WTValuedHashMap();
+			 if(container!=null){
+				 if(object instanceof WTPart){
+					 WTPart part=(WTPart)object;
+					 part.setContainer(container);
+					 map.put(part, folder);
+				 }else if(object instanceof EPMDocument){
+					 EPMDocument epm=(EPMDocument)object;
+					 epm.setContainer(container);
+					 map.put(epm, folder);
+				 }else if(object instanceof WTDocument){
+					 WTDocument doc=(WTDocument)object;
+					 doc.setContainer(container);
+					 map.put(doc, folder);
+				 }
+				 
+				 FolderHelper.service.changeFolder(map);
+				 Debug.P("-------->>>移动对象到容器成功!");
+			 }
 
+			
+	  }
 		
+		
+		
+		/**
+		 * 构造产品容器文件夹
+		 * @param containerName
+		 * @return
+		 * @throws Exception
+		 */
+		public  static Folder createNewPath(WTContainer container) throws Exception {
+			if(container==null) return null;
+			WTContainerRef containerRef = WTContainerRef.newWTContainerRef(container);
+			String folder_path="/Default";
+			Debug.P("---------->>>Container Path:"+folder_path);
+			Folder folder = null;
+	        try{
+	        	folder = FolderHelper.service.getFolder(folder_path, containerRef);
+	        } catch (WTException e) {
+	            try {
+	                folder = FolderHelper.service.saveFolderPath(folder_path, containerRef);
+	            } catch (WTException e1) {
+	                e1.printStackTrace();
+	            }
+	        }
+	        if (folder == null)
+	        {
+	        	throw new WTException("=--->>>create subfolder failed!");
+	        }
+	        return folder;
+		}
+		
+		
+		/**
+		 * 设置大版本
+		 * @param versioned
+		 * @param s
+		 */
+	    public static void setVersion(Versioned versioned, String s) {
+	        MultilevelSeries multilevelseries;
+	        Mastered mastered;
+	        VersionIdentifier versionidentifier;
+	        try {
+	            if (s == null || s.trim().length() == 0) {
+	                s = null;
+	                if (versioned.getVersionInfo() != null)
+	                    return;
+	            }
+	        } catch (Exception exception) {
+	          Debug.P(exception.getMessage());
+	        }
+	        multilevelseries = null;
+	        mastered = versioned.getMaster();
+	        if (mastered != null) {
+	            String s1 = mastered.getSeries();
+	            if (s1 == null) {
+	                if ((versioned instanceof WTContained)
+	                && ((WTContained) versioned).getContainer() != null) {
+	                    try {
+	                        multilevelseries = VersionControlHelper
+	                                .getVersionIdentifierSeries(versioned);
+	                        VersionControlServerHelper.changeSeries(mastered, multilevelseries
+	                                .getUniqueSeriesName());
+	                    } catch (VersionControlException e) {
+	                    	Debug.P(e.getMessage());
+	                    } catch (WTPropertyVetoException e) {
+	                    	Debug.P(e.getMessage());
+	                    } catch (WTException e) {
+	                    	Debug.P(e.getMessage());
+	                    }
+	                }
+	            } else {
+	                try {
+	                    multilevelseries = MultilevelSeries.newMultilevelSeries(s1);
+	                } catch (SeriesException e) {
+	                	Debug.P(e.getMessage());
+	                }
+	            }
+	        }
+	        if (multilevelseries == null) {
+	            
+	            try {
+	                multilevelseries = MultilevelSeries.newMultilevelSeries(
+	                        "wt.vc.VersionIdentifier", s);
+	            } catch (Exception e) {
+	            	Debug.P(e.getMessage());
+	            }
+	        }
+	        if (s != null) {
+	            try {
+	                multilevelseries.setValueWithoutValidating(s.trim());
+	            } catch (Exception e) {
+	            	Debug.P(e.getMessage());
+	            }
+	        }
+	        try {
+	            versionidentifier = VersionIdentifier
+	                    .newVersionIdentifier(multilevelseries);
+	            VersionControlServerHelper.setVersionIdentifier(versioned,
+	                    versionidentifier, false);
+	        } catch (WTException e) {
+	        	Debug.P(e.getMessage());
+	        }
+	    }
+	    
+	    /**
+	     * 设置小版本
+	     * @param iterated
+	     * @param s
+	     */
+	    public static void setIteration(Iterated iterated, String s) {
+	        try {
+	            if (s != null) {
+	                Series series = Series.newSeries("wt.vc.IterationIdentifier", s);
+	                IterationIdentifier iterationidentifier = IterationIdentifier
+	                        .newIterationIdentifier(series);
+	                VersionControlHelper.setIterationIdentifier(iterated,
+	                        iterationidentifier);
+	            }
+	        } catch (WTPropertyVetoException e) {
+	        	Debug.P(e.getMessage());
+	        } catch (SeriesException e) {
+	        	Debug.P(e.getMessage());
+	        } catch (WTException e) {
+	        	Debug.P(e.getMessage());
+	        }
+	    }
+	    
+	    public static void setLifeCycle(WTContainerRef wtcontainerref,
+	            LifeCycleManaged lifecyclemanaged, String s) {
+	        if (s != null)
+	            try {
+	                LifeCycleHelper.setLifeCycle(lifecyclemanaged, LifeCycleHelper.service
+	                        .getLifeCycleTemplate(s, wtcontainerref));
+	            } catch (LifeCycleException e) {
+	                Debug.P(e.getMessage());
+	            } catch (WTPropertyVetoException e) {
+	            	Debug.P(e.getMessage());
+	            } catch (WTException e) {
+	            	Debug.P(e.getMessage());
+	            }
+	    }
+	    
+
 		
 
 		

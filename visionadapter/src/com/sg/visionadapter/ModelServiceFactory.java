@@ -29,6 +29,8 @@ public class ModelServiceFactory {
 
 	private DB defaultDB;
 
+	public static String URL_REAUTH;
+
 	public static ModelServiceFactory service;
 
 	public ModelServiceFactory() {
@@ -44,7 +46,41 @@ public class ModelServiceFactory {
 		if (service == null) {
 			service = this;
 			clients = new ConcurrentHashMap<String, MongoClient>();
-			loadDB(confFolder);
+			loadDBConf(confFolder);
+			loadPMConf(confFolder);
+		}
+	}
+
+	private void loadPMConf(String confFolder) {
+		File file;
+		if (confFolder == null) {
+			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
+					+ File.separator + "visionconf" + File.separator+"pm.conf";//$NON-NLS-1$
+			file = new File(folderName);
+		} else {
+			file = new File(confFolder+ File.separator+"pm.conf");
+		}
+		
+		InputStream is = null;
+		FileInputStream fis = null;
+		try {
+			is = new FileInputStream(file);
+			Properties props = new Properties();
+			props.load(is);
+			URL_REAUTH = props.getProperty("pm.reauth"); //$NON-NLS-1$
+		} catch (Exception e) {
+		} finally {
+			if (fis != null)
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			if (is != null)
+				try {
+					is.close();
+				} catch (IOException e) {
+				}
 		}
 	}
 
@@ -77,7 +113,7 @@ public class ModelServiceFactory {
 		return defaultDB.getCollection(collectionName);
 	}
 
-	private void loadDB(String confFolder) {
+	private void loadDBConf(String confFolder) {
 		File folder;
 		if (confFolder == null) {
 			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
