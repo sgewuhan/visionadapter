@@ -277,24 +277,4 @@ public class WindchillService implements IPDMServiceProvider {
 			run(job, true);
 		}
 	}
-
-	/*private void doSetRequest(PrimaryObject po, String requestCode) {
-		DBCollection col = getDocOrFolderCollection(po);
-		if(col != null) {	
-		col.update(po.queryThis(), new BasicDBObject().append("$set",
-				new BasicDBObject().append(IPLM_Object.F_SYNC_REQUEST,
-						requestCode)));
-		}
-	}
-
-	private DBCollection getDocOrFolderCollection(PrimaryObject po) {
-		if (po instanceof Document) {
-			return DBActivator.getCollection(IModelConstants.DB,
-					IModelConstants.C_DOCUMENT);
-		} else if (po instanceof Folder) {
-			return DBActivator.getCollection(IModelConstants.DB,
-					IModelConstants.C_FOLDER);
-		}
-		return null;
-	}*/
 }
