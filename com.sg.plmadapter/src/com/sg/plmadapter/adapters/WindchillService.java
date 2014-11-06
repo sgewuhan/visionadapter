@@ -6,6 +6,7 @@ import com.mobnut.db.model.PrimaryObject;
 import com.sg.business.model.Document;
 import com.sg.business.model.Folder;
 import com.sg.business.model.IPDMServiceProvider;
+import com.sg.business.model.IPLM_Object;
 import com.sg.plmadapter.windchill.PMWebservice;
 
 public class WindchillService implements IPDMServiceProvider {
@@ -80,6 +81,8 @@ public class WindchillService implements IPDMServiceProvider {
 	@Override
 	public void doInsertBefore(PrimaryObject po) throws Exception {
 		po.setValue(F_SYNC_DATE, null);
+		setRequest(po, IPLM_Object.REQUEST_INSERT);
+		
 		Object type = po.getValue(F_PLM_TYPE);
 		if (type == null) {
 			if (po instanceof Folder) {
@@ -136,9 +139,21 @@ public class WindchillService implements IPDMServiceProvider {
 		checkBeforeSync(po);
 		if (po instanceof Folder) {
 			po.setValue(F_SYNC_DATE, null);
+			setRequest(po, IPLM_Object.REQUEST_UPDATE);
 		} else if (po instanceof Document) {
+			setRequest(po, IPLM_Object.REQUEST_UPDATE);
 			po.setValue(F_SYNC_DATE, null);
 		}
+	}
+
+	private void setRequest(PrimaryObject po, String requestCode) {
+//		BasicBSONList request = (BasicBSONList) po
+//				.getValue(IPLM_Object.F_SYNC_REQUEST);
+//		if (request == null) {
+//			request = new BasicDBList();
+//		}
+//		request.add(0, requestCode);
+		po.setValue(IPLM_Object.F_SYNC_REQUEST, requestCode);
 	}
 
 	private void checkBeforeSync(PrimaryObject po) throws Exception {
@@ -175,6 +190,7 @@ public class WindchillService implements IPDMServiceProvider {
 		checkBeforeSync(po);
 
 		po.setValue(F_SYNC_DATE, null);
+		setRequest(po, IPLM_Object.REQUEST_REMOVE);
 
 		checkService();
 		WindchillSyncJob job = null;
@@ -197,6 +213,7 @@ public class WindchillService implements IPDMServiceProvider {
 		checkParentFolder(parent);
 
 		document.setValue(F_SYNC_DATE, null);
+		setRequest(document, IPLM_Object.REQUEST_MOVE);
 	}
 
 	@Override
@@ -215,6 +232,7 @@ public class WindchillService implements IPDMServiceProvider {
 		checkBeforeSync(document);
 
 		document.setValue(F_SYNC_DATE, null);
+		setRequest(document, IPLM_Object.REQUEST_CHANGE_REV);
 	}
 
 	@Override
@@ -232,6 +250,7 @@ public class WindchillService implements IPDMServiceProvider {
 	public void doSetLifeCycleStatusBefore(Document document) throws Exception {
 		checkBeforeSync(document);
 		document.setValue(F_SYNC_DATE, null);
+		setRequest(document, IPLM_Object.REQUEST_SETLIFECYCLE);
 	}
 
 	@Override
@@ -242,6 +261,20 @@ public class WindchillService implements IPDMServiceProvider {
 		job = new SetLifeCycleStatus(windchill, document);
 		if (job != null) {
 			run(job, syncExcute);
+		}
+	}
+
+	@Override
+	public void forceSync(PrimaryObject po) throws Exception {
+		WindchillSyncJob job = null;
+		checkService();
+		if (po instanceof Document) {
+			job = new DocumentSync(windchill, (Document) po);
+		} else {
+			job = new FolderSync(windchill, (Folder) po);
+		}
+		if (job != null) {
+			run(job, true);
 		}
 	}
 }
