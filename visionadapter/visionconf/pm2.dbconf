@@ -1,6 +1,6 @@
 db.name=pm2
-db.host=10.99.190.21
-db.port=27017
+db.host=10.99.190.23
+db.port=10001
 db.options.autoConnectRetry=true
 db.options.connectionsPerHost=1000
 db.options.maxWaitTime=5000

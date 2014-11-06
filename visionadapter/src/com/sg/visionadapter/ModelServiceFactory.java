@@ -10,8 +10,12 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bson.types.ObjectId;
+
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientOptions.Builder;
@@ -29,6 +33,8 @@ public class ModelServiceFactory {
 
 	private DB defaultDB;
 
+	public static String URL_REAUTH;
+
 	public static ModelServiceFactory service;
 
 	public ModelServiceFactory() {
@@ -44,7 +50,42 @@ public class ModelServiceFactory {
 		if (service == null) {
 			service = this;
 			clients = new ConcurrentHashMap<String, MongoClient>();
-			loadDB(confFolder);
+			loadDBConf(confFolder);
+			loadPMConf(confFolder);
+		}
+	}
+
+	private void loadPMConf(String confFolder) {
+		File file;
+		if (confFolder == null) {
+			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
+					+ File.separator
+					+ "visionconf" + File.separator + "pm.conf";//$NON-NLS-1$
+			file = new File(folderName);
+		} else {
+			file = new File(confFolder + File.separator + "pm.conf");
+		}
+
+		InputStream is = null;
+		FileInputStream fis = null;
+		try {
+			is = new FileInputStream(file);
+			Properties props = new Properties();
+			props.load(is);
+			URL_REAUTH = props.getProperty("pm.reauth"); //$NON-NLS-1$
+		} catch (Exception e) {
+		} finally {
+			if (fis != null)
+				try {
+					fis.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			if (is != null)
+				try {
+					is.close();
+				} catch (IOException e) {
+				}
 		}
 	}
 
@@ -77,7 +118,7 @@ public class ModelServiceFactory {
 		return defaultDB.getCollection(collectionName);
 	}
 
-	private void loadDB(String confFolder) {
+	private void loadDBConf(String confFolder) {
 		File folder;
 		if (confFolder == null) {
 			String folderName = System.getProperty("user.dir") //$NON-NLS-1$
@@ -191,6 +232,43 @@ public class ModelServiceFactory {
 		DBCollection col = getCollection(instance.getCollectionName());
 		instance.setCollection(col);
 		return instance;
+	}
+
+	public BasicDocument getBasicDocumentById(String id) throws Exception {
+		Class<? extends BasicDocument> clas = getClassBy(id);
+		if (clas == null) {
+			throw new Exception("无法确定对象的类型");
+		}
+		DBCollection col = getCollection("document");
+		col.setObjectClass(clas);
+		BasicDocument result = (BasicDocument) col.findOne(new BasicDBObject()
+				.append(BasicDocument._ID, new ObjectId(id)));
+		result.setCollection(col);
+		return result;
+	}
+
+	private Class<? extends BasicDocument> getClassBy(String id) {
+		DBCollection col = getCollection("document");
+		DBObject data = col
+				.findOne(new BasicDBObject().append(BasicDocument._ID,
+						new ObjectId(id)), new BasicDBObject().append(
+						BasicDocument.PLM_TYPE, 1));
+		Object type = data.get(BasicDocument.PLM_TYPE);
+		if (PMCADDocument.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMCADDocument.class;
+		} else if (PMDocument.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMDocument.class;
+		} else if (PMMaterial.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMMaterial.class;
+		} else if (PMPart.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMPart.class;
+		} else if (PMProduct.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMProduct.class;
+		} else if (PMSupplyment.class.getSimpleName().toLowerCase()
+				.equals(type)) {
+			return PMSupplyment.class;
+		}
+		return null;
 	}
 
 }

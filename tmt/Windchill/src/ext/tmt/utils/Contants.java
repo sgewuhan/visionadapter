@@ -8,13 +8,13 @@ public class Contants {
 	
 	//软类型
 	
-	/**
+	/*
 	 * 成品
 	 */
 	public static final String PRODUCTPART="com.plm.Product";  //成品
 	
 	/*
-	 * //半成品
+	 *半成品
 	 */
 	public static final String SEMIFINISHEDPRODUCT="com.plm.SemiFinishedProduct"; 
 	 
@@ -22,6 +22,11 @@ public class Contants {
 	 *原材料
 	 */
 	public static final String RAWMATERIAL="com.plm.RawMaterial"; 
+	
+	/*
+	 * 客供件
+	 */
+	public static final String SUPPLYMENT="com.plm.GuestPart";
 	
 	
 	// 软属性
@@ -90,11 +95,11 @@ public class Contants {
 	 */
 	public static final String CLIENTNAME="Client_Name";
 	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
+	/*
+	 * 图号--物资编码
+	 */
+	public static final String MATERIALNO="Material_NO";
+	
 //	/*
 //	 * 物料组
 //	 */
