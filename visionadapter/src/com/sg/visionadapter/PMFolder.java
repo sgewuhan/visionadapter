@@ -26,6 +26,8 @@ public class PMFolder extends VisionObject {
 
 	private static final String CONTAINER_NAME = "containername";
 
+	private static final String F_IS_CONTAINER = "iscontainer";
+
 	/**
 	 * @return the projectId
 	 */
@@ -130,5 +132,12 @@ public class PMFolder extends VisionObject {
 	@Override
 	public WriteResult doInsert() throws Exception {
 		throw new Exception("PM Document can not insert by adapter.");
+	}
+	/**
+	 * ÊÇ·ñÎªÈÝÆ÷
+	 * @return
+	 */
+	public boolean isContainer() {
+		return Boolean.TRUE.equals(get(F_IS_CONTAINER ));
 	}
 }
