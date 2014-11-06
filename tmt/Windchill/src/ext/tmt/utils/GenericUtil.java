@@ -2205,7 +2205,14 @@ public class GenericUtil implements RemoteAccess {
 		                PersistenceServerHelper.manager.remove(link);
 		            }
 		            
-		            PersistenceHelper.manager.delete(obj);
+		           QueryResult rs=VersionControlHelper.service.allVersionsOf(obj.getMaster());
+		           Debug.P("----->>Version Size:"+rs==null?"0":rs.size());
+		           while(rs.hasMoreElements()){
+		        	   Object object = rs.nextElement();
+		        	   PersistenceHelper.manager.delete((Persistable) object);
+		           }
+		           
+		           
 		            
 		        } catch (PersistenceException e) {
 		              Debug.P("PersistenceException : {}"+e.getMessage());
