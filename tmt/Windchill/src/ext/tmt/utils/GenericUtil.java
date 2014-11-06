@@ -2212,6 +2212,7 @@ public class GenericUtil implements RemoteAccess {
 		        	   PersistenceHelper.manager.delete((Persistable) object);
 		           }
 		           
+		           
 		            
 		        } catch (PersistenceException e) {
 		              Debug.P("PersistenceException : {}"+e.getMessage());
