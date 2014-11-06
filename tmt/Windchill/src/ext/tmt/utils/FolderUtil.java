@@ -15,6 +15,7 @@ import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 
+import wt.dataops.containermove.processors.MoveValidator;
 import wt.fc.IdentityHelper;
 import wt.fc.ObjectReference;
 import wt.fc.Persistable;
