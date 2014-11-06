@@ -59,4 +59,9 @@ public class DocumentSync extends WindchillSyncJob {
 				new BasicDBObject().append(Folder.F_SYNC_DATE, null));
 	}
 
+	@Override
+	protected String getRequestCode() {
+		return IPLM_Object.REQUEST_SYNC;
+	}
+
 }

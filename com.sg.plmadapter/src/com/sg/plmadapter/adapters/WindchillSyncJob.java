@@ -26,6 +26,7 @@ public abstract class WindchillSyncJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try {
+			startRequest();
 			run(windchill, po);
 			finishRequest();
 			return Status.OK_STATUS;
@@ -48,5 +49,14 @@ public abstract class WindchillSyncJob extends Job {
 		col.update(po.queryThis(), new BasicDBObject().append("$set",
 				new BasicDBObject().append(IPLM_Object.F_SYNC_REQUEST, null)));
 	}
+
+	
+	protected void startRequest() {
+		DBCollection col = po.getCollection();
+		col.update(po.queryThis(), new BasicDBObject().append("$set",
+				new BasicDBObject().append(IPLM_Object.F_SYNC_REQUEST, getRequestCode())));
+	}
+
+	protected abstract  String getRequestCode();
 
 }

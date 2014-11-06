@@ -9,6 +9,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.sg.business.model.Folder;
 import com.sg.business.model.IModelConstants;
+import com.sg.business.model.IPLM_Object;
 import com.sg.plmadapter.windchill.PMWebservice;
 
 public class FolderSync extends WindchillSyncJob {
@@ -66,4 +67,8 @@ public class FolderSync extends WindchillSyncJob {
 				new BasicDBObject().append(Folder.F_SYNC_DATE, null));
 	}
 
+	@Override
+	protected String getRequestCode() {
+		return IPLM_Object.REQUEST_SYNC;
+	}
 }

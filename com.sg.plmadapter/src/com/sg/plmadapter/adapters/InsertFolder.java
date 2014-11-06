@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.mobnut.db.model.PrimaryObject;
+import com.sg.business.model.IPLM_Object;
 import com.sg.plmadapter.windchill.PMWebservice;
 
 public class InsertFolder extends WindchillSyncJob {
@@ -21,4 +22,8 @@ public class InsertFolder extends WindchillSyncJob {
 		windchill.createFolder(folderIds);
 	}
 
+	@Override
+	protected String getRequestCode() {
+		return IPLM_Object.REQUEST_INSERT;
+	}
 }
