@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 
+import ext.tmt.WC2PM.WCToPMHelper;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
@@ -163,13 +164,16 @@ public class PartHelper implements Serializable {
 						return;
 					}
 					Debug.P("productName--------->"+productName);
-					prefix=productName.substring(0, prefix.indexOf("-"));
+					prefix=productName.substring(0, productName.indexOf("-"));
 					if(!prefix.toUpperCase().contains("TX")){
 						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
 					}
+					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")){
+						return;
+					}
 					Debug.P("产品前缀----》"+prefix);
 					int i= 0;
-					do {
+					do {  
 						if(prefix.toUpperCase().trim().equals("TXA6")||prefix.toUpperCase().trim().equals("TXA7")||prefix.toUpperCase().trim().equals("TXA8")){
 							partNumber=prefix+StringUtil.int2String(i,5);
 						}else{
@@ -182,6 +186,7 @@ public class PartHelper implements Serializable {
 						i++;
 					} while (i < 100000);
 					changePartNumber(wtPart,newNumber);
+					WCToPMHelper.CreatePMProductToPM(wtPart);
 				}
 			    else //如果是半成品
 				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
@@ -210,10 +215,16 @@ public class PartHelper implements Serializable {
 							i++;
 						} while (i < 100000);
 						changePartNumber(wtPart,newNumber);
-						
-						//WCToPMHelper.CreatePartToPM(wtPart);
+						WCToPMHelper.CreatePartToPM(wtPart);
 					}
+				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+					WCToPMHelper.CreatePMaterialToPM(wtPart);
+				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+					WCToPMHelper.CreateSupplyToPM(wtPart);
 				}
+			    
+			}catch(Exception e){
+				e.printStackTrace();
 			}finally {
 				SessionServerHelper.manager.setAccessEnforced(flag);
 			}
