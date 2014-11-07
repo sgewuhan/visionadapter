@@ -38,10 +38,12 @@ public class ObjectFactory {
     private final static QName _Exception_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "Exception");
     private final static QName _ChangeLifecycleState_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "changeLifecycleState");
     private final static QName _DeleteDocumentResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "deleteDocumentResponse");
+    private final static QName _ChangePhase_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "changePhase");
     private final static QName _MoveDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "moveDocument");
     private final static QName _DeleteFolder_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "deleteFolder");
     private final static QName _EditFolder_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "editFolder");
     private final static QName _CreateDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "createDocument");
+    private final static QName _ChangePhaseResponse_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "changePhaseResponse");
     private final static QName _UpdateDocument_QNAME = new QName("http://pm.webservice.integration.tmt.ext/", "updateDocument");
 
     /**
@@ -164,6 +166,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ChangePhaseResponse }
+     * 
+     */
+    public ChangePhaseResponse createChangePhaseResponse() {
+        return new ChangePhaseResponse();
+    }
+
+    /**
      * Create an instance of {@link CreateDocument }
      * 
      */
@@ -177,6 +187,14 @@ public class ObjectFactory {
      */
     public MoveDocument createMoveDocument() {
         return new MoveDocument();
+    }
+
+    /**
+     * Create an instance of {@link ChangePhase }
+     * 
+     */
+    public ChangePhase createChangePhase() {
+        return new ChangePhase();
     }
 
     /**
@@ -330,6 +348,15 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ChangePhase }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "changePhase")
+    public JAXBElement<ChangePhase> createChangePhase(ChangePhase value) {
+        return new JAXBElement<ChangePhase>(_ChangePhase_QNAME, ChangePhase.class, null, value);
+    }
+
+    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link MoveDocument }{@code >}}
      * 
      */
@@ -363,6 +390,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "createDocument")
     public JAXBElement<CreateDocument> createCreateDocument(CreateDocument value) {
         return new JAXBElement<CreateDocument>(_CreateDocument_QNAME, CreateDocument.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ChangePhaseResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://pm.webservice.integration.tmt.ext/", name = "changePhaseResponse")
+    public JAXBElement<ChangePhaseResponse> createChangePhaseResponse(ChangePhaseResponse value) {
+        return new JAXBElement<ChangePhaseResponse>(_ChangePhaseResponse_QNAME, ChangePhaseResponse.class, null, value);
     }
 
     /**
