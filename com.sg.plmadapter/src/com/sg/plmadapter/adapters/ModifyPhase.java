@@ -13,7 +13,7 @@ public class ModifyPhase extends WindchillSyncJob {
 	@Override
 	protected void run(PMWebservice windchill, PrimaryObject po)
 			throws Exception {
-		
+		windchill.changePhase(po.get_id().toString());
 	}
 
 	@Override
