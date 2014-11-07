@@ -79,6 +79,9 @@ public class EndItemPartService extends StandardManager implements PartService,
 		String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
 		getManagerService().addEventListener(listener, POST_UPDATE);
 		
+		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_DELETE);
+		getManagerService().addEventListener( listener, DELETE);
+		
 //		String PRE_CHECKIN = WorkInProgressServiceEvent
 //		        .generateEventKey(WorkInProgressServiceEvent.PRE_CHECKIN);
 //        getManagerService().addEventListener(listener, PRE_CHECKIN);
