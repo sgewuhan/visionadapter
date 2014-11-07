@@ -100,21 +100,21 @@ public class Contants {
 	 */
 	public static final String MATERIALNO="Material_NO";
 	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
+	/*
+	 * PMid
+	 */
+	public static final String PMID="PMId";
+	
+	/*
+	 * PM同步时间
+	 */
+	public static final String CYNCDATA="Cyncdata";
+	
+	/*
+	 * PM操作请求
+	 */
+	public static final String PMREQUEST="PMRequest";
+	
 //	/*
 //	 * 物料组
 //	 */
