@@ -11,22 +11,22 @@ public class Contants {
 	/*
 	 * 成品
 	 */
-	public static final String PRODUCTPART="com.plm.Product";  //成品
+	public static final String PRODUCTPART="com.yaozheng.Product";  //成品
 	
 	/*
 	 *半成品
 	 */
-	public static final String SEMIFINISHEDPRODUCT="com.plm.SemiFinishedProduct"; 
+	public static final String SEMIFINISHEDPRODUCT="com.yaozheng.SemiFinishedProduct"; 
 	 
 	/*
 	 *原材料
 	 */
-	public static final String RAWMATERIAL="com.plm.RawMaterial"; 
+	public static final String RAWMATERIAL="com.yaozheng.RawMaterial"; 
 	
 	/*
 	 * 客供件
 	 */
-	public static final String SUPPLYMENT="com.plm.GuestPart";
+	public static final String SUPPLYMENT="com.yaozheng.GuestPart";
 	
 	
 	// 软属性
@@ -100,21 +100,21 @@ public class Contants {
 	 */
 	public static final String MATERIALNO="Material_NO";
 	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
-//	/*
-//	 * 物料组
-//	 */
-//	public static final String MATERIALGROUP="Material_Group";
-//	
+	/*
+	 * PMid
+	 */
+	public static final String PMID="PMId";
+	
+	/*
+	 * PM同步时间
+	 */
+	public static final String CYNCDATA="Cyncdata";
+	
+	/*
+	 * PM操作请求
+	 */
+	public static final String PMREQUEST="PMRequest";
+	
 //	/*
 //	 * 物料组
 //	 */

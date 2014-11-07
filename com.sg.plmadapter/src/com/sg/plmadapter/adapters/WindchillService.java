@@ -80,7 +80,7 @@ public class WindchillService implements IPDMServiceProvider {
 	@Override
 	public void doInsertBefore(PrimaryObject po) throws Exception {
 		po.setValue(F_SYNC_DATE, null);
-		
+
 		Object type = po.getValue(F_PLM_TYPE);
 		if (type == null) {
 			if (po instanceof Folder) {
@@ -141,7 +141,6 @@ public class WindchillService implements IPDMServiceProvider {
 			po.setValue(F_SYNC_DATE, null);
 		}
 	}
-
 
 	private void checkBeforeSync(PrimaryObject po) throws Exception {
 		Object plmid = po.getValue(F_PLM_ID, true);
@@ -263,14 +262,18 @@ public class WindchillService implements IPDMServiceProvider {
 
 	@Override
 	public void doChangePhaseBefore(Document document) throws Exception {
-		// TODO Auto-generated method stub
-		
+		checkBeforeSync(document);
+		document.setValue(F_SYNC_DATE, null);
 	}
 
 	@Override
-	public void doChangePhaseAfter(Document document, boolean b)
+	public void doChangePhaseAfter(Document document, boolean syncExcute)
 			throws Exception {
-		// TODO Auto-generated method stub
-		
+		WindchillSyncJob job = null;
+		checkService();
+		job = new ModifyPhase(windchill, document);
+		if (job != null) {
+			run(job, syncExcute);
+		}
 	}
 }
