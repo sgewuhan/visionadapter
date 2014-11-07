@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId; 
 
 import com.mongodb.WriteResult;
+import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.IFileProvider;
@@ -741,6 +742,42 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				}
 		      	 
 		  }
+	 }
+	 
+	 
+	 /**
+	  * 更改对象阶段
+	  * @param pm_id
+	  * @throws Exception
+	  */
+	 public static int  changePhase(String pm_id)throws Exception{
+		  Debug.P("------->>>Change Phase PMID:"+pm_id);
+		   int count=0;
+		  if(!StringUtils.isEmpty(pm_id)){
+			  //根据pm_id修改阶段信息
+			  BasicDocument object=factory.getBasicDocumentById(pm_id);
+              String phase=object.getPhase();//阶段
+              String plmId=object.getPLMId();//PM对应的Windchill字段
+              Debug.P("----Phase--->>>Windchill ID:"+plmId+"   ;Phase Value:"+phase);
+              if(!StringUtils.isEmpty(plmId)){
+             try {
+			    SessionHelper.manager.setAdministrator();
+			    if(StringUtils.isEmpty(phase)){
+			        Persistable persistable=GenericUtil.getPersistableByOid(plmId);
+				    Map  ibas=new HashMap();
+			        ibas.put(ConstanUtil.PHASE, phase);
+				    LWCUtil.setValue(persistable, ibas);//修改阶段属性
+				    count=1;
+			    }
+			
+			 } catch (Exception e) {
+				 throw new Exception("Windchill ("+plmId+") 修改阶段失败!");
+			}finally{
+				 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+			}       	        
+        }    
+	}
+		   return count;
 	 }
 	 
 	 
