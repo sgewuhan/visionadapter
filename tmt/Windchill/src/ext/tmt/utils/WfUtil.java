@@ -304,7 +304,7 @@ public class WfUtil implements RemoteAccess {
 	 * 
 	 * @param obj
 	 * @throws Exception
-	 */
+	 */ 
 	public static void setSuccess2ERPFlag(Object obj) throws Exception {
 		if (obj instanceof PromotionNotice) {
 			QueryResult qr = MaturityHelper.service.getPromotionTargets(
