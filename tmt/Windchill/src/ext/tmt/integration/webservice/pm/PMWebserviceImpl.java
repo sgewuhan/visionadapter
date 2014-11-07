@@ -381,6 +381,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            		Debug.P("----->>>PM Return:("+result.getN()+")Create PMID:"+wcId+"  ;PM_Document:"+pm_document.getPLMId());
 	            		count=1;
 	        			}
+	        		
 	        	}catch(Exception e){
 	        		throw new Exception("Windchill 创建("+pm_document.getCommonName()+")文档失败!");
 	        	}finally{
