@@ -72,11 +72,12 @@ public class PartHelper implements Serializable {
 		String partNumber="";
 		String partType="";
 		String types="";
+		boolean flag = true;
+		try {
+		partType=DocUtils.getType(wtPart);
+		IBAUtils iba = new IBAUtils(wtPart);
         if (eventType.equals(PersistenceManagerEvent.POST_STORE)) {
-			boolean flag = true;
-			try {
 				flag = SessionServerHelper.manager.setAccessEnforced(false);
-				
 				// 如果是检出再检入
 				if (WorkInProgressHelper.isCheckedOut(wtPart)) {
 					return;
@@ -91,21 +92,12 @@ public class PartHelper implements Serializable {
 			   EPMDocument epmdoc = null;
 			   String productName="";	
 			   String prefix="";
-			   partType=DocUtils.getType(wtPart);
 			   partNumber=wtPart.getNumber();
 			   if(StringUtils.isNotEmpty(partType)){
 				   partType=partType.replaceAll(" ", "").trim();
 			   }
 			   Debug.P(partNumber+"------------------->"+partType);
 			   
-			   //检入AutoCad图纸时，系统根据图纸明细栏自动创建部件，如果部件编码为“本图”则不创建
-			    if(partNumber.equals("本图")){
-			    Debug.P(partNumber+"------------------->"+partType);
-			   // PersistenceHelper.manager.delete(wtPart);
-			        wtPart =null;
-			     //   throw new Exception("不创建编码为“本图”的部件");
-			    	//return;
-			    }
 			    String epmPartType="";
 			    if(partType.equals("wt.part.WTPart")){
 			    	epmdoc=EPMDocUtil.getActiveEPMDocument(wtPart);
@@ -194,7 +186,6 @@ public class PartHelper implements Serializable {
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
 					}
 					String isKHpart="";//空簧部件分类
-					IBAUtils iba = new IBAUtils(wtPart);
 					isKHpart=iba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
 					Debug.P("WTPart -->"+isKHpart);
 					//如果部件上的 空簧部件分类 值为空，则从部件关联的EPMDocument上获取
@@ -223,12 +214,28 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.CreateSupplyToPM(wtPart);
 				}
 			    
-			}catch(Exception e){
-				e.printStackTrace();
-			}finally {
-				SessionServerHelper.manager.setAccessEnforced(flag);
+		} else  if (eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			String pmoid = iba.getIBAValue(Contants.PMID);
+//			   if(StringUtils.isEmpty(pmid)){
+//				   throw new Exception("");
+//			   }
+			  
+			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+				   WCToPMHelper.updatePMPart(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
+					WCToPMHelper.updatePMProductToPM(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.MATERIAL)){ //如果是原材料
+					WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
 			}
-		} 
+			
+		}
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally {
+			SessionServerHelper.manager.setAccessEnforced(flag);
+		}
 	}
 
 	
