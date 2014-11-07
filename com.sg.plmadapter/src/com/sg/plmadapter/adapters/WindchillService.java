@@ -260,4 +260,17 @@ public class WindchillService implements IPDMServiceProvider {
 			run(job, true);
 		}
 	}
+
+	@Override
+	public void doChangePhaseBefore(Document document) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void doChangePhaseAfter(Document document, boolean b)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 }
