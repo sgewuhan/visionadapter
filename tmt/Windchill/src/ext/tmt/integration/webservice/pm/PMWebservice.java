@@ -76,6 +76,12 @@ public class PMWebservice extends JaxWsWebService
          PMWebserviceImpl.changeLifecycleState(objectId);
     }
     
+    @WebMethod(operationName="changePhase")
+    public void changePhase (String objectId)throws Exception
+    {
+         PMWebserviceImpl.changePhase(objectId);
+    }
+    
     
     
     
