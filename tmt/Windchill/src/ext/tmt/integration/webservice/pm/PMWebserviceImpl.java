@@ -32,6 +32,7 @@ import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
+import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.VersionControlUtil;
 import wt.doc.WTDocument;
@@ -41,9 +42,12 @@ import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
 import wt.folder.Folder;
+import wt.folder.FolderEntry;
 import wt.folder.FolderHelper;
+import wt.iba.value.IBAHolder;
 import wt.inf.container.WTContainer;
 import wt.lifecycle.LifeCycleHelper;
+import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.part.WTPart;
@@ -377,6 +381,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            		Debug.P("----->>>PM Return:("+result.getN()+")Create PMID:"+wcId+"  ;PM_Document:"+pm_document.getPLMId());
 	            		count=1;
 	        			}
+	        	}catch(Exception e){
+	        		throw new Exception("Windchill 创建("+pm_document.getCommonName()+")文档失败!");
 	        	}finally{
 	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	}
@@ -510,40 +516,35 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //           Object[] vals = {pm_docId};
 //           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //       }else{
-    	     DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
-    	 	 PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
-    	 	 checkNull(pm_document);
+    	     BasicDocument basic_object=factory.getBasicDocumentById(pm_docId);
+    	 	 checkNull(basic_object);
     	 	//根据PM文件夹找到与之对应的Windchill文件夹Oid
-    	      PMFolder folder=pm_document.getFolder();
+    	      PMFolder folder=basic_object.getFolder();
     	      checkNull(folder);
     	 	 //判断文件夹是否为容器Root
     	 	 boolean isContainer=folder.isContainer();
     	 	 String containerName=folder.getContainerName();
     	 	 checkNull(folder);
     	 	 String wc_foid=folder.getPLMId();
-    		 Debug.P("---->>Windchill Folder ID:"+wc_foid+"  Windchill Doc ID:"+pm_document.getPLMId());
+    		 Debug.P("---->>Windchill Folder ID:"+wc_foid+"  Windchill Doc ID:"+basic_object.getPLMId());
     		 
     	 	   try {
-    	 		  String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
+    	 		  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
     			   if(!StringUtils.isEmpty(doc_num)){
     			    	SessionHelper.manager.setAdministrator();
     			    	Persistable object= GenericUtil.getObjectByNumber(doc_num);
-	         			if(object instanceof WTDocument){
-	         				WTDocument doc=(WTDocument)object;
-	         				Folder folderObj=null;
-	         				if(isContainer){//容器
+	         			 Folder folderObj=null;
+	         			if(isContainer){//容器
 	         					WTContainer container=GenericUtil.getWTContainerByName(containerName);
 	         					folderObj=GenericUtil.createNewPath(container);
-	         					GenericUtil.moveObject2Container(doc, container, folderObj);//移动到容器目录下
+	         					GenericUtil.moveObject2Container(object, container, folderObj);//移动到容器目录下
 	         				}else{//文件夹
-	         					if(StringUtils.isEmpty(wc_foid)){throw new Exception("文档("+pm_document.getCommonName()+")目标文件夹("+folder.getCommonName()+")在Windchill系统不存在 ,无法执行移动操作!");}
+	         					if(StringUtils.isEmpty(wc_foid)){throw new Exception("文档("+basic_object.getCommonName()+")目标文件夹("+folder.getCommonName()+")在Windchill系统不存在 ,无法执行移动操作!");}
 	         					folderObj=(Folder) GenericUtil.getPersistableByOid(wc_foid);
-	         					FolderUtil.changeFolder(doc, folderObj);//移动文档位置
+	         					FolderUtil.changeFolder((FolderEntry) object, folderObj);//移动文档位置
 	         				}
-	         			
 	    			    	PersistenceHelper.manager.refresh(folderObj);
 	    			    	return 1;
-	         			}
     			    }
     		    } finally {
     	             SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
@@ -669,39 +670,34 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		   Debug.P("----->>Check Revision PM_DocID:"+pm_id);
 		   checkNull(pm_id);
 		    //获取PM文档对象
-			DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
-        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
-        	//获得WindChill ID
-        	String wc_id=pm_document.getPLMId();
+//			DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+//        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
+             BasicDocument basic_object=factory.getBasicDocumentById(pm_id);
+             checkNull(basic_object);
+		   //获得WindChill ID
+        	String wc_id=basic_object.getPLMId();
         	Debug.P("----------->>>Windchill PLMID:"+wc_id);
         	try {
 				SessionHelper.manager.setAdministrator();
 				if(!StringUtils.isEmpty(wc_id)){
-				    String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
+				     String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
 				     Persistable object=GenericUtil.getObjectByNumber(doc_num);
-				     if(object instanceof WTDocument){
-							WTDocument doc=(WTDocument) object;
-							String tempName=doc.getLifeCycleName();
-							Folder folder = FolderHelper.service.getFolder(doc);
-							char currentVersion=doc.getVersionIdentifier().getValue().charAt(0);
-							if(currentVersion=='Z'){throw new Exception("当前版本为Z 无法继续修订!");}
-							
-							Debug.P("------------->>>>Current Version:"+doc.getVersionIdentifier().getValue());
-							WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion(doc);
-							LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
-							FolderHelper.assignLocation(newdoc,folder);
-							PersistenceHelper.manager.save(newdoc);
-							GenericUtil.changeState(newdoc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
-							 PersistenceHelper.manager.refresh(newdoc);
-							Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
-							pm_document.setMajorVid(newdoc.getVersionIdentifier().getValue());
-							pm_document.setSecondVid(Integer.valueOf(newdoc.getIterationIdentifier().getValue()));
-							pm_document.doUpdate();
-				     }
+					 Folder folder = FolderHelper.service.getFolder((FolderEntry) object);
+					 WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion((Versioned) object);
+//					 LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
+					 FolderHelper.assignLocation(newdoc,folder);
+					 PersistenceHelper.manager.save(newdoc);
+					 GenericUtil.changeState(newdoc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
+					 PersistenceHelper.manager.refresh(newdoc);
+					 Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
+					 basic_object.setMajorVid(newdoc.getVersionIdentifier().getValue());
+					 basic_object.setSecondVid(Integer.valueOf(newdoc.getIterationIdentifier().getValue()));
+					 basic_object.doUpdate();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				pm_document.doSetErrorMessage(10, "PLM 修订("+wc_id+")升级版本异常!");
+				basic_object.doSetErrorMessage(10, "PLM 修订("+wc_id+")升级版本异常!");
+			    throw new Exception(e.getMessage());
 			}finally{
 				SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 			}
@@ -717,24 +713,22 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		  Debug.P("----------->>>>Lifecycle  PMID:"+pm_id);
 		 //获取PM文档对象
 		  if(!StringUtils.isEmpty(pm_id)){
-			     DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
-		      	 PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
-		      	 checkNull(pm_document);
+//			     DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+//		      	 PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
+			     BasicDocument  basic_object=factory.getBasicDocumentById(pm_id);
+		      	 checkNull(basic_object);
 		      	//获得WindChill ID
-		        String wc_id=pm_document.getPLMId();
+		        String wc_id=basic_object.getPLMId();
 		        Debug.P("----------->>>Windchill PLMID:"+wc_id);
 		        try {
-					 SessionHelper.manager.setAdministrator();
-					  String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
+					  SessionHelper.manager.setAdministrator();
+					  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
 				      Persistable object=GenericUtil.getObjectByNumber(doc_num);
-				      if(object instanceof WTDocument){
-				    	  WTDocument doc=(WTDocument)object;
-				    	  String stateName=pm_document.getStatus();
-				    	  doc=(WTDocument) GenericUtil.changeState(doc, stateMap.get(stateName));
-				    	  PersistenceHelper.manager.refresh(doc);
-				    	  pm_document.setPLMData(getObjectInfo(object));
-				    	  pm_document.doUpdate();
-				      }
+				      String stateName=basic_object.getStatus();
+				      object=GenericUtil.changeState((LifeCycleManaged) object, stateMap.get(stateName));
+				      PersistenceHelper.manager.refresh(object);
+				      basic_object.setPLMData(getObjectInfo(object));
+				      basic_object.doUpdate();
 		        } catch (Exception e) {
 				    e.printStackTrace();
 				}finally{
@@ -762,11 +756,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
               if(!StringUtils.isEmpty(plmId)){
              try {
 			    SessionHelper.manager.setAdministrator();
-			    if(StringUtils.isEmpty(phase)){
+			    if(!StringUtils.isEmpty(phase)){
 			        Persistable persistable=GenericUtil.getPersistableByOid(plmId);
-				    Map  ibas=new HashMap();
-			        ibas.put(ConstanUtil.PHASE, phase);
-				    LWCUtil.setValue(persistable, ibas);//修改阶段属性
+//				    Map  ibas=new HashMap();
+//			        ibas.put(ConstanUtil.PHASE, phase);
+			        IBAUtils iba_values=new IBAUtils((IBAHolder)persistable);
+			        iba_values.setIBAValue(ConstanUtil.PHASE, phase);
+			        iba_values.updateIBAPart((IBAHolder)persistable);
+//				    LWCUtil.setValueBeforeStore(persistable, ibas);//修改阶段属性
+//				    PersistenceHelper.manager.save(persistable);
 				    count=1;
 			    }
 			
