@@ -2,8 +2,6 @@ package ext.tmt.WC2PM;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -20,7 +18,6 @@ import wt.util.WTProperties;
 
 import com.mongodb.WriteResult;
 import com.sg.visionadapter.CADDocumentPersistence;
-import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
