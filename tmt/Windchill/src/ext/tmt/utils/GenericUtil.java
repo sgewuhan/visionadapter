@@ -1632,7 +1632,10 @@ public class GenericUtil implements RemoteAccess {
 	public static RevisionControlled getLatestObject(Master master)
 			throws WTException {
 		QueryResult queryResult = VersionControlHelper.service.allVersionsOf(master);
-		return (RevisionControlled) queryResult.nextElement();
+		if(queryResult.hasMoreElements()){
+			return (RevisionControlled) queryResult.nextElement();
+		}
+		return null;
 	}
 	
 	

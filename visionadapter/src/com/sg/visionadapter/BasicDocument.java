@@ -113,6 +113,7 @@ public abstract class BasicDocument extends VisionObject {
 	 * @param documentNumber
 	 */
 	public void setObjectNumber(String documentNumber) {
+		setValue(DOCUMENTNUMBER, documentNumber);
 		put(DOCUMENTNUMBER, documentNumber);
 	}
 
@@ -176,6 +177,7 @@ public abstract class BasicDocument extends VisionObject {
 	 * @param status
 	 */
 	public void setStatus(String status) {
+		setValue(STATUS, status);
 		put(STATUS, status);
 	}
 
@@ -194,6 +196,7 @@ public abstract class BasicDocument extends VisionObject {
 	 * @param phase
 	 */
 	public void setPhase(String phase) {
+		setValue(PHASE, phase);
 		put(PHASE, phase);
 	}
 
@@ -213,6 +216,7 @@ public abstract class BasicDocument extends VisionObject {
 	 *            √Ë ˆ
 	 */
 	public void setDescription(String description) {
+		setValue(DESCRIPTION, description);
 		put(DESCRIPTION, description);
 	}
 

@@ -29,6 +29,7 @@ public abstract class BasicPart extends BasicDocument {
 	 * @param spec
 	 */
 	public void setSpec(String spec) {
+		setValue(SPEC, spec);
 		put(SPEC,spec);
 	}
 
@@ -45,6 +46,7 @@ public abstract class BasicPart extends BasicDocument {
 	 * @param model
 	 */
 	public void setModel(String model) {
+		setValue(MODEL, model);
 		put(MODEL,model);
 	}
 
@@ -61,6 +63,7 @@ public abstract class BasicPart extends BasicDocument {
 	 * @param weight
 	 */
 	public void setWeight(Number weight) {
+		setValue(WEIGHT, weight);
 		put(WEIGHT,weight);
 	}
 
@@ -77,6 +80,7 @@ public abstract class BasicPart extends BasicDocument {
 	 * @param material ²ÄÁÏ
 	 */
 	public void setMaterial(String material) {
+		setValue(MATERIAL, material);
 		put(MATERIAL,material);
 	}
 

@@ -28,6 +28,7 @@ import ext.tmt.folder.api.FolderService;
 import ext.tmt.folder.impl.FolderServiceImpl;
 
 
+import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.FolderUtil;
@@ -577,7 +578,12 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		if(!StringUtils.isEmpty(object.getProductNumber())){
 			  ibas.put(ConstanUtil.PRODUCTNO, object.getProductNumber());//关联的成品号
 		}
-	 
+		if(!StringUtils.isEmpty(object.getCreateByUserId())){
+			  ibas.put(Contants.PMCREATOR, object.getCreateByUserId());//创建者
+		}
+		if(!StringUtils.isEmpty(object.getModifiedUserId())){
+			  ibas.put(Contants.PMMODIFYEDBY, object.getModifiedUserId());//修改者
+		}
 	}
 	
 	
@@ -683,6 +689,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				if(!StringUtils.isEmpty(wc_id)){
 				     String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
 				     Persistable object=GenericUtil.getObjectByNumber(doc_num);
+				     if(object!=null){
 					 Folder folder = FolderHelper.service.getFolder((FolderEntry) object);
 					 WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion((Versioned) object);
 //					 LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
@@ -694,6 +701,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 					 basic_object.setMajorVid(newdoc.getVersionIdentifier().getValue());
 					 basic_object.setSecondVid(Integer.valueOf(newdoc.getIterationIdentifier().getValue()));
 					 basic_object.doUpdate();
+				     }
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -725,11 +733,13 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 					  SessionHelper.manager.setAdministrator();
 					  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
 				      Persistable object=GenericUtil.getObjectByNumber(doc_num);
+				      if(object!=null){
 				      String stateName=basic_object.getStatus();
 				      object=GenericUtil.changeState((LifeCycleManaged) object, stateMap.get(stateName));
 				      PersistenceHelper.manager.refresh(object);
 				      basic_object.setPLMData(getObjectInfo(object));
 				      basic_object.doUpdate();
+				      }
 		        } catch (Exception e) {
 				    e.printStackTrace();
 				}finally{

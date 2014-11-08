@@ -76,19 +76,23 @@ public class EndItemPartService extends StandardManager implements PartService,
 				.generateEventKey(PersistenceManagerEvent.POST_STORE);
 		getManagerService().addEventListener(listener, POST_STORE);
 		
-		String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
-		getManagerService().addEventListener(listener, POST_UPDATE);
+//		String INSERT = PersistenceManagerEvent
+//				.generateEventKey(PersistenceManagerEvent.INSERT); 
+//		getManagerService().addEventListener(listener, INSERT);
 		
-		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_DELETE);
+//		String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
+//		getManagerService().addEventListener(listener, POST_UPDATE);
+		
+		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
 		getManagerService().addEventListener( listener, DELETE);
 		
 //		String PRE_CHECKIN = WorkInProgressServiceEvent
 //		        .generateEventKey(WorkInProgressServiceEvent.PRE_CHECKIN);
 //        getManagerService().addEventListener(listener, PRE_CHECKIN);
 //        
-//        String POST_CHECKIN =WorkInProgressServiceEvent
-//		        .generateEventKey(WorkInProgressServiceEvent.POST_CHECKIN);
-//        getManagerService().addEventListener(listener, POST_CHECKIN);
+        String POST_CHECKIN =WorkInProgressServiceEvent
+		        .generateEventKey(WorkInProgressServiceEvent.POST_CHECKIN);
+        getManagerService().addEventListener(listener, POST_CHECKIN);
  
         
 //        String PER_POST = PersistenceManagerEvent
@@ -99,8 +103,8 @@ public class EndItemPartService extends StandardManager implements PartService,
 //		getManagerService().addEventListener(listener, NEW_ITERATION);
 //
 //		// 监听PersistenceManagerEvent
-//		String PRE_MODIFY = PersistenceManagerEvent
-//				.generateEventKey(PersistenceManagerEvent.PRE_MODIFY);
-//		getManagerService().addEventListener(listener, PRE_MODIFY);
+		String POST_MODIFY = PersistenceManagerEvent
+				.generateEventKey(PersistenceManagerEvent.POST_MODIFY);
+		getManagerService().addEventListener(listener, POST_MODIFY);
 	}
 }

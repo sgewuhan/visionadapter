@@ -12,6 +12,7 @@ import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMDocUtil;
+import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.PartUtil;
 import ext.tmt.utils.StringUtil;
@@ -54,11 +55,12 @@ import wt.util.WTAttributeNameIfc;
 import wt.util.WTException;
 import wt.vc.VersionControlHelper;
 import wt.vc.wip.WorkInProgressHelper;
+import wt.vc.wip.WorkInProgressServiceEvent;
 
 public class PartHelper implements Serializable {
 	private static final long serialVersionUID = 2304592616754675533L;
 
-	/**
+	/** 
 	 * 监听WTPart事件
 	 * @param target
 	 * @param eventType
@@ -67,21 +69,26 @@ public class PartHelper implements Serializable {
 	public static void listenerWTPart(WTPart wtPart, String eventType)
 			throws Exception {
 		Debug.P("事件类型---->" + eventType);
-		Debug.P(wtPart.getNumber());
+		Debug.P("wtPart----->"+wtPart.getNumber());
 		String newNumber="";
 		String partNumber="";
 		String partType="";
 		String types="";
 		boolean flag = true;
+		flag = SessionServerHelper.manager.setAccessEnforced(false);
 		try {
 		partType=DocUtils.getType(wtPart);
+//		Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//		if(object !=null){
+//			wtPart=(WTPart)object;
+//		}
 		IBAUtils iba = new IBAUtils(wtPart);
-        if (eventType.equals(PersistenceManagerEvent.POST_STORE)) {
-				flag = SessionServerHelper.manager.setAccessEnforced(false);
-				// 如果是检出再检入
-				if (WorkInProgressHelper.isCheckedOut(wtPart)) {
-					return;
-				}
+		Debug.P("ibautils--->"+iba);
+		String sync=iba.getIBAValue(Contants.CYNCDATA);
+		String pmoids = iba.getIBAValue(Contants.PMID);
+		Debug.P("sync--->"+sync);
+		Debug.P("pmoids--->"+pmoids);
+        if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 //				// 如果是新建修订版本或者新建视图版本
 //				if (WindchillUtil.isReviseVersion(wtPart)){
 //					IBAUtils ibaUtil = new IBAUtils(wtPart);
@@ -135,7 +142,7 @@ public class PartHelper implements Serializable {
 								PersistenceServerHelper.manager.update(wtPart);
 							}
 						}
-					}
+					} 
 			    	partType=DocUtils.getType(wtPart);
 			    	Debug.P(partNumber+"------------------->"+partType);
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
@@ -178,6 +185,10 @@ public class PartHelper implements Serializable {
 						i++;
 					} while (i < 100000);
 					changePartNumber(wtPart,newNumber);
+					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+					if(object !=null){
+						wtPart=(WTPart)object;
+					}
 					WCToPMHelper.CreatePMProductToPM(wtPart);
 				}
 			    else //如果是半成品
@@ -206,20 +217,35 @@ public class PartHelper implements Serializable {
 							i++;
 						} while (i < 100000);
 						changePartNumber(wtPart,newNumber);
+						Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+						if(object !=null){
+							wtPart=(WTPart)object;
+						}
 						WCToPMHelper.CreatePartToPM(wtPart);
 					}
 				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+					if(object !=null){
+						wtPart=(WTPart)object;
+					}
 					WCToPMHelper.CreatePMaterialToPM(wtPart);
 				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+					if(object !=null){
+						wtPart=(WTPart)object;
+					}
 					WCToPMHelper.CreateSupplyToPM(wtPart);
 				}
 			    
-		} else  if (eventType.equals(PersistenceManagerEvent.UPDATE)) {
+		} else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-//			   if(StringUtils.isEmpty(pmid)){
-//				   throw new Exception("");
-//			   }
-			  
+            Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
+            Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+			if(object !=null){
+				wtPart=(WTPart)object;
+			}
+            if(WorkInProgressHelper.isCheckedOut(wtPart)){
+            	
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -230,9 +256,31 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
 			}
 			
-		}else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
+            }
+		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-			Debug.P(pmoid);
+			Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+			if(object !=null){
+				wtPart=(WTPart)object;
+			}
+            Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
+			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+				   WCToPMHelper.updatePMPart(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
+					WCToPMHelper.updatePMProductToPM(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.MATERIAL)){ //如果是原材料
+					WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
+			}
+		}
+		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
+			String pmoid = iba.getIBAValue(Contants.PMID);
+			Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+			if(object !=null){
+				wtPart=(WTPart)object;
+			}
+			   Debug.P("PRE_DELETE-----------------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.deletePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料

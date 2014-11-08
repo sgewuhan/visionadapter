@@ -115,6 +115,16 @@ public class Contants {
 	 */
 	public static final String PMREQUEST="PMRequest";
 	
+	/*
+	 * PM创建者
+	 */
+	public static final String PMCREATOR="CreatorBy";
+	
+	/*
+	 * PM修改者
+	 */
+	public static final String PMMODIFYEDBY="ModifiedBy";
+	
 //	/*
 //	 * 物料组
 //	 */
