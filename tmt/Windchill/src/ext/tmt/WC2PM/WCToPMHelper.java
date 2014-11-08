@@ -50,7 +50,7 @@ public class WCToPMHelper {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-	 }  
+	 }    
 	
 	 /**
 	  * Windchill 创建半成品后将半成品的基本属性写入PM的半成品对象上并存入PM数据库中
