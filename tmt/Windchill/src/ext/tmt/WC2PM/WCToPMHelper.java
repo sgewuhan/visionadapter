@@ -636,7 +636,7 @@ public class WCToPMHelper {
 			pmPart = partPersistence.get(new ObjectId(pmoid));
 			WriteResult wresult = pmPart.doRemove();   //
 			Debug.P("delete PMPart success");
-		} catch (Exception e) {
+		} catch (Exception e) {    
 			e.printStackTrace();
 		}
 	}
