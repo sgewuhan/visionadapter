@@ -14,6 +14,7 @@ public class ConstanUtil {
 	public static String PROJECTNO="Project_NO";//项目编号
 	public static String WORKORDER="Work_Order";//工作令号
 	public static String PRODUCTNO="Product_NO";//成品号
+	public static String PM_CREATOR="";
 	
 	
 	//其他常量
