@@ -685,7 +685,9 @@ public class WCToPMHelper {
 	
 	
 	public static void reloadPermission(String objectId) throws Exception{
-		URL url = new URL(ModelServiceFactory.URL_REAUTH+"?id="+objectId);
+		String urls =ModelServiceFactory.URL_REAUTH+"?id="+objectId;
+		Debug.P(urls);
+		URL url = new URL(urls);
 		url.openConnection();
 	}
 
