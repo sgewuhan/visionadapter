@@ -110,7 +110,9 @@ public class WCToPMHelper {
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.PMID, objectId.toString());
-				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
+				String data = Utils.getDate();
+				Debug.P(data);
+				partiba.setIBAValue(Contants.CYNCDATA, data);
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
 				reloadPermission(objectId.toString());
@@ -424,6 +426,7 @@ public class WCToPMHelper {
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence = factory.get(PartPersistence.class);
 			pmPart = partPersistence.get(new ObjectId(pmoid));
+			Debug.P("pmPart --->"+pmPart.getCommonName());
 			IBAUtils  partiba = new IBAUtils(wtPart);
             Debug.P(partOid);
 			pmPart.setCommonName(wtPart.getName());                           //设置PM部件名称
@@ -473,9 +476,10 @@ public class WCToPMHelper {
 		String weight ="";
 		Debug.P("更新PM系统的数据库-----------》"+wtPart.getNumber());
 		try {
-			PMProduct pmProduct = null;//PM中的半成品           
+			PMProduct pmProduct = null;//PM中的成品           
 			productPersistence = factory.get(ProductPersistence.class);
 			pmProduct = productPersistence.get(new ObjectId(pmoid));
+			Debug.P(pmProduct.getSyncDate());
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Debug.P(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
@@ -528,9 +532,10 @@ public class WCToPMHelper {
 		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
 		partOid = wtPart.toString();
 		try {
-			PMMaterial pmMaterial = null;//PM中的半成品           
+			PMMaterial pmMaterial = null;//PM中的原材料          
 			materialPersistence = factory.get(MaterialPersistence.class);
 			pmMaterial = materialPersistence.get(new ObjectId(pmoid));
+			Debug.P("pmmaterial--->"+pmMaterial.getCommonName());
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Debug.P(partOid);
           pmMaterial.setPLMId(partOid);
@@ -685,7 +690,9 @@ public class WCToPMHelper {
 	
 	
 	public static void reloadPermission(String objectId) throws Exception{
-		URL url = new URL(ModelServiceFactory.URL_REAUTH+"?id="+objectId);
+		String urls = ModelServiceFactory.URL_REAUTH+"?id="+objectId;
+		Debug.P(urls);
+		URL url = new URL(urls);
 		url.openConnection();
 	}
 

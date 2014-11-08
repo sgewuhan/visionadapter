@@ -108,7 +108,7 @@ public class Contants {
 	/*
 	 * PM同步时间
 	 */
-	public static final String CYNCDATA="Cyncdata";
+	public static final String CYNCDATA="CyncData";
 	
 	/*
 	 * PM操作请求
