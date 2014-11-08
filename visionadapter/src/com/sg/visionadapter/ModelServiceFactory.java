@@ -267,6 +267,13 @@ public class ModelServiceFactory {
 		} else if (PMSupplyment.class.getSimpleName().toLowerCase()
 				.equals(type)) {
 			return PMSupplyment.class;
+		} else if (PMJigTools.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMJigTools.class;
+		} else if (PMPackage.class.getSimpleName().toLowerCase().equals(type)) {
+			return PMPackage.class;
+		} else if (PMSupplyment.class.getSimpleName().toLowerCase()
+				.equals(type)) {
+			return PMSupplyment.class;
 		}
 		return null;
 	}

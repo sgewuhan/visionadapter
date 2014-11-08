@@ -108,10 +108,10 @@ public class WCToPMHelper {
 			pmPart.setProductNumber(partiba.getIBAValue(Contants.PRODUCTNO)==null?"":partiba.getIBAValue(Contants.PRODUCTNO));
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			pmPart.setPLMData(plmData);
-			pmPart.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmPart.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmPart.doInsert();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.PMID, objectId.toString());
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
@@ -182,10 +182,10 @@ public class WCToPMHelper {
 			if(StringUtils.isNotEmpty(weight))
 			pmProduct.setWeight(NumberFormat.getInstance().parse(weight));    
 			pmProduct.setFormularNumber(partiba.getIBAValue(Contants.FORMULANO)==null?"":partiba.getIBAValue(Contants.FORMULANO) );
-			pmProduct.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmProduct.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmProduct.doInsert();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.PMID, objectId.toString());
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
@@ -257,10 +257,10 @@ public class WCToPMHelper {
 			pmMaterial.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
             ObjectId objectId =new ObjectId();
 			pmMaterial.set_id(objectId);
-			pmMaterial.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmMaterial.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmMaterial.doInsert();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.PMID, objectId.toString());
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
@@ -333,10 +333,10 @@ public class WCToPMHelper {
 			pmSupplyment.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
 			ObjectId objectId = new ObjectId();
 			pmSupplyment.set_id(objectId);
-			pmSupplyment.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmSupplyment.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmSupplyment.doInsert();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.PMID, objectId.toString());
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
@@ -403,10 +403,10 @@ public class WCToPMHelper {
 			pmcad.setDrawingNumber(cadiba.getIBAValue(Contants.MATERIALNO)==null?"":cadiba.getIBAValue(Contants.MATERIALNO));
 			ObjectId objectId = new ObjectId();
 			pmcad.set_id(objectId);
-			pmcad.setOwner(epmdoc.getOwnership().getOwner().getFullName());
+			pmcad.setOwner(epmdoc.getCreatorName());
 			WriteResult wresult=pmcad.doInsert();   //执行插入数据库操作
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
                 cadiba.setIBAValue(Contants.PMID, objectId.toString());
                 cadiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
                 cadiba.setIBAValue(Contants.PMREQUEST, "create");
@@ -424,7 +424,7 @@ public class WCToPMHelper {
 		String partOid ="";    //WC部件Oid 
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
-		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		Debug.P("更新Windchill中的半成品后至PM系统的数据库中");
 		partOid = wtPart.toString();
 		try {
 			PMPart pmPart = null;//PM中的半成品           
@@ -446,11 +446,10 @@ public class WCToPMHelper {
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			plmData.put("AirSpringClassification", partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
 			pmPart.setPLMData(plmData);
-			pmPart.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmPart.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmPart.doUpdate();   //
-			int error = wresult.getN();
-			if(error==1){
-				//partiba.setIBAValue(Contants.PMID, objectId.toString());
+			String error = wresult.getError();   
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
@@ -500,10 +499,10 @@ public class WCToPMHelper {
 			pmProduct.setWeight(NumberFormat.getInstance().parse(weight));    
 			pmProduct.setFormularNumber(partiba.getIBAValue(Contants.FORMULANO)==null?"":partiba.getIBAValue(Contants.FORMULANO) );
 			pmProduct.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
-			pmProduct.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmProduct.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmProduct.doUpdate();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
@@ -557,10 +556,10 @@ public class WCToPMHelper {
 			if(StringUtils.isNotEmpty(weight))
 			 pmMaterial.setWeight(NumberFormat.getInstance().parse(weight));    
 			pmMaterial.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
-			pmMaterial.setOwner(wtPart.getOwnership().getOwner().getFullName());
+			pmMaterial.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmMaterial.doUpdate();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
@@ -615,8 +614,8 @@ public class WCToPMHelper {
 			pmSupplyment.setOwner(wtPart.getCreatorName());
 			pmSupplyment.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
 			WriteResult wresult = pmSupplyment.doUpdate();   //
-			int error = wresult.getN();
-			if(error==1){
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
