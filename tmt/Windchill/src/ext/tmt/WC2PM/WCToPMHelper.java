@@ -1,10 +1,12 @@
 package ext.tmt.WC2PM;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -14,13 +16,13 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
 import wt.epm.EPMDocument;
+import wt.fc.WTObject;
 import wt.folder.Folder;
 import wt.part.WTPart;
 import wt.util.WTProperties;
 
 import com.mongodb.WriteResult;
 import com.sg.visionadapter.CADDocumentPersistence;
-import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
@@ -35,11 +37,9 @@ import com.sg.visionadapter.SupplymentPersistence;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.IBAUtils;
-import ext.tmt.utils.PartUtil;
 import ext.tmt.utils.Utils;
 
 public class WCToPMHelper {
-	
 	
 
 	//获得PM数据池
@@ -70,21 +70,25 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
-		partOid = wtPart.toString();
-		try {
+		partOid = getObjectOid(wtPart);
+		try {   
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence = factory.get(PartPersistence.class);
-			pmPart = partPersistence.newInstance();
+			pmPart = partPersistence.newInstance();  
 			IBAUtils  partiba = new IBAUtils(wtPart);
             Debug.P(partOid);
             partFolderString = wtPart.getFolderPath();
-            partFolder=wtPart.getFolderingInfo().getFolder();
-            Debug.P(partFolder.toString());
-            Debug.P(wtPart.getContainer());
+            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
             Debug.P(partFolderString);
+          //  partFolder=FolderUtil.getFolder(partFolderString, wtPart.getContainerName());
+           // partFolder=wtPart.getFolderingInfo().getFolder();
+            Debug.P(partFolder);
+            
+            Debug.P(wtPart.getContainer());
             
             wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
             pFolderId = rf.getReferenceString(partFolder);
+            Debug.P(pFolderId);
             pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
  		    pmPart.setFolderIdByPLMId(pFolderId);
  		    ObjectId objectId = new ObjectId();
@@ -128,6 +132,10 @@ public class WCToPMHelper {
 			e.printStackTrace();
 		}
 	}
+
+	private static String getObjectOid(WTObject object) {
+		return object.getPersistInfo().getObjectIdentifier().getStringValue();
+	}
 	
 	/**
 	  * Windchill 创建成品后将成品的基本属性写入PM的成品对象上并存入PM数据库中
@@ -137,7 +145,6 @@ public class WCToPMHelper {
 	  * @Description
 	  */
 	public static void CreatePMProductToPM(WTPart wtPart){
-		String partType ="";   //Windchill中部件的类型
 		String partOid ="";    //WC部件Oid 
 		String partFolderString="";
 		Folder partFolder =null;
@@ -145,8 +152,7 @@ public class WCToPMHelper {
 		ProductPersistence productPersistence =null;  //PM系统中的成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的成品插入PM系统的数据库中");
-		partType = PartUtil.getType(wtPart);
-		partOid = wtPart.toString();
+		partOid = getObjectOid(wtPart);
 		try {
 			PMProduct pmProduct = null;//PM中的成品           
 			productPersistence = factory.get(ProductPersistence.class);
@@ -154,10 +160,11 @@ public class WCToPMHelper {
 			IBAUtils  partiba = new IBAUtils(wtPart);
            Debug.P(partOid);
            partFolderString = wtPart.getFolderPath();
-           partFolder=wtPart.getFolderingInfo().getFolder();
-           Debug.P(partFolder.toString());
-           Debug.P(wtPart.getContainer());
            Debug.P(partFolderString);
+           partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+           //partFolder=wtPart.getFolderingInfo().getFolder();
+           Debug.P(partFolder);
+           Debug.P(wtPart.getContainer());
            Debug.P(pFolderId);
            ObjectId objectId =new ObjectId();
            pmProduct.set_id(objectId);
@@ -219,7 +226,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
-		partOid = wtPart.toString();
+		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品           
 			materialPersistence = factory.get(MaterialPersistence.class);
@@ -227,10 +234,11 @@ public class WCToPMHelper {
 			IBAUtils  partiba = new IBAUtils(wtPart);
            Debug.P(partOid);
            partFolderString = wtPart.getFolderPath();
-           partFolder=wtPart.getFolderingInfo().getFolder();
-           Debug.P(partFolder.toString());
-           Debug.P(wtPart.getContainer());
            Debug.P(partFolderString);
+           partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+           //partFolder=wtPart.getFolderingInfo().getFolder();
+           Debug.P(partFolder);
+           Debug.P(wtPart.getContainer());
            wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
            pFolderId = rf.getReferenceString(partFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
@@ -284,7 +292,6 @@ public class WCToPMHelper {
 	  * @Description
 	  */
 	public static void CreateSupplyToPM(WTPart wtPart){
-		String partType ="";   //Windchill中部件的类型
 		String partOid ="";    //WC部件Oid 
 		String partFolderString="";
 		Folder partFolder =null;
@@ -293,8 +300,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的客供件插入PM系统的数据库中");
-		partType = PartUtil.getType(wtPart);
-		partOid = wtPart.getPersistInfo().getObjectIdentifier().toString();
+		partOid = getObjectOid(wtPart);;
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的半成品           
 			supplymentPersistence = factory.get(SupplymentPersistence.class);
@@ -303,10 +309,11 @@ public class WCToPMHelper {
 			
            Debug.P(partOid);
            partFolderString = wtPart.getFolderPath();
-           partFolder=wtPart.getFolderingInfo().getFolder();
-           Debug.P(partFolder.toString());
-           Debug.P(wtPart.getContainer());
            Debug.P(partFolderString);
+           partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+           //partFolder=wtPart.getFolderingInfo().getFolder();
+           Debug.P(partFolder);
+           Debug.P(wtPart.getContainer());
            wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
            pFolderId = rf.getReferenceString(partFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
@@ -314,6 +321,7 @@ public class WCToPMHelper {
            pmSupplyment.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            pmSupplyment.setPLMData(plmData);
+           pmSupplyment.setObjectNumber(wtPart.getNumber());
 			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
 			pmSupplyment.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
@@ -375,12 +383,15 @@ public class WCToPMHelper {
 			IBAUtils  cadiba = new IBAUtils(epmdoc);
            Debug.P(docOid);
            docFolderString = epmdoc.getFolderPath();
-           docFolder=epmdoc.getFolderingInfo().getFolder();
-           Debug.P(docFolder.toString());
-           Debug.P(epmdoc.getContainer());
            Debug.P(docFolderString);
-           pFolderId = docFolder.toString();
-           Debug.P(docFolder.toString());
+           docFolder=  wt.folder.FolderHelper.service.getFolder(epmdoc);
+           //partFolder=wtPart.getFolderingInfo().getFolder();
+           Debug.P(docFolder);
+           Debug.P(epmdoc.getContainer());
+           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
+           pFolderId = rf.getReferenceString(docFolder);
+           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+           Debug.P(pFolderId);
            pmcad.setFolderId(new ObjectId(pFolderId));
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -421,13 +432,14 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品后至PM系统的数据库中");
-		partOid = wtPart.toString();
+		partOid = getObjectOid(wtPart);
 		try {
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence = factory.get(PartPersistence.class);
 			pmPart = partPersistence.get(new ObjectId(pmoid));
 			Debug.P("pmPart --->"+pmPart.getCommonName());
 			IBAUtils  partiba = new IBAUtils(wtPart);
+			Debug.P("partiba----->"+partiba);
             Debug.P(partOid);
 			pmPart.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPart.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
@@ -476,11 +488,13 @@ public class WCToPMHelper {
 		String weight ="";
 		Debug.P("更新PM系统的数据库-----------》"+wtPart.getNumber());
 		try {
+			partOid = getObjectOid(wtPart);
 			PMProduct pmProduct = null;//PM中的成品           
 			productPersistence = factory.get(ProductPersistence.class);
 			pmProduct = productPersistence.get(new ObjectId(pmoid));
 			Debug.P(pmProduct.getSyncDate());
 			IBAUtils  partiba = new IBAUtils(wtPart);
+			Debug.P("partiba----->"+partiba);
           Debug.P(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           pmProduct.setPLMData(plmData);
@@ -530,7 +544,7 @@ public class WCToPMHelper {
 		MaterialPersistence materialPersistence=null;         //PM系统中的原材料持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
-		partOid = wtPart.toString();
+		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料          
 			materialPersistence = factory.get(MaterialPersistence.class);
@@ -593,16 +607,14 @@ public class WCToPMHelper {
 			supplymentPersistence = factory.get(SupplymentPersistence.class);
 			pmSupplyment = supplymentPersistence.get(new ObjectId(pmoid));
 			IBAUtils  partiba = new IBAUtils(wtPart);
-          pmSupplyment.setFolderIdByPLMId(pFolderId);
           Map<String,Object> plmData = new HashMap<String,Object>();
-          pmSupplyment.setPLMData(plmData);
+            pmSupplyment.setPLMData(plmData);
 			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
 			pmSupplyment.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
 			pmSupplyment.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
 			pmSupplyment.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
 			pmSupplyment.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
-			
 			pmSupplyment.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
 			 weight = partiba.getIBAValue(Contants.WEIGHT);
 			if(StringUtils.isNotEmpty(weight))
@@ -611,7 +623,6 @@ public class WCToPMHelper {
 			pmSupplyment.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
 			pmSupplyment.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
 			pmSupplyment.setOwner(wtPart.getCreatorName());
-			pmSupplyment.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
 			WriteResult wresult = pmSupplyment.doUpdate();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
@@ -637,12 +648,15 @@ public class WCToPMHelper {
 		try {
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence = factory.get(PartPersistence.class);
-			pmPart = partPersistence.get(new ObjectId(pmoid));
+			ObjectId objecdId=new ObjectId(pmoid);
+			if(objecdId !=null){
+			pmPart = partPersistence.get(objecdId);
 			Debug.P("将Windchill中的半成品从PM系统的数据库中删除------------->"+pmPart.getCommonName());
 			WriteResult wresult = pmPart.doRemove();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
 				Debug.P("delete PMPart success");
+			}
 			}
 		} catch (Exception e) {    
 			e.printStackTrace();
@@ -654,12 +668,15 @@ public class WCToPMHelper {
 		try {
 			PMProduct productPart = null;//PM中的成品           
 			productPersistence = factory.get(ProductPersistence.class);
-			productPart = productPersistence.get(new ObjectId(pmoid));
+			ObjectId objecdId=new ObjectId(pmoid);
+			if(objecdId !=null){
+			productPart = productPersistence.get(objecdId);
 			Debug.P("将Windchill中的成品从PM系统的数据库中删除--->"+productPart.getCommonName());
 			WriteResult wresult = productPart.doRemove();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
 				Debug.P("delete PMProduct success");
+			}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -671,12 +688,15 @@ public class WCToPMHelper {
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料
 			materialPersistence = factory.get(MaterialPersistence.class);
-			pmMaterial = materialPersistence.get(new ObjectId(pmoid));
+			ObjectId objecdId=new ObjectId(pmoid);
+			if(objecdId !=null){
+			pmMaterial = materialPersistence.get(objecdId);
 			Debug.P("将Windchill中的半成品从PM系统的数据库中删除-----》"+pmMaterial.getCommonName());
 			WriteResult wresult = pmMaterial.doRemove();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
 				Debug.P("delete PMMaterial success");
+			}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -688,12 +708,15 @@ public class WCToPMHelper {
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的客供件          
 			supplymentPersistence = factory.get(SupplymentPersistence.class);
-			pmSupplyment = supplymentPersistence.get(new ObjectId(pmoid));
+			ObjectId objecdId=new ObjectId(pmoid);
+			if(objecdId !=null){
+			pmSupplyment = supplymentPersistence.get(objecdId);
 			Debug.P("将Windchill中的客供件从PM系统的数据库中删除---》"+pmSupplyment.getCommonName());
 			WriteResult wresult = pmSupplyment.doRemove();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
 				Debug.P("delete Supplyment success");
+			}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -706,7 +729,23 @@ public class WCToPMHelper {
 		String urls = ModelServiceFactory.URL_REAUTH+"?id="+objectId;
 		Debug.P(urls);
 		URL url = new URL(urls);
-		url.openConnection();
+		HttpURLConnection  connection = (HttpURLConnection)url.openConnection();
+		connection.connect();
+         BufferedReader reader  =   new  BufferedReader( new  InputStreamReader(connection.getInputStream()));
+         String line;
+         System.out.println( " ============================= " );
+         System.out.println( " Contents of post request " );
+         System.out.println( " ============================= " );
+           while  ((line  =  reader.readLine())  !=   null ){
+             System.out.println(line);
+         } 
+         System.out.println( " ============================= " );
+         System.out.println( " Contents of post request ends " );
+         System.out.println( " ============================= " );
+         reader.close();
+         connection.disconnect();
+//		conn.disconnect();
+//		conn.getOutputStream();
 	}
 
 }
