@@ -221,8 +221,8 @@ public class PartHelper implements Serializable {
 						if(object !=null){
 							wtPart=(WTPart)object;
 						}
-						WCToPMHelper.CreatePartToPM(wtPart);
 					}
+					WCToPMHelper.CreatePartToPM(wtPart);
 				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
 					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
 					if(object !=null){

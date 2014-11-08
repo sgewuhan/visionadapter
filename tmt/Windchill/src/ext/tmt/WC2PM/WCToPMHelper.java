@@ -110,6 +110,7 @@ public class WCToPMHelper {
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			pmPart.setPLMData(plmData);
 			pmPart.setOwner(wtPart.getCreatorName());
+			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL));
 			WriteResult wresult = pmPart.doInsert();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
@@ -188,6 +189,7 @@ public class WCToPMHelper {
 			if(StringUtils.isNotEmpty(weight))
 			pmProduct.setWeight(NumberFormat.getInstance().parse(weight));    
 			pmProduct.setFormularNumber(partiba.getIBAValue(Contants.FORMULANO)==null?"":partiba.getIBAValue(Contants.FORMULANO) );
+			pmProduct.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmProduct.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmProduct.doInsert();   //
 			String error = wresult.getError();
@@ -263,6 +265,7 @@ public class WCToPMHelper {
             ObjectId objectId =new ObjectId();
 			pmMaterial.set_id(objectId);
 			pmMaterial.setOwner(wtPart.getCreatorName());
+			pmMaterial.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			WriteResult wresult = pmMaterial.doInsert();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
@@ -337,6 +340,7 @@ public class WCToPMHelper {
 			pmSupplyment.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
 			ObjectId objectId = new ObjectId();
 			pmSupplyment.set_id(objectId);
+			pmSupplyment.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmSupplyment.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmSupplyment.doInsert();   //
 			String error = wresult.getError();
@@ -405,7 +409,6 @@ public class WCToPMHelper {
 			pmcad.setMajorVid(epmdoc.getVersionIdentifier().getValue());     //设置PM部件大版本
 			pmcad.setSecondVid(Integer.parseInt(epmdoc.getIterationIdentifier().getValue())); //设置PM部件小版本
 			pmcad.setPhase(cadiba.getIBAValue(Contants.PHASE)==null?"":cadiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
-			
 			//pmcad.setModifiedBy("", epmdoc.getModifierFullName());		//设置PM部件修改者
 			pmcad.setDrawingNumber(cadiba.getIBAValue(Contants.MATERIALNO)==null?"":cadiba.getIBAValue(Contants.MATERIALNO));
 			ObjectId objectId = new ObjectId();
@@ -455,6 +458,7 @@ public class WCToPMHelper {
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			plmData.put("AirSpringClassification", partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
 			pmPart.setPLMData(plmData);
+			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmPart.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmPart.doUpdate();   //
 			String error = wresult.getError();   
@@ -512,6 +516,7 @@ public class WCToPMHelper {
 			pmProduct.setFormularNumber(partiba.getIBAValue(Contants.FORMULANO)==null?"":partiba.getIBAValue(Contants.FORMULANO) );
 			pmProduct.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
 			pmProduct.setOwner(wtPart.getCreatorName());
+			pmProduct.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			WriteResult wresult = pmProduct.doUpdate();   //
 			String error = wresult.getError();
 			if(StringUtils.isEmpty(error)){
@@ -562,7 +567,7 @@ public class WCToPMHelper {
 			pmMaterial.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
 			pmMaterial.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
 			pmMaterial.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
-			
+			pmMaterial.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmMaterial.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
 			pmMaterial.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
 			 weight = partiba.getIBAValue(Contants.WEIGHT);
@@ -622,6 +627,7 @@ public class WCToPMHelper {
 			pmSupplyment.setCustomerName(partiba.getIBAValue(Contants.CLIENTNAME)==null?"":partiba.getIBAValue(Contants.CLIENTNAME));
 			pmSupplyment.setModifiedBy(wtPart.getModifierName(), wtPart.getModifierFullName());		//设置PM部件修改者
 			pmSupplyment.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
+			pmSupplyment.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmSupplyment.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmSupplyment.doUpdate();   //
 			String error = wresult.getError();
