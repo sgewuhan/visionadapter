@@ -232,6 +232,7 @@ public class PartHelper implements Serializable {
 			
 		}else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
+			Debug.P(pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.deletePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -241,7 +242,7 @@ public class PartHelper implements Serializable {
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
 					WCToPMHelper.deleteSupplyment(pmoid, wtPart);
 			}
-		}
+		}    
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally {
