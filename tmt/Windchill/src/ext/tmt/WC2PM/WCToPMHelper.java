@@ -63,13 +63,16 @@ public class WCToPMHelper {
 	  * @Description
 	  */
 		public static void CreatePartToPM(WTPart wtPart){
+			String partType ="";   //Windchill中部件的类型
 		String partOid ="";    //WC部件Oid 
 		String partFolderString="";
 		Folder partFolder =null;
 		String pFolderId="";
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
+		
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		//partType = PartUtil.getType(wtPart);
 		partOid = wtPart.toString();
 		try {
 			PMPart pmPart = null;//PM中的半成品           
@@ -113,9 +116,9 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
-				reloadPermission(objectId.toString());
-				Debug.P("create PMPart success");
 			}
+			reloadPermission(objectId.toString());
+			Debug.P("create PMPart success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -146,7 +149,7 @@ public class WCToPMHelper {
 		partType = PartUtil.getType(wtPart);
 		partOid = wtPart.toString();
 		try {
-			PMProduct pmProduct = null;//PM中的成品           
+			PMProduct pmProduct = null;//PM中的半成品           
 			productPersistence = factory.get(ProductPersistence.class);
 			pmProduct = productPersistence.newInstance();
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -187,9 +190,9 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
-				reloadPermission(objectId.toString());
-				Debug.P("create pmproduct success");
 			}
+			reloadPermission(objectId.toString());
+			Debug.P("create pmproduct success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -209,6 +212,7 @@ public class WCToPMHelper {
 	  * @Description
 	  */
 	public static void CreatePMaterialToPM(WTPart wtPart){
+		String partType ="";   //Windchill中部件的类型
 		String partOid ="";    //WC部件Oid 
 		String partFolderString="";
 		Folder partFolder =null;
@@ -217,6 +221,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		partType = PartUtil.getType(wtPart);
 		partOid = wtPart.toString();
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品           
@@ -260,9 +265,10 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
-				reloadPermission(objectId.toString());
-				Debug.P("create PMMaterial success");
 			}
+			
+			reloadPermission(objectId.toString());
+			Debug.P("create PMMaterial success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -335,9 +341,9 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
-				reloadPermission(objectId.toString());
-				Debug.P("create PMSupplyment success");
 			}
+			reloadPermission(objectId.toString());
+			Debug.P("create PMSupplyment success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -405,9 +411,9 @@ public class WCToPMHelper {
                 cadiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
                 cadiba.setIBAValue(Contants.PMREQUEST, "create");
                 cadiba.updateIBAPart(epmdoc);
-                reloadPermission(objectId.toString());
-                Debug.P("create PMCADDocument success");
 			}
+			reloadPermission(objectId.toString());
+			Debug.P("create PMCADDocument success");
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -448,9 +454,9 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
-				//reloadPermission(pmoid);
-				Debug.P("update PMPart success");
 			}
+			reloadPermission(pmoid);
+			Debug.P("update PMPart success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -501,9 +507,9 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
-//				reloadPermission(pmoid);
-				Debug.P("update pmproduct success");
 			}
+			reloadPermission(pmoid);
+			Debug.P("update pmproduct success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -558,9 +564,9 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
-//				reloadPermission(pmoid);
-				Debug.P("update PMMaterial success");
 			}
+			reloadPermission(pmoid);
+			Debug.P("update PMMaterial success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -585,7 +591,7 @@ public class WCToPMHelper {
 		String weight ="";
 		Debug.P("将Windchill中的客供件更新PM系统的数据库中---------------》"+wtPart.getNumber());
 		try {
-			PMSupplyment pmSupplyment = null;//PM中的客供件         
+			PMSupplyment pmSupplyment = null;//PM中的半成品           
 			supplymentPersistence = factory.get(SupplymentPersistence.class);
 			pmSupplyment = supplymentPersistence.get(new ObjectId(pmoid));
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -614,71 +620,15 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
 				partiba.updateIBAPart(wtPart);
-//				reloadPermission(pmoid);
-				Debug.P("update PMSupplyment success");
 			}
+			reloadPermission(pmoid);
+			Debug.P("update PMSupplyment success");
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (ParseException e) {
 			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();  
-		}
-	}
-	
-	public static void deletePMPart(String pmoid,WTPart wtPart){
-		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
-		Debug.P("将Windchill中的半成品从PM系统的数据库中删除");
-		try {
-			PMPart pmPart = null;//PM中的半成品           
-			partPersistence = factory.get(PartPersistence.class);
-			pmPart = partPersistence.get(new ObjectId(pmoid));
-			WriteResult wresult = pmPart.doRemove();   //
-			Debug.P("delete PMPart success");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void deletePMProduct(String pmoid,WTPart wtPart){
-		ProductPersistence productPersistence=null;         //PM系统中的半成品持久化对象
-		Debug.P("将Windchill中的成品从PM系统的数据库中删除");
-		try {
-			PMProduct productPart = null;//PM中的半成品           
-			productPersistence = factory.get(ProductPersistence.class);
-			productPart = productPersistence.get(new ObjectId(pmoid));
-			WriteResult wresult = productPart.doRemove();   //
-			Debug.P("delete PMProduct success");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void deletePMMaterial(String pmoid,WTPart wtPart){
-		MaterialPersistence materialPersistence=null;           //PM系统中的半成品持久化对象
-		Debug.P("将Windchill中的半成品从PM系统的数据库中删除");
-		try {
-			PMMaterial pmMaterial = null;//PM中的半成品           
-			materialPersistence = factory.get(MaterialPersistence.class);
-			pmMaterial = materialPersistence.get(new ObjectId(pmoid));
-			WriteResult wresult = pmMaterial.doRemove();   //
-			Debug.P("delete PMMaterial success");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public static void deleteSupplyment(String pmoid,WTPart wtPart){
-		SupplymentPersistence supplymentPersistence=null;         //PM系统中的客供件持久化对象
-		Debug.P("将Windchill中的客供件从PM系统的数据库中删除");
-		try {
-			PMSupplyment pmSupplyment = null;//PM中的客供件          
-			supplymentPersistence = factory.get(SupplymentPersistence.class);
-			pmSupplyment = supplymentPersistence.get(new ObjectId(pmoid));
-			WriteResult wresult = pmSupplyment.doRemove();   //
-			Debug.P("delete Supplyment success");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
