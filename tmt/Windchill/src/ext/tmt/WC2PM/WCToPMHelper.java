@@ -442,7 +442,7 @@ public class WCToPMHelper {
 			pmPart.setPLMData(plmData);
 			pmPart.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmPart.doUpdate();   //
-			String error = wresult.getError();
+			String error = wresult.getError();   
 			if(StringUtils.isEmpty(error)){
 				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
 				partiba.setIBAValue(Contants.PMREQUEST, "update");
