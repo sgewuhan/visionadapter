@@ -53,7 +53,6 @@ public class ModelServiceFactory {
 	 *            配置文件的目录名
 	 */
 	private void start(String confFolder) {
-			service = this;
 			clients = new ConcurrentHashMap<String, MongoClient>();
 			loadDBConf(confFolder);
 			loadPMConf(confFolder);
