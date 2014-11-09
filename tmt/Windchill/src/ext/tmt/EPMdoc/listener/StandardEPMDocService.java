@@ -73,14 +73,15 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 		listener = new EPMDocListener(getConceptualClassname());
 
 		// 监听VersionControlServiceEvent
+		// 监听VersionControlServiceEvent
 		String POST_STORE = PersistenceManagerEvent
 				.generateEventKey(PersistenceManagerEvent.POST_STORE);
 		getManagerService().addEventListener(listener, POST_STORE);
 		
-		String PRE_CHECKIN = WorkInProgressServiceEvent
-		        .generateEventKey(WorkInProgressServiceEvent.PRE_CHECKIN);
-        getManagerService().addEventListener(listener, PRE_CHECKIN);
-        
+		
+		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
+		getManagerService().addEventListener( listener, DELETE);
+		
         String POST_CHECKIN =WorkInProgressServiceEvent
 		        .generateEventKey(WorkInProgressServiceEvent.POST_CHECKIN);
         getManagerService().addEventListener(listener, POST_CHECKIN);
