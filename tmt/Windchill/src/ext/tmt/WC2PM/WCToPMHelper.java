@@ -27,6 +27,7 @@ import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
 import com.sg.visionadapter.PMMaterial;
+import com.sg.visionadapter.PMPackage;
 import com.sg.visionadapter.PMPart;
 import com.sg.visionadapter.PMProduct;
 import com.sg.visionadapter.PMSupplyment;
@@ -213,7 +214,7 @@ public class WCToPMHelper {
 	}
 	
 	/**
-	  * Windchill 创建原材料后将原材料的基本属性写入PM的半成品对象上并存入PM数据库中
+	  * Windchill 创建原材料后将原材料的基本属性写入PM的原材料对象上并存入PM数据库中
 	  * @author Eilaiwang
 	  * @param wtPart
 	  * @return void
@@ -227,10 +228,10 @@ public class WCToPMHelper {
 		MaterialPersistence materialPersistence=null;         //PM系统中的原材料持久化对象
 		
 		String weight ="";
-		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		Debug.P("将Windchill中的原材料插入PM系统的数据库中");
 		partOid = getObjectOid(wtPart);
 		try {
-			PMMaterial pmMaterial = null;//PM中的半成品           
+			PMMaterial pmMaterial = null;//PM中的原材料           
 			materialPersistence = factory.get(MaterialPersistence.class);
 			pmMaterial = materialPersistence.newInstance();
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -411,6 +412,7 @@ public class WCToPMHelper {
 			pmcad.setPhase(cadiba.getIBAValue(Contants.PHASE)==null?"":cadiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
 			//pmcad.setModifiedBy("", epmdoc.getModifierFullName());		//设置PM部件修改者
 			pmcad.setDrawingNumber(cadiba.getIBAValue(Contants.MATERIALNO)==null?"":cadiba.getIBAValue(Contants.MATERIALNO));
+			pmcad.setPartType0(cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
 			ObjectId objectId = new ObjectId();
 			pmcad.set_id(objectId);
 			pmcad.setOwner(epmdoc.getCreatorName());
@@ -429,6 +431,161 @@ public class WCToPMHelper {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	  * Windchill 创建包装材料后将包装材料的基本属性写入PM的包装材料对象上并存入PM数据库中
+	  * @author Eilaiwang
+	  * @param wtPart
+	  * @return void
+	  * @Description
+	  */
+	public static void CreatePMPackageToPM(WTPart wtPart){
+		String partOid ="";    //WC部件Oid 
+		String partFolderString="";
+		Folder partFolder =null;
+		String pFolderId="";
+		PackagePersistence packagePersistence=null;         //PM系统中的原材料持久化对象
+		
+		String weight ="";
+		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		partOid = getObjectOid(wtPart);
+		try {
+			PMPackage pmPackage = null;//PM中的包装材料      
+			packagePersistence = factory.get(MaterialPersistence.class);
+			pmPackage = packagePersistence.newInstance();
+			IBAUtils  partiba = new IBAUtils(wtPart);
+          Debug.P(partOid);
+          partFolderString = wtPart.getFolderPath();
+          Debug.P(partFolderString);
+          partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+          //partFolder=wtPart.getFolderingInfo().getFolder();
+          Debug.P(partFolder);
+          Debug.P(wtPart.getContainer());
+          wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
+          pFolderId = rf.getReferenceString(partFolder);
+          pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+          pmPackage.setFolderIdByPLMId(pFolderId);
+          pmPackage.setPLMId(partOid);
+          Map<String,Object> plmData = new HashMap<String,Object>();
+          pmPackage.setPLMData(plmData);
+			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
+			pmPackage.setObjectNumber(wtPart.getNumber());
+			pmPackage.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
+			pmPackage.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
+			pmPackage.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
+			pmPackage.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
+			pmPackage.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
+			
+			//pmPackage.setModifiedBy("", wtPart.getModifierFullName());		//设置PM部件修改者
+			pmPackage.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
+			 weight = partiba.getIBAValue(Contants.WEIGHT);
+			if(StringUtils.isNotEmpty(weight))
+			 pmPackage.setWeight(NumberFormat.getInstance().parse(weight));    
+			pmPackage.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
+           ObjectId objectId =new ObjectId();
+			pmPackage.set_id(objectId);
+			pmPackage.setOwner(wtPart.getCreatorName());
+			pmPackage.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
+			WriteResult wresult = pmPackage.doInsert();   //
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
+				partiba.setIBAValue(Contants.PMID, objectId.toString());
+				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
+				partiba.setIBAValue(Contants.PMREQUEST, "create");
+				partiba.updateIBAPart(wtPart);
+				reloadPermission(objectId.toString());
+				Debug.P("create pmPackage success");
+			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	  * Windchill 创建原材料后将原材料的基本属性写入PM的半成品对象上并存入PM数据库中
+	  * @author Eilaiwang
+	  * @param wtPart
+	  * @return void
+	  * @Description
+	  */
+	public static void CreatePMaterialToPM(WTPart wtPart){
+		String partOid ="";    //WC部件Oid 
+		String partFolderString="";
+		Folder partFolder =null;
+		String pFolderId="";
+		MaterialPersistence materialPersistence=null;         //PM系统中的原材料持久化对象
+		
+		String weight ="";
+		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		partOid = getObjectOid(wtPart);
+		try {
+			PMMaterial pmMaterial = null;//PM中的半成品           
+			materialPersistence = factory.get(MaterialPersistence.class);
+			pmMaterial = materialPersistence.newInstance();
+			IBAUtils  partiba = new IBAUtils(wtPart);
+          Debug.P(partOid);
+          partFolderString = wtPart.getFolderPath();
+          Debug.P(partFolderString);
+          partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+          //partFolder=wtPart.getFolderingInfo().getFolder();
+          Debug.P(partFolder);
+          Debug.P(wtPart.getContainer());
+          wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
+          pFolderId = rf.getReferenceString(partFolder);
+          pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+          pmMaterial.setFolderIdByPLMId(pFolderId);
+          pmMaterial.setPLMId(partOid);
+          Map<String,Object> plmData = new HashMap<String,Object>();
+          pmMaterial.setPLMData(plmData);
+			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
+			pmMaterial.setObjectNumber(wtPart.getNumber());
+			pmMaterial.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
+			pmMaterial.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
+			pmMaterial.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
+			pmMaterial.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
+			pmMaterial.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
+			
+			//pmMaterial.setModifiedBy("", wtPart.getModifierFullName());		//设置PM部件修改者
+			pmMaterial.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
+			 weight = partiba.getIBAValue(Contants.WEIGHT);
+			if(StringUtils.isNotEmpty(weight))
+			 pmMaterial.setWeight(NumberFormat.getInstance().parse(weight));    
+			pmMaterial.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
+           ObjectId objectId =new ObjectId();
+			pmMaterial.set_id(objectId);
+			pmMaterial.setOwner(wtPart.getCreatorName());
+			pmMaterial.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
+			WriteResult wresult = pmMaterial.doInsert();   //
+			String error = wresult.getError();
+			if(StringUtils.isEmpty(error)){
+				partiba.setIBAValue(Contants.PMID, objectId.toString());
+				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
+				partiba.setIBAValue(Contants.PMREQUEST, "create");
+				partiba.updateIBAPart(wtPart);
+				reloadPermission(objectId.toString());
+				Debug.P("create PMMaterial success");
+			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	
 	
 	public static void updatePMPart(String pmoid,WTPart wtPart){
 		String partOid ="";    //WC部件Oid 
