@@ -707,7 +707,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				      String stateName=basic_object.getStatus();
 				      object=GenericUtil.changeState((LifeCycleManaged) object, stateMap.get(stateName));
 				      PersistenceHelper.manager.refresh(object);
-				      basic_object.setPLMData(getObjectInfo(object));
 				      basic_object.doUpdate();
 				      }
 		        } catch (Exception e) {
@@ -746,6 +745,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			        iba_values.updateIBAPart((IBAHolder)persistable);
 //				    LWCUtil.setValueBeforeStore(persistable, ibas);//修改阶段属性
 //				    PersistenceHelper.manager.save(persistable);
+			        object.doUpdate();
 				    count=1;
 			    }
 			
