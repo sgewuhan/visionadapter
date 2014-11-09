@@ -21,7 +21,8 @@ import com.mongodb.WriteResult;
  * @author zhonghua
  *
  */
-public abstract class VisionObject extends BasicDBObject {
+public abstract class VisionObject extends BasicDBObject implements
+		IProjectRelative {
 
 	protected static final String PLM_TYPE = "plmtype";
 
@@ -52,13 +53,12 @@ public abstract class VisionObject extends BasicDBObject {
 	public static final String EDITOR = "_editor";
 
 	public static final int SUCCESS = 0;
-	
-	public static final int INSERT_ERR = 1;
-	
-	public static final int UPDATE_ERR = 2;
-	
-	public static final int DELETE_ERR = 3;
 
+	public static final int INSERT_ERR = 1;
+
+	public static final int UPDATE_ERR = 2;
+
+	public static final int DELETE_ERR = 3;
 
 	protected DBCollection collection;
 
@@ -253,7 +253,6 @@ public abstract class VisionObject extends BasicDBObject {
 		return getSyncDate() != null;
 	}
 
-
 	/**
 	 * 设置为已同步
 	 */
@@ -282,8 +281,20 @@ public abstract class VisionObject extends BasicDBObject {
 		setPLMType();
 		setSync();
 		extendPLMData();
+		extendProjectData();
 		WriteResult wr = collection.insert(this);
 		return wr;
+	}
+
+	private void extendProjectData() throws Exception {
+		PMFolder folder = getParentFolder();
+		if(folder == null){
+			throw new Exception("缺少父目录");
+		}
+		setProjectId(folder.getProjectId());
+		setProjectName(folder.getProjectName());
+		setProjectNumber(folder.getProjectNumber());
+		setProjectWorkOrder(folder.getProjectWorkOrder());
 	}
 
 	public WriteResult doSetErrorMessage(int code, String message)
@@ -409,4 +420,45 @@ public abstract class VisionObject extends BasicDBObject {
 		return new GridFSFileProvider(fileData);
 	}
 
+	public abstract PMFolder getParentFolder();
+
+	@Override
+	public ObjectId getProjectId() {
+		return (ObjectId) get(PROJECT_ID);
+	}
+
+	@Override
+	public void setProjectId(ObjectId projectId) {
+		setValue(PROJECT_ID, projectId);
+	}
+
+	@Override
+	public String getProjectName() {
+		return (String) get(PROJECT_DESC);
+	}
+
+	@Override
+	public void setProjectName(String projectDesc) {
+		setValue(PROJECT_DESC, projectDesc);
+	}
+
+	@Override
+	public String getProjectNumber() {
+		return (String) get(PROJECT_NUMBER);
+	}
+
+	@Override
+	public void setProjectNumber(String projectNumber) {
+		setValue(PROJECT_NUMBER, projectNumber);
+	}
+
+	@Override
+	public String getProjectWorkOrder() {
+		return (String) get(PROJECT_WORK_ORDER);
+	}
+
+	@Override
+	public void setProjectWorkOrder(String projectWorkOrder) {
+		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
+	}
 }

@@ -9,7 +9,7 @@ import com.mongodb.WriteResult;
  * @author zhonghua
  *
  */
-public final class PMProduct extends BasicPart  implements IProjectRelative{
+public final class PMProduct extends BasicPart  {
 
 	private static final String FORMULAR = "formularnumber";
 	

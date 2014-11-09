@@ -9,7 +9,7 @@ import com.mongodb.WriteResult;
  * @author zhonghua
  *
  */
-public final class PMPart extends BasicPart  implements IProjectRelative,IProductRelative{
+public final class PMPart extends BasicPart  implements IProductRelative{
 
 	
 	

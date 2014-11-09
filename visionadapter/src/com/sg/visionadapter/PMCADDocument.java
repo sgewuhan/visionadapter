@@ -11,7 +11,7 @@ import com.mongodb.WriteResult;
  *
  */
 public final class PMCADDocument extends BasicDocument implements
-		IProjectRelative, IProductRelative {
+		IProductRelative {
 
 	private static final String PART_TYPE0 = "parttype0";
 
