@@ -190,8 +190,7 @@ public class PartHelper implements Serializable {
 						wtPart=(WTPart)object;
 					}
 					WCToPMHelper.CreatePMProductToPM(wtPart);
-				}
-			    else //如果是半成品
+				} else //如果是半成品
 				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 					if(wtPart.isEndItem()){
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
@@ -221,8 +220,8 @@ public class PartHelper implements Serializable {
 						if(object !=null){
 							wtPart=(WTPart)object;
 						}
-						WCToPMHelper.CreatePartToPM(wtPart);
 					}
+					WCToPMHelper.CreatePartToPM(wtPart);
 				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
 					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
 					if(object !=null){
@@ -235,6 +234,18 @@ public class PartHelper implements Serializable {
 						wtPart=(WTPart)object;
 					}
 					WCToPMHelper.CreateSupplyToPM(wtPart);
+				}else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+					if(object !=null){
+						wtPart=(WTPart)object;
+					}
+					WCToPMHelper.CreatePMPackageToPM(wtPart);
+				}else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+					if(object !=null){
+						wtPart=(WTPart)object;
+					}
+					WCToPMHelper.CreateJigToolPartToPM(wtPart);
 				}
 			    
 		} else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
@@ -254,7 +265,11 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
 					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
-			}
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+					WCToPMHelper.updatePMPackageToPM(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+					WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
+			  }
 			
             }
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
@@ -272,7 +287,11 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
 					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
-			}
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+					WCToPMHelper.updatePMPackageToPM(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+					WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
+			  }
 		}
 		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
@@ -289,7 +308,11 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.deletePMMaterial(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
 					WCToPMHelper.deleteSupplyment(pmoid, wtPart);
-			}
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+					WCToPMHelper.deletePMPackage(pmoid, wtPart);
+			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+					WCToPMHelper.deletePMJigTools(pmoid, wtPart);
+			  }
 		}    
 		}catch(Exception e){
 			e.printStackTrace();

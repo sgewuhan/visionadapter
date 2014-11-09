@@ -96,14 +96,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			}
 	 }
 	 
-
-
-	 
-
-	 
-	 
-	 
-	 
 	 
 	 /**
 	  * 创建文件夹结构

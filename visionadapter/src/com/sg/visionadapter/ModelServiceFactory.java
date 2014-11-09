@@ -37,8 +37,8 @@ public class ModelServiceFactory {
 
 	public static ModelServiceFactory service;
 
-	public static ModelServiceFactory getInstance(String confFolder){
-		if(service!=null){
+	public static ModelServiceFactory getInstance(String confFolder) {
+		if (service != null) {
 			return service;
 		}
 		service = new ModelServiceFactory();
@@ -53,9 +53,9 @@ public class ModelServiceFactory {
 	 *            配置文件的目录名
 	 */
 	private void start(String confFolder) {
-			clients = new ConcurrentHashMap<String, MongoClient>();
-			loadDBConf(confFolder);
-			loadPMConf(confFolder);
+		clients = new ConcurrentHashMap<String, MongoClient>();
+		loadDBConf(confFolder);
+		loadPMConf(confFolder);
 	}
 
 	private void loadPMConf(String confFolder) {
