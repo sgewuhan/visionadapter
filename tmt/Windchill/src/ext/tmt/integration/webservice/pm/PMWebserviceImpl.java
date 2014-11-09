@@ -741,13 +741,13 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			  //根据pm_id修改阶段信息
 			  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
               String phase=object.getPhase();//阶段
-              String plmId=object.getPLMId();//PM对应的Windchill字段
-              Debug.P("----Phase--->>>Windchill ID:"+plmId+"   ;Phase Value:"+phase);
-              if(!StringUtils.isEmpty(plmId)){
+           	   String plm_num=object.getObjectNumber();//PM对应的Windchill Number字段
+              Debug.P("----Phase--->>>Windchill num:"+plm_num+"   ;Phase Value:"+phase);
+              if(!StringUtils.isEmpty(plm_num)){
              try {
 			    SessionHelper.manager.setAdministrator();
 			    if(!StringUtils.isEmpty(phase)){
-			        Persistable persistable=GenericUtil.getPersistableByOid(plmId);
+			    	Persistable persistable=GenericUtil.getObjectByNumber(plm_num);
 //				    Map  ibas=new HashMap();
 //			        ibas.put(ConstanUtil.PHASE, phase);
 			        IBAUtils iba_values=new IBAUtils((IBAHolder)persistable);
@@ -760,7 +760,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			    }
 			
 			 } catch (Exception e) {
-				 throw new Exception("Windchill ("+plmId+") 修改阶段失败!");
+				 throw new Exception("Windchill ("+plm_num+") 修改阶段失败!");
 			}finally{
 				 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 			}       	        
