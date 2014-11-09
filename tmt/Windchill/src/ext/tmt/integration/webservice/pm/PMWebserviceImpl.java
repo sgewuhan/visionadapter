@@ -103,13 +103,17 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	//初始化获得PM数据池服务
-	 public  void  initModelFactory() throws IOException{
-		    factory =new ModelServiceFactory();
+	 @SuppressWarnings("static-access")
+	public  static void  initModelFactory() throws IOException{
 			WTProperties wtproperties = WTProperties.getLocalProperties();
 			String codebasePath= wtproperties.getProperty("wt.codebase.location");
 			codebasePath=codebasePath+File.separator+"visionconf";
-			factory.start(codebasePath);
+			factory=factory.getInstance(codebasePath);
+		   Debug.P("--------Factory:"+factory);
 	 }
+	 
+
+	 
 	 
 	 
 	 
