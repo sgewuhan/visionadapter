@@ -4,12 +4,8 @@ package ext.tmt.integration.webservice.pm;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId; 
@@ -18,11 +14,9 @@ import com.mongodb.WriteResult;
 import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
-import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
-import com.sg.visionadapter.URLFileProvider;
 
 import ext.tmt.folder.api.FolderService;
 import ext.tmt.folder.impl.FolderServiceImpl;
@@ -35,19 +29,16 @@ import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
-import ext.tmt.utils.VersionControlUtil;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
-import wt.fc.PersistenceServerHelper;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
 import wt.folder.FolderHelper;
 import wt.iba.value.IBAHolder;
 import wt.inf.container.WTContainer;
-import wt.lifecycle.LifeCycleHelper;
 import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
@@ -84,8 +75,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 private static String VMUSER="PM-RW";
 	 
-	 private static ModelServiceFactory factory;
-	 
 	 
 	 private static Map<String,String> stateMap=new HashMap<String,String>();
 	 static{
@@ -95,22 +84,20 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		 stateMap.put(ConstanUtil.DESPOSED,ConstanUtil.WC_DESPOSED);
 	 }
 
-	 
-	 public PMWebserviceImpl() throws IOException{
-		   initModelFactory();
+	 private static String codebasePath=null;
+	 static {
+			try {
+				WTProperties wtproperties= WTProperties.getLocalProperties();
+				codebasePath= wtproperties.getProperty("wt.codebase.location");
+				codebasePath=codebasePath+File.separator+"visionconf";
+				Debug.P("----------->>>Codebase:"+codebasePath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	 }
+	 
 
-	 
-	 
-	//初始化获得PM数据池服务
-	 @SuppressWarnings("static-access")
-	  private  static void  initModelFactory() throws IOException{
-			WTProperties wtproperties = WTProperties.getLocalProperties();
-			String codebasePath= wtproperties.getProperty("wt.codebase.location");
-			codebasePath=codebasePath+File.separator+"visionconf";
-			factory=factory.getInstance(codebasePath);
-		   Debug.P("--------Factory:"+factory);
-	 }
+
 	 
 
 	 
@@ -148,8 +135,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		     Folder folderResult=null;
 		    //首先得到PM Folder对象
 		     if(objectId==null) {throw new IllegalArgumentException("----Args ID is Null");}
-		     new PMWebserviceImpl();//初始化
-			FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
+			FolderPersistence folderPersistence = ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 			PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 			boolean isSync=folder.isSync();
 			PMFolder parentFolder=folder.getParentFolder();//父文件夹
@@ -221,8 +207,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //	       }else{
 	  		 //查询PM文件夹对象
-		     new PMWebserviceImpl();//初始化
-	  		 FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
+	  		 FolderPersistence folderPersistence =  ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 	       	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 	       	 String oldFolderName=folder.getCommonName();
 	       	 checkNull(folder);
@@ -273,8 +258,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 	        }else{
 	             checkNull(objectId);
-	             new PMWebserviceImpl();//初始化
-	        	 FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
+	        	 FolderPersistence folderPersistence = ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 	        	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 	        	 checkNull(folder);
 	        	try{
@@ -337,8 +321,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	     }else{
 	        	WTDocument document=WTDocument.newWTDocument();
 	        	//获得PM文档对象
-	        	new PMWebserviceImpl();//初始化
-	        	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+	        	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
 	        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
 	        	PMFolder pmfolder=pm_document.getFolder();//获得文档所在的PM文件夹
 	        	String wc_foid=pmfolder.getPLMId();//Windchill 文件夹 Oid 
@@ -408,8 +391,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	            Object[] vals = {pm_id};
 //	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //	     }else{
-    	    new PMWebserviceImpl();//初始化
-	    	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+	    	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
 	     	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
 	     	String pm_docName=pm_document.getCommonName();
 	     	
@@ -475,8 +457,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //       }else{
     	   
     	checkNull(pm_docId);
-    	new PMWebserviceImpl();//初始化
-       	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+       	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
        	checkNull(pm_document);
        	 //获得PM 文档对应的Windchill文档ID
@@ -518,8 +499,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //           Object[] vals = {pm_docId};
 //           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //       }else{
-	         new PMWebserviceImpl();//初始化
-    	     BasicDocument basic_object=factory.getBasicDocumentById(pm_docId);
+    	     BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_docId);
     	 	 checkNull(basic_object);
     	 	//根据PM文件夹找到与之对应的Windchill文件夹Oid
     	      PMFolder folder=basic_object.getFolder();
@@ -678,8 +658,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		   Debug.P("----->>Check Revision PM_DocID:"+pm_id);
 		   checkNull(pm_id);
 		    //获取PM文档对象
-		     new PMWebserviceImpl();//初始化
-             BasicDocument basic_object=factory.getBasicDocumentById(pm_id);
+             BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
              checkNull(basic_object);
 		   //获得WindChill ID
         	String wc_id=basic_object.getPLMId();
@@ -722,8 +701,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		  Debug.P("----------->>>>Lifecycle  PMID:"+pm_id);
 		 //获取PM文档对象
 		  if(!StringUtils.isEmpty(pm_id)){
-			     new PMWebserviceImpl();//初始化
-			     BasicDocument  basic_object=factory.getBasicDocumentById(pm_id);
+			     BasicDocument  basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
 		      	 checkNull(basic_object);
 		      	//获得WindChill ID
 		        String wc_id=basic_object.getPLMId();
@@ -759,8 +737,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		   int count=0;
 		  if(!StringUtils.isEmpty(pm_id)){
 			  //根据pm_id修改阶段信息
-			  new PMWebserviceImpl();//初始化
-			  BasicDocument object=factory.getBasicDocumentById(pm_id);
+			  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
               String phase=object.getPhase();//阶段
               String plmId=object.getPLMId();//PM对应的Windchill字段
               Debug.P("----Phase--->>>Windchill ID:"+plmId+"   ;Phase Value:"+phase);
