@@ -741,7 +741,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			  //根据pm_id修改阶段信息
 			  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
               String phase=object.getPhase();//阶段
-           	   String plm_num=object.getObjectNumber();//PM对应的Windchill Number字段
+           	   String plm_num=(String) object.getPLMData().get(ConstanUtil.NUMBER);//PM对应的Windchill Number字段
               Debug.P("----Phase--->>>Windchill num:"+plm_num+"   ;Phase Value:"+phase);
               if(!StringUtils.isEmpty(plm_num)){
              try {
