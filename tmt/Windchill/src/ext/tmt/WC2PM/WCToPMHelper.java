@@ -183,6 +183,7 @@ public class WCToPMHelper {
            pmProduct.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          Debug.P(plmData);
            pmProduct.setPLMData(plmData);
 			pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmProduct.setObjectNumber(wtPart.getNumber());
@@ -408,7 +409,7 @@ public class WCToPMHelper {
            pFolderId = rf.getReferenceString(docFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
            Debug.P(pFolderId);
-           pmcad.setFolderId(new ObjectId(pFolderId));
+           pmcad.setFolderIdByPLMId(pFolderId);
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
@@ -598,9 +599,6 @@ public class WCToPMHelper {
 	
 	public static void updatePMCADDoc(String pmoid,EPMDocument epmdoc){
 		String docOid ="";    //EPMDoc的Oid 
-		String docFolderString="";
-		Folder docFolder =null;
-		String pFolderId="";
 		CADDocumentPersistence cadDocPersistence =null;  //PM系统中的图纸持久化对象
 		
 		String weight ="";
@@ -613,11 +611,6 @@ public class WCToPMHelper {
 			pmcad = cadDocPersistence.get(new ObjectId(pmoid));
 			IBAUtils  cadiba = new IBAUtils(epmdoc);
            Debug.P(docOid);
-           docFolderString = epmdoc.getFolderPath();
-           Debug.P(docFolderString);
-           docFolder=  wt.folder.FolderHelper.service.getFolder(epmdoc);
-           //partFolder=wtPart.getFolderingInfo().getFolder();
-           Debug.P(docFolder);
            String part_type=cadiba.getIBAValue(Contants.PART_TYPE);
 			 if(StringUtils.isNotEmpty(part_type)){
 				 part_type=part_type.replaceAll(" ", "").trim();

@@ -47,10 +47,10 @@ public class EPMDocHelper implements Serializable {
         if (StringUtils.isEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			try {
 				flag = SessionServerHelper.manager.setAccessEnforced(false);
-				// 如果是新建修订版本或者新建视图版本
-				if (WindchillUtil.isReviseVersion(epmdoc)){
-					return;
-				}
+//				// 如果是新建修订版本或者新建视图版本
+//				if (WindchillUtil.isReviseVersion(epmdoc)){
+//					return;
+//				}
 				WCToPMHelper.CreateEPMDocToPM(epmdoc);
 			}catch(Exception e){
 				e.printStackTrace();

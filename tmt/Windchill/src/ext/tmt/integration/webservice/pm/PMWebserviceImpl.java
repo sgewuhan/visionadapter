@@ -663,16 +663,25 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				     Persistable object=GenericUtil.getObjectByNumber(doc_num);
 				     if(object!=null){
 					 Folder folder = FolderHelper.service.getFolder((FolderEntry) object);
-					 WTDocument newdoc= (WTDocument) VersionControlHelper.service.newVersion((Versioned) object);
-//					 LifeCycleHelper.setLifeCycle(newdoc, LifeCycleHelper.service.getLifeCycleTemplate(tempName, doc.getContainerReference()));
-					 FolderHelper.assignLocation(newdoc,folder);
-					 PersistenceHelper.manager.save(newdoc);
-					 GenericUtil.changeState(newdoc, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
-					 PersistenceHelper.manager.refresh(newdoc);
-					 Debug.P("------New Revision:"+newdoc.getVersionIdentifier().getValue()+"   Iteration:"+newdoc.getIterationIdentifier().getValue());
-					 basic_object.setMajorVid(newdoc.getVersionIdentifier().getValue());
-					 basic_object.setSecondVid(Integer.valueOf(newdoc.getIterationIdentifier().getValue()));
-					 basic_object.doUpdate();
+					 Persistable newobject= VersionControlHelper.service.newVersion((Versioned) object);
+					 FolderHelper.assignLocation((FolderEntry) newobject,folder);
+					 PersistenceHelper.manager.save(newobject);
+					 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
+					 PersistenceHelper.manager.refresh(newobject);
+					 if(newobject instanceof EPMDocument){
+						 EPMDocument empdoc=(EPMDocument)newobject;
+						 basic_object.setMajorVid(empdoc.getVersionIdentifier().getValue());
+						 basic_object.setSecondVid(Integer.valueOf(empdoc.getIterationIdentifier().getValue()));
+					 }else if(newobject instanceof WTPart){
+						 WTPart part=(WTPart)newobject;
+						 basic_object.setMajorVid(part.getVersionIdentifier().getValue());
+						 basic_object.setSecondVid(Integer.valueOf(part.getIterationIdentifier().getValue()));
+					 }else if(newobject instanceof WTDocument){
+						 WTDocument doc=(WTDocument)newobject;
+						 basic_object.setMajorVid(doc.getVersionIdentifier().getValue());
+						 basic_object.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
+					 }
+					     basic_object.doUpdate();
 				     }
 				}
 			} catch (Exception e) {

@@ -88,6 +88,7 @@ public class PartHelper implements Serializable {
 		String pmoids = iba.getIBAValue(Contants.PMID);
 		Debug.P("sync--->"+sync);
 		Debug.P("pmoids--->"+pmoids);
+		Debug.P("eventType---------------->"+eventType);
         if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 //				// 如果是新建修订版本或者新建视图版本
 //				if (WindchillUtil.isReviseVersion(wtPart)){
@@ -103,7 +104,17 @@ public class PartHelper implements Serializable {
 			   if(StringUtils.isNotEmpty(partType)){
 				   partType=partType.replaceAll(" ", "").trim();
 			   }
-			   Debug.P(partNumber+"------------------->"+partType);
+			   Debug.P(partNumber+"------------------->"+partType+" event--->"+eventType);
+			   Debug.P(partType.equals("wt.part.WTPart"));
+			   Debug.P(partType.contains(Contants.PRODUCTPART));
+			   Debug.P(partType.contains(Contants.SEMIFINISHEDPRODUCT));
+			   Debug.P(partType.contains(Contants.MATERIAL));
+			   Debug.P(partType.contains(Contants.SUPPLYMENT));
+			   Debug.P(partType.contains(Contants.TOOLPART));
+			   Debug.P(partType.contains(Contants.PACKINGPART));
+			   Debug.P();
+			   Debug.P();
+			   
 			   
 			    String epmPartType="";
 			    if(partType.equals("wt.part.WTPart")){
@@ -113,8 +124,10 @@ public class PartHelper implements Serializable {
 			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
 			    	}
 			    	Debug.P("2-->"+epmdoc);
-			    	IBAUtils epmIba = new IBAUtils(epmdoc);
-			    	epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+			    	if(epmdoc!=null){
+			    		IBAUtils epmIba = new IBAUtils(epmdoc);
+			    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+			    	}
 			    	if(StringUtils.isNotEmpty(epmPartType)){
 			    		epmPartType=epmPartType.replaceAll(" ", "").trim();
 			    	}
@@ -153,9 +166,6 @@ public class PartHelper implements Serializable {
 					}else{
 						PersistenceServerHelper.manager.update(wtPart);
 					}
-			    	//					if(!wtPart.isEndItem()){
-//						throw new Exception("您创建的是产品，请将“是否为成品”的值设置为“是”！");
-//					}
 				//成品编码=TX+三位分类码+四位流水码。其中分类码为成品所在产品库容器名称的前三个字符，自动根据成品所在产品库获取。
 					productName=wtPart.getContainerName();
 					//批量导入部件时如果导入的部件编码含有TX则不修改部件编码
@@ -194,7 +204,7 @@ public class PartHelper implements Serializable {
 				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 					if(wtPart.isEndItem()){
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
-					}
+					} 
 					String isKHpart="";//空簧部件分类
 					isKHpart=iba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
 					Debug.P("WTPart -->"+isKHpart);
@@ -248,7 +258,22 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.CreateJigToolPartToPM(wtPart);
 				}
 			    
-		} else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_MODIFY)) {
+			if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果是成品
+				WCToPMHelper.CreatePMProductToPM( wtPart);
+			  }else if(partType.contains(Contants.PRODUCTPART)){ //如果是半成品
+				  WCToPMHelper.CreatePartToPM( wtPart);
+			  }else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+					WCToPMHelper.CreatePMaterialToPM(wtPart);
+			  }else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+					WCToPMHelper.CreateSupplyToPM(wtPart);
+			  }else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+					WCToPMHelper.CreatePMPackageToPM(wtPart);
+			  }else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+					WCToPMHelper.CreateJigToolPartToPM( wtPart);
+			  }
+		}
+        else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
             Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
             Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
