@@ -705,6 +705,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				      Persistable object=GenericUtil.getObjectByNumber(doc_num);
 				      if(object!=null){
 				      String stateName=basic_object.getStatus();
+				      Debug.P("------->>>PM State:"+stateName);
 				      object=GenericUtil.changeState((LifeCycleManaged) object, stateMap.get(stateName));
 				      PersistenceHelper.manager.refresh(object);
 				      basic_object.doUpdate();
