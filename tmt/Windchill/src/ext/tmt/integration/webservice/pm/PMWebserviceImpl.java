@@ -135,7 +135,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		     Folder folderResult=null;
 		    //首先得到PM Folder对象
 		     if(objectId==null) {throw new IllegalArgumentException("----Args ID is Null");}
-			FolderPersistence folderPersistence = ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
+		    ModelServiceFactory factory= ModelServiceFactory.getInstance(codebasePath);
+			FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
 			PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 			boolean isSync=folder.isSync();
 			PMFolder parentFolder=folder.getParentFolder();//父文件夹
