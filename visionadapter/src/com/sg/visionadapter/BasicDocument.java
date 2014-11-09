@@ -90,6 +90,10 @@ public abstract class BasicDocument extends VisionObject {
 		folder.setCollection(folderColletion);
 		return folder;
 	}
+	
+	public PMFolder getParentFolder(){
+		return getFolder();
+	}
 
 	/**
 	 * 获得对象的编号，不同的子类该编号的意义不同。

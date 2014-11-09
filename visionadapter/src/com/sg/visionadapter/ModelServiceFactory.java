@@ -31,13 +31,19 @@ public class ModelServiceFactory {
 
 	private static ConcurrentHashMap<String, MongoClient> clients;
 
-	private DB defaultDB;
+	private static DB defaultDB;
 
 	public static String URL_REAUTH;
 
 	public static ModelServiceFactory service;
 
-	public ModelServiceFactory() {
+	public static ModelServiceFactory getInstance(String confFolder){
+		if(service!=null){
+			return service;
+		}
+		service = new ModelServiceFactory();
+		service.start(confFolder);
+		return service;
 	}
 
 	/**
@@ -46,7 +52,7 @@ public class ModelServiceFactory {
 	 * @param confFolder
 	 *            配置文件的目录名
 	 */
-	public void start(String confFolder) {
+	private void start(String confFolder) {
 		if (service == null) {
 			service = this;
 			clients = new ConcurrentHashMap<String, MongoClient>();

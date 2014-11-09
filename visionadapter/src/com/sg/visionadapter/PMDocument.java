@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.BasicBSONList;
-import org.bson.types.ObjectId;
 
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
@@ -15,7 +14,7 @@ import com.mongodb.WriteResult;
  * @author zhonghua
  *
  */
-public final class PMDocument extends BasicDocument implements IProjectRelative {
+public final class PMDocument extends BasicDocument  {
 
 	private static final String PRODUCT_NUMBER = "productnumber";
 
@@ -91,46 +90,6 @@ public final class PMDocument extends BasicDocument implements IProjectRelative 
 		setValue(URL, url);
 	}
 
-	@Override
-	public ObjectId getProjectId() {
-		return (ObjectId) get(PROJECT_ID);
-	}
-
-	@Override
-	public void setProjectId(ObjectId projectId) {
-		setValue(PROJECT_ID, projectId);
-	}
-
-	@Override
-	public String getProjectName() {
-		return (String) get(PROJECT_DESC);
-	}
-
-	@Override
-	public void setProjectName(String projectDesc) {
-		setValue(PROJECT_DESC, projectDesc);
-	}
-
-	@Override
-	public String getProjectNumber() {
-		return (String) get(PROJECT_NUMBER);
-	}
-
-	@Override
-	public void setProjectNumber(String projectNumber) {
-		setValue(PROJECT_NUMBER, projectNumber);
-	}
-
-	@Override
-	public String getProjectWorkOrder() {
-		return (String) get(PROJECT_WORK_ORDER);
-	}
-
-	@Override
-	public void setProjectWorkOrder(String projectWorkOrder) {
-		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
-	}
-	
 	@Override
 	public WriteResult doInsert() throws Exception {
 		throw new Exception("PM Document can not insert by adapter.");
