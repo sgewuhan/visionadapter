@@ -31,7 +31,7 @@ public class ModelServiceFactory {
 
 	private static ConcurrentHashMap<String, MongoClient> clients;
 
-	private DB defaultDB;
+	private static DB defaultDB;
 
 	public static String URL_REAUTH;
 
