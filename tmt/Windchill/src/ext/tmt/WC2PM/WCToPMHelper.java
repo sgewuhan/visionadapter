@@ -46,18 +46,19 @@ import ext.tmt.utils.Utils;
 public class WCToPMHelper {
 	
 
-	//获得PM数据池
-	 private static ModelServiceFactory factory;
-	 private static String codebasePath;
-	 static{
-		 try {
-			 WTProperties wtproperties = WTProperties.getLocalProperties();
-			 codebasePath= wtproperties.getProperty("wt.codebase.location");
-			 codebasePath=codebasePath+File.separator+"visionconf";
-		} catch (Exception e) {
-			e.printStackTrace();// TODO: handle exception
-		}
+	
+	 private static String codebasePath=null;
+	 static {
+			try {
+				WTProperties wtproperties= WTProperties.getLocalProperties();
+				codebasePath= wtproperties.getProperty("wt.codebase.location");
+				codebasePath=codebasePath+File.separator+"visionconf";
+				Debug.P("----------->>>Codebase:"+codebasePath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	 }
+
 	
 	 /**
 	  * Windchill 创建半成品后将半成品的基本属性写入PM的半成品对象上并存入PM数据库中
@@ -77,7 +78,6 @@ public class WCToPMHelper {
 		partOid = getObjectOid(wtPart);
 		try {   
 			PMPart pmPart = null;//PM中的半成品           
-			
 			partPersistence =ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
 			pmPart = partPersistence.newInstance();  
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -160,7 +160,6 @@ public class WCToPMHelper {
 		partOid = getObjectOid(wtPart);
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
-		
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
 			pmProduct = productPersistence.newInstance();
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -236,7 +235,6 @@ public class WCToPMHelper {
 		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品   
-		
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
 			pmMaterial = materialPersistence.newInstance();
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -312,7 +310,6 @@ public class WCToPMHelper {
 		partOid = getObjectOid(wtPart);;
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的半成品        
-		
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
 			pmSupplyment = supplymentPersistence.newInstance();
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -388,7 +385,6 @@ public class WCToPMHelper {
 		docOid = epmdoc.toString();
 		try {
 			PMCADDocument pmcad = null;//PM中的半成品     
-		
 			cadDocPersistence = ModelServiceFactory.getInstance(codebasePath).get(CADDocumentPersistence.class);
 			pmcad = cadDocPersistence.newInstance();
 			IBAUtils  cadiba = new IBAUtils(epmdoc);
@@ -662,7 +658,6 @@ public class WCToPMHelper {
 		partOid = getObjectOid(wtPart);
 		try {
 			PMPart pmPart = null;//PM中的半成品           
-		
 			partPersistence = ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
 			pmPart = partPersistence.get(new ObjectId(pmoid));
 			Debug.P("pmPart --->"+pmPart.getCommonName());
@@ -719,7 +714,6 @@ public class WCToPMHelper {
 		try {
 			partOid = getObjectOid(wtPart);
 			PMProduct pmProduct = null;//PM中的成品           
-		
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
 			pmProduct = productPersistence.get(new ObjectId(pmoid));
 			Debug.P(pmProduct.getSyncDate());
@@ -778,7 +772,6 @@ public class WCToPMHelper {
 		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料          
-		
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
 			pmMaterial = materialPersistence.get(new ObjectId(pmoid));
 			Debug.P("pmmaterial--->"+pmMaterial.getCommonName());
@@ -968,7 +961,6 @@ public class WCToPMHelper {
 		Debug.P("将Windchill中的客供件更新PM系统的数据库中---------------》"+wtPart.getNumber());
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的客供件     
-		
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
 			pmSupplyment = supplymentPersistence.get(new ObjectId(pmoid));
 			IBAUtils  partiba = new IBAUtils(wtPart);
@@ -1013,7 +1005,6 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		try {
 			PMPart pmPart = null;//PM中的半成品         
-		
 			partPersistence = ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
 			ObjectId objecdId=new ObjectId(pmoid);
 			if(objecdId !=null){
@@ -1034,7 +1025,6 @@ public class WCToPMHelper {
 		ProductPersistence productPersistence=null;         //PM系统中的成品持久化对象
 		try {
 			PMProduct productPart = null;//PM中的成品           
-		
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
 			ObjectId objecdId=new ObjectId(pmoid);
 			if(objecdId !=null){
@@ -1055,7 +1045,6 @@ public class WCToPMHelper {
 		MaterialPersistence materialPersistence=null;           //PM系统中的原材料持久化对象
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料
-		
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
 			ObjectId objecdId=new ObjectId(pmoid);
 			if(objecdId !=null){
@@ -1139,7 +1128,6 @@ public class WCToPMHelper {
 		SupplymentPersistence supplymentPersistence=null;         //PM系统中的客供件持久化对象
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的客供件        
-		
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
 			ObjectId objecdId=new ObjectId(pmoid);
 			if(objecdId !=null){

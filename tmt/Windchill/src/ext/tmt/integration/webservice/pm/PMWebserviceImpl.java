@@ -1,32 +1,24 @@
 package ext.tmt.integration.webservice.pm;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId; 
+import org.bson.types.ObjectId;
 
 import com.mongodb.WriteResult;
 import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
-import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
-import com.sg.visionadapter.URLFileProvider;
 
 import ext.tmt.folder.api.FolderService;
 import ext.tmt.folder.impl.FolderServiceImpl;
-
 
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
@@ -35,19 +27,16 @@ import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
-import ext.tmt.utils.VersionControlUtil;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
-import wt.fc.PersistenceServerHelper;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
 import wt.folder.FolderHelper;
 import wt.iba.value.IBAHolder;
 import wt.inf.container.WTContainer;
-import wt.lifecycle.LifeCycleHelper;
 import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
@@ -61,154 +50,147 @@ import wt.vc.VersionControlHelper;
 import wt.vc.Versioned;
 import wt.vc.wip.WorkInProgressHelper;
 
-
-
 /**
  * Webservice服务实现类
+ * 
  * @author public759
  *
  */
-public class PMWebserviceImpl implements Serializable,RemoteAccess{
-	
+public class PMWebserviceImpl implements Serializable, RemoteAccess {
 
-	
 	private static final long serialVersionUID = -9012564223029784741L;
 
+	/* 文件夹服务接口 */
+	private static FolderService folderService = new FolderServiceImpl();
 
-	/*文件夹服务接口*/
-	 private  static FolderService folderService=new FolderServiceImpl();
-	 
-	 
-	 private static String DEFAULT="/Default";
-	 
-	 
-	 private static String VMUSER="PM-RW";
-	 
-	 private static ModelServiceFactory factory;
-	 
-	 
-	 private static Map<String,String> stateMap=new HashMap<String,String>();
-	 static{
-		 stateMap.put(ConstanUtil.INWORK,ConstanUtil.WC_INWORK);
-		 stateMap.put(ConstanUtil.APPROVE,ConstanUtil.WC_APPROVE);
-		 stateMap.put(ConstanUtil.RELEASED,ConstanUtil.WC_RELEASED);
-		 stateMap.put(ConstanUtil.DESPOSED,ConstanUtil.WC_DESPOSED);
-	 }
+	private static String DEFAULT = "/Default";
 
-	 
-	 public PMWebserviceImpl() throws IOException{
-		   initModelFactory();
-	 }
+	private static String VMUSER = "PM-RW";
 
-	 
-	 
-	//初始化获得PM数据池服务
-	  private  static void  initModelFactory() throws IOException{
+	private static Map<String, String> stateMap = new HashMap<String, String>();
+	static {
+		stateMap.put(ConstanUtil.INWORK, ConstanUtil.WC_INWORK);
+		stateMap.put(ConstanUtil.APPROVE, ConstanUtil.WC_APPROVE);
+		stateMap.put(ConstanUtil.RELEASED, ConstanUtil.WC_RELEASED);
+		stateMap.put(ConstanUtil.DESPOSED, ConstanUtil.WC_DESPOSED);
+	}
+
+	private static String codebasePath = null;
+	static {
+		try {
 			WTProperties wtproperties = WTProperties.getLocalProperties();
-			String codebasePath= wtproperties.getProperty("wt.codebase.location");
-			codebasePath=codebasePath+File.separator+"visionconf";
-			factory=ModelServiceFactory.getInstance(codebasePath);
-		   Debug.P("--------Factory:"+factory);
-	 }
-	 
+			codebasePath = wtproperties.getProperty("wt.codebase.location");
+			codebasePath = codebasePath + File.separator + "visionconf";
+			Debug.P("----------->>>Codebase:" + codebasePath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
-	 
-	 
-	 
-	 
-	 
-	 /**
-	  * 创建文件夹结构
-	  * @param result
-	  * @throws Exception
-	  */
-	 public static int  createFolderEntryList(String[] result) throws Exception{
-		 int count=0;
-		 if(result!=null){
-			  Debug.P("----->>>>Length:"+result.length);
-			 for (int i=0;i<result.length;i++) {
-				 String str=result[i];
-				 createFolderEntry(str);
-				 count++;
+	/**
+	 * 创建文件夹结构
+	 * 
+	 * @param result
+	 * @throws Exception
+	 */
+	public static int createFolderEntryList(String[] result) throws Exception {
+		int count = 0;
+		if (result != null) {
+			Debug.P("----->>>>Length:" + result.length);
+			for (int i = 0; i < result.length; i++) {
+				String str = result[i];
+				createFolderEntry(str);
+				count++;
 			}
-		 }
-		    return count;
-	 }
+		}
+		return count;
+	}
 
-	 
+	/**
+	 * 创建文件夹
+	 * 
+	 * @param pm_id
+	 * @throws Exception
+	 */
+	private static void createFolderEntry(String objectId) throws Exception {
+		Debug.P("----->>>>ObjectId:" + objectId);
+		Folder folderResult = null;
+		// 首先得到PM Folder对象
+		if (objectId == null) {
+			throw new IllegalArgumentException("----Args ID is Null");
+		}
+		FolderPersistence folderPersistence = ModelServiceFactory.getInstance(
+				codebasePath).get(FolderPersistence.class);
+		PMFolder folder = folderPersistence.get(new ObjectId(objectId));// PM文件夹对象
+		boolean isSync = folder.isSync();
+		PMFolder parentFolder = folder.getParentFolder();// 父文件夹
+		checkNull(parentFolder);
+		String containerName = folder.getContainerName();// ContainerName
+		ObjectId root_id = parentFolder.getRootId();
 
-	 /**
-	  * 创建文件夹
-	  * @param pm_id
-	 * @throws Exception 
-	  */
-	 private  static  void createFolderEntry(String objectId) throws Exception{
-		     Debug.P("----->>>>ObjectId:"+objectId);
-		     Folder folderResult=null;
-		    //首先得到PM Folder对象
-		     if(objectId==null) {throw new IllegalArgumentException("----Args ID is Null");}
-		     new PMWebserviceImpl();//初始化
-			FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
-			PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
-			boolean isSync=folder.isSync();
-			PMFolder parentFolder=folder.getParentFolder();//父文件夹
-			checkNull(parentFolder);
-			String containerName=folder.getContainerName();//ContainerName
-			ObjectId root_id=parentFolder.getRootId();
-			
-			Debug.P("------>>>Folder:"+folder.getCommonName()+"  ParentFolder:"+parentFolder.getCommonName()+"  ContainerName="+containerName+"  RootId="+objectId);
-			String wcId=null;
-			if(root_id!=null){//不是容器
-				wcId=parentFolder.getPLMId();//获得父项对象Id
+		Debug.P("------>>>Folder:" + folder.getCommonName() + "  ParentFolder:"
+				+ parentFolder.getCommonName() + "  ContainerName="
+				+ containerName + "  RootId=" + objectId);
+		String wcId = null;
+		if (root_id != null) {// 不是容器
+			wcId = parentFolder.getPLMId();// 获得父项对象Id
+		}
+
+		try {
+			SessionHelper.manager.setAdministrator();
+			// 判断父项是否为容器
+			Persistable persistable = null;
+			if (!StringUtils.isEmpty(wcId)) {
+				persistable = GenericUtil.getPersistableByOid(wcId);// 根据Windchill
+																	// oid获得对象类型
 			}
-		    
-		    try{
-		    	SessionHelper.manager.setAdministrator();
-			    //判断父项是否为容器
-		    	 Persistable persistable=null;
-		    	if(!StringUtils.isEmpty(wcId)){
-		    		  persistable=GenericUtil.getPersistableByOid(wcId);//根据Windchill oid获得对象类型
-		    	}
-		    	
-		    		if(persistable!=null&&persistable instanceof Folder){
-	 	            	Folder parent_Folder=(Folder)persistable;
-	 	              if(!isSync){
-	 	            		folderResult=FolderUtil.createSubFolder(folder.getCommonName(), null, parent_Folder, null);
-	 	                 }else{
-	 	                	String  oid=folder.getPLMId();
-	 	                	folderResult=(Folder) GenericUtil.getPersistableByOid(oid);
-	 	                 }
-	 	            }else{
-	 	           	    WTContainer  wtcontainer=GenericUtil.getWTContainerByName(containerName);
-	            	     if(wtcontainer instanceof PDMLinkProduct){//产品库
-	            		     folderResult=folderService.createFolder(DEFAULT, folder.getCommonName(), containerName, "1");
-	            	    }else{//存储库
-	            		      folderResult=folderService.createFolder(DEFAULT, folder.getCommonName(), containerName, "0");
-	            	       }
-	 	            }
-	        
-	            
-	           //回写Windchill Folder Oid到PM系统
-	            String wc_oid=folderResult.getPersistInfo().getObjectIdentifier().getStringValue();//OID
-	            Debug.P("------Windchill Folder_OID:"+wc_oid);
-	            folder.setPLMId(wc_oid);
-	            folder.setPLMData(getObjectInfo(folderResult));
-	            
-	            folder.doUpdate();//修改
-	            Debug.P("----->>>更新PM:("+folder.getCommonName()+")成功!");
-		    }finally{
-		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-		    }
 
-	 }
-	 
-	 /**
-	  * 修改文件夹名称
-	  * @param objectId 
-	  * @param newFolderName 新文件夹名称
-	  * @return
-	  */
-	 public static int modifyFolderEntry(String objectId,String newFolderName)throws Exception{
+			if (persistable != null && persistable instanceof Folder) {
+				Folder parent_Folder = (Folder) persistable;
+				if (!isSync) {
+					folderResult = FolderUtil.createSubFolder(
+							folder.getCommonName(), null, parent_Folder, null);
+				} else {
+					String oid = folder.getPLMId();
+					folderResult = (Folder) GenericUtil
+							.getPersistableByOid(oid);
+				}
+			} else {
+				WTContainer wtcontainer = GenericUtil
+						.getWTContainerByName(containerName);
+				if (wtcontainer instanceof PDMLinkProduct) {// 产品库
+					folderResult = folderService.createFolder(DEFAULT,
+							folder.getCommonName(), containerName, "1");
+				} else {// 存储库
+					folderResult = folderService.createFolder(DEFAULT,
+							folder.getCommonName(), containerName, "0");
+				}
+			}
+
+			// 回写Windchill Folder Oid到PM系统
+			String wc_oid = folderResult.getPersistInfo().getObjectIdentifier()
+					.getStringValue();// OID
+			Debug.P("------Windchill Folder_OID:" + wc_oid);
+			folder.setPLMId(wc_oid);
+			folder.setPLMData(getObjectInfo(folderResult));
+
+			folder.doUpdate();// 修改
+			Debug.P("----->>>更新PM:(" + folder.getCommonName() + ")成功!");
+		} finally {
+			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+		}
+
+	}
+
+	/**
+	 * 修改文件夹名称
+	 * 
+	 * @param objectId
+	 * @param newFolderName
+	 *            新文件夹名称
+	 * @return
+	 */
+	public static int modifyFolderEntry(String objectId,String newFolderName)throws Exception{
 		  int count =0;
 		  Debug.P("------->>>ObjectId:"+objectId);
 		  checkNull(objectId);
@@ -220,8 +202,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //	       }else{
 	  		 //查询PM文件夹对象
-		     new PMWebserviceImpl();//初始化
-	  		 FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
+	  		 FolderPersistence folderPersistence =  ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 	       	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 	       	 String oldFolderName=folder.getCommonName();
 	       	 checkNull(folder);
@@ -253,15 +234,16 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	       }
      	       return count;
 	 }
-	 
-	 /**
-	  * 删除文件夹包含文件夹下的对象
-	 * @throws IllegalAccessException 
-	 * @throws Exception 
-	  * 
-	  */
-	 
-	 public static int deleteFolderEntry(String objectId) throws Exception{
+
+	/**
+	 * 删除文件夹包含文件夹下的对象
+	 * 
+	 * @throws IllegalAccessException
+	 * @throws Exception
+	 * 
+	 */
+
+	public static int deleteFolderEntry(String objectId) throws Exception{
 		   int count=0;
 		   Debug.P("-------->>>Delete Folder:"+objectId);
 		   if (!RemoteMethodServer.ServerFlag) {
@@ -272,8 +254,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 	        }else{
 	             checkNull(objectId);
-	             new PMWebserviceImpl();//初始化
-	        	 FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
+	        	 FolderPersistence folderPersistence = ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 	        	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 	        	 checkNull(folder);
 	        	try{
@@ -305,26 +286,21 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        }
      	            return count;
 	 }
-	 
-	 
-	
 
 	private static void checkNull(Object object) {
-		if(object==null){
-			Debug.P("---->>Object:"+object);
+		if (object == null) {
+			Debug.P("---->>Object:" + object);
 			throw new IllegalArgumentException("object  is Null");
 		}
-	
+
 	}
 
-
-	
-	
 	/**
 	 * 创建WTDocument文档
+	 * 
 	 * @param pm_docId
 	 */
-    public static int  createWTDocumentEntry(String pm_docId) throws Exception{
+	public static int  createWTDocumentEntry(String pm_docId) throws Exception{
     	   int count=0;
     	   Debug.P("------>>>Create Windchill Doc:PMID("+pm_docId+")");
 //		 if (!RemoteMethodServer.ServerFlag) {
@@ -336,8 +312,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	     }else{
 	        	WTDocument document=WTDocument.newWTDocument();
 	        	//获得PM文档对象
-	        	new PMWebserviceImpl();//初始化
-	        	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+	        	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
 	        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
 	        	PMFolder pmfolder=pm_document.getFolder();//获得文档所在的PM文件夹
 	        	String wc_foid=pmfolder.getPLMId();//Windchill 文件夹 Oid 
@@ -387,16 +362,16 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	}
          	     return count;
     }
-    
 
-    /**
-     * 更新文档信息
-     * @param pm_id
-     * @param newDocName
-     * @return
-     * @throws Exception
-     */
-    public static int updateWTDocumentEntry(String pm_id)throws Exception{
+	/**
+	 * 更新文档信息
+	 * 
+	 * @param pm_id
+	 * @param newDocName
+	 * @return
+	 * @throws Exception
+	 */
+	public static int updateWTDocumentEntry(String pm_id)throws Exception{
     	Debug.P("------>>>Update Windchill Doc:PMID("+pm_id+")");
     	int count=0;
     	checkNull(pm_id);
@@ -407,8 +382,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //	            Object[] vals = {pm_id};
 //	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //	     }else{
-    	    new PMWebserviceImpl();//初始化
-	    	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+	    	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
 	     	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
 	     	String pm_docName=pm_document.getCommonName();
 	     	
@@ -451,17 +425,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     	  return count;
     }
 
-
-    
-	
-	
-    /**
-     * 删除文档对象
-     * @param pm_docId
-     * @return
-     * @throws Exception
-     */
-    public static int deleteWTDocumentEntry(String pm_docId)throws Exception{
+	/**
+	 * 删除文档对象
+	 * 
+	 * @param pm_docId
+	 * @return
+	 * @throws Exception
+	 */
+	public static int deleteWTDocumentEntry(String pm_docId)throws Exception{
     	
        Debug.P("------>>>Delete PM_DocumentID："+pm_docId);
        
@@ -474,8 +445,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //       }else{
     	   
     	checkNull(pm_docId);
-    	new PMWebserviceImpl();//初始化
-       	DocumentPersistence docPersistance=factory.get(DocumentPersistence.class);
+       	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
        	checkNull(pm_document);
        	 //获得PM 文档对应的Windchill文档ID
@@ -498,15 +468,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //       }
     	  return 0;
     }
-    
-    
-    /**
-     * 同步移动PM文档的路径到Windchill系统中更改
-     * @param pm_docId
-     * @return
-     * @throws Exception
-     */
-    public static int moveWTDocumentEntry(String pm_docId)throws Exception{
+
+	/**
+	 * 同步移动PM文档的路径到Windchill系统中更改
+	 * 
+	 * @param pm_docId
+	 * @return
+	 * @throws Exception
+	 */
+	public static int moveWTDocumentEntry(String pm_docId)throws Exception{
 
    	 Debug.P("------>>>Move Path PM_DocumentID ："+pm_docId);
 	 checkNull(pm_docId);
@@ -517,8 +487,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //           Object[] vals = {pm_docId};
 //           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 //       }else{
-	         new PMWebserviceImpl();//初始化
-    	     BasicDocument basic_object=factory.getBasicDocumentById(pm_docId);
+    	     BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_docId);
     	 	 checkNull(basic_object);
     	 	//根据PM文件夹找到与之对应的Windchill文件夹Oid
     	      PMFolder folder=basic_object.getFolder();
@@ -555,130 +524,138 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
  	           return 0;
   }
-    
-    
-    
+
 	/**
 	 * 映射文档对象对象软属性
+	 * 
 	 * @param ibas
 	 * @param object
 	 * @throws WTException
 	 */
-	private  static void setDocIBAValuesMap(Map ibas,PMDocument object )throws WTException{
-		//设置对象参数
-		if(!StringUtils.isEmpty(object.getPhase())){
-			 ibas.put(ConstanUtil.PHASE, object.getPhase());//阶段
+	private static void setDocIBAValuesMap(Map ibas, PMDocument object)
+			throws WTException {
+		// 设置对象参数
+		if (!StringUtils.isEmpty(object.getPhase())) {
+			ibas.put(ConstanUtil.PHASE, object.getPhase());// 阶段
 		}
-		if(!StringUtils.isEmpty(object.getProductNumber())){
-			ibas.put(ConstanUtil.PROJECTNO,object.getProductNumber());//项目编号
+		if (!StringUtils.isEmpty(object.getProductNumber())) {
+			ibas.put(ConstanUtil.PROJECTNO, object.getProductNumber());// 项目编号
 		}
-		if(!StringUtils.isEmpty(object.getProjectWorkOrder())){
-			ibas.put(ConstanUtil.WORKORDER, object.getProjectWorkOrder());//工作令号
+		if (!StringUtils.isEmpty(object.getProjectWorkOrder())) {
+			ibas.put(ConstanUtil.WORKORDER, object.getProjectWorkOrder());// 工作令号
 		}
-		if(!StringUtils.isEmpty(object.getProductNumber())){
-			  ibas.put(ConstanUtil.PRODUCTNO, object.getProductNumber());//关联的成品号
+		if (!StringUtils.isEmpty(object.getProductNumber())) {
+			ibas.put(ConstanUtil.PRODUCTNO, object.getProductNumber());// 关联的成品号
 		}
-		if(!StringUtils.isEmpty(object.getCreateByUserId())){
-			  ibas.put(Contants.PMCREATOR, object.getCreateByUserId());//创建者
+		if (!StringUtils.isEmpty(object.getCreateByUserId())) {
+			ibas.put(Contants.PMCREATOR, object.getCreateByUserId());// 创建者
 		}
-		if(!StringUtils.isEmpty(object.getModifiedUserId())){
-			  ibas.put(Contants.PMMODIFYEDBY, object.getModifiedUserId());//修改者
+		if (!StringUtils.isEmpty(object.getModifiedUserId())) {
+			ibas.put(Contants.PMMODIFYEDBY, object.getModifiedUserId());// 修改者
 		}
 	}
-	
-	
 
 	/**
 	 * 获取对象的属性信息
+	 * 
 	 * @param object
 	 * @throws WTException
 	 */
-	 private static Map<String,Object> getObjectInfo(Persistable object)throws Exception{
-		  Map<String,Object> result=new HashMap<String,Object>();
-		  if(object!=null){
-			   if(object instanceof WTPart){
-				   WTPart part=(WTPart)object;
-				   result.put(ConstanUtil.NAME, part.getName());
-				   result.put(ConstanUtil.TYPE, part.getType());
-				   result.put(ConstanUtil.NUMBER, part.getNumber());
-				   result.put(ConstanUtil.CREATOR, part.getCreator().getName());
-				   result.put(ConstanUtil.MODIFIER, part.getModifier().getName());
-				   //获取对象的软属性集合
-				   Map<String,Object> ibas=LWCUtil.getAllAttribute(part);
-				   result.putAll(ibas);
-			   }else if(object instanceof EPMDocument){
-				   EPMDocument epm=(EPMDocument)object;
-				   result.put(ConstanUtil.NAME, epm.getName());
-				   result.put(ConstanUtil.TYPE, epm.getType());
-				   result.put(ConstanUtil.NUMBER, epm.getNumber());
-//				   result.put(ConstanUtil.STATE, epm.getLifeCycleState().getDisplay());
-				   result.put(ConstanUtil.CREATOR, epm.getCreator().getName());
-				   result.put(ConstanUtil.MODIFIER, epm.getModifier().getName());
-				   result.put(ConstanUtil.CREATEDATE, epm.getCreateTimestamp().toString());
-				   result.put(ConstanUtil.MODIFYDATE, epm.getModifyTimestamp().toString());
-				   result.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(epm));
-				   //获取对象的软属性集合
-				   Map<String,Object> ibas=LWCUtil.getAllAttribute(epm);
-				   result.putAll(ibas);
-			   }else if(object instanceof WTDocument){
-				   WTDocument doc=(WTDocument)object;
-				   Debug.P("----------->>>>Doc:"+doc.getName());
-				   result.put(ConstanUtil.NAME, doc.getName());
-				   result.put(ConstanUtil.TYPE, doc.getType());
-				   result.put(ConstanUtil.NUMBER, doc.getNumber());
-//                   result.put(ConstanUtil.STATE, doc.getLifeCycleState().getDisplay());
-				   result.put(ConstanUtil.CREATOR, doc.getCreator().getName());
-				   result.put(ConstanUtil.MODIFIER, doc.getModifier().getName());
-//			   result.put(ConstanUtil.CREATEDATE, doc.getCreateTimestamp().toString());
-//			   result.put(ConstanUtil.MODIFYDATE, doc.getModifyTimestamp().toString());
-				   result.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(doc));
-				   //获取对象的软属性集合
-				   Map<String,Object> ibas=LWCUtil.getAllAttribute(doc);
-				   result.putAll(ibas);
-			   }else if(object instanceof Folder){
-				   Folder folder=(Folder)object;
-				   result.put(ConstanUtil.NAME, folder.getName());
-			   }
-			     //对象链接地址
-			     result.put(ConstanUtil.OBJECT_URL, GenericUtil.getObjUrl(object));
-		  }
-		        return result;
-	 }
-	
-	
-	 /**
-	  * 获得对象的版本(A.3)
-	  * @param object
-	  * @return
-	  */
-	 public static String getObjectVersion(RevisionControlled object){
-		  checkNull(object);
-		  String result=null;
-		 try {
-			 String version =VersionControlHelper.getVersionIdentifier(object).getValue();
-			 String iteration=VersionControlHelper.getIterationIdentifier(object).getValue();
-	         result=version+"."+iteration;
-		 } catch (VersionControlException e) {
-			 Debug.P(e.getMessage());
+	private static Map<String, Object> getObjectInfo(Persistable object)
+			throws Exception {
+		Map<String, Object> result = new HashMap<String, Object>();
+		if (object != null) {
+			if (object instanceof WTPart) {
+				WTPart part = (WTPart) object;
+				result.put(ConstanUtil.NAME, part.getName());
+				result.put(ConstanUtil.TYPE, part.getType());
+				result.put(ConstanUtil.NUMBER, part.getNumber());
+				result.put(ConstanUtil.CREATOR, part.getCreator().getName());
+				result.put(ConstanUtil.MODIFIER, part.getModifier().getName());
+				// 获取对象的软属性集合
+				Map<String, Object> ibas = LWCUtil.getAllAttribute(part);
+				result.putAll(ibas);
+			} else if (object instanceof EPMDocument) {
+				EPMDocument epm = (EPMDocument) object;
+				result.put(ConstanUtil.NAME, epm.getName());
+				result.put(ConstanUtil.TYPE, epm.getType());
+				result.put(ConstanUtil.NUMBER, epm.getNumber());
+				// result.put(ConstanUtil.STATE,
+				// epm.getLifeCycleState().getDisplay());
+				result.put(ConstanUtil.CREATOR, epm.getCreator().getName());
+				result.put(ConstanUtil.MODIFIER, epm.getModifier().getName());
+				result.put(ConstanUtil.CREATEDATE, epm.getCreateTimestamp()
+						.toString());
+				result.put(ConstanUtil.MODIFYDATE, epm.getModifyTimestamp()
+						.toString());
+				result.put(ConstanUtil.DOWNLOAD_URL,
+						GenericUtil.getPrimaryContentUrl(epm));
+				// 获取对象的软属性集合
+				Map<String, Object> ibas = LWCUtil.getAllAttribute(epm);
+				result.putAll(ibas);
+			} else if (object instanceof WTDocument) {
+				WTDocument doc = (WTDocument) object;
+				Debug.P("----------->>>>Doc:" + doc.getName());
+				result.put(ConstanUtil.NAME, doc.getName());
+				result.put(ConstanUtil.TYPE, doc.getType());
+				result.put(ConstanUtil.NUMBER, doc.getNumber());
+				// result.put(ConstanUtil.STATE,
+				// doc.getLifeCycleState().getDisplay());
+				result.put(ConstanUtil.CREATOR, doc.getCreator().getName());
+				result.put(ConstanUtil.MODIFIER, doc.getModifier().getName());
+				// result.put(ConstanUtil.CREATEDATE,
+				// doc.getCreateTimestamp().toString());
+				// result.put(ConstanUtil.MODIFYDATE,
+				// doc.getModifyTimestamp().toString());
+				result.put(ConstanUtil.DOWNLOAD_URL,
+						GenericUtil.getPrimaryContentUrl(doc));
+				// 获取对象的软属性集合
+				Map<String, Object> ibas = LWCUtil.getAllAttribute(doc);
+				result.putAll(ibas);
+			} else if (object instanceof Folder) {
+				Folder folder = (Folder) object;
+				result.put(ConstanUtil.NAME, folder.getName());
+			}
+			// 对象链接地址
+			result.put(ConstanUtil.OBJECT_URL, GenericUtil.getObjUrl(object));
+		}
+		return result;
+	}
+
+	/**
+	 * 获得对象的版本(A.3)
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public static String getObjectVersion(RevisionControlled object) {
+		checkNull(object);
+		String result = null;
+		try {
+			String version = VersionControlHelper.getVersionIdentifier(object)
+					.getValue();
+			String iteration = VersionControlHelper.getIterationIdentifier(
+					object).getValue();
+			result = version + "." + iteration;
+		} catch (VersionControlException e) {
+			Debug.P(e.getMessage());
 			e.printStackTrace();
 		}
-		  return result;
-	 }
-	 
-	 
-	 
-	 /**
-	  * 修订版本
-	  * @param pm_oid
-	  * @throws Exception
-	  */
-	 public static void changeRevision(String pm_id)throws Exception{
+		return result;
+	}
+
+	/**
+	 * 修订版本
+	 * 
+	 * @param pm_oid
+	 * @throws Exception
+	 */
+	public static void changeRevision(String pm_id)throws Exception{
 		 
 		   Debug.P("----->>Check Revision PM_DocID:"+pm_id);
 		   checkNull(pm_id);
 		    //获取PM文档对象
-		     new PMWebserviceImpl();//初始化
-             BasicDocument basic_object=factory.getBasicDocumentById(pm_id);
+             BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
              checkNull(basic_object);
 		   //获得WindChill ID
         	String wc_id=basic_object.getPLMId();
@@ -712,17 +689,17 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
         	
 	 }
 
-	 /**
-	  * 修改生命周期状态
-	  * @param pm_id
-	  * @return
-	  */
-	 public static void changeLifecycleState(String pm_id)throws Exception{
+	/**
+	 * 修改生命周期状态
+	 * 
+	 * @param pm_id
+	 * @return
+	 */
+	public static void changeLifecycleState(String pm_id)throws Exception{
 		  Debug.P("----------->>>>Lifecycle  PMID:"+pm_id);
 		 //获取PM文档对象
 		  if(!StringUtils.isEmpty(pm_id)){
-			     new PMWebserviceImpl();//初始化
-			     BasicDocument  basic_object=factory.getBasicDocumentById(pm_id);
+			     BasicDocument  basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
 		      	 checkNull(basic_object);
 		      	//获得WindChill ID
 		        String wc_id=basic_object.getPLMId();
@@ -746,20 +723,19 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		      	 
 		  }
 	 }
-	 
-	 
-	 /**
-	  * 更改对象阶段
-	  * @param pm_id
-	  * @throws Exception
-	  */
-	 public static int  changePhase(String pm_id)throws Exception{
+
+	/**
+	 * 更改对象阶段
+	 * 
+	 * @param pm_id
+	 * @throws Exception
+	 */
+	public static int  changePhase(String pm_id)throws Exception{
 		  Debug.P("------->>>Change Phase PMID:"+pm_id);
 		   int count=0;
 		  if(!StringUtils.isEmpty(pm_id)){
 			  //根据pm_id修改阶段信息
-			  new PMWebserviceImpl();//初始化
-			  BasicDocument object=factory.getBasicDocumentById(pm_id);
+			  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
               String phase=object.getPhase();//阶段
               String plmId=object.getPLMId();//PM对应的Windchill字段
               Debug.P("----Phase--->>>Windchill ID:"+plmId+"   ;Phase Value:"+phase);
@@ -787,9 +763,5 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	}
 		   return count;
 	 }
-	 
-	 
-
-
 
 }

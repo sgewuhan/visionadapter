@@ -37,8 +37,8 @@ public class ModelServiceFactory {
 
 	public static ModelServiceFactory service;
 
-	public static ModelServiceFactory getInstance(String confFolder) {
-		if (service != null) {
+	public static ModelServiceFactory getInstance(String confFolder){
+		if(service!=null){
 			return service;
 		}
 		service = new ModelServiceFactory();
