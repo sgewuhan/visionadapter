@@ -28,6 +28,17 @@ public class Contants {
 	public static final String SUPPLYMENT="com.plm.GuestPart";
 	
 	
+	/*
+	 * 包装材料
+	 */
+	public static final String PACKINGPART="com.plm.PackingMaterialPart";
+	
+	/*
+	 * 备品备料
+	 */
+	public static final String TOOLPART="com.plm.ToolPart";
+	
+	
 	// 软属性
 	/*
 	 * 部件类型
