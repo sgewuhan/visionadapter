@@ -477,7 +477,7 @@ public class WCToPMHelper {
           pmPackage.setFolderIdByPLMId(pFolderId);
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
-          pmPackage.setPLMData(plmData);
+          pmPackage.setPLMData(plmData);  
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
 			pmPackage.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
