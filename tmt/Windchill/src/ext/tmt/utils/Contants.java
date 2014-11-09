@@ -135,6 +135,9 @@ public class Contants {
 	 */
 	public static final String PMMODIFYEDBY="ModifiedBy";
 	
+	
+	public static final String PMNUMBER="number";
+	
 //	/*
 //	 * 物料组
 //	 */

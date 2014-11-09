@@ -112,6 +112,8 @@ public class WCToPMHelper {
 			 pmPart.setWeight(NumberFormat.getInstance().parse(weight));    
 			pmPart.setProductNumber(partiba.getIBAValue(Contants.PRODUCTNO)==null?"":partiba.getIBAValue(Contants.PRODUCTNO));
 			Map<String,Object> plmData = new HashMap<String,Object>();
+			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
 			pmPart.setPLMData(plmData);
 			pmPart.setOwner(wtPart.getCreatorName());
 			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL));
@@ -180,6 +182,7 @@ public class WCToPMHelper {
            pmProduct.setFolderIdByPLMId(pFolderId);
            pmProduct.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
+           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
            pmProduct.setPLMData(plmData);
 			pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmProduct.setObjectNumber(wtPart.getNumber());
@@ -251,6 +254,7 @@ public class WCToPMHelper {
            pmMaterial.setFolderIdByPLMId(pFolderId);
            pmMaterial.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
+           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
            pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmMaterial.setObjectNumber(wtPart.getNumber());
@@ -327,6 +331,7 @@ public class WCToPMHelper {
            pmSupplyment.setFolderIdByPLMId(pFolderId);
            pmSupplyment.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
+           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
            pmSupplyment.setPLMData(plmData);
            pmSupplyment.setObjectNumber(wtPart.getNumber());
 			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
@@ -406,6 +411,7 @@ public class WCToPMHelper {
            pmcad.setFolderId(new ObjectId(pFolderId));
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
+           plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
            plmData.put("AirSpringClassification", cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
            plmData.put("Part_Type", cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
            pmcad.setPLMData(plmData);
@@ -473,6 +479,7 @@ public class WCToPMHelper {
           pmPackage.setFolderIdByPLMId(pFolderId);
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
+          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
           pmPackage.setPLMData(plmData);  
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
@@ -548,6 +555,7 @@ public class WCToPMHelper {
           pmJigTools.setFolderIdByPLMId(pFolderId);
           pmJigTools.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
+          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
           pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmJigTools.setObjectNumber(wtPart.getNumber());
@@ -617,6 +625,7 @@ public class WCToPMHelper {
            Debug.P(epmdoc.getContainer());
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
+           plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
            plmData.put("AirSpringClassification", cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
            plmData.put("Part_Type", cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
            pmcad.setPLMData(plmData);
@@ -676,6 +685,7 @@ public class WCToPMHelper {
 			 pmPart.setWeight(NumberFormat.getInstance().parse(weight));    
 			pmPart.setProductNumber(partiba.getIBAValue(Contants.PRODUCTNO)==null?"":partiba.getIBAValue(Contants.PRODUCTNO));
 			Map<String,Object> plmData = new HashMap<String,Object>();
+			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
 			plmData.put("AirSpringClassification", partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
 			pmPart.setPLMData(plmData);
 			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
@@ -721,6 +731,7 @@ public class WCToPMHelper {
 			Debug.P("partiba----->"+partiba);
           Debug.P(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
+          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
           pmProduct.setPLMData(plmData);
 			pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmProduct.setObjectNumber(wtPart.getNumber());
@@ -779,6 +790,7 @@ public class WCToPMHelper {
           Debug.P(partOid);
           pmMaterial.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
+          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
           pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmMaterial.setObjectNumber(wtPart.getNumber());
@@ -838,6 +850,7 @@ public class WCToPMHelper {
          Debug.P(partOid);
          pmPackage.setPLMId(partOid);
          Map<String,Object> plmData = new HashMap<String,Object>();
+         plmData.put(Contants.PMNUMBER, wtPart.getNumber());
          pmPackage.setPLMData(plmData);
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
@@ -909,6 +922,7 @@ public class WCToPMHelper {
          pmJigTools.setFolderIdByPLMId(pFolderId);
          pmJigTools.setPLMId(partOid);
          Map<String,Object> plmData = new HashMap<String,Object>();
+         plmData.put(Contants.PMNUMBER, wtPart.getNumber());
          pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmJigTools.setObjectNumber(wtPart.getNumber());
@@ -965,6 +979,7 @@ public class WCToPMHelper {
 			pmSupplyment = supplymentPersistence.get(new ObjectId(pmoid));
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Map<String,Object> plmData = new HashMap<String,Object>();
+          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
             pmSupplyment.setPLMData(plmData);
 			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态

@@ -44,7 +44,7 @@ public class EPMDocHelper implements Serializable {
 		String pmoids = iba.getIBAValue(Contants.PMID);
 		Debug.P("sync--->"+sync);
 		Debug.P("pmoids--->"+pmoids);
-        if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+        if (StringUtils.isEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			try {
 				flag = SessionServerHelper.manager.setAccessEnforced(false);
 				// 如果是新建修订版本或者新建视图版本
