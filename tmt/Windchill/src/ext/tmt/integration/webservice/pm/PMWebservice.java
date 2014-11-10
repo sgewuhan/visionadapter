@@ -12,9 +12,6 @@ import ext.tmt.integration.webservice.spm.SPMWebserviceImpl;
 public class PMWebservice extends JaxWsWebService
 {
 
-	/*
-	 * 以下为PM调用的接口
-	 */
     @WebMethod(operationName="createFolder")
     public int createFolder(String[] result )throws Exception
     {
@@ -78,9 +75,7 @@ public class PMWebservice extends JaxWsWebService
          PMWebserviceImpl.changePhase(objectId);
     }
     
-    /**
-     * 以下为SPM系统调用的借口
-     */
+
     @WebMethod(operationName="processorForSpm1")
     public String processorForSpm1 (String workflow, int times,
             String factory)throws Exception
