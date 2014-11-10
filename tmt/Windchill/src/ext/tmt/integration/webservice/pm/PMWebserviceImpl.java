@@ -146,8 +146,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			    	 //如果父项是容器则在容器下创建文件夹
 			    	 if(isContainer){
 			    		  Debug.P("-----Container----->>>Ready Create FolderPath: "+(DEFAULT+"/"+pmfolder.getCommonName()));
-			    		  Folder containerFolder=GenericUtil.createNewPath(container);
-			    		  folderResult=FolderUtil.createSubFolder(pmfolder.getCommonName(),null,containerFolder,null);
+			    		  String folderPath=DEFAULT+"/"+pmfolder.getCommonName();
+			    		  folderResult=FolderUtil.getFolderRef(folderPath,container,true);
 			    	 }else{
 			    		 //否则获得父项的文件夹对象
 			    		 Persistable persistable=GenericUtil.getPersistableByOid(parent_wcId);
