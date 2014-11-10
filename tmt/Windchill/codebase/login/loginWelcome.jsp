@@ -25,6 +25,9 @@
 		  passWord = name;
     }
   } 
+  String Oid = request.getParameter("Oid");
+  String user = request.getParameter("user");
+  String pass = request.getParameter("pass");
 %>
 <script>
 	
@@ -36,7 +39,7 @@ function login(){
 	//alert(password);
 	//alert('login start...');
 	//var username='test';
-	//var password='test';
+	//var password='test';http://csr-tmt.plm.com/Windchill/login/loginWelcome.jsp?Oid=wt.part.WTPart:97241
 	if(window.ActiveXObject){
 		xhr = new ActiveXObject("Microsoft.XMLHTTP");
 	}else {  
@@ -57,7 +60,7 @@ function handleStateChange(){
 <body  bgColor=#ffffff>
 							验证成功，页面正在跳转...
 <script></script>	
-<iframe width=420 height=330 name=aa frameborder=0 src="http://crh-tmt.plm.com/Windchill/app/#ptc1/tcomp/infoPage?oid=VR%3Awt.part.WTPart%3A62373&u8=1"></iframe>
+<iframe width=1420 height=1000 name=aa frameborder=0 src="http://crh-tmt.plm.com/Windchill/app/#ptc1/tcomp/infoPage?oid=VR<%=Oid%>&u8=1"></iframe>
 </body>
 
 </html>

@@ -22,11 +22,14 @@ import wt.part.WTPart;
 import wt.util.WTProperties;
 
 import com.mongodb.WriteResult;
+import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.CADDocumentPersistence;
+import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.JigToolsPersistence;
 import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
+import com.sg.visionadapter.PMFolder;
 import com.sg.visionadapter.PMJigTools;
 import com.sg.visionadapter.PMMaterial;
 import com.sg.visionadapter.PMPackage;
@@ -40,6 +43,7 @@ import com.sg.visionadapter.SupplymentPersistence;
 
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
+import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.Utils;
 
@@ -82,10 +86,11 @@ public class WCToPMHelper {
 			pmPart = partPersistence.newInstance();  
 			IBAUtils  partiba = new IBAUtils(wtPart);
             Debug.P(partOid);
+            Debug.P(wtPart.getContainerName());
             partFolderString = wtPart.getFolderPath();
             partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
             Debug.P(partFolderString);
-          //  partFolder=FolderUtil.getFolder(partFolderString, wtPart.getContainerName());
+//            partFolder=FolderUtil.getFolder(partFolderString, wtPart.getContainerName());
            // partFolder=wtPart.getFolderingInfo().getFolder();
             Debug.P(partFolder);
             
@@ -94,7 +99,9 @@ public class WCToPMHelper {
             pFolderId = rf.getReferenceString(partFolder);
             Debug.P(pFolderId);
             pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
- 		    pmPart.setFolderIdByPLMId(pFolderId);
+             PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+             if(pmfolder!=null){
+            pmPart.setFolderIdByPLMId(pFolderId);
  		    ObjectId objectId = new ObjectId();
  		    pmPart.set_id(objectId);
             pmPart.setPLMId(partOid);
@@ -129,6 +136,7 @@ public class WCToPMHelper {
 				reloadPermission(objectId.toString());
 				Debug.P("create PMPart success");
 			}
+		}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -179,6 +187,8 @@ public class WCToPMHelper {
            pFolderId = rf.getReferenceString(partFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
 		   Debug.P(pFolderId);
+		   PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+           if(pmfolder!=null){
            pmProduct.setFolderIdByPLMId(pFolderId);
            pmProduct.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -209,6 +219,7 @@ public class WCToPMHelper {
 				reloadPermission(objectId.toString());
 				Debug.P("create pmproduct success");
 			}
+           }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -252,6 +263,8 @@ public class WCToPMHelper {
            wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
            pFolderId = rf.getReferenceString(partFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+           PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+           if(pmfolder!=null){
            pmMaterial.setFolderIdByPLMId(pFolderId);
            pmMaterial.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -285,6 +298,7 @@ public class WCToPMHelper {
 				reloadPermission(objectId.toString());
 				Debug.P("create PMMaterial success");
 			}
+           }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -329,38 +343,56 @@ public class WCToPMHelper {
            wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
            pFolderId = rf.getReferenceString(partFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-           pmSupplyment.setFolderIdByPLMId(pFolderId);
-           pmSupplyment.setPLMId(partOid);
-           Map<String,Object> plmData = new HashMap<String,Object>();
-           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
-           pmSupplyment.setPLMData(plmData);
-           pmSupplyment.setObjectNumber(wtPart.getNumber());
-			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
-			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
-			pmSupplyment.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
-			pmSupplyment.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
-			pmSupplyment.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
-			pmSupplyment.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
-			
-			pmSupplyment.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
-			 weight = partiba.getIBAValue(Contants.WEIGHT);
-			if(StringUtils.isNotEmpty(weight))
-			 pmSupplyment.setWeight(NumberFormat.getInstance().parse(weight));    
-			pmSupplyment.setCustomerName(partiba.getIBAValue(Contants.CLIENTNAME)==null?"":partiba.getIBAValue(Contants.CLIENTNAME));
-			pmSupplyment.setMaterialGroup(partiba.getIBAValue(Contants.MATERIALGROUP)==null?"":partiba.getIBAValue(Contants.MATERIALGROUP));
-			ObjectId objectId = new ObjectId();
-			pmSupplyment.set_id(objectId);
-			pmSupplyment.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
-			pmSupplyment.setOwner(wtPart.getCreatorName());
-			WriteResult wresult = pmSupplyment.doInsert();   //
-			String error = wresult.getError();
-			if(StringUtils.isEmpty(error)){
-				partiba.setIBAValue(Contants.PMID, objectId.toString());
-				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
-				partiba.setIBAValue(Contants.PMREQUEST, "create");
-				partiba.updateIBAPart(wtPart);
-				reloadPermission(objectId.toString());
-				Debug.P("create PMSupplyment success");
+           PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			if (pmfolder != null) {
+				pmSupplyment.setFolderIdByPLMId(pFolderId);
+				pmSupplyment.setPLMId(partOid);
+				Map<String, Object> plmData = new HashMap<String, Object>();
+				plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+				pmSupplyment.setPLMData(plmData);
+				pmSupplyment.setObjectNumber(wtPart.getNumber());
+				pmSupplyment.setCommonName(wtPart.getName()); // 设置PM部件名称
+				pmSupplyment.setStatus(wtPart.getState().toString()
+						.toLowerCase()); // 设置PM部件状态
+				pmSupplyment.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName()); // 设置PM部件创建者
+				pmSupplyment.setMajorVid(wtPart.getVersionIdentifier()
+						.getValue()); // 设置PM部件大版本
+				pmSupplyment.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue())); // 设置PM部件小版本
+				pmSupplyment
+						.setPhase(partiba.getIBAValue(Contants.PHASE) == null ? ""
+								: partiba.getIBAValue(Contants.PHASE)); // 设置PM部件的阶段标记
+
+				pmSupplyment.setSpec(partiba
+						.getIBAValue(Contants.SPECIFICATIONS) == null ? ""
+						: partiba.getIBAValue(Contants.SPECIFICATIONS)); // 设置pm部件型号规格
+				weight = partiba.getIBAValue(Contants.WEIGHT);
+				if (StringUtils.isNotEmpty(weight))
+					pmSupplyment.setWeight(NumberFormat.getInstance().parse(
+							weight));
+				pmSupplyment.setCustomerName(partiba
+						.getIBAValue(Contants.CLIENTNAME) == null ? ""
+						: partiba.getIBAValue(Contants.CLIENTNAME));
+				pmSupplyment.setMaterialGroup(partiba
+						.getIBAValue(Contants.MATERIALGROUP) == null ? ""
+						: partiba.getIBAValue(Contants.MATERIALGROUP));
+				ObjectId objectId = new ObjectId();
+				pmSupplyment.set_id(objectId);
+				pmSupplyment
+						.setMaterial(partiba.getIBAValue(Contants.MATERIAL) == null ? ""
+								: partiba.getIBAValue(Contants.MATERIAL));
+				pmSupplyment.setOwner(wtPart.getCreatorName());
+				WriteResult wresult = pmSupplyment.doInsert(); //
+				String error = wresult.getError();
+				if (StringUtils.isEmpty(error)) {
+					partiba.setIBAValue(Contants.PMID, objectId.toString());
+					partiba.setIBAValue(Contants.CYNCDATA, Utils.getDate());
+					partiba.setIBAValue(Contants.PMREQUEST, "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(objectId.toString());
+					Debug.P("create PMSupplyment success");
+				}
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -409,6 +441,8 @@ public class WCToPMHelper {
            pFolderId = rf.getReferenceString(docFolder);
            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
            Debug.P(pFolderId);
+           PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+           if(pmfolder!=null){
            pmcad.setFolderIdByPLMId(pFolderId);
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -439,7 +473,7 @@ public class WCToPMHelper {
                 reloadPermission(objectId.toString());
                 Debug.P("create PMCADDocument success");
 			}
-		
+           }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -477,6 +511,8 @@ public class WCToPMHelper {
           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
           pFolderId = rf.getReferenceString(partFolder);
           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+          PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+          if(pmfolder!=null){
           pmPackage.setFolderIdByPLMId(pFolderId);
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
@@ -510,6 +546,7 @@ public class WCToPMHelper {
 				reloadPermission(objectId.toString());
 				Debug.P("create pmPackage success");
 			}
+          }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -553,6 +590,8 @@ public class WCToPMHelper {
           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
           pFolderId = rf.getReferenceString(partFolder);
           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+          PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+          if(pmfolder!=null){
           pmJigTools.setFolderIdByPLMId(pFolderId);
           pmJigTools.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
@@ -586,6 +625,7 @@ public class WCToPMHelper {
 				reloadPermission(objectId.toString());
 				Debug.P("create pmJigTools success");
 			}
+          }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
