@@ -130,7 +130,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
 			PMFolder pmfolder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 			checkNull(pmfolder);
-			boolean isSynch=pmfolder.getPLMId()==null?true:false;
+			boolean iscreate=pmfolder.getPLMId()==null?true:false;
 			PMFolder parentFolder=pmfolder.getParentFolder();//父文件夹
 			checkNull(parentFolder);
 			String containerName=pmfolder.getContainerName();//ContainerName
@@ -140,7 +140,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			Debug.P("------>>>Folder:"+pmfolder.getCommonName()+"  ParentFolder:"+parentFolder.getCommonName()+"  ContainerName="+containerName+"  ParentFolderID="+parent_wcId);
 			try{
 		    	SessionHelper.manager.setAdministrator();
-		    	if(!isSynch){//是否同步防止重复创建
+		    	if(iscreate){//是否同步防止重复创建
 			    	 //如果父项是容器则在容器下创建文件夹
 			    	 if(isContainer){
 			    		  String folderPath=DEFAULT+"/"+pmfolder.getCommonName();//文件夹路径
@@ -326,15 +326,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	PMFolder pmfolder=pm_document.getFolder();//获得文档所在的PM文件夹
 	        	String wc_foid=pmfolder.getPLMId();//Windchill 文件夹 Oid 
 	        	boolean isContainer=pmfolder.isContainer();
-	        	boolean isSynch=pm_document.getPLMId()==null?true:false;//是否已同步到Windchill
+	        	boolean iscreate=pm_document.getPLMId()==null?true:false;//是否已同步到Windchill
 	        	String containerName=pmfolder.getContainerName();
 	        	Debug.P("----->>>>WC   Folder ID:"+wc_foid+"  是否为PM的容器文件夹:"+isContainer +"  ;ContaienrName:"+containerName);
 	        	try{
 	        		SessionHelper.manager.setAdministrator();
 	        		  Persistable persistable=null;
 	        		  WTContainer container=null;
-	        		  Debug.P("------>>>PM DOC_ID："+pm_docId+"是否已同步到Windchill="+isSynch);
-	        		  if(!isSynch){//判断是否已同步到Windchill
+	        		  Debug.P("------>>>PM DOC_ID："+pm_docId+"是否新建到Windchill="+iscreate);
+	        		  if(iscreate){//判断是否已同步到Windchill
 	        			  //文件夹对象
 	            		  if(!StringUtils.isEmpty(wc_foid)){
 		        				persistable=GenericUtil.getPersistableByOid(wc_foid);
