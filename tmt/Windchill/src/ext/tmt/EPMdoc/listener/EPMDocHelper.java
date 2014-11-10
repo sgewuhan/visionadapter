@@ -57,7 +57,10 @@ public class EPMDocHelper implements Serializable {
 			} finally {
 				SessionServerHelper.manager.setAccessEnforced(flag);
 			}
-		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			WCToPMHelper.CreateEPMDocToPM(epmdoc);
+		}
+        else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
             Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
             Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());

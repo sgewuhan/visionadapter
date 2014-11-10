@@ -83,6 +83,9 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
         String POST_CHECKIN =WorkInProgressServiceEvent
 		        .generateEventKey(WorkInProgressServiceEvent.POST_CHECKIN);
         getManagerService().addEventListener(listener, POST_CHECKIN);
+        
+        String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
+		getManagerService().addEventListener(listener, POST_UPDATE);
  
 //        String PER_POST = PersistenceManagerEvent
 //                .generateEventKey(PersistenceManagerEvent.PRE_STORE);
