@@ -37,8 +37,10 @@ import wt.fc.PersistenceHelper;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
 import wt.folder.FolderHelper;
+import wt.folder.FolderServerHelper;
 import wt.iba.value.IBAHolder;
 import wt.inf.container.WTContainer;
+import wt.inf.container.WTContainerRef;
 import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
@@ -134,18 +136,18 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			PMFolder parentFolder=pmfolder.getParentFolder();//父文件夹
 			checkNull(parentFolder);
 			String containerName=pmfolder.getContainerName();//ContainerName
-			checkWTContainerExist(containerName);
 			boolean  isContainer=parentFolder.isContainer();//是否为容器
 			String parent_wcId=parentFolder.getPLMId();//获得父项对象Id
-			Debug.P("------>>>Folder:"+pmfolder.getCommonName()+"  ParentFolder:"+parentFolder.getCommonName()+"  ContainerName="+containerName+"  ParentFolderID="+parent_wcId);
+			Debug.P("------>>>Folder:"+pmfolder.getCommonName()+"  ParentFolder:"+parentFolder.getCommonName()+"  isContainer="+isContainer+"  ParentFolderID="+parent_wcId);
 			try{
 		    	SessionHelper.manager.setAdministrator();
+		    	WTContainer container=checkWTContainerExist(containerName);
 		    	if(iscreate){//是否同步防止重复创建
 			    	 //如果父项是容器则在容器下创建文件夹
 			    	 if(isContainer){
-			    		  String folderPath=DEFAULT+"/"+pmfolder.getCommonName();//文件夹路径
-			    		  Debug.P("---------->>>Ready Create FolderPath: "+folderPath);
-			    		  folderResult=FolderUtil.getFolderRef(folderPath, GenericUtil.getWTContainerByName(containerName), true);
+			    		  Debug.P("-----Container----->>>Ready Create FolderPath: "+(DEFAULT+"/"+pmfolder.getCommonName()));
+			    		  Folder containerFolder=GenericUtil.createNewPath(container);
+			    		  folderResult=FolderUtil.createSubFolder(pmfolder.getCommonName(),null,containerFolder,null);
 			    	 }else{
 			    		 //否则获得父项的文件夹对象
 			    		 Persistable persistable=GenericUtil.getPersistableByOid(parent_wcId);
@@ -154,17 +156,16 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			 	             folderResult=FolderUtil.createSubFolder(pmfolder.getCommonName(), null, parent_Folder, null);
 			 	            }
 			    	      }
-			    	  String  oid=pmfolder.getPLMId();
-	                  folderResult=(Folder) GenericUtil.getPersistableByOid(oid);
 	                  //回写Windchill Folder Oid到PM系统
 	                  String wc_oid=folderResult.getPersistInfo().getObjectIdentifier().getStringValue();//OID
 	                  Debug.P("------Windchill Folder_OID:"+wc_oid);
 	                  pmfolder.setPLMId(wc_oid);
 	                  pmfolder.setPLMData(getObjectInfo(folderResult));
 	                  pmfolder.doUpdate();//修改
-	                  Debug.P("----->>>创建同步Windchill:("+pmfolder.getCommonName()+")成功!");
+	                  Debug.P("----->>>创建同步Windchill文件夹:("+pmfolder.getCommonName()+")成功!");
 			    	 }
 		    }catch(Exception e){
+		    	e.printStackTrace();
 		    	throw new Exception("Windchill创建文件夹("+pmfolder.getCommonName()+")失败!");
 		    }finally{
 		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
@@ -294,15 +295,17 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 * @param containerName
 	 * @throws Exception
 	 */
-	private static void checkWTContainerExist(String containerName)throws Exception{
+	private static WTContainer checkWTContainerExist(String containerName)throws Exception{
+		WTContainer container=null;
 	try{
-		WTContainer container=GenericUtil.getWTContainerByName(containerName);
+		 container=GenericUtil.getWTContainerByName(containerName);
 		if(container==null){
 			throw new Exception("Windchill中不存在PM中的容器对象,请联系管理员配置!");
 		}
 	} catch (Exception e) {
 		throw new Exception("Windchill查询("+containerName+")异常!");
 	  }
+        return container;
 } 
 	
 	/**
