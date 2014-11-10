@@ -215,6 +215,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		       		}
 		       	 }
 	      	 }catch(Exception e){
+	      		 e.printStackTrace();
 	      		 throw new Exception("Windchill修改文件夹("+foid+")信息失败!");
 	      	 }finally{
 	      		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
@@ -428,6 +429,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			}
 	         		}
 	     		}catch(Exception e){
+	     			e.printStackTrace();
 	     			throw new Exception("Windchill更新("+doc_id+")文档对象失败!");
 	     		}finally{
 	     			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
@@ -476,6 +478,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
            		 }
            	  }
    	    	} catch(Exception e){
+   	    		e.printStackTrace();
    			   throw new Exception("Windchill删除文档对象("+wc_oid+")失败!");
    		   }finally{
    			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
