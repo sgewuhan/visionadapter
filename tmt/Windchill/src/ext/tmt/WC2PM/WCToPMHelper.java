@@ -89,18 +89,19 @@ public class WCToPMHelper {
             Debug.P(wtPart.getContainerName());
             partFolderString = wtPart.getFolderPath();
             partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
-            Debug.P(partFolderString);
-//            partFolder=FolderUtil.getFolder(partFolderString, wtPart.getContainerName());
-           // partFolder=wtPart.getFolderingInfo().getFolder();
             Debug.P(partFolder);
-            
-            Debug.P(wtPart.getContainer());
-            wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-            pFolderId = rf.getReferenceString(partFolder);
+            pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
             Debug.P(pFolderId);
-            pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-             PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-             if(pmfolder!=null){
+            boolean flag = true;
+ 		   try {
+ 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+ 			 if(pmfolder==null){
+ 				 flag=false;
+ 			 }
+ 		    } catch (NullPointerException e) {
+ 		    	flag=false;
+ 		    }
+ 		   if(flag){
             pmPart.setFolderIdByPLMId(pFolderId);
  		    ObjectId objectId = new ObjectId();
  		    pmPart.set_id(objectId);
@@ -179,46 +180,51 @@ public class WCToPMHelper {
            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
            //partFolder=wtPart.getFolderingInfo().getFolder();
            Debug.P(partFolder);
-           Debug.P(wtPart.getContainer());
            Debug.P(pFolderId);
            ObjectId objectId =new ObjectId();
            pmProduct.set_id(objectId);
-           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-           pFolderId = rf.getReferenceString(partFolder);
-           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
+           pFolderId=partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
 		   Debug.P(pFolderId);
-		   PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-           if(pmfolder!=null){
-           pmProduct.setFolderIdByPLMId(pFolderId);
-           pmProduct.setPLMId(partOid);
-           Map<String,Object> plmData = new HashMap<String,Object>();
-           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
-          Debug.P(plmData);
-           pmProduct.setPLMData(plmData);
-			pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
-			pmProduct.setObjectNumber(wtPart.getNumber());
-			pmProduct.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
-			pmProduct.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
-			pmProduct.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
-			pmProduct.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
-			pmProduct.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
-			pmProduct.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
-			 weight = partiba.getIBAValue(Contants.WEIGHT);
-			if(StringUtils.isNotEmpty(weight))
-			pmProduct.setWeight(NumberFormat.getInstance().parse(weight));    
-			pmProduct.setFormularNumber(partiba.getIBAValue(Contants.FORMULANO)==null?"":partiba.getIBAValue(Contants.FORMULANO) );
-			pmProduct.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
-			pmProduct.setOwner(wtPart.getCreatorName());
-			WriteResult wresult = pmProduct.doInsert();   //
-			String error = wresult.getError();
-			if(StringUtils.isEmpty(error)){
-				partiba.setIBAValue(Contants.PMID, objectId.toString());
-				partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
-				partiba.setIBAValue(Contants.PMREQUEST, "create");
-				partiba.updateIBAPart(wtPart);
-				reloadPermission(objectId.toString());
-				Debug.P("create pmproduct success");
-			}
+		   boolean flag = true;
+		   try {
+			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 if(pmfolder==null){
+				 flag=false;
+			 }
+		    } catch (NullPointerException e) {
+		    	flag=false;
+		   }
+           if(flag){//如果PM端没有该文件夹对象
+        	   pmProduct.setFolderIdByPLMId(pFolderId);
+        	   pmProduct.setPLMId(partOid);
+        	   Map<String,Object> plmData = new HashMap<String,Object>();
+        	   plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+        	   Debug.P(plmData);
+        	   pmProduct.setPLMData(plmData);
+        	   pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
+        	   pmProduct.setObjectNumber(wtPart.getNumber());
+        	   pmProduct.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
+        	   pmProduct.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
+        	   pmProduct.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
+        	   pmProduct.setSecondVid(Integer.parseInt(wtPart.getIterationIdentifier().getValue())); //设置PM部件小版本
+        	   pmProduct.setPhase(partiba.getIBAValue(Contants.PHASE)==null?"":partiba.getIBAValue(Contants.PHASE));             //设置PM部件的阶段标记
+        	   pmProduct.setSpec(partiba.getIBAValue(Contants.SPECIFICATIONS)==null?"":partiba.getIBAValue(Contants.SPECIFICATIONS));   //设置pm部件型号规格
+        	   weight = partiba.getIBAValue(Contants.WEIGHT);
+        	   if(StringUtils.isNotEmpty(weight))
+        		   pmProduct.setWeight(NumberFormat.getInstance().parse(weight));    
+        	   		pmProduct.setFormularNumber(partiba.getIBAValue(Contants.FORMULANO)==null?"":partiba.getIBAValue(Contants.FORMULANO) );
+        	   		pmProduct.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
+        	   		pmProduct.setOwner(wtPart.getCreatorName());
+        	   		WriteResult wresult = pmProduct.doInsert();   //
+        	   		String error = wresult.getError();
+        	   		if(StringUtils.isEmpty(error)){
+        	   			partiba.setIBAValue(Contants.PMID, objectId.toString());
+        	   			partiba.setIBAValue(Contants.CYNCDATA,Utils.getDate() );
+        	   			partiba.setIBAValue(Contants.PMREQUEST, "create");
+        	   			partiba.updateIBAPart(wtPart);
+        	   			reloadPermission(objectId.toString());
+        	   			Debug.P("create pmproduct success");
+        	   		}
            }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -259,12 +265,18 @@ public class WCToPMHelper {
            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
            //partFolder=wtPart.getFolderingInfo().getFolder();
            Debug.P(partFolder);
-           Debug.P(wtPart.getContainer());
-           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-           pFolderId = rf.getReferenceString(partFolder);
-           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-           PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-           if(pmfolder!=null){
+           pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
+           Debug.P(pFolderId);
+           boolean flag = true;
+		   try {
+			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 if(pmfolder==null){
+				 flag=false;
+			 }
+		    } catch (NullPointerException e) {
+		    	flag=false;
+		   }
+           if(flag){//如果PM端没有该文件夹对象
            pmMaterial.setFolderIdByPLMId(pFolderId);
            pmMaterial.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -339,12 +351,18 @@ public class WCToPMHelper {
            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
            //partFolder=wtPart.getFolderingInfo().getFolder();
            Debug.P(partFolder);
-           Debug.P(wtPart.getContainer());
-           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-           pFolderId = rf.getReferenceString(partFolder);
-           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-           PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-			if (pmfolder != null) {
+           pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
+           Debug.P(pFolderId);
+           boolean flag = true;
+		   try {
+			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 if(pmfolder==null){
+				 flag=false;
+			 }
+		    } catch (NullPointerException e) {
+		    	flag=false;
+		   }
+           if(flag){//如果PM端没有该文件夹对象
 				pmSupplyment.setFolderIdByPLMId(pFolderId);
 				pmSupplyment.setPLMId(partOid);
 				Map<String, Object> plmData = new HashMap<String, Object>();
@@ -418,7 +436,6 @@ public class WCToPMHelper {
 		Folder docFolder =null;
 		String pFolderId="";
 		CADDocumentPersistence cadDocPersistence =null;  //PM系统中的图纸持久化对象
-		String weight ="";
 		Debug.P("将Windchill中的EPMDocument插入PM系统的数据库中");
 		docOid = epmdoc.toString();
 		try {
@@ -436,13 +453,18 @@ public class WCToPMHelper {
 			 if(StringUtils.isNotEmpty(part_type)){
 				 part_type=part_type.replaceAll(" ", "").trim();
 			   }
-           Debug.P(epmdoc.getContainer());
-           wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-           pFolderId = rf.getReferenceString(docFolder);
-           pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-           Debug.P(pFolderId);
-           PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-           if(pmfolder!=null){
+			 pFolderId = docFolder.getPersistInfo().getObjectIdentifier().getStringValue();
+	            Debug.P(pFolderId);
+           boolean flag = true;
+		   try {
+			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 if(pmfolder==null){
+				 flag=false;
+			 }
+		    } catch (NullPointerException e) {
+		    	flag=false;
+		   }
+		   if(flag){
            pmcad.setFolderIdByPLMId(pFolderId);
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -507,12 +529,18 @@ public class WCToPMHelper {
           partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
           //partFolder=wtPart.getFolderingInfo().getFolder();
           Debug.P(partFolder);
-          Debug.P(wtPart.getContainer());
-          wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-          pFolderId = rf.getReferenceString(partFolder);
-          pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-          PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-          if(pmfolder!=null){
+          pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
+          Debug.P(pFolderId);
+          boolean flag = true;
+		   try {
+			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 if(pmfolder==null){
+				 flag=false;
+			 }
+		    } catch (NullPointerException e) {
+		    	flag=false;
+		   }
+		   if(flag){
           pmPackage.setFolderIdByPLMId(pFolderId);
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
@@ -584,14 +612,19 @@ public class WCToPMHelper {
           partFolderString = wtPart.getFolderPath();
           Debug.P(partFolderString);
           partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
-          //partFolder=wtPart.getFolderingInfo().getFolder();
           Debug.P(partFolder);
-          Debug.P(wtPart.getContainer());
-          wt.fc.ReferenceFactory rf = new wt.fc.ReferenceFactory();
-          pFolderId = rf.getReferenceString(partFolder);
-          pFolderId=pFolderId.substring(pFolderId.indexOf(":")+1, pFolderId.length());
-          PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
-          if(pmfolder!=null){
+          pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
+          Debug.P(pFolderId);
+          boolean flag = true;
+		   try {
+			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 if(pmfolder==null){
+				 flag=false;
+			 }
+		    } catch (NullPointerException e) {
+		    	flag=false;
+		   }
+		   if(flag){
           pmJigTools.setFolderIdByPLMId(pFolderId);
           pmJigTools.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
@@ -640,13 +673,10 @@ public class WCToPMHelper {
 	public static void updatePMCADDoc(String pmoid,EPMDocument epmdoc){
 		String docOid ="";    //EPMDoc的Oid 
 		CADDocumentPersistence cadDocPersistence =null;  //PM系统中的图纸持久化对象
-		
-		String weight ="";
 		Debug.P("将Windchill中的EPMDocument插入PM系统的数据库中");
 		docOid = epmdoc.toString();
 		try {
 			PMCADDocument pmcad = null;//PM中的图纸
-		
 			cadDocPersistence = ModelServiceFactory.getInstance(codebasePath).get(CADDocumentPersistence.class);
 			pmcad = cadDocPersistence.get(new ObjectId(pmoid));
 			IBAUtils  cadiba = new IBAUtils(epmdoc);
