@@ -140,4 +140,8 @@ public class PMFolder extends VisionObject {
 	public boolean isContainer() {
 		return Boolean.TRUE.equals(get(F_IS_CONTAINER ));
 	}
+	
+	public Object getProjectWorkOrder() {
+		return get(PROJECT_WORK_ORDER);
+	}
 }
