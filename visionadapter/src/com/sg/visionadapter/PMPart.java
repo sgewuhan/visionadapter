@@ -48,10 +48,7 @@ public final class PMPart extends BasicPart  implements IProductRelative{
 		return (String) get(PROJECT_WORK_ORDER);
 	}
 
-	@Override
-	public void setProjectWorkOrder(String projectWorkOrder) {
-		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
-	}
+	
 
 	/**
 	 * @return the productNumber

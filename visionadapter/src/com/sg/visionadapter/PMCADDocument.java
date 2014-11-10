@@ -52,10 +52,7 @@ public final class PMCADDocument extends BasicDocument implements
 		return (String) get(PROJECT_WORK_ORDER);
 	}
 
-	@Override
-	public void setProjectWorkOrder(String projectWorkOrder) {
-		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
-	}
+	
 
 	/**
 	 * @return the ³ÉÆ·±àÂë
