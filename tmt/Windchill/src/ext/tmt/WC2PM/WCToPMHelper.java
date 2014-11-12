@@ -80,7 +80,7 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {   
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence =ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
@@ -123,6 +123,7 @@ public class WCToPMHelper {
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
 			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+			plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
 			pmPart.setPLMData(plmData);
 			pmPart.setOwner(wtPart.getCreatorName());
 			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL));
@@ -167,6 +168,7 @@ public class WCToPMHelper {
 			master=(Master)epmdoc.getMaster();
 			oid=master.getPersistable().getPersistInfo().getObjectIdentifier().getStringValue();
 		}
+		Debug.P(oid);
 		return oid;
 	}
 	
@@ -185,7 +187,7 @@ public class WCToPMHelper {
 		ProductPersistence productPersistence =null;  //PM系统中的成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的成品插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
@@ -216,6 +218,7 @@ public class WCToPMHelper {
         	   pmProduct.setPLMId(partOid);
         	   Map<String,Object> plmData = new HashMap<String,Object>();
         	   plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+        	   plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
         	   Debug.P(plmData);
         	   pmProduct.setPLMData(plmData);
         	   pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
@@ -270,7 +273,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的原材料插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品   
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
@@ -298,6 +301,7 @@ public class WCToPMHelper {
            pmMaterial.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+           plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
            pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmMaterial.setObjectNumber(wtPart.getNumber());
@@ -355,7 +359,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的客供件插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);;
+		partOid = getObjectOid(wtPart);;
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的半成品        
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
@@ -384,6 +388,8 @@ public class WCToPMHelper {
 				pmSupplyment.setPLMId(partOid);
 				Map<String, Object> plmData = new HashMap<String, Object>();
 				plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+				plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
+				plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
 				pmSupplyment.setPLMData(plmData);
 				pmSupplyment.setObjectNumber(wtPart.getNumber());
 				pmSupplyment.setCommonName(wtPart.getName()); // 设置PM部件名称
@@ -486,8 +492,9 @@ public class WCToPMHelper {
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
-           plmData.put("AirSpringClassification", cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
-           plmData.put("Part_Type", cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+           plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.PLMMID, getObjectMasterOid(epmdoc));
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM部件名称
 			pmcad.setObjectNumber(epmdoc.getNumber());
@@ -534,7 +541,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMPackage pmPackage = null;//PM中的包装材料      
 			packagePersistence = ModelServiceFactory.getInstance(codebasePath).get(PackagePersistence.class);
@@ -562,6 +569,8 @@ public class WCToPMHelper {
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
+          plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
           pmPackage.setPLMData(plmData);  
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
@@ -619,7 +628,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的备品备料插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMJigTools pmJigTools = null;//PM中的备品备料        
 			jigTollsPersistence = ModelServiceFactory.getInstance(codebasePath).get(JigToolsPersistence.class);
@@ -646,6 +655,7 @@ public class WCToPMHelper {
           pmJigTools.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
           pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmJigTools.setObjectNumber(wtPart.getNumber());
@@ -706,8 +716,9 @@ public class WCToPMHelper {
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
-           plmData.put("AirSpringClassification", cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
-           plmData.put("Part_Type", cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+           plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.PLMMID, getObjectMasterOid(epmdoc));
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM图纸名称
 			pmcad.setObjectNumber(epmdoc.getNumber());
@@ -744,7 +755,7 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品后至PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence = ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
@@ -766,7 +777,8 @@ public class WCToPMHelper {
 			pmPart.setProductNumber(partiba.getIBAValue(Contants.PRODUCTNO)==null?"":partiba.getIBAValue(Contants.PRODUCTNO));
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
-			plmData.put("AirSpringClassification", partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+			plmData.put(Contants.AIRSPRINGCLASSIFICATION, partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+			plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
 			pmPart.setPLMData(plmData);
 			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmPart.setOwner(wtPart.getCreatorName());
@@ -802,7 +814,7 @@ public class WCToPMHelper {
 		String weight ="";
 		Debug.P("更新PM系统的数据库-----------》"+wtPart.getNumber());
 		try {
-			partOid = getObjectMasterOid(wtPart);
+			partOid = getObjectOid(wtPart);
 			PMProduct pmProduct = null;//PM中的成品           
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
 			pmProduct = productPersistence.get(new ObjectId(pmoid));
@@ -812,6 +824,7 @@ public class WCToPMHelper {
           Debug.P(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
           pmProduct.setPLMData(plmData);
 			pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmProduct.setObjectNumber(wtPart.getNumber());
@@ -860,7 +873,7 @@ public class WCToPMHelper {
 		MaterialPersistence materialPersistence=null;         //PM系统中的原材料持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料          
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
@@ -871,6 +884,7 @@ public class WCToPMHelper {
           pmMaterial.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
           pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmMaterial.setObjectNumber(wtPart.getNumber());
@@ -919,7 +933,7 @@ public class WCToPMHelper {
 		PackagePersistence packagePersistence=null;         //PM系统中的包装材料持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMPackage pmPackage = null;//PM中的包装材料          
 		
@@ -931,6 +945,7 @@ public class WCToPMHelper {
          pmPackage.setPLMId(partOid);
          Map<String,Object> plmData = new HashMap<String,Object>();
          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+         plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
          pmPackage.setPLMData(plmData);
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
@@ -983,7 +998,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的备品备料插入PM系统的数据库中");
-		partOid = getObjectMasterOid(wtPart);
+		partOid = getObjectOid(wtPart);
 		try {
 			PMJigTools pmJigTools = null;//PM中的备品备料        
 			jigTollsPersistence = ModelServiceFactory.getInstance(codebasePath).get(JigToolsPersistence.class);
@@ -1003,6 +1018,7 @@ public class WCToPMHelper {
          pmJigTools.setPLMId(partOid);
          Map<String,Object> plmData = new HashMap<String,Object>();
          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+         plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
          pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmJigTools.setObjectNumber(wtPart.getNumber());
@@ -1060,6 +1076,7 @@ public class WCToPMHelper {
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, getObjectMasterOid(wtPart));
             pmSupplyment.setPLMData(plmData);
 			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
