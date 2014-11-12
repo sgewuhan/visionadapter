@@ -137,7 +137,7 @@ public class PartHelper implements Serializable {
 						if(epmPartType.equals("半成品")){
 							types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
 						}else if(epmPartType.equals("成品")){
-							wtPart.setEndItem(true);
+							//wtPart.setEndItem(true);
 							types="wt.part.WTPart|"+Contants.PRODUCTPART;
 						}else{
 							return;
@@ -160,7 +160,7 @@ public class PartHelper implements Serializable {
 			    	partType=DocUtils.getType(wtPart);
 			    	Debug.P(partNumber+"------------------->"+partType);
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
-			    	wtPart.setEndItem(true);
+			    	//wtPart.setEndItem(true);
 			    	if (!PersistenceHelper.isPersistent(wtPart)) {
 						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
 						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
@@ -178,24 +178,34 @@ public class PartHelper implements Serializable {
 					if(!prefix.toUpperCase().contains("TX")){
 						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
 					}
-					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")){
+					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")
+							||prefix.toUpperCase().trim().contains("TX113")||prefix.toUpperCase().trim().contains("TX114")||prefix.toUpperCase().trim().contains("TX115")){
 						return;
 					}
+					
 					Debug.P("产品前缀----》"+prefix);
-					int i= 0;
-					do {  
-						if(prefix.toUpperCase().trim().equals("TXA6")||prefix.toUpperCase().trim().equals("TXA7")||prefix.toUpperCase().trim().equals("TXA8")){
-							partNumber=prefix+StringUtil.int2String(i,5);
-						}else{
+					if(prefix.toUpperCase().trim().contains("TX111")){
+						int i=9000;
+						do{
 							partNumber=prefix+StringUtil.int2String(i,4);
-						}
-						if(PartUtil.getPartByNumber(partNumber)==null){
-							newNumber=partNumber;
-							break;
-						}
-						i++;
-					} while (i < 100000);
-					changePartNumber(wtPart,newNumber);
+						}while(i<9999);
+						changePartNumber(wtPart,newNumber);
+					}else{
+						int i= 0;
+						do {  
+							if(prefix.toUpperCase().trim().equals("TXA6")||prefix.toUpperCase().trim().equals("TXA7")||prefix.toUpperCase().trim().equals("TXA8")){
+								partNumber=prefix+StringUtil.int2String(i,5);
+							}else {
+								partNumber=prefix+StringUtil.int2String(i,4);
+							}
+							if(PartUtil.getPartByNumber(partNumber)==null){
+								newNumber=partNumber;
+								break;
+							}
+							i++;
+						} while (i < 100000);
+						changePartNumber(wtPart,newNumber);
+					}
 					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
 					if(object !=null){
 						wtPart=(WTPart)object;

@@ -1,35 +1,21 @@
 package ext.tmt.utils;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 
-
-
-
-
-
-
-
-
-
-
-
-
-import com.ptc.core.meta.common.TypeIdentifier;
-import com.ptc.core.meta.server.TypeIdentifierUtility;
-
-import wt.org.OrganizationServicesHelper;
-import wt.org.WTPrincipalReference;
-import wt.org.WTUser;
-import wt.ownership.OwnershipHelper;
-import wt.part.PartType;
-import wt.part.WTPart;
+import wt.csm.navigation.ClassificationNode;
+import wt.doc.WTDocument;
+import wt.doc.WTDocumentMaster;
+import wt.epm.EPMDocument;
 import wt.fc.ObjectVector;
 import wt.fc.PersistenceHelper;
+import wt.fc.PersistenceServerHelper;
 import wt.fc.QueryResult;
 import wt.fc.WTObject;
 import wt.folder.Folder;
@@ -42,16 +28,33 @@ import wt.lifecycle.LifeCycleServerHelper;
 import wt.lifecycle.State;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
+import wt.org.OrganizationServicesHelper;
+import wt.org.WTPrincipalReference;
+import wt.org.WTUser;
+import wt.ownership.OwnershipHelper;
+import wt.part.PartType;
+import wt.part.WTPart;
+import wt.part.WTPartDescribeLink;
+import wt.part.WTPartHelper;
+import wt.part.WTPartReferenceLink;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.type.TypeDefinitionReference;
 import wt.type.TypedUtility;
 import wt.util.WTException;
+import wt.vc.Iterated;
 import wt.vc.VersionControlHelper;
+import wt.vc.VersionIdentifier;
+import wt.vc.Versioned;
 import wt.vc.config.LatestConfigSpec;
 import wt.vc.views.View;
 import wt.vc.views.ViewHelper;
 import wt.vc.views.ViewReference;
+import wt.vc.wip.CheckoutInfo;
+import wt.vc.wip.WorkInProgressState;
+
+import com.ptc.core.meta.common.TypeIdentifier;
+import com.ptc.core.meta.server.TypeIdentifierUtility;
 // part工具类
 public class PartUtil implements RemoteAccess {
 	
@@ -177,101 +180,97 @@ public class PartUtil implements RemoteAccess {
 	}
 	
 	
+	public static boolean VERBOSE = true;
 	
+	
+	 public static String getVersion(WTObject obj) throws WTException {
+	        String version = "";
+	        String iterate = "";
+	        String banbenhao = "";
+	        version = ((Versioned)obj).getVersionIdentifier().getValue();
+	        iterate = ((Iterated)obj).getIterationIdentifier().getValue();
+	        banbenhao = version + "." + iterate;
+	        return banbenhao;
+	    }
 
 	
 	
-//	public static boolean VERBOSE = true;
-//	
-//	
-//	 public static String getVersion(WTObject obj) throws WTException {
-//	        String version = "";
-//	        String iterate = "";
-//	        String banbenhao = "";
-//	        version = ((Versioned)obj).getVersionIdentifier().getValue();
-//	        iterate = ((Iterated)obj).getIterationIdentifier().getValue();
-//	        banbenhao = version + "." + iterate;
-//	        return banbenhao;
-//	    }
-//
-//	
-//	
-//	
-//	/**
-//	 * 获取部件的第一层分类码
-//	 * @author Eilaiwang
-//	 * @param wtPart
-//	 * @return
-//	 * @throws WTException
-//	 * @return String
-//	 * @Description
-//	 */
-//	public static String getNumberPrefix(WTPart wtPart) throws WTException {
-//		String numberPrefix = "";
-//		List<ClassificationNode> cnList = WindchillUtil.getClassificationNodeByPart(wtPart);
-//		if (cnList.size() > 0) {
-//			List<String> cpList = getClassficationPath(cnList.get(0));
-//			numberPrefix =cpList.get(cpList.size()-1);
-//		//	Debug.P("Prefix->>" + numberPrefix);
-//		}
-//		return numberPrefix;
-//	}
-//	
-//	/**
-//	 * 获取部件的第四层分类码
-//	 * @author Eilaiwang
-//	 * @param wtPart
-//	 * @return
-//	 * @throws WTException
-//	 * @return String
-//	 * @Description
-//	 */
-//	public static String getNumberPrefix4(WTPart wtPart) throws WTException {
-//		String numberPrefix = "";
-//		List<ClassificationNode> cnList = WindchillUtil.getClassificationNodeByPart(wtPart);
-//		List<String> cpList = getClassficationPath(cnList.get(0));
-//		if (cnList.size() > 0) {
-//			numberPrefix =cpList.get(0);
-//			//Debug.P("Prefix->>" + numberPrefix);
-//		}
-//		return numberPrefix;
-//	}
-//	
-//	public static String getNumberClassPath4(WTPart wtpart)throws WTException{
-//		String numberPrefix = "";
-//		String type ="";
-//		type = getType(wtpart);
-//		List<ClassificationNode> cnList = WindchillUtil.getClassificationNodeByPart(wtpart);
-//		if (cnList.size() > 0) {
-//			List<String> cpList = getClassficationPath(cnList.get(0));
-//			numberPrefix = cpList.get(0);
-//			//Debug.P("Prefix->>" + numberPrefix);
+	
+	/**
+	 * 获取部件的第一层分类码
+	 * @author Eilaiwang
+	 * @param wtPart
+	 * @return
+	 * @throws WTException
+	 * @return String
+	 * @Description
+	 */
+	public static String getNumberPrefix(WTPart wtPart) throws WTException {
+		String numberPrefix = "";
+		List<ClassificationNode> cnList = WindchillUtil.getClassificationNodeByPart(wtPart);
+		if (cnList.size() > 0) {
+			List<String> cpList = getClassficationPath(cnList.get(0));
+			numberPrefix =cpList.get(cpList.size()-1);
+		//	Debug.P("Prefix->>" + numberPrefix);
+		}
+		return numberPrefix;
+	}
+	
+	/**
+	 * 获取部件的第四层分类码
+	 * @author Eilaiwang
+	 * @param wtPart
+	 * @return
+	 * @throws WTException
+	 * @return String
+	 * @Description
+	 */
+	public static String getNumberPrefix4(WTPart wtPart) throws WTException {
+		String numberPrefix = "";
+		List<ClassificationNode> cnList = WindchillUtil.getClassificationNodeByPart(wtPart);
+		List<String> cpList = getClassficationPath(cnList.get(0));
+		if (cnList.size() > 0) {
+			numberPrefix =cpList.get(0);
+			//Debug.P("Prefix->>" + numberPrefix);
+		}
+		return numberPrefix;
+	}
+	
+	public static String getNumberClassPath4(WTPart wtpart)throws WTException{
+		String numberPrefix = "";
+		String type ="";
+		type = getType(wtpart);
+		List<ClassificationNode> cnList = WindchillUtil.getClassificationNodeByPart(wtpart);
+		if (cnList.size() > 0) {
+			List<String> cpList = getClassficationPath(cnList.get(0));
+			numberPrefix = cpList.get(0);
+			//Debug.P("Prefix->>" + numberPrefix);
 //			if (type.contains(Contants.NUMITPARTS)) {
 //				numberPrefix = numberPrefix.substring(0, 6);
 //			} else {
-//				numberPrefix = numberPrefix.substring(0, 7);
+				numberPrefix = numberPrefix.substring(0, 7);
 //			}
-//		}
-//		return numberPrefix;
-//	}
-//	
-//	
-//	public static List<String> getClassficationPath(ClassificationNode cn) {
-//		List<String> pathList = new ArrayList<String>();
-//		while (true) {
-//			if (cn == null) {
-//				break;
-//			} else {
-//				String displayString = cn.getIBAReferenceableDisplayString();
-//				//Debug.P("============= displayString11 " + displayString);
-//				pathList.add(displayString);
-//			}
-//			cn = cn.getParent();
-//		}
-//		return pathList;
-//	}
-//	
-//
+		}
+		return numberPrefix;
+	}
+	
+	
+	public static List<String> getClassficationPath(ClassificationNode cn) {
+		List<String> pathList = new ArrayList<String>();
+		while (true) {
+			if (cn == null) {
+				break;
+			} else {
+				String displayString = cn.getIBAReferenceableDisplayString();
+				//Debug.P("============= displayString11 " + displayString);
+				pathList.add(displayString);
+			}
+			cn = cn.getParent();
+		}
+		return pathList;
+	}
+	
+
 	/**
 	 * 根据部件编号查找部件
 	 * @author blueswang
@@ -301,38 +300,38 @@ public class PartUtil implements RemoteAccess {
 	
 	
 	
-//	  
-//	
-//	/**
-//	 * 根据部件编号查找部件
-//	 * @author blueswang
-//	 * @param number
-//	 * @return
-//	 * @throws WTException
-//	 * @return WTPart
-//	 * @Description
-//	 */
-//	public static WTPart getPartByNumber2(String number) throws WTException {
-//
-//		WTPart Part = null;
-//		QuerySpec qs = new QuerySpec(WTPart.class);
-//		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.NUMBER,
-//				SearchCondition.EQUAL, number.trim().toUpperCase(), false));
-//		
-//		QueryResult qr = PersistenceHelper.manager.find(qs);
-//		if (qr.size() > 0) {
-//			Part = (WTPart) qr.nextElement();
-//     			Part = (WTPart) VersionControlHelper.getLatestIteration(Part);
-//			if (Part != null)
-//				if (VERBOSE)
-//					System.out.println("the Part is ： "+ Part.getDisplayIdentity());
-//		}
-//		if (Part == null)
-//			if (VERBOSE)
-//				System.out.println("没有编号为:" + number + "的WTPart！");
-//		return Part;
-//	}
-//	
+	  
+	
+	/**
+	 * 根据部件编号查找部件
+	 * @author blueswang
+	 * @param number
+	 * @return
+	 * @throws WTException
+	 * @return WTPart
+	 * @Description
+	 */
+	public static WTPart getPartByNumber2(String number) throws WTException {
+
+		WTPart Part = null;
+		QuerySpec qs = new QuerySpec(WTPart.class);
+		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.NUMBER,
+				SearchCondition.EQUAL, number.trim().toUpperCase(), false));
+		
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		if (qr.size() > 0) {
+			Part = (WTPart) qr.nextElement();
+     			Part = (WTPart) VersionControlHelper.getLatestIteration(Part);
+			if (Part != null)
+				if (VERBOSE)
+					System.out.println("the Part is ： "+ Part.getDisplayIdentity());
+		}
+		if (Part == null)
+			if (VERBOSE)
+				System.out.println("没有编号为:" + number + "的WTPart！");
+		return Part;
+	}
+	
 	/**
 	 * 根据部件名称和视图获取部件
 	 * @author blueswang
@@ -390,243 +389,244 @@ public class PartUtil implements RemoteAccess {
 	     	
 	     	return qrs;
 	    }
-//	
-//
-//	public static WTPart getDocByName(String name) throws Exception {
-//		WTPart party = null;
-//		QuerySpec qs = new QuerySpec(WTPart.class);
-//		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.NAME,
-//				SearchCondition.EQUAL, name.toUpperCase(), false));
-//
-//		QueryResult qr = PersistenceHelper.manager.find(qs);
-//		if (qr.size() > 0) {
-//			party = (WTPart) qr.nextElement();
-//			party = (WTPart) VersionControlHelper.getLatestIteration(party);
-//			if (party != null)
-//				if (VERBOSE)
-//					System.out.println("the part is ： "
-//							+ party.getDisplayIdentity());
-//		}
-//		if (party == null)
-//			if (VERBOSE)
-//				System.out.println("没有编号为:" + name + "的WTPart！");
-//
-//		return party;
-//	}
-//	
-//	/**
-//	 * 根据编号、版本查找part
-//	 * 
-//	 * @param RELATED_PART_NUMBER
-//	 * @param RELATED_PART_VERSION
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public static WTPart findPart(String RELATED_PART_NUMBER,
-//			String RELATED_PART_VERSION) throws Exception {
-//		WTPart part = null;
-//	//	Debug.P("-->查找编号为:" + RELATED_PART_NUMBER + "版本为:"
-//	//			+ RELATED_PART_VERSION + "的零部件");
-//		QuerySpec qs = new QuerySpec(WTPart.class);
-//		int index = 0;
-//		// 条件: 指定编号
-//		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.NUMBER,
-//				SearchCondition.EQUAL, RELATED_PART_NUMBER),
-//				new int[] { index });
-//		qs.appendAnd();
-//		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.CHECKOUT_INFO
-//				+ "." + CheckoutInfo.STATE, SearchCondition.NOT_EQUAL,
-//				WorkInProgressState.WORKING), new int[] { 0 });
-//		// 条件：指定大版本
-//		if (RELATED_PART_VERSION != null || !RELATED_PART_VERSION.trim().equals("")) {
-//			qs.appendAnd();
-//			qs.appendWhere(new SearchCondition(WTPart.class,
-//					WTPart.VERSION_IDENTIFIER + "."	+ VersionIdentifier.VERSIONID,
-//					SearchCondition.EQUAL, RELATED_PART_VERSION),
-//					new int[] { index });
-//		}
-//		qs = new LatestConfigSpec().appendSearchCriteria(qs);
-//		// 执行查询
-//		QueryResult qr = PersistenceHelper.manager.find(qs);
-//		if (RELATED_PART_VERSION == null|| RELATED_PART_VERSION.trim().equals("")) {
-//			// 过滤最新版本, 未指定版本时，只取最新大版本＋最新小版本
-//			qr = new LatestConfigSpec().process(qr);
-//		}
-//		// 处理查询结果
-//		if (qr.hasMoreElements()) {
-//			part = (WTPart) qr.nextElement();
-//			//Debug.P("-->查询完成,查找到编号为:" + part.getNumber() + "名称为:"
-//			//		+ part.getName() + "的零部件");
-//			return part;
-//		} else {
-//			throw new Exception("未找到指定编号、版本的零部件.");
-//		}
-//	}
-//	
-//	/**
-//	 * 创建部件与文档的说明关系
-//	 * @author Eilaiwang
-//	 * @param part
-//	 * @param doc
-//	 * @return
-//	 * @throws Exception
-//	 * @return boolean
-//	 * @Description
-//	 */
-//	public static boolean createDescriptionLink(WTPart part, WTDocument doc)
-//			throws Exception {
-//		boolean result = false;
-//		if (!getDescriptionLink(part, doc)) {
-//			WTPartDescribeLink partLink = WTPartDescribeLink
-//					.newWTPartDescribeLink(part, doc);
-//			PersistenceServerHelper.manager.insert(partLink);
-//			partLink = (WTPartDescribeLink) PersistenceHelper.manager
-//					.refresh(partLink);
-//			result = true;
-//		} else {
-//			throw new Exception("部件:" + part.getNumber() + " 和文档:"
-//					+ doc.getName() + "已有关联");
-//		}
-//		return result;
-//	}
-//	
-//	
-//	/**
-//	 * 创建部件和文档的参考关系
-//	 * @author blueswang
-//	 * @param part
-//	 * @param doc
-//	 * @return void
-//	 * @throws Exception 
-//	 * @Description
-//	 */
-//	public static boolean createReferentLink(WTPart part,WTDocument doc) throws Exception{
-//		 boolean result = false;
-//		WTDocumentMaster docMaster=(WTDocumentMaster)doc.getMaster();
-//			if(!getRelationLink(part,docMaster)){
-//				WTPartReferenceLink partRef = WTPartReferenceLink.newWTPartReferenceLink(part, docMaster);
-//				PersistenceServerHelper.manager.insert(partRef);
-//				partRef= (WTPartReferenceLink)PersistenceHelper.manager.refresh(partRef);
-//			result = true;
-//			}else{
-//				throw new Exception("部件:"+part.getNumber()+" 和文档:"+doc.getName()+"已有关联");
-//			}
-//			return result;
-//	}
-//	
-//	
-//	/**
-//	 * 判断部件和文档间是否存在说明关系
-//	 * @author Eilaiwang
-//	 * @param part
-//	 * @param doc
-//	 * @return
-//	 * @throws Exception
-//	 * @return boolean
-//	 * @Description
-//	 */
-//	public static boolean getDescriptionLink(WTPart part, WTDocument doc) throws Exception{
-//		boolean result = false;
-//		QueryResult qr = PersistenceHelper.manager.navigate(part, WTPartDescribeLink.DESCRIBES_ROLE,
-//				WTPartDescribeLink.class,true);
-//		while (qr.hasMoreElements()) {
-//			WTDocumentMaster docMaster = (WTDocumentMaster)qr.nextElement();
-//			System.out.println(" docMaster.num"+docMaster.getNumber());
-//			if(docMaster.getNumber().equals(doc.getNumber())){
-//				result = true;
-//			}
-//		}
-//		return result;
-//	}
-//	
-//	
-//	/**
-//	 * 获取与部件管理的图样文档的编号
-//	 * @author Eilaiwang
-//	 * @param part
-//	 * @param docList
-//	 * @return
-//	 * @throws WTException
-//	 * @return WTDocument
-//	 * @Description
-//	 */
-//	public static List<String> getDescriptionDocByPart(WTPart part) throws WTException{
-//		List<String> list = new ArrayList<String>();
-//		String docType="";
-//		String docNumber="";
-//		String state ="";
-//		WTDocument doc =null;
-//		QueryResult qr = PersistenceHelper.manager.navigate(part, WTPartDescribeLink.DESCRIBES_ROLE,
-//				WTPartDescribeLink.class,true);
-//		while (qr.hasMoreElements()) {
-//			WTDocumentMaster docMaster = (WTDocumentMaster)qr.nextElement();
-//			docType=getType(docMaster);
-//			docNumber=docMaster.getNumber();
-//			doc=DocUtils.getDocByNumber(docNumber);
-//			state = doc.getLifeCycleState().toString();
-//			Debug.P(" docMastedocMaster.getNumber()--->"+docNumber+"   DocType====>"+docType);
-//			System.out.println();
+	
+
+	public static WTPart getDocByName(String name) throws Exception {
+		WTPart party = null;
+		QuerySpec qs = new QuerySpec(WTPart.class);
+		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.NAME,
+				SearchCondition.EQUAL, name.toUpperCase(), false));
+
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		if (qr.size() > 0) {
+			party = (WTPart) qr.nextElement();
+			party = (WTPart) VersionControlHelper.getLatestIteration(party);
+			if (party != null)
+				if (VERBOSE)
+					System.out.println("the part is ： "
+							+ party.getDisplayIdentity());
+		}
+		if (party == null)
+			if (VERBOSE)
+				System.out.println("没有编号为:" + name + "的WTPart！");
+
+		return party;
+	}
+	
+	/**
+	 * 根据编号、版本查找part
+	 * 
+	 * @param RELATED_PART_NUMBER
+	 * @param RELATED_PART_VERSION
+	 * @return
+	 * @throws Exception
+	 */
+	public static WTPart findPart(String RELATED_PART_NUMBER,
+			String RELATED_PART_VERSION) throws Exception {
+		WTPart part = null;
+	//	Debug.P("-->查找编号为:" + RELATED_PART_NUMBER + "版本为:"
+	//			+ RELATED_PART_VERSION + "的零部件");
+		QuerySpec qs = new QuerySpec(WTPart.class);
+		int index = 0;
+		// 条件: 指定编号
+		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.NUMBER,
+				SearchCondition.EQUAL, RELATED_PART_NUMBER),
+				new int[] { index });
+		qs.appendAnd();
+		qs.appendWhere(new SearchCondition(WTPart.class, WTPart.CHECKOUT_INFO
+				+ "." + CheckoutInfo.STATE, SearchCondition.NOT_EQUAL,
+				WorkInProgressState.WORKING), new int[] { 0 });
+		// 条件：指定大版本
+		if (RELATED_PART_VERSION != null || !RELATED_PART_VERSION.trim().equals("")) {
+			qs.appendAnd();
+			qs.appendWhere(new SearchCondition(WTPart.class,
+					WTPart.VERSION_IDENTIFIER + "."	+ VersionIdentifier.VERSIONID,
+					SearchCondition.EQUAL, RELATED_PART_VERSION),
+					new int[] { index });
+		}
+		qs = new LatestConfigSpec().appendSearchCriteria(qs);
+		// 执行查询
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		if (RELATED_PART_VERSION == null|| RELATED_PART_VERSION.trim().equals("")) {
+			// 过滤最新版本, 未指定版本时，只取最新大版本＋最新小版本
+			qr = new LatestConfigSpec().process(qr);
+		}
+		// 处理查询结果
+		if (qr.hasMoreElements()) {
+			part = (WTPart) qr.nextElement();
+			//Debug.P("-->查询完成,查找到编号为:" + part.getNumber() + "名称为:"
+			//		+ part.getName() + "的零部件");
+			return part;
+		} else {
+			throw new Exception("未找到指定编号、版本的零部件.");
+		}
+	}
+	
+	/**
+	 * 创建部件与文档的说明关系
+	 * @author Eilaiwang
+	 * @param part
+	 * @param doc
+	 * @return
+	 * @throws Exception
+	 * @return boolean
+	 * @Description
+	 */
+	public static boolean createDescriptionLink(WTPart part, WTDocument doc)
+			throws Exception {
+		boolean result = false;
+		if (!getDescriptionLink(part, doc)) {
+			WTPartDescribeLink partLink = WTPartDescribeLink
+					.newWTPartDescribeLink(part, doc);
+			PersistenceServerHelper.manager.insert(partLink);
+			partLink = (WTPartDescribeLink) PersistenceHelper.manager
+					.refresh(partLink);
+			result = true;
+		} else {
+			throw new Exception("部件:" + part.getNumber() + " 和文档:"
+					+ doc.getName() + "已有关联");
+		}
+		return result;
+	}
+	
+	
+	/**
+	 * 创建部件和文档的参考关系
+	 * @author blueswang
+	 * @param part
+	 * @param doc
+	 * @return void
+	 * @throws Exception 
+	 * @Description
+	 */
+	public static boolean createReferentLink(WTPart part,WTDocument doc) throws Exception{
+		 boolean result = false;
+		WTDocumentMaster docMaster=(WTDocumentMaster)doc.getMaster();
+			if(!getRelationLink(part,docMaster)){
+				WTPartReferenceLink partRef = WTPartReferenceLink.newWTPartReferenceLink(part, docMaster);
+				PersistenceServerHelper.manager.insert(partRef);
+				partRef= (WTPartReferenceLink)PersistenceHelper.manager.refresh(partRef);
+			result = true;
+			}else{
+				throw new Exception("部件:"+part.getNumber()+" 和文档:"+doc.getName()+"已有关联");
+			}
+			return result;
+	}
+	
+	
+	/**
+	 * 判断部件和文档间是否存在说明关系
+	 * @author Eilaiwang
+	 * @param part
+	 * @param doc
+	 * @return
+	 * @throws Exception
+	 * @return boolean
+	 * @Description
+	 */
+	public static boolean getDescriptionLink(WTPart part, WTDocument doc) throws Exception{
+		boolean result = false;
+		QueryResult qr = PersistenceHelper.manager.navigate(part, WTPartDescribeLink.DESCRIBES_ROLE,
+				WTPartDescribeLink.class,true);
+		while (qr.hasMoreElements()) {
+			WTDocumentMaster docMaster = (WTDocumentMaster)qr.nextElement();
+			System.out.println(" docMaster.num"+docMaster.getNumber());
+			if(docMaster.getNumber().equals(doc.getNumber())){
+				result = true;
+			}
+		}
+		return result;
+	}
+	
+	
+	
+	/**
+	 * 获取与部件管理的图样文档的编号
+	 * @author Eilaiwang
+	 * @param part
+	 * @param docList
+	 * @return
+	 * @throws WTException
+	 * @return WTDocument
+	 * @Description
+	 */
+	public static List<String> getDescriptionDocByPart(WTPart part) throws WTException{
+		List<String> list = new ArrayList<String>();
+		String docType="";
+		String docNumber="";
+		String state ="";
+		WTDocument doc =null;
+		QueryResult qr = PersistenceHelper.manager.navigate(part, WTPartDescribeLink.DESCRIBES_ROLE,
+				WTPartDescribeLink.class,true);
+		while (qr.hasMoreElements()) {
+			WTDocumentMaster docMaster = (WTDocumentMaster)qr.nextElement();
+			docType=getType(docMaster);
+			docNumber=docMaster.getNumber();
+			doc=DocUtils.getDocByNumber(docNumber);
+			state = doc.getLifeCycleState().toString();
+			Debug.P(" docMastedocMaster.getNumber()--->"+docNumber+"   DocType====>"+docType);
+			System.out.println();
 //			if(docType.equals(Contants.DRWDOCUMENT)&& !state.equals(Contants.RELEASE)){
 //				list.add(docNumber);
 //			}
-//		}
-//		return list;
-//	}
-//	
-//	
-//	/**
-//	 * 获取与部件关联的EPMDocument
-//	 * @author Eilaiwang
-//	 * @param part
-//	 * @return
-//	 * @throws WTException
-//	 * @return List<EPMDocument>
-//	 * @Description
-//	 */
-//	public static List<String> getEPMDocByPart(WTPart part)throws WTException{
-//		List<String> list = new ArrayList<String>();
-//		String epmNumber ="";
-//		String state ="";
-//		QueryResult qr = WTPartHelper.service.getDescribedByDocuments(part);
-//	       while(qr.hasMoreElements()){
-//	    	   Object obj = qr.nextElement();
-//	    	   if(obj instanceof EPMDocument){
-//	    		   EPMDocument doc = (EPMDocument)obj;
-//	    		   state =doc.getLifeCycleState().toString();
-//	    		   if(!state.equals(Contants.RELEASE)){
-//	    		      epmNumber = doc.getNumber();
-//	    		      list.add(epmNumber);
-//	    		   }
-//	    	   }
-//	       }	
-//		return list;
-//	}
-//	
-//	
-//	/**
-//	 * 判断部件和文档是否已存在参考关系
-//	 * @author blueswang
-//	 * @param part
-//	 * @param doc
-//	 * @return
-//	 * @throws Exception
-//	 * @return boolean
-//	 * @Description
-//	 */
-//	public static boolean getRelationLink(WTPart part, WTDocumentMaster doc) throws Exception{
-//		boolean result = false;
-//		QueryResult qr = PersistenceHelper.manager.navigate(part, WTPartReferenceLink.REFERENCES_ROLE,
-//				 WTPartReferenceLink.class,true);
-//		while (qr.hasMoreElements()) {
-//			WTDocumentMaster docMaster = (WTDocumentMaster)qr.nextElement();
-//			System.out.println(" docMaster.num"+docMaster.getNumber());
-//			if(docMaster.getNumber().equals(doc.getNumber())){
-//				result = true;
-//			}
-//		}
-//		return result;
-//	}
-//	
+		}
+		return list;
+	}
+	
+	
+	/**
+	 * 获取与部件关联的EPMDocument
+	 * @author Eilaiwang
+	 * @param part
+	 * @return
+	 * @throws WTException
+	 * @return List<EPMDocument>
+	 * @Description
+	 */
+	public static List<String> getEPMDocByPart(WTPart part)throws WTException{
+		List<String> list = new ArrayList<String>();
+		String epmNumber ="";
+		String state ="";
+		QueryResult qr = WTPartHelper.service.getDescribedByDocuments(part);
+	       while(qr.hasMoreElements()){
+	    	   Object obj = qr.nextElement();
+	    	   if(obj instanceof EPMDocument){
+	    		   EPMDocument doc = (EPMDocument)obj;
+	    		   state =doc.getLifeCycleState().toString();
+	    		   if(!state.equals(Contants.RELEASE)){
+	    		      epmNumber = doc.getNumber();
+	    		      list.add(epmNumber);
+	    		   }
+	    	   }
+	       }	
+		return list;
+	}
+	
+	
+	/**
+	 * 判断部件和文档是否已存在参考关系
+	 * @author blueswang
+	 * @param part
+	 * @param doc
+	 * @return
+	 * @throws Exception
+	 * @return boolean
+	 * @Description
+	 */
+	public static boolean getRelationLink(WTPart part, WTDocumentMaster doc) throws Exception{
+		boolean result = false;
+		QueryResult qr = PersistenceHelper.manager.navigate(part, WTPartReferenceLink.REFERENCES_ROLE,
+				 WTPartReferenceLink.class,true);
+		while (qr.hasMoreElements()) {
+			WTDocumentMaster docMaster = (WTDocumentMaster)qr.nextElement();
+			System.out.println(" docMaster.num"+docMaster.getNumber());
+			if(docMaster.getNumber().equals(doc.getNumber())){
+				result = true;
+			}
+		}
+		return result;
+	}
+	
 //	/**
 //	 * 查询BOM中零部件及其子件
 //	 * 
@@ -658,35 +658,35 @@ public class PartUtil implements RemoteAccess {
 //		}
 //		return list;
 //	}
-//	
-//	
-//	
-//	
-//	
-//    public static WTDocument getDocumentByNum(String docNumber) throws WTException{
-//    	Debug.P(docNumber);
-//		WTDocument document = null;
-//		QuerySpec querySpec = new QuerySpec(WTDocument.class);
-//		SearchCondition numberSC = new SearchCondition(WTDocument.class, WTDocument.NUMBER, SearchCondition.EQUAL, docNumber);
-//		SearchCondition latestIteration = new SearchCondition(WTDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
-//		querySpec.appendWhere(numberSC);
-//		querySpec.appendAnd();
-//		querySpec.appendWhere(latestIteration);
-//		QueryResult queryResult = PersistenceHelper.manager.find(querySpec);
-//		// queryResult = (new LatestConfigSpec()).process(queryResult);
-//		Debug.P("Document----->"+queryResult.hasMoreElements());
-//		while (queryResult.hasMoreElements()) {
-//			document = (WTDocument) queryResult.nextElement();
-//			Debug.P(document);
-//			String dType=getType(document);
-//			   Debug.P(dType);
-//			  // if(dType.contains("ProcessDoc")){
-//					return document;
-//			   //}
-//		}
-//		return null;
-//    }
-//	
+	
+	
+	
+	
+	
+    public static WTDocument getDocumentByNum(String docNumber) throws WTException{
+    	Debug.P(docNumber);
+		WTDocument document = null;
+		QuerySpec querySpec = new QuerySpec(WTDocument.class);
+		SearchCondition numberSC = new SearchCondition(WTDocument.class, WTDocument.NUMBER, SearchCondition.EQUAL, docNumber);
+		SearchCondition latestIteration = new SearchCondition(WTDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		querySpec.appendWhere(numberSC);
+		querySpec.appendAnd();
+		querySpec.appendWhere(latestIteration);
+		QueryResult queryResult = PersistenceHelper.manager.find(querySpec);
+		// queryResult = (new LatestConfigSpec()).process(queryResult);
+		Debug.P("Document----->"+queryResult.hasMoreElements());
+		while (queryResult.hasMoreElements()) {
+			document = (WTDocument) queryResult.nextElement();
+			Debug.P(document);
+			String dType=getType(document);
+			   Debug.P(dType);
+			  // if(dType.contains("ProcessDoc")){
+					return document;
+			   //}
+		}
+		return null;
+    }
+	
 	/**
 	 * 获取对象类型
 	 * @author Eilaiwang

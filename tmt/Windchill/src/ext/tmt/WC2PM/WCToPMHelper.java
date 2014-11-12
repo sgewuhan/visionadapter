@@ -22,6 +22,7 @@ import wt.part.WTPart;
 import wt.util.WTProperties;
 
 import com.mongodb.WriteResult;
+import com.ptc.windchill.uwgm.soap.uwgmdb.Master;
 import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.CADDocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
@@ -79,7 +80,7 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {   
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence =ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
@@ -150,7 +151,23 @@ public class WCToPMHelper {
 	}
 
 	private static String getObjectOid(WTObject object) {
+		
 		return object.getPersistInfo().getObjectIdentifier().getStringValue();
+	}
+	
+	public static String getObjectMasterOid(WTObject object){
+		String oid ="";
+		Master master =null;
+		if(object instanceof WTPart){
+			 WTPart part = (WTPart)object;
+			  master=(Master) part.getMaster();
+			 oid=master.getPersistable().getPersistInfo().getObjectIdentifier().getStringValue();
+		}else if(object instanceof EPMDocument){
+			EPMDocument  epmdoc = (EPMDocument)object;
+			master=(Master)epmdoc.getMaster();
+			oid=master.getPersistable().getPersistInfo().getObjectIdentifier().getStringValue();
+		}
+		return oid;
 	}
 	
 	/**
@@ -168,7 +185,7 @@ public class WCToPMHelper {
 		ProductPersistence productPersistence =null;  //PM系统中的成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的成品插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
@@ -253,7 +270,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的原材料插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品   
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
@@ -338,7 +355,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的客供件插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);;
+		partOid = getObjectMasterOid(wtPart);;
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的半成品        
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
@@ -517,7 +534,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMPackage pmPackage = null;//PM中的包装材料      
 			packagePersistence = ModelServiceFactory.getInstance(codebasePath).get(PackagePersistence.class);
@@ -602,7 +619,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的备品备料插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMJigTools pmJigTools = null;//PM中的备品备料        
 			jigTollsPersistence = ModelServiceFactory.getInstance(codebasePath).get(JigToolsPersistence.class);
@@ -727,7 +744,7 @@ public class WCToPMHelper {
 		PartPersistence partPersistence=null;         //PM系统中的半成品持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品后至PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence = ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
@@ -785,7 +802,7 @@ public class WCToPMHelper {
 		String weight ="";
 		Debug.P("更新PM系统的数据库-----------》"+wtPart.getNumber());
 		try {
-			partOid = getObjectOid(wtPart);
+			partOid = getObjectMasterOid(wtPart);
 			PMProduct pmProduct = null;//PM中的成品           
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
 			pmProduct = productPersistence.get(new ObjectId(pmoid));
@@ -843,7 +860,7 @@ public class WCToPMHelper {
 		MaterialPersistence materialPersistence=null;         //PM系统中的原材料持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料          
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
@@ -902,7 +919,7 @@ public class WCToPMHelper {
 		PackagePersistence packagePersistence=null;         //PM系统中的包装材料持久化对象
 		String weight ="";
 		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMPackage pmPackage = null;//PM中的包装材料          
 		
@@ -966,7 +983,7 @@ public class WCToPMHelper {
 		
 		String weight ="";
 		Debug.P("将Windchill中的备品备料插入PM系统的数据库中");
-		partOid = getObjectOid(wtPart);
+		partOid = getObjectMasterOid(wtPart);
 		try {
 			PMJigTools pmJigTools = null;//PM中的备品备料        
 			jigTollsPersistence = ModelServiceFactory.getInstance(codebasePath).get(JigToolsPersistence.class);

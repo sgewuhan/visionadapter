@@ -80,6 +80,7 @@ import wt.httpgw.GatewayServletHelper;
 import wt.httpgw.GatewayURL;
 import wt.httpgw.URLFactory;
 import wt.inf.container.ExchangeContainer;
+import wt.inf.container.LookupSpec;
 import wt.inf.container.OrgContainer;
 import wt.inf.container.WTContained;
 import wt.inf.container.WTContainer;
@@ -385,7 +386,40 @@ public class GenericUtil implements RemoteAccess {
 		    return persistable;
 	}
 	
+	/**
+	 * 设置对象生命周期状态
+	 * 
+	 * @param obj
+	 * @param stateName
+	 */
 
+	public static void setLifeCycleState(LifeCycleManaged obj, String stateName) {
+		if (obj == null || stateName == null) {
+			return;
+		}
+		LookupSpec ls=null;
+		State toState = State.toState(stateName);
+		if (toState == null) {
+			return;
+		}
+		WTPrincipal administrator = null;
+		try {
+			administrator = SessionHelper.manager.getAdministrator();
+		} catch (WTException e) {
+			e.printStackTrace();
+		}
+		WTPrincipal previous = SessionContext
+				.setEffectivePrincipal(administrator);
+		try {
+			try {
+				LifeCycleHelper.service.setLifeCycleState(obj, toState);
+			} catch (WTException e) {
+				e.printStackTrace();
+			}
+		} finally {
+			SessionContext.setEffectivePrincipal(previous);
+		}
+	}
 
 	
 /**
