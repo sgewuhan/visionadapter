@@ -138,22 +138,23 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			String containerName=pmfolder.getContainerName();//ContainerName
 			boolean  isContainer=parentFolder.isContainer();//是否为容器
 			String parent_wcId=parentFolder.getPLMId();//获得父项对象Id
-			Debug.P("------>>>Folder:"+pmfolder.getCommonName()+"  ParentFolder:"+parentFolder.getCommonName()+"  isContainer="+isContainer+"  ParentFolderID="+parent_wcId);
+			String folderName=pmfolder.getCommonName().trim();
+			Debug.P("------>>>Folder:"+folderName+"  ContainerName:"+containerName+"  isContainer="+isContainer+"  ParentFolderID="+parent_wcId);
 			try{
 		    	SessionHelper.manager.setAdministrator();
 		    	WTContainer container=checkWTContainerExist(containerName);
 		    	if(iscreate){//是否同步防止重复创建
 			    	 //如果父项是容器则在容器下创建文件夹
 			    	 if(isContainer){
-			    		  Debug.P("-----Container----->>>Ready Create FolderPath: "+(DEFAULT+"/"+pmfolder.getCommonName()));
-			    		  String folderPath=DEFAULT+"/"+pmfolder.getCommonName();
+			    		  Debug.P("-----Container----->>>Ready Create FolderPath: "+(DEFAULT+"/"+folderName));
+			    		  String folderPath=DEFAULT+"/"+folderName;
 			    		  folderResult=FolderUtil.getFolderRef(folderPath,container,true);
 			    	 }else{
 			    		 //否则获得父项的文件夹对象
 			    		 Persistable persistable=GenericUtil.getPersistableByOid(parent_wcId);
 			    		 if(persistable!=null&&persistable instanceof Folder){
 			 	             Folder parent_Folder=(Folder)persistable;
-			 	             folderResult=FolderUtil.createSubFolder(pmfolder.getCommonName(), null, parent_Folder, null);
+			 	             folderResult=FolderUtil.createSubFolder(folderName, null, parent_Folder, null);
 			 	            }
 			    	      }
 	                  //回写Windchill Folder Oid到PM系统
@@ -162,11 +163,11 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	                  pmfolder.setPLMId(wc_oid);
 	                  pmfolder.setPLMData(getObjectInfo(folderResult));
 	                  pmfolder.doUpdate();//修改
-	                  Debug.P("----->>>创建同步Windchill文件夹:("+pmfolder.getCommonName()+")成功!");
+	                  Debug.P("----->>>创建同步Windchill文件夹:("+folderName+")成功!");
 			    	 }
 		    }catch(Exception e){
 		    	e.printStackTrace();
-		    	throw new Exception("Windchill创建文件夹("+pmfolder.getCommonName()+")失败!");
+		    	throw new Exception("Windchill创建文件夹("+folderName+")失败!");
 		    }finally{
 		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 		    }

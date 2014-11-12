@@ -294,4 +294,15 @@ public abstract class BasicDocument extends VisionObject {
 	void setCollection(DBCollection collection) {
 		super.setCollection(collection);
 	}
+	
+	public String getProjectWorkOrder() {
+		Object object = get(PROJECT_WORK_ORDER);
+		if(object instanceof List<?>){
+			List<?> list = (List<?>) object;
+			if(list.size()>0){
+				return (String) list.get(0);
+			}
+		}
+		return "";
+	}
 }

@@ -452,13 +452,8 @@ public abstract class VisionObject extends BasicDBObject implements
 		setValue(PROJECT_NUMBER, projectNumber);
 	}
 
-	@Override
-	public String getProjectWorkOrder() {
-		return (String) get(PROJECT_WORK_ORDER);
-	}
 
-	@Override
-	public void setProjectWorkOrder(String projectWorkOrder) {
+	public void setProjectWorkOrder(Object projectWorkOrder) {
 		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
 	}
 }

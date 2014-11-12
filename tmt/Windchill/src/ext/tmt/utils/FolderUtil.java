@@ -73,6 +73,7 @@ public class FolderUtil implements RemoteAccess{
             tempPath = defaultMark + tempPath;
         }
         
+        tempPath=tempPath.trim();
     	Debug.P("------  FolderPath:"+tempPath);
         String nextfolder[] = tempPath.split(splitMark);
         // System.out.println("nextfolder[]==="+nextfolder.length);
@@ -84,26 +85,27 @@ public class FolderUtil implements RemoteAccess{
         }
 
         if (isCreate) {
-            createMultiLevelDirectory(list, WTContainerRef.newWTContainerRef(wtcontainer));
+        	createMultiLevelDirectory(list, WTContainerRef.newWTContainerRef(wtcontainer));
         }
         
-        //检查文件的存在性
-        try {
-        	 subfolder = FolderHelper.service.getFolder(tempPath, WTContainerRef.newWTContainerRef(wtcontainer));
-		} catch (FolderNotFoundException e) {
-			 Debug.P(e.getMessage());
-			 throw new WTException("文件夹路径:"+tempPath+"不存在!");
-			 
-		}
-        if (subfolder == null) {
-            tempPath = "/Default";
-            subfolder = FolderHelper.service.getFolder(tempPath, WTContainerRef.newWTContainerRef(wtcontainer));
-        } else {
-            ReferenceFactory rf = new ReferenceFactory();
-            folderRef = rf.getReferenceString(ObjectReference.newObjectReference(((Persistable) subfolder)
-                    .getPersistInfo().getObjectIdentifier()));
-        }
-        return subfolder;
+        
+            //检查文件的存在性
+            try {
+            	 subfolder = FolderHelper.service.getFolder(tempPath, WTContainerRef.newWTContainerRef(wtcontainer));
+    		} catch (FolderNotFoundException e) {
+    			 Debug.P(e.getMessage());
+    			 throw new WTException("文件夹路径:"+tempPath+"不存在!");
+    			 
+    		}
+            if (subfolder == null) {
+                tempPath = "/Default";
+                subfolder = FolderHelper.service.getFolder(tempPath, WTContainerRef.newWTContainerRef(wtcontainer));
+            } else {
+                ReferenceFactory rf = new ReferenceFactory();
+                folderRef = rf.getReferenceString(ObjectReference.newObjectReference(((Persistable) subfolder)
+                        .getPersistInfo().getObjectIdentifier()));
+             }
+            return subfolder;
     }
 	
 	
@@ -474,6 +476,7 @@ public class FolderUtil implements RemoteAccess{
 	}
 	
 	
+
 	
 	
 }

@@ -52,16 +52,16 @@ public interface IProjectRelative {
 	 */
 	public void setProjectNumber(String projectNumber);
 
-	/**
-	 * 
-	 * @return 项目工作令号
-	 */
-	public String getProjectWorkOrder();
+//	/**
+//	 * 
+//	 * @return 项目工作令号
+//	 */
+//	public String getProjectWorkOrder();
 
-	/**
-	 * 
-	 * @param projectWorkOrder 项目工作令号
-	 */
-	public void setProjectWorkOrder(String projectWorkOrder);
+//	/**
+//	 * 
+//	 * @param projectWorkOrder 项目工作令号
+//	 */
+//	public void setProjectWorkOrder(String projectWorkOrder);
 	
 }

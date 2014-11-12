@@ -219,16 +219,17 @@ public class DocUtils implements RemoteAccess{
 			}
 
 			
-//			//上传附件信息
-//			List<IFileProvider> attachments = pmdoc.getAttachments();
-//			if(attachments!=null&&attachments.size()>0){
-//				for (IFileProvider provider : attachments) {
-//					ByteArrayOutputStream bsout=new ByteArrayOutputStream();
-//					provider.write(bsout);
-//					sins=new ByteArrayInputStream(bsout.toByteArray());
-//					linkDocument(document, provider.getFileName(), sins, "0", null);
-//				}
-//			}
+			//上传附件信息
+			List<IFileProvider> attachments = pmdoc.getAttachments();
+			if(attachments!=null&&attachments.size()>0){
+				for (IFileProvider provider : attachments) {
+					ByteArrayOutputStream bsout=new ByteArrayOutputStream();
+					provider.write(bsout);
+					sins=new ByteArrayInputStream(bsout.toByteArray());
+					linkDocument(document, provider.getFileName(), sins, "0", null);
+				}
+			}
+			
 		      } catch (IOException e) {
 			      e.printStackTrace();
 			      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
