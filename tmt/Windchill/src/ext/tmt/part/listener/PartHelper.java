@@ -161,23 +161,26 @@ public class PartHelper implements Serializable {
 			    	Debug.P(partNumber+"------------------->"+partType);
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
 			    	//wtPart.setEndItem(true);
-			    	if (!PersistenceHelper.isPersistent(wtPart)) {
-						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
-						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
-					}else{
-						PersistenceServerHelper.manager.update(wtPart);
-					}
+//			    	if (!PersistenceHelper.isPersistent(wtPart)) {
+//						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+//						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+//					}else{
+//						PersistenceServerHelper.manager.update(wtPart);
+//					}
 				//成品编码=TX+三位分类码+四位流水码。其中分类码为成品所在产品库容器名称的前三个字符，自动根据成品所在产品库获取。
 					productName=wtPart.getContainerName();
 					//批量导入部件时如果导入的部件编码含有TX则不修改部件编码
 					if(wtPart.getNumber().toUpperCase().contains("TX")){
 						return;
 					}
-					Debug.P("productName--------->"+productName);
-					prefix=productName.substring(0, productName.indexOf("-"));
-					if(!prefix.toUpperCase().contains("TX")){
+					if(!productName.toUpperCase().contains("TX")){
 						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
 					}
+					Debug.P("productName--------->"+productName);
+					prefix=productName.substring(0, productName.indexOf("-"));
+//					if(!prefix.toUpperCase().contains("TX")){
+//						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
+//					}
 					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")
 							||prefix.toUpperCase().trim().contains("TX113")||prefix.toUpperCase().trim().contains("TX114")||prefix.toUpperCase().trim().contains("TX115")){
 						return;
@@ -206,10 +209,11 @@ public class PartHelper implements Serializable {
 						} while (i < 100000);
 						changePartNumber(wtPart,newNumber);
 					}
-					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-					if(object !=null){
-						wtPart=(WTPart)object;
-					}
+					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//					if(object !=null){
+//						wtPart=(WTPart)object;
+//					}
 					WCToPMHelper.CreatePMProductToPM(wtPart);
 				} else //如果是半成品
 				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
@@ -237,35 +241,40 @@ public class PartHelper implements Serializable {
 							i++;
 						} while (i < 100000);
 						changePartNumber(wtPart,newNumber);
-						Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-						if(object !=null){
-							wtPart=(WTPart)object;
-						}
+//						Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//						if(object !=null){
+//							wtPart=(WTPart)object;
+//						}
+						wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					}
 					WCToPMHelper.CreatePartToPM(wtPart);
 				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
-					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-					if(object !=null){
-						wtPart=(WTPart)object;
-					}
+//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//					if(object !=null){
+//						wtPart=(WTPart)object;
+//					}
+					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMaterialToPM(wtPart);
 				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
-					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-					if(object !=null){
-						wtPart=(WTPart)object;
-					}
+//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//					if(object !=null){
+//						wtPart=(WTPart)object;
+//					}
+					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreateSupplyToPM(wtPart);
 				}else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
-					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-					if(object !=null){
-						wtPart=(WTPart)object;
-					}
+//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//					if(object !=null){
+//						wtPart=(WTPart)object;
+//					}
+					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMPackageToPM(wtPart);
 				}else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
-					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-					if(object !=null){
-						wtPart=(WTPart)object;
-					}
+//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//					if(object !=null){
+//						wtPart=(WTPart)object;
+//					}
+					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreateJigToolPartToPM(wtPart);
 				}
 			    
@@ -310,10 +319,11 @@ public class PartHelper implements Serializable {
             }
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-			Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-			if(object !=null){
-				wtPart=(WTPart)object;
-			}
+//			Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//			if(object !=null){
+//				wtPart=(WTPart)object;
+//			}
+			wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
             Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
@@ -331,10 +341,7 @@ public class PartHelper implements Serializable {
 		}
 		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-			Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-			if(object !=null){
-				wtPart=(WTPart)object;
-			}
+			 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 			   Debug.P("PRE_DELETE-----------------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.deletePMPart(pmoid, wtPart);
@@ -350,8 +357,6 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.deletePMJigTools(pmoid, wtPart);
 			  }
 		}    
-		}catch(Exception e){
-			e.printStackTrace();
 		}finally {
 			SessionServerHelper.manager.setAccessEnforced(flag);
 		}
