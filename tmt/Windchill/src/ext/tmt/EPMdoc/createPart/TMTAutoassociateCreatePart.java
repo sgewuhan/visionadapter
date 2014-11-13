@@ -12,7 +12,7 @@ import ext.tmt.utils.Debug;
 
 public class TMTAutoassociateCreatePart extends DefaultAutoAssociatePartFinderCreator{
 	
-	void TMTAutoassociateCreatePart(){
+	TMTAutoassociateCreatePart(){
 		
 	}
 	@Override

@@ -137,6 +137,7 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
 				reloadPermission(objectId.toString());
+				reloadDeliverable(objectId.toString());
 				Debug.P("create PMPart success");
 			}
 		}
@@ -246,6 +247,7 @@ public class WCToPMHelper {
         	   			partiba.setIBAValue(Contants.PMREQUEST, "create");
         	   			partiba.updateIBAPart(wtPart);
         	   			reloadPermission(objectId.toString());
+        	   			reloadDeliverable(objectId.toString());
         	   			Debug.P("create pmproduct success");
         	   		}
            }
@@ -333,6 +335,7 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
 				reloadPermission(objectId.toString());
+				reloadDeliverable(objectId.toString());
 				Debug.P("create PMMaterial success");
 			}
            }
@@ -435,6 +438,7 @@ public class WCToPMHelper {
 					partiba.setIBAValue(Contants.PMREQUEST, "create");
 					partiba.updateIBAPart(wtPart);
 					reloadPermission(objectId.toString());
+					reloadDeliverable(objectId.toString());
 					Debug.P("create PMSupplyment success");
 				}
 			}
@@ -520,6 +524,7 @@ public class WCToPMHelper {
                 cadiba.setIBAValue(Contants.PMREQUEST, "create");
                 cadiba.updateIBAPart(epmdoc);
                 reloadPermission(objectId.toString());
+                reloadDeliverable(objectId.toString());
                 Debug.P("create PMCADDocument success");
 			}
            }
@@ -600,6 +605,7 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
 				reloadPermission(objectId.toString());
+				reloadDeliverable(objectId.toString());
 				Debug.P("create pmPackage success");
 			}
           }
@@ -685,6 +691,7 @@ public class WCToPMHelper {
 				partiba.setIBAValue(Contants.PMREQUEST, "create");
 				partiba.updateIBAPart(wtPart);
 				reloadPermission(objectId.toString());
+				reloadDeliverable(objectId.toString());
 				Debug.P("create pmJigTools success");
 			}
           }
@@ -1329,7 +1336,6 @@ public class WCToPMHelper {
 	
 	
 	public static void reloadPermission(String objectId) throws Exception{
-
 		String urls = ModelServiceFactory.URL_REAUTH+"?id="+objectId;
 		Debug.P(urls);
 		URL url = new URL(urls);
@@ -1337,19 +1343,32 @@ public class WCToPMHelper {
 		connection.connect();
          BufferedReader reader  =   new  BufferedReader( new  InputStreamReader(connection.getInputStream()));
          String line;
-         System.out.println( " ============================= " );
-         System.out.println( " Contents of post request " );
-         System.out.println( " ============================= " );
+         System.out.println( "Reload Permission---------start---- " );
            while  ((line  =  reader.readLine())  !=   null ){
              System.out.println(line);
          } 
-         System.out.println( " ============================= " );
-         System.out.println( " Contents of post request ends " );
-         System.out.println( " ============================= " );
+         System.out.println( " Reload Permission--------ends " );
          reader.close();
          connection.disconnect();
-//		conn.disconnect();
-//		conn.getOutputStream();
 	}
+	
+	public static void reloadDeliverable(String objectId) throws Exception{
+		String urls = ModelServiceFactory.URL_LINKDELIVERY+"?id="+objectId;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection  connection = (HttpURLConnection)url.openConnection();
+		connection.connect();
+         BufferedReader reader  =   new  BufferedReader( new  InputStreamReader(connection.getInputStream()));
+         String line;
+         System.out.println( "Reload Deliverable----------start--- " );
+           while  ((line  =  reader.readLine())  !=   null ){
+             System.out.println(line);
+         } 
+         System.out.println( " Reload Deliverable--------ends " );
+         reader.close();
+         connection.disconnect();
+	}
+	
+	
 
 }
