@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +40,8 @@ import wt.content.ContentRoleType;
 import wt.content.ContentServerHelper;
 import wt.content.FormatContentHolder;
 import wt.content.StandardContentService;
+import wt.content.URLData;
+import wt.dataops.containermove.ContainerMoveHelper;
 import wt.doc.DocumentMaster;
 import wt.doc.WTDocument;
 import wt.doc.WTDocumentDependencyLink;
@@ -58,11 +61,14 @@ import wt.epm.EPMDocumentMasterIdentity;
 import wt.epm.EPMDocumentType;
 import wt.epm.structure.EPMMemberLink;
 import wt.epm.structure.EPMStructureHelper;
+import wt.epm.util.EPMHelper;
 import wt.epm.workspaces.EPMPopulateRule;
 import wt.epm.workspaces.EPMWorkspace;
+import wt.epm.workspaces.EPMWorkspaceHelper;
 import wt.fc.BinaryLink;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
+import wt.fc.ObjectIdentifier;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
@@ -70,7 +76,11 @@ import wt.fc.QueryResult;
 import wt.fc.ReferenceFactory;
 import wt.fc.WTObject;
 import wt.fc.WTReference;
+import wt.fc.collections.WTCollection;
+import wt.fc.collections.WTKeyedHashMap;
+import wt.fc.collections.WTKeyedMap;
 import wt.fc.collections.WTValuedHashMap;
+import wt.fc.collections.WTValuedMap;
 import wt.folder.CabinetBased;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
@@ -127,6 +137,8 @@ import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.query.TableColumn;
 import wt.representation.PublishedContentLink;
+import wt.representation.Representable;
+import wt.representation.Representation;
 import wt.series.HarvardSeries;
 import wt.series.MultilevelSeries;
 import wt.series.Series;
@@ -166,12 +178,14 @@ import wt.vc.wip.WorkInProgressException;
 import wt.vc.wip.WorkInProgressHelper;
 import wt.vc.wip.WorkInProgressState;
 import wt.vc.wip.Workable;
+import wt.viewmarkup.DerivedImage;
 
 import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinition;
 import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinitionMaster;
 import com.ptc.windchill.cadx.common.preference.EpdParams;
 import com.ptc.windchill.cadx.common.util.WorkspaceConfigSpecUtilities;
 import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
+import com.ptc.wvs.common.ui.VisualizationHelper;
 
 public class GenericUtil implements RemoteAccess {
 
@@ -1006,6 +1020,50 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	
+	/**
+	 * 获得对象的可视化链接地址
+	 * @param ch
+	 * @return
+	 */
+	public static String  getViewContentURL(Persistable object)throws Exception{
+		 String viewUrl=null;
+		  if(object!=null){
+		  try {
+			  
+			  if(object instanceof EPMDocument||object instanceof WTDocument){
+				  object = (ContentHolder) PersistenceHelper.manager.refresh(object);
+				  VisualizationHelper visualizationHelper = new VisualizationHelper();
+				  QueryResult epmReps = visualizationHelper.getRepresentations(object);
+				  if (epmReps != null) {
+			           while (epmReps.hasMoreElements()) {
+			              Representation representation = (Representation) epmReps.nextElement();
+			              System.out.println("--->>>RID:"+representation.getIdentity());
+			              representation = (Representation) ContentHelper.service.getContents(representation);
+			              if (representation != null) {
+			                  Enumeration e = ContentHelper.getApplicationData(representation).elements();
+			                  while (e.hasMoreElements()) {
+			                     Object app_object = e.nextElement();
+			                     if (app_object instanceof ApplicationData) {
+			                         ApplicationData app_data = (ApplicationData) app_object;
+			                         viewUrl= app_data.getViewContentURL(representation).toString();
+			                     }
+			                  }
+			 
+			              }
+			           }
+				  }
+			  }else {
+				   throw new Exception("可视化不支持该对象("+object+")!");
+			   }
+			} catch (Exception e) {
+			   e.printStackTrace();
+			   throw new Exception("获取对象可视化链接失败!");
+			}
+		  }
+		      return viewUrl;
+	}
+	
+	
 	
 	
 
@@ -1686,7 +1744,7 @@ public class GenericUtil implements RemoteAccess {
 			} catch (Exception ex) {
 			}
 			if (urlfactory == null)
-				urlfactory = new URLFactory();
+			urlfactory = new URLFactory();
 			urlLink = GatewayServletHelper.buildAuthenticatedHREF(urlfactory,
 					"wt.enterprise.URLProcessor", "generateForm", hashmap);
 			urlLink = trimBaseHostUrl(urlLink);
@@ -2580,8 +2638,53 @@ public class GenericUtil implements RemoteAccess {
 	    
 
 		
+public static void moveObject2OtherContainer(String containerOid,String targetFolderPath,String docOid){
+	try{
+	       ObjectIdentifier oid =  ObjectIdentifier.newObjectIdentifier(containerOid);
+	       PDMLinkProduct product = ( PDMLinkProduct) wt.fc.PersistenceHelper.manager.refresh(oid);
+	       WTContainerRef c_ref = WTContainerRef.newWTContainerRef(product);
+	      
+	       //Original folder
+	       Folder folder1 = product.getDefaultCabinet();
+	      
+	       //Target folder: Move the doc to AA folder in the product
+	       Folder folder2 = FolderHelper.service.getFolder(targetFolderPath, c_ref);
+	 
+	       //Get moved doc
+	       ObjectIdentifier oidDoc =  ObjectIdentifier.newObjectIdentifier(docOid);
+	       WTDocument doc = (wt.doc.WTDocument)  PersistenceHelper.manager.refresh(oidDoc);
+	       
+	       WTValuedMap objFolderMap = new WTValuedHashMap(1);
+	       objFolderMap.put(doc, folder2);
+	       WTCollection col = ContainerMoveHelper.service.moveAllVersions(objFolderMap);
+	      } catch(Exception e){
+	         e.printStackTrace();
+	      }
+}
+		
 
+/**
+ * 设置EPM工作区属性
+ * @param ws
+ * @param epm
+ * @param attr_name
+ * @param attr_value
+ * @throws WTException
+ */
+private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String attr_name, String attr_value) throws WTException
+{
+   Map<String, String> attr_value_map = new HashMap<String, String>(1);
+   attr_value_map.put(attr_name, attr_value);
+ 
+   WTKeyedMap keyed_map = new WTKeyedHashMap(1);
+   keyed_map.put(epm, attr_value_map);
+   EPMWorkspaceHelper.manager.setAttributes(ws, keyed_map);
+}
 		
-		
+
+public static void main(String[] args) throws Exception {
+	Persistable object=getPersistableByOid("");
+    String url=getViewContentURL(object);
+}
 	
 }

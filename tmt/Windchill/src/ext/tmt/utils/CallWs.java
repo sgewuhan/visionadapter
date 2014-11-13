@@ -29,6 +29,7 @@ public class CallWs {
 		callWebService(urlStr,methodName,userName,pass,targetNs,array);
 	}
 	
+
 	
 	 private static <T> Object[] ConvertToArray (List<T> tList)
      {
