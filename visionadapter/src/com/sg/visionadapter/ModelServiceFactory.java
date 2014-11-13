@@ -34,6 +34,8 @@ public class ModelServiceFactory {
 	private static DB defaultDB;
 
 	public static String URL_REAUTH;
+	
+	public static String URL_LINKDELIVERY;
 
 	public static ModelServiceFactory service;
 
@@ -76,6 +78,7 @@ public class ModelServiceFactory {
 			Properties props = new Properties();
 			props.load(is);
 			URL_REAUTH = props.getProperty("pm.reauth"); //$NON-NLS-1$
+			URL_LINKDELIVERY = props.getProperty("pm.linkdelivery"); //$NON-NLS-1$
 		} catch (Exception e) {
 		} finally {
 			if (fis != null)
