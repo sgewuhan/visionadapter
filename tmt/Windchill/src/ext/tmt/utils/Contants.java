@@ -137,6 +137,13 @@ public class Contants {
 	
 	
 	public static final String PMNUMBER="number";
+
+	public static final String RELEASE = "release";
+
+	public static final String DESIGN = "design";
+
+	public static final String PLMMID = "plmmid";
+	
 	
 //	/*
 //	 * 物料组

@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
+import wt.enterprise.Master;
 import wt.epm.EPMDocument;
 import wt.fc.WTObject;
 import wt.folder.Folder;
@@ -122,6 +123,7 @@ public class WCToPMHelper {
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
 			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+			plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());
 			pmPart.setPLMData(plmData);
 			pmPart.setOwner(wtPart.getCreatorName());
 			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL));
@@ -150,7 +152,24 @@ public class WCToPMHelper {
 	}
 
 	private static String getObjectOid(WTObject object) {
+		
 		return object.getPersistInfo().getObjectIdentifier().getStringValue();
+	}
+	
+	public static String getObjectMasterOid(WTObject object){
+		String oid ="";
+		Master master =null;
+		if(object instanceof WTPart){
+			 WTPart part = (WTPart)object;
+			  master=(Master) part.getMaster();
+			 oid=master.getPersistInfo().getObjectIdentifier().getStringValue();
+		}else if(object instanceof EPMDocument){
+			EPMDocument  epmdoc = (EPMDocument)object;
+			master=(Master)epmdoc.getMaster();
+			oid=master.getPersistInfo().getObjectIdentifier().getStringValue();
+		}
+		Debug.P(oid);
+		return oid;
 	}
 	
 	/**
@@ -168,13 +187,16 @@ public class WCToPMHelper {
 		ProductPersistence productPersistence =null;  //PM系统中的成品持久化对象
 		String weight ="";
 		Debug.P("将Windchill中的成品插入PM系统的数据库中");
+		Debug.P(wtPart.toString());
 		partOid = getObjectOid(wtPart);
+		Debug.P(wtPart.getPersistInfo().getObjectIdentifier().getId());
+		Debug.P(partOid);
+        		
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
 			pmProduct = productPersistence.newInstance();
 			IBAUtils  partiba = new IBAUtils(wtPart);
-           Debug.P(partOid);
            partFolderString = wtPart.getFolderPath();
            Debug.P(partFolderString);
            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
@@ -199,6 +221,7 @@ public class WCToPMHelper {
         	   pmProduct.setPLMId(partOid);
         	   Map<String,Object> plmData = new HashMap<String,Object>();
         	   plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+        	   plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
         	   Debug.P(plmData);
         	   pmProduct.setPLMData(plmData);
         	   pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
@@ -254,6 +277,7 @@ public class WCToPMHelper {
 		String weight ="";
 		Debug.P("将Windchill中的原材料插入PM系统的数据库中");
 		partOid = getObjectOid(wtPart);
+		//Debug.P(partOid);
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品   
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
@@ -281,6 +305,7 @@ public class WCToPMHelper {
            pmMaterial.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+           plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
            pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmMaterial.setObjectNumber(wtPart.getNumber());
@@ -367,6 +392,7 @@ public class WCToPMHelper {
 				pmSupplyment.setPLMId(partOid);
 				Map<String, Object> plmData = new HashMap<String, Object>();
 				plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+				plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());
 				pmSupplyment.setPLMData(plmData);
 				pmSupplyment.setObjectNumber(wtPart.getNumber());
 				pmSupplyment.setCommonName(wtPart.getName()); // 设置PM部件名称
@@ -469,8 +495,9 @@ public class WCToPMHelper {
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
-           plmData.put("AirSpringClassification", cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
-           plmData.put("Part_Type", cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+           plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.PLMMID, "wt.epm.EPMDocument:"+epmdoc.getIterationInfo().getBranchId());
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM部件名称
 			pmcad.setObjectNumber(epmdoc.getNumber());
@@ -545,6 +572,7 @@ public class WCToPMHelper {
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
           pmPackage.setPLMData(plmData);  
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
@@ -629,6 +657,7 @@ public class WCToPMHelper {
           pmJigTools.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
           pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmJigTools.setObjectNumber(wtPart.getNumber());
@@ -689,8 +718,9 @@ public class WCToPMHelper {
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
-           plmData.put("AirSpringClassification", cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
-           plmData.put("Part_Type", cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+           plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
+           plmData.put(Contants.PLMMID, "wt.epm.EPMDocument:"+epmdoc.getIterationInfo().getBranchId());
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM图纸名称
 			pmcad.setObjectNumber(epmdoc.getNumber());
@@ -749,7 +779,8 @@ public class WCToPMHelper {
 			pmPart.setProductNumber(partiba.getIBAValue(Contants.PRODUCTNO)==null?"":partiba.getIBAValue(Contants.PRODUCTNO));
 			Map<String,Object> plmData = new HashMap<String,Object>();
 			plmData.put(Contants.PMNUMBER, wtPart.getNumber());
-			plmData.put("AirSpringClassification", partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+			plmData.put(Contants.AIRSPRINGCLASSIFICATION, partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":partiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
+			plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
 			pmPart.setPLMData(plmData);
 			pmPart.setMaterial(partiba.getIBAValue(Contants.MATERIAL)==null?"":partiba.getIBAValue(Contants.MATERIAL) );
 			pmPart.setOwner(wtPart.getCreatorName());
@@ -795,6 +826,7 @@ public class WCToPMHelper {
           Debug.P(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
           pmProduct.setPLMData(plmData);
 			pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmProduct.setObjectNumber(wtPart.getNumber());
@@ -854,6 +886,7 @@ public class WCToPMHelper {
           pmMaterial.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
           pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmMaterial.setObjectNumber(wtPart.getNumber());
@@ -914,6 +947,7 @@ public class WCToPMHelper {
          pmPackage.setPLMId(partOid);
          Map<String,Object> plmData = new HashMap<String,Object>();
          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+         plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
          pmPackage.setPLMData(plmData);
 			pmPackage.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmPackage.setObjectNumber(wtPart.getNumber());
@@ -986,6 +1020,7 @@ public class WCToPMHelper {
          pmJigTools.setPLMId(partOid);
          Map<String,Object> plmData = new HashMap<String,Object>();
          plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+         plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
          pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmJigTools.setObjectNumber(wtPart.getNumber());
@@ -1043,6 +1078,7 @@ public class WCToPMHelper {
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
+          plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
             pmSupplyment.setPLMData(plmData);
 			pmSupplyment.setCommonName(wtPart.getName());                           //设置PM部件名称
 			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
@@ -1084,8 +1120,18 @@ public class WCToPMHelper {
 		try {
 			PMPart pmPart = null;//PM中的半成品         
 			partPersistence = ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    pmPart = partPersistence.get(objecdId);
+				 if(pmPart!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+			   if(flag){
 				pmPart = partPersistence.get(objecdId);
 				Debug.P("将Windchill中的半成品从PM系统的数据库中删除------------->"+pmPart.getCommonName());
 				WriteResult wresult = pmPart.doRemove();   //
@@ -1104,8 +1150,18 @@ public class WCToPMHelper {
 		try {
 			PMProduct productPart = null;//PM中的成品           
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    productPart = productPersistence.get(objecdId);
+				 if(productPart!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+			   if(flag){
 				productPart = productPersistence.get(objecdId);
 				Debug.P("将Windchill中的成品从PM系统的数据库中删除--->"+productPart.getCommonName());
 				WriteResult wresult = productPart.doRemove();   //
@@ -1124,8 +1180,18 @@ public class WCToPMHelper {
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    pmMaterial = materialPersistence.get(objecdId);
+				 if(pmMaterial!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+			   if(flag){
 				pmMaterial = materialPersistence.get(objecdId);
 				Debug.P("将Windchill中的半成品从PM系统的数据库中删除-----》"+pmMaterial.getCommonName());
 				WriteResult wresult = pmMaterial.doRemove();   //
@@ -1145,8 +1211,18 @@ public class WCToPMHelper {
 			PMPackage pmPackage = null;//PM中的包装材料
 		
 			packagePersistence = ModelServiceFactory.getInstance(codebasePath).get(PackagePersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    pmPackage = packagePersistence.get(objecdId);
+				 if(pmPackage!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+			   if(flag){
 				pmPackage = packagePersistence.get(objecdId);
 				Debug.P("将Windchill中的包装材料从PM系统的数据库中删除-----》"+pmPackage.getCommonName());
 				WriteResult wresult = pmPackage.doRemove();   //
@@ -1166,16 +1242,25 @@ public class WCToPMHelper {
 			PMCADDocument pmcad = null;//PM中的图纸
 		
 			cadDocPersistence = ModelServiceFactory.getInstance(codebasePath).get(CADDocumentPersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
-				pmcad = cadDocPersistence.get(objecdId);
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    pmcad = cadDocPersistence.get(objecdId);
+				 if(pmcad!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+	           if(flag){//如果PM端有该对象
 				Debug.P("将Windchill中的备品备料从PM系统的数据库中删除-----》"+pmcad.getCommonName());
 				WriteResult wresult = pmcad.doRemove();   //
 				String error = wresult.getError();
 				if(StringUtils.isEmpty(error)){
 					Debug.P("delete PMCADDocument success");
 				}
-			}
+			  }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1187,8 +1272,18 @@ public class WCToPMHelper {
 			PMJigTools pmJigTools = null;//PM中的备品备料
 		
 			jigToolsPersistence = ModelServiceFactory.getInstance(codebasePath).get(JigToolsPersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    pmJigTools = jigToolsPersistence.get(objecdId);
+				 if(pmJigTools!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+	           if(flag){//如果PM端有该对象
 				pmJigTools = jigToolsPersistence.get(objecdId);
 				Debug.P("将Windchill中的备品备料从PM系统的数据库中删除-----》"+pmJigTools.getCommonName());
 				WriteResult wresult = pmJigTools.doRemove();   //
@@ -1207,8 +1302,18 @@ public class WCToPMHelper {
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的客供件        
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
-			ObjectId objecdId=new ObjectId(pmoid);
-			if(objecdId !=null){
+			 boolean flag = false;
+			 ObjectId objecdId=null;
+			   try {
+				    objecdId=new ObjectId(pmoid);
+				    pmSupplyment = supplymentPersistence.get(objecdId);
+				 if(pmSupplyment!=null){
+					 flag=true;
+				 }
+			    } catch (NullPointerException e) {
+			    	flag=false;
+			   }
+			   if(flag){
 				pmSupplyment = supplymentPersistence.get(objecdId);
 				Debug.P("将Windchill中的客供件从PM系统的数据库中删除---》"+pmSupplyment.getCommonName());
 				WriteResult wresult = pmSupplyment.doRemove();   //
