@@ -37,15 +37,12 @@ import wt.fc.PersistenceHelper;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
 import wt.folder.FolderHelper;
-import wt.folder.FolderServerHelper;
 import wt.iba.value.IBAHolder;
 import wt.inf.container.WTContainer;
-import wt.inf.container.WTContainerRef;
 import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.part.WTPart;
-import wt.pdmlink.PDMLinkProduct;
 import wt.session.SessionHelper;
 import wt.util.WTException;
 import wt.util.WTProperties;
@@ -181,15 +178,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	  */
 	 public static int modifyFolderEntry(String objectId,String newFolderName)throws Exception{
 		  int count =0;
-		  Debug.P("------->>>ObjectId:"+objectId);
+		  Debug.P("------->>>Modify Folder ObjectId:"+objectId);
 		  checkNull(objectId);
-//		   if (!RemoteMethodServer.ServerFlag) {
-//	           String method = "modifyFolderEntry";
-//	           String klass = PMWebserviceImpl.class.getName();
-//	           Class[] types = { String.class,String.class};
-//	           Object[] vals = {objectId,newFolderName};
-//	           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
-//	       }else{
+		   if (!RemoteMethodServer.ServerFlag) {
+	           String method = "modifyFolderEntry";
+	           String klass = PMWebserviceImpl.class.getName();
+	           Class[] types = { String.class,String.class};
+	           Object[] vals = {objectId,newFolderName};
+	           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+	       }else{
 	  		 //查询PM文件夹对象
 	  		 FolderPersistence folderPersistence =  ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 	       	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
@@ -222,8 +219,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	      	 }finally{
 	      		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	      	 }
-
-//	       }
+	       }
      	       return count;
 	 }
 	 
@@ -316,13 +312,13 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     public static int  createWTDocumentEntry(String pm_docId) throws Exception{
     	   int count=0;
     	   Debug.P("------>>>Create Windchill Doc:PMID("+pm_docId+")");
-//		 if (!RemoteMethodServer.ServerFlag) {
-//	            String method = "createWTDocumentEntry";
-//	            String klass = PMWebserviceImpl.class.getName();
-//	            Class[] types = { String.class,};
-//	            Object[] vals = {pm_docId};
-//	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
-//	     }else{
+		 if (!RemoteMethodServer.ServerFlag) {
+	            String method = "createWTDocumentEntry";
+	            String klass = PMWebserviceImpl.class.getName();
+	            Class[] types = { String.class,};
+	            Object[] vals = {pm_docId};
+	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+	     }else{
 	        	WTDocument document=WTDocument.newWTDocument();
 	        	//获得PM文档对象
 	        	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
@@ -377,6 +373,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	}finally{
 	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	}
+	     }
          	     return count;
     }
     
@@ -392,13 +389,13 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     	Debug.P("------>>>Update Windchill Doc:PMID("+pm_id+")");
     	int count=0;
     	checkNull(pm_id);
-//		if (!RemoteMethodServer.ServerFlag) {
-//	            String method = "updateWTDocumentEntry";
-//	            String klass = PMWebserviceImpl.class.getName();
-//	            Class[] types = { String.class,};
-//	            Object[] vals = {pm_id};
-//	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
-//	     }else{
+		if (!RemoteMethodServer.ServerFlag) {
+	            String method = "updateWTDocumentEntry";
+	            String klass = PMWebserviceImpl.class.getName();
+	            Class[] types = { String.class,};
+	            Object[] vals = {pm_id};
+	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+	     }else{
 	    	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
 	     	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
 	     	checkNull(pm_document);
@@ -426,6 +423,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			
 	             			//操作完回调doUpdate()
 	         				pm_document.setPLMData(getObjectInfo(doc));
+	         				pm_document.setPLMId(doc.getPersistInfo().getObjectIdentifier().getStringValue());
 	         				pm_document.setMajorVid(doc.getVersionIdentifier().getValue());
 	         				pm_document.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
 	         				pm_document.doUpdate();
@@ -438,7 +436,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	     		}finally{
 	     			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	     		}
-//    	}
+    	}
     	  return count;
     }
 
@@ -456,14 +454,13 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     	
        Debug.P("------>>>Delete PM_DocumentID："+pm_docId);
        
-//  	   if (!RemoteMethodServer.ServerFlag) {
-//           String method = "deleteWTDocumentEntry";
-//           String klass = PMWebserviceImpl.class.getName();
-//           Class[] types = { String.class,};
-//           Object[] vals = {pm_docId};
-//           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
-//       }else{
-    	   
+  	   if (!RemoteMethodServer.ServerFlag) {
+           String method = "deleteWTDocumentEntry";
+           String klass = PMWebserviceImpl.class.getName();
+           Class[] types = { String.class,};
+           Object[] vals = {pm_docId};
+           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+       }else{
     	checkNull(pm_docId);
        	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
@@ -487,7 +484,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
    		   }finally{
    			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
    		  }
-//       }
+       }
     	  return 0;
     }
     
@@ -502,18 +499,18 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 
    	 Debug.P("------>>>Move Path PM_DocumentID ："+pm_docId);
 	 checkNull(pm_docId);
-//	 if (!RemoteMethodServer.ServerFlag) {
-//           String method = "moveWTDocumentEntry";
-//           String klass = PMWebserviceImpl.class.getName();
-//           Class[] types = { String.class,};
-//           Object[] vals = {pm_docId};
-//           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
-//       }else{
+	 if (!RemoteMethodServer.ServerFlag) {
+           String method = "moveWTDocumentEntry";
+           String klass = PMWebserviceImpl.class.getName();
+           Class[] types = { String.class,};
+           Object[] vals = {pm_docId};
+           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+       }else{
     	     BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_docId);
     	 	 checkNull(basic_object);
     	 	//根据PM文件夹找到与之对应的Windchill文件夹Oid
-    	      PMFolder folder=basic_object.getFolder();
-    	      checkNull(folder);
+    	     PMFolder folder=basic_object.getFolder();
+    	     checkNull(folder);
     	 	 //判断文件夹是否为容器Root
     	 	 boolean isContainer=folder.isContainer();
     	 	 String containerName=folder.getContainerName();
@@ -546,7 +543,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     		    } finally {
     	             SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
     		    }
-//       }
+       }
 	 
  	              return 0;
   }
@@ -668,50 +665,61 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	  * @throws Exception
 	  */
 	 public static void changeRevision(String pm_id)throws Exception{
-		 
 		   Debug.P("----->>Check Revision PM_DocID:"+pm_id);
 		   checkNull(pm_id);
-		    //获取PM文档对象
-             BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
-             checkNull(basic_object);
-		   //获得WindChill ID
-        	String wc_id=basic_object.getPLMId();
-        	Debug.P("----------->>>Windchill PLMID:"+wc_id);
-        	try {
-				SessionHelper.manager.setAdministrator();
-				if(!StringUtils.isEmpty(wc_id)){
-				     String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
-				     Persistable object=GenericUtil.getObjectByNumber(doc_num);
-				     if(object!=null){
-					 Folder folder = FolderHelper.service.getFolder((FolderEntry) object);
-					 Persistable newobject= VersionControlHelper.service.newVersion((Versioned) object);
-					 FolderHelper.assignLocation((FolderEntry) newobject,folder);
-					 PersistenceHelper.manager.save(newobject);
-					 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
-					 PersistenceHelper.manager.refresh(newobject);
-					 if(newobject instanceof EPMDocument){
-						 EPMDocument empdoc=(EPMDocument)newobject;
-						 basic_object.setMajorVid(empdoc.getVersionIdentifier().getValue());
-						 basic_object.setSecondVid(Integer.valueOf(empdoc.getIterationIdentifier().getValue()));
-					 }else if(newobject instanceof WTPart){
-						 WTPart part=(WTPart)newobject;
-						 basic_object.setMajorVid(part.getVersionIdentifier().getValue());
-						 basic_object.setSecondVid(Integer.valueOf(part.getIterationIdentifier().getValue()));
-					 }else if(newobject instanceof WTDocument){
-						 WTDocument doc=(WTDocument)newobject;
-						 basic_object.setMajorVid(doc.getVersionIdentifier().getValue());
-						 basic_object.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
-					 }
-					     basic_object.doUpdate();
-				     }
+			if (!RemoteMethodServer.ServerFlag) {
+		            String method = "changeRevision";
+		            String klass = PMWebserviceImpl.class.getName();
+		            Class[] types = { String.class,};
+		            Object[] vals = {pm_id};
+		            RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+		     }else{
+		    	 //获取PM文档对象
+	             BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
+	             checkNull(basic_object);
+			   //获得WindChill ID
+	        	String wc_id=basic_object.getPLMId();
+	        	Debug.P("----------->>>Windchill PLMID:"+wc_id);
+	        	try {
+					SessionHelper.manager.setAdministrator();
+					if(!StringUtils.isEmpty(wc_id)){
+					     String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
+					     Persistable object=GenericUtil.getObjectByNumber(doc_num);
+					     if(object!=null){
+						 Folder folder = FolderHelper.service.getFolder((FolderEntry) object);
+						 Persistable newobject= VersionControlHelper.service.newVersion((Versioned) object);
+						 FolderHelper.assignLocation((FolderEntry) newobject,folder);
+						 PersistenceHelper.manager.save(newobject);
+						 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);//修订时将对象生命周期状态改为工作中
+						 PersistenceHelper.manager.refresh(newobject);
+						 if(newobject instanceof EPMDocument){
+							 EPMDocument empdoc=(EPMDocument)newobject;
+							 basic_object.setPLMId(empdoc.getPersistInfo().getObjectIdentifier().getStringValue());
+							 basic_object.setMajorVid(empdoc.getVersionIdentifier().getValue());
+							 basic_object.setSecondVid(Integer.valueOf(empdoc.getIterationIdentifier().getValue()));
+						 }else if(newobject instanceof WTPart){
+							 WTPart part=(WTPart)newobject;
+							 basic_object.setPLMId(part.getPersistInfo().getObjectIdentifier().getStringValue());
+							 basic_object.setMajorVid(part.getVersionIdentifier().getValue());
+							 basic_object.setSecondVid(Integer.valueOf(part.getIterationIdentifier().getValue()));
+						 }else if(newobject instanceof WTDocument){
+							 WTDocument doc=(WTDocument)newobject;
+							 basic_object.setPLMId(doc.getPersistInfo().getObjectIdentifier().getStringValue());
+							 basic_object.setMajorVid(doc.getVersionIdentifier().getValue());
+							 basic_object.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
+						 }
+						     basic_object.doUpdate();
+					     }
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					basic_object.doSetErrorMessage(10, "PLM 修订("+wc_id+")升级版本异常!");
+				    throw new Exception(e.getMessage());
+				}finally{
+					SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				basic_object.doSetErrorMessage(10, "PLM 修订("+wc_id+")升级版本异常!");
-			    throw new Exception(e.getMessage());
-			}finally{
-				SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-			}
+		     }
+		   
         	
 	 }
 
@@ -721,33 +729,41 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	  * @return
 	  */
 	 public static void changeLifecycleState(String pm_id)throws Exception{
-		  Debug.P("----------->>>>Lifecycle  PMID:"+pm_id);
-		 //获取PM文档对象
-		  if(!StringUtils.isEmpty(pm_id)){
-			     BasicDocument  basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
-		      	 checkNull(basic_object);
-		      	//获得WindChill ID
-		        String wc_id=basic_object.getPLMId();
-		        Debug.P("----------->>>Windchill PLMID:"+wc_id);
-		        try {
-					  SessionHelper.manager.setAdministrator();
-					  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
-				      Persistable object=GenericUtil.getObjectByNumber(doc_num);
-				      if(object!=null){
-				      String stateName=basic_object.getStatus();
-				      Debug.P("------->>>PM State:"+stateName);
-				      object=GenericUtil.changeState((LifeCycleManaged) object, stateMap.get(stateName));
-				      PersistenceHelper.manager.refresh(object);
-				      basic_object.doUpdate();
-				      }
-		        } catch (Exception e) {
-				    e.printStackTrace();
-				    throw new Exception("Windchill 修改对象("+wc_id+"生命周期状态失败!");
-				}finally{
-					SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-				}
-		      	 
-		  }
+		  Debug.P("----------->>>>Change Lifecycle  PMID:"+pm_id);
+		  
+		   if (!RemoteMethodServer.ServerFlag) {
+	            String method = "changeLifecycleState";
+	            String klass = PMWebserviceImpl.class.getName();
+	            Class[] types = { String.class,};
+	            Object[] vals = {pm_id};
+	            RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+	     }else{
+			 //获取PM文档对象
+			  if(!StringUtils.isEmpty(pm_id)){
+				     BasicDocument  basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
+			      	 checkNull(basic_object);
+			      	//获得WindChill ID
+			        String wc_id=basic_object.getPLMId();
+			        Debug.P("----------->>>Windchill PLMID:"+wc_id);
+			        try {
+						  SessionHelper.manager.setAdministrator();
+						  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
+					      Persistable object=GenericUtil.getObjectByNumber(doc_num);
+					      if(object!=null){
+					      String stateName=basic_object.getStatus();
+					      Debug.P("------->>>PM State:"+stateName);
+					      object=GenericUtil.changeState((LifeCycleManaged) object, stateMap.get(stateName));
+					      PersistenceHelper.manager.refresh(object);
+					      basic_object.doUpdate();
+					      }
+			        } catch (Exception e) {
+					    e.printStackTrace();
+					    throw new Exception("Windchill 修改对象("+wc_id+"生命周期状态失败!");
+					}finally{
+						SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+					}
+			  }
+	     }
 	 }
 	 
 	 
@@ -759,41 +775,42 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 public static int  changePhase(String pm_id)throws Exception{
 		  Debug.P("------->>>Change Phase PMID:"+pm_id);
 		   int count=0;
-		  if(!StringUtils.isEmpty(pm_id)){
-			  //根据pm_id修改阶段信息
-			  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
-              String phase=object.getPhase();//阶段
-           	   String plm_num=(String) object.getPLMData().get(ConstanUtil.NUMBER);//PM对应的Windchill Number字段
-              Debug.P("----Phase--->>>Windchill num:"+plm_num+"   ;Phase Value:"+phase);
-              if(!StringUtils.isEmpty(plm_num)){
-             try {
-			    SessionHelper.manager.setAdministrator();
-			    if(!StringUtils.isEmpty(phase)){
-			    	Persistable persistable=GenericUtil.getObjectByNumber(plm_num);
-//				    Map  ibas=new HashMap();
-//			        ibas.put(ConstanUtil.PHASE, phase);
-			        IBAUtils iba_values=new IBAUtils((IBAHolder)persistable);
-			        iba_values.setIBAValue(ConstanUtil.PHASE, phase);
-			        iba_values.updateIBAPart((IBAHolder)persistable);
-//				    LWCUtil.setValueBeforeStore(persistable, ibas);//修改阶段属性
-//				    PersistenceHelper.manager.save(persistable);
-			        object.doUpdate();
-				    count=1;
-			    }
-			
-			 } catch (Exception e) {
-				 e.printStackTrace();
-				 throw new Exception("Windchill ("+plm_num+") 修改阶段失败!");
-			}finally{
-				 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-			}       	        
-        }    
-	}
-		   return count;
+		   if (!RemoteMethodServer.ServerFlag) {
+		            String method = "changePhase";
+		            String klass = PMWebserviceImpl.class.getName();
+		            Class[] types = { String.class,};
+		            Object[] vals = {pm_id};
+		            return (Integer)RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+		     }else{
+				  if(!StringUtils.isEmpty(pm_id)){
+					  //根据pm_id修改阶段信息
+					  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
+		              String phase=object.getPhase();//阶段
+		           	   String plm_num=(String) object.getPLMData().get(ConstanUtil.NUMBER);//PM对应的Windchill Number字段
+		              Debug.P("----Phase--->>>Windchill num:"+plm_num+"   ;Phase Value:"+phase);
+		              if(!StringUtils.isEmpty(plm_num)){
+		             try {
+					    SessionHelper.manager.setAdministrator();
+					    if(!StringUtils.isEmpty(phase)){
+					    	Persistable persistable=GenericUtil.getObjectByNumber(plm_num);
+					        IBAUtils iba_values=new IBAUtils((IBAHolder)persistable);
+					        iba_values.setIBAValue(ConstanUtil.PHASE, phase);
+					        iba_values.updateIBAPart((IBAHolder)persistable);
+					        object.doUpdate();
+						    count=1;
+					    }
+					 } catch (Exception e) {
+						 e.printStackTrace();
+						 throw new Exception("Windchill ("+plm_num+") 修改阶段失败!");
+					}finally{
+						 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+					}       	        
+		        }    
+			 }
+		 }
+		      return count;
 	 }
 	 
-	 
-
 
 
 }
