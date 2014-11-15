@@ -3,6 +3,7 @@ package ext.tmt.part.listener;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +15,7 @@ import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMDocUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
 import ext.tmt.utils.StringUtil;
 import ext.tmt.utils.WindchillUtil;
@@ -83,6 +85,7 @@ public class PartHelper implements Serializable {
 //			wtPart=(WTPart)object;
 //		}
 		IBAUtils iba = new IBAUtils(wtPart);
+		Map<String,Object> ibavals=LWCUtil.getAllAttribute(wtPart);
 		Debug.P("ibautils--->"+iba);
 		String sync=iba.getIBAValue(Contants.CYNCDATA);
 		String pmoids = iba.getIBAValue(Contants.PMID);
@@ -139,6 +142,7 @@ public class PartHelper implements Serializable {
 						}else if(epmPartType.equals("成品")){
 							//wtPart.setEndItem(true);
 							types="wt.part.WTPart|"+Contants.PRODUCTPART;
+		
 						}else{
 							return;
 						}
@@ -149,6 +153,7 @@ public class PartHelper implements Serializable {
 							TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
 							wtPart.setPartType(PartType.getPartTypeDefault());
 							wtPart.setTypeDefinitionReference(typeDefinitionRef);
+							LWCUtil.setValueBeforeStore(wtPart, ibavals);
 							if (!PersistenceHelper.isPersistent(wtPart)) {
 								wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
 								wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
@@ -215,8 +220,7 @@ public class PartHelper implements Serializable {
 //						wtPart=(WTPart)object;
 //					}
 					WCToPMHelper.CreatePMProductToPM(wtPart);
-				} else //如果是半成品
-				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+				} else if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果是半成品
 					if(wtPart.isEndItem()){
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
 					} 

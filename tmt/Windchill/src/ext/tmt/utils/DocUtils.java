@@ -1353,7 +1353,7 @@ public class DocUtils implements RemoteAccess{
 	 * @return WTDocumnet
 	 * @throws WTException
 	 */
-	public static WTDocument updateWTDocument(WTDocument doc,PMDocument pm_document,HashMap ibas) throws Exception{
+	public static WTDocument updateWTDocument(WTDocument doc,PMDocument pm_document,Map ibas) throws Exception{
 		
 		Transaction trans = null;
 		String docName=pm_document.getCommonName();

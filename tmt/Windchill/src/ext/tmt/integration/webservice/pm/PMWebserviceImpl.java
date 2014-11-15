@@ -416,8 +416,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			Persistable object= GenericUtil.getObjectByNumber(doc_num);
 	         			if(object!=null&&object instanceof WTDocument){
 	         				WTDocument doc=(WTDocument)object;
-	         				HashMap ibas=new HashMap();
-	         			    setDocIBAValuesMap(ibas, pm_document);
+	         				Map ibas=LWCUtil.getAllAttribute(doc);
+	         			    setDocIBAValuesMap(ibas, pm_document);//更新软属性
 	         				doc=(WTDocument) GenericUtil.checkout(doc);
 	         				doc=DocUtils.updateWTDocument(doc,pm_document, ibas);//更新文档
 	         				if (doc != null) {
@@ -831,6 +831,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			if(!plmId.startsWith("VR")){plmId="VR:"+plmId;}
 			Persistable object=GenericUtil.getPersistableByOid(plmId);
 		    if(object!=null){
+		    	Debug.P("------>>>EPM>>>>>>>");
 		        String url=GenericUtil.getViewContentHrefUrl(object);
 		        if(!StringUtils.isEmpty(url)){
 		        	result=url.substring(url.indexOf("/"),url.indexOf(","));
