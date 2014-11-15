@@ -85,8 +85,7 @@ public class PartHelper implements Serializable {
 //			wtPart=(WTPart)object;
 //		}
 		IBAUtils iba = new IBAUtils(wtPart);
-		Map<String,Object> ibavals=LWCUtil.getAllAttribute(wtPart);
-		Debug.P("ibautils--->"+iba);
+		Map ibaValues=LWCUtil.getAllAttribute(wtPart);
 		String sync=iba.getIBAValue(Contants.CYNCDATA);
 		String pmoids = iba.getIBAValue(Contants.PMID);
 		Debug.P("sync--->"+sync);
@@ -142,7 +141,6 @@ public class PartHelper implements Serializable {
 						}else if(epmPartType.equals("成品")){
 							//wtPart.setEndItem(true);
 							types="wt.part.WTPart|"+Contants.PRODUCTPART;
-		
 						}else{
 							return;
 						}
@@ -153,7 +151,8 @@ public class PartHelper implements Serializable {
 							TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
 							wtPart.setPartType(PartType.getPartTypeDefault());
 							wtPart.setTypeDefinitionReference(typeDefinitionRef);
-							LWCUtil.setValueBeforeStore(wtPart, ibavals);
+							Debug.P("------->>WTPart IBA:"+ibaValues.size());
+						  	LWCUtil.setValue(wtPart, ibaValues);
 							if (!PersistenceHelper.isPersistent(wtPart)) {
 								wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
 								wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
@@ -164,6 +163,7 @@ public class PartHelper implements Serializable {
 					} 
 			    	partType=DocUtils.getType(wtPart);
 			    	Debug.P(partNumber+"------------------->"+partType);
+			    	
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
 			    	//wtPart.setEndItem(true);
 //			    	if (!PersistenceHelper.isPersistent(wtPart)) {
@@ -219,8 +219,11 @@ public class PartHelper implements Serializable {
 //					if(object !=null){
 //						wtPart=(WTPart)object;
 //					}
+					Debug.P("------->>SET PRODUCTPART IBA:"+ibaValues.size());
+				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreatePMProductToPM(wtPart);
-				} else if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果是半成品
+				} else //如果是半成品
+				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 					if(wtPart.isEndItem()){
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
 					} 
@@ -251,6 +254,8 @@ public class PartHelper implements Serializable {
 //						}
 						wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					}
+					Debug.P("------->>SET SEMIFINISHEDPRODUCT IBA:"+ibaValues.size());
+				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreatePartToPM(wtPart);
 				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
 //					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
@@ -258,6 +263,8 @@ public class PartHelper implements Serializable {
 //						wtPart=(WTPart)object;
 //					}
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+					Debug.P("------->>SET MATERIAL IBA:"+ibaValues.size());
+				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreatePMaterialToPM(wtPart);
 				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
 //					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
@@ -265,6 +272,8 @@ public class PartHelper implements Serializable {
 //						wtPart=(WTPart)object;
 //					}
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+					Debug.P("------->>SET SUPPLYMENT IBA:"+ibaValues.size());
+				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreateSupplyToPM(wtPart);
 				}else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
 //					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
@@ -272,6 +281,8 @@ public class PartHelper implements Serializable {
 //						wtPart=(WTPart)object;
 //					}
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+					Debug.P("------->>SET PACKINGPART IBA:"+ibaValues.size());
+				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreatePMPackageToPM(wtPart);
 				}else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
 //					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
@@ -279,10 +290,14 @@ public class PartHelper implements Serializable {
 //						wtPart=(WTPart)object;
 //					}
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+					Debug.P("------->>SET TOOLPART IBA:"+ibaValues.size());
+				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreateJigToolPartToPM(wtPart);
 				}
 			    
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			Debug.P("------->>SET UPDATE IBA:"+ibaValues.size());
+		  	LWCUtil.setValue(wtPart, ibaValues);
 			if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果是成品
 				WCToPMHelper.CreatePMProductToPM( wtPart);
 			  }else if(partType.contains(Contants.PRODUCTPART)){ //如果是半成品
@@ -305,7 +320,8 @@ public class PartHelper implements Serializable {
 				wtPart=(WTPart)object;
 			}
             if(WorkInProgressHelper.isCheckedOut(wtPart)){
-            	
+    			Debug.P("------->>SET POST_STORE IBA:"+ibaValues.size());
+    		  	LWCUtil.setValue(wtPart, ibaValues);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -319,7 +335,6 @@ public class PartHelper implements Serializable {
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
 					WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
 			  }
-			
             }
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
@@ -329,6 +344,8 @@ public class PartHelper implements Serializable {
 //			}
 			wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
             Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
+			Debug.P("------->>SET POST_STORE IBA:"+ibaValues.size());
+		  	LWCUtil.setValue(wtPart, ibaValues);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
