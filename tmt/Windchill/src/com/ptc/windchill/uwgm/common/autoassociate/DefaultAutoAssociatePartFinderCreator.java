@@ -145,7 +145,7 @@ public class DefaultAutoAssociatePartFinderCreator implements
 		String s = associatepartdescriptor.getPartName();
 		String s1 = associatepartdescriptor.getPartNumber();
 		System.out.println("出现本图了-------------------------》"+s1);
-		if(s1 !=null &&s1.equals("本图")){
+		if(s1 !=null &&s1.replace(" ", "").trim().equals("本图")){
 			System.out.println("出现本图了-------------------------》"+s1);
 			return null;
 		}
