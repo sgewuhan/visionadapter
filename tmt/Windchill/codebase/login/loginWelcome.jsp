@@ -26,8 +26,8 @@
     }
   } 
   String Oid = request.getParameter("Oid");
-  String user = request.getParameter("user");
-  String pass = request.getParameter("pass");
+  String user = request.getParameter("username");
+  String pass = request.getParameter("password");
 %>
 <script>
 	
@@ -45,7 +45,7 @@ function login(){
 	}else {  
 		xhr = new XMLHttpRequest();
 	}
-	xhr.open("POST", "../netmarkets/jsp/ping.htm", false, username,password);
+	xhr.open("POST", "../netmarkets/jsp/ping.htm", false, <%=user%>,<%=pass%>);
 	xhr.onreadystatechange=handleStateChange;
 	xhr.send(null);
 }
@@ -60,7 +60,7 @@ function handleStateChange(){
 <body  bgColor=#ffffff>
 							验证成功，页面正在跳转...
 <script></script>	
-<iframe width=1420 height=1000 name=aa frameborder=0 src="http://crh-tmt.plm.com/Windchill/app/#ptc1/tcomp/infoPage?oid=VR<%=Oid%>&u8=1"></iframe>
+<iframe width=1420 height=1000 name=aa frameborder=0 src="http://crh-tmt.plm.com/Windchill/app/#ptc1/tcomp/infoPage?oid=VR:<%=Oid%>&u8=1"></iframe>
 </body>
 
 </html>
