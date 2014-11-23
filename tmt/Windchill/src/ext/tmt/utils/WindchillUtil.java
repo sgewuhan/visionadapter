@@ -271,6 +271,20 @@ public class WindchillUtil {
 		return null;
 	}
 	
+	public static SubFolder getSubFolderByName(String subFolderName)throws WTException{
+		QuerySpec qs = new QuerySpec(SubFolder.class);
+		qs.appendWhere(new SearchCondition(SubFolder.class, SubFolder.NAME,
+				SearchCondition.EQUAL, subFolderName));
+		Debug.P(qs);
+		QueryResult qr = PersistenceHelper.manager.find((StatementSpec) qs);
+		Debug.P(qr);
+		if (qr.hasMoreElements()) {
+			 return (SubFolder)qr.nextElement();
+		}
+		return null;
+	}
+	
+	
 	@SuppressWarnings("all")
 	public static WTObject checkOut(WTObject wtobject)
 			throws InterruptedException, WTPropertyVetoException,
@@ -446,8 +460,41 @@ public class WindchillUtil {
 	 */
 	public static Persistable getObjectByOid(String oid)
 			throws WTRuntimeException, WTException {
-		ReferenceFactory rf = new ReferenceFactory();
-		Persistable p = rf.getReference(oid).getObject();
+		boolean flag = SessionServerHelper.manager.setAccessEnforced(false);
+	//	WTUser currentuser = (WTUser) SessionHelper.manager.getPrincipal();
+	//	SessionHelper.manager.setAdministrator();
+		Persistable p =null;
+		try{
+			ReferenceFactory rf = new ReferenceFactory();
+			 p = rf.getReference(oid).getObject();
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+		//	SessionHelper.manager.setPrincipal(currentuser.getAuthenticationName());
+			SessionServerHelper.manager.setAccessEnforced(flag);
+		}
 		return p;
+	}
+	
+	public static String getContaintOidByFolder(SubFolder folder){
+		String containerOid = "";
+		WTContainer container = null;
+		boolean flag = SessionServerHelper.manager.setAccessEnforced(false);
+		//	WTUser currentuser = (WTUser) SessionHelper.manager.getPrincipal();
+		//	SessionHelper.manager.setAdministrator();
+			Persistable p =null;
+		try {
+			if (folder != null) {
+				container = folder.getContainer();
+				Debug.P("container------->" + container);
+				containerOid = container.toString();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			// SessionHelper.manager.setPrincipal(currentuser.getAuthenticationName());
+			SessionServerHelper.manager.setAccessEnforced(flag);
+		}
+		return containerOid;
 	}
 }

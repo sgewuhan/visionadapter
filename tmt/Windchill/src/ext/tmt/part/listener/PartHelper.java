@@ -10,6 +10,7 @@ import java.util.Vector;
 import org.apache.commons.lang.StringUtils;
 
 import ext.tmt.WC2PM.WCToPMHelper;
+import ext.tmt.part.PartUtils;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
@@ -119,11 +120,13 @@ public class PartHelper implements Serializable {
 			    	if(StringUtils.isNotEmpty(epmPartType)){
 						if(epmPartType.equals("半成品")){
 							types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
-						}else if(epmPartType.equals("成品")){
-							//wtPart.setEndItem(true);
-							types="wt.part.WTPart|"+Contants.PRODUCTPART;
-						}else{
-							return;
+						}
+//						else if(epmPartType.equals("成品")){
+//							//wtPart.setEndItem(true);
+//							types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//						}
+						else{
+							throw new Exception("检入图纸时，只允许创建成品和半成品");
 						}
 						if(types.contains("Product")){
 							Debug.P(types);
@@ -138,10 +141,9 @@ public class PartHelper implements Serializable {
 						}
 						setPartIBAValues(wtPart,epmdoc);
 						
+					}else{
+						throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
 					}
-//			    	else{
-//						throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
-//					}
 			    	partType=DocUtils.getType(wtPart);
 			    	Debug.P(partNumber+"------------------->"+partType);
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
@@ -257,10 +259,12 @@ public class PartHelper implements Serializable {
 	    	if(StringUtils.isNotEmpty(epmPartType)){
 				if(epmPartType.equals("半成品")){
 					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
-				}else if(epmPartType.equals("成品")){
-					types="wt.part.WTPart|"+Contants.PRODUCTPART;
-				}else{
-					return;
+				}
+//				else if(epmPartType.equals("成品")){
+//					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//				}
+				else{
+					throw new Exception("检入图纸时，只允许自动创建半成品！");
 				}
 				Debug.P(types);
 				if(types.contains("Product")){
@@ -312,11 +316,13 @@ public class PartHelper implements Serializable {
 	    	if(StringUtils.isNotEmpty(epmPartType)){
 				if(epmPartType.equals("半成品")){
 					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
-				}else if(epmPartType.equals("成品")){
-					//wtPart.setEndItem(true);
-					types="wt.part.WTPart|"+Contants.PRODUCTPART;
-				}else{
-					return;
+				}
+//				else if(epmPartType.equals("成品")){
+//					//wtPart.setEndItem(true);
+//					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//				}
+				else{
+					throw new Exception("检入图纸时，只允许自动创建半成品！");
 				}
 				Debug.P(types);
 				if(types.contains("Product")){
@@ -332,17 +338,15 @@ public class PartHelper implements Serializable {
 				}
 				setPartIBAValues(wtPart,epmdoc);
 			}
-//	    	else{
-//				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
-//			}
+	    	else{
+				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+			}
 	    	
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
             Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
-            Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-			if(object !=null){
-				wtPart=(WTPart)object;
-			}
+//            Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+            wtPart=   PartUtils.getPartByNumber(wtPart.getNumber());
             if(WorkInProgressHelper.isCheckedOut(wtPart)){
             	
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){

@@ -11,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId; 
 
 import com.mongodb.WriteResult;
+import com.ptc.wvs.common.ui.VisualizationHelper;
+import com.ptc.wvs.server.util.WVSContentHelper;
 import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
@@ -29,6 +31,8 @@ import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
+import wt.content.ApplicationData;
+import wt.content.ContentHolder;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
@@ -412,8 +416,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			Persistable object= GenericUtil.getObjectByNumber(doc_num);
 	         			if(object!=null&&object instanceof WTDocument){
 	         				WTDocument doc=(WTDocument)object;
-	         				HashMap ibas=new HashMap();
-	         			    setDocIBAValuesMap(ibas, pm_document);
+	         				Map ibas=LWCUtil.getAllAttribute(doc);
+	         			    setDocIBAValuesMap(ibas, pm_document);//更新软属性
 	         				doc=(WTDocument) GenericUtil.checkout(doc);
 	         				doc=DocUtils.updateWTDocument(doc,pm_document, ibas);//更新文档
 	         				if (doc != null) {
@@ -811,6 +815,42 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		      return count;
 	 }
 	 
+	 
+	 
+	 
+	 /**
+	  * 获得对象的可视化链接
+	  * @param plmId
+	  * @return
+	  */
+	 public static String getViewContentURL(String plmId)throws Exception{
+		 Debug.P("--------->>>PLMID:"+plmId);
+		 String result=null;
+		 try {
+			SessionHelper.manager.setAdministrator();
+			if(!plmId.startsWith("VR")){plmId="VR:"+plmId;}
+			Persistable object=GenericUtil.getPersistableByOid(plmId);
+		    if(object!=null){
+		    	Debug.P("------>>>EPM>>>>>>>");
+		        String url=GenericUtil.getViewContentHrefUrl(object);
+		        if(!StringUtils.isEmpty(url)){
+		        	result=url.substring(url.indexOf("/"),url.indexOf(","));
+		        }
+		    }
+		    Debug.P("------->>>>>View URL:"+result);
+		} catch (Exception e) {
+		   throw new Exception("获取对象的可视化链接失败!");
+		}finally{
+			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+		}
+		  return result;
+	 }
 
 
+//	 public static void main(String[] args) throws Exception {
+//		 String pid="VR:wt.epm.EPMDocument:174627";
+//		 String cid="VR:wt.epm.EPMDocument:96452";
+//		 getViewContentURL(cid);
+//	}
+	 
 }

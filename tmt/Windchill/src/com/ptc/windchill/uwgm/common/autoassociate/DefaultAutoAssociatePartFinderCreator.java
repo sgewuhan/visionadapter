@@ -5,7 +5,11 @@ import com.ptc.core.logging.LogFactory;
 import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
 import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
 import com.ptc.windchill.uwgm.common.util.PrintHelper;
+
+import ext.tmt.utils.IBAUtils;
+
 import java.util.Map;
+
 import wt.epm.EPMDocument;
 import wt.epm.modelitems.ModelItem;
 import wt.epm.workspaces.EPMWorkspace;

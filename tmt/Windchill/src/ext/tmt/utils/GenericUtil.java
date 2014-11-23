@@ -15,6 +15,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -26,6 +27,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -187,6 +190,7 @@ import com.ptc.windchill.cadx.common.preference.EpdParams;
 import com.ptc.windchill.cadx.common.util.WorkspaceConfigSpecUtilities;
 import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
 import com.ptc.wvs.common.ui.VisualizationHelper;
+import com.ptc.wvs.server.util.WVSContentHelper;
 
 public class GenericUtil implements RemoteAccess {
 
@@ -1053,17 +1057,39 @@ public class GenericUtil implements RemoteAccess {
 		return ch;
 	}
 	
+	/**
+	 * 获取对象可视化的超链接地址
+	 * @param object
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getViewContentHrefUrl(Persistable object) throws Exception{
+		  String result=null;
+		try {
+			 if(object!=null){
+				  object = (ContentHolder) PersistenceHelper.manager.refresh(object);
+				  VisualizationHelper visualizationHelper = new VisualizationHelper();
+				  String [] arr= visualizationHelper.getDefaultVisualizationData(object.toString(),false,Locale.US);
+				  if(!StringUtils.isEmpty(arr[0])){
+					  result= getMatchHrefUrl(arr[0]);
+				  }
+			 }
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception(e);
+		}
+		     return result;
+	}
 	
 	/**
-	 * 获得对象的可视化链接地址
+	 * 获得对象的可视化文件下载地址
 	 * @param ch
 	 * @return
 	 */
-	public static String  getViewContentURL(Persistable object)throws Exception{
+	public static  String  getViewContentDownloadURL(Persistable object)throws Exception{
 		 String viewUrl=null;
 		  if(object!=null){
 		  try {
-			  
 			  if(object instanceof EPMDocument||object instanceof WTDocument){
 				  object = (ContentHolder) PersistenceHelper.manager.refresh(object);
 				  VisualizationHelper visualizationHelper = new VisualizationHelper();
@@ -1071,7 +1097,6 @@ public class GenericUtil implements RemoteAccess {
 				  if (epmReps != null) {
 			           while (epmReps.hasMoreElements()) {
 			              Representation representation = (Representation) epmReps.nextElement();
-			              System.out.println("--->>>RID:"+representation.getIdentity());
 			              representation = (Representation) ContentHelper.service.getContents(representation);
 			              if (representation != null) {
 			                  Enumeration e = ContentHelper.getApplicationData(representation).elements();
@@ -1091,7 +1116,7 @@ public class GenericUtil implements RemoteAccess {
 			   }
 			} catch (Exception e) {
 			   e.printStackTrace();
-			   throw new Exception("获取对象可视化链接失败!");
+			   throw new Exception("获取对象可视化下载链接失败!");
 			}
 		  }
 		      return viewUrl;
@@ -1140,6 +1165,8 @@ public class GenericUtil implements RemoteAccess {
 		}
 		return document;
 	}
+	
+	
 	
 	/**
 	 * create a usagelink between two WTPart
@@ -2716,9 +2743,44 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 }
 		
 
-public static void main(String[] args) throws Exception {
-	Persistable object=getPersistableByOid("");
-    String url=getViewContentURL(object);
+
+
+/**
+ * 获取URl字符串中的
+ * @param url
+ * @return
+ */
+ public static  Map<String, String> getURLParams(String url) {
+	    Map<String, String> paramMap = new HashMap<String, String>();
+	    if (!StringUtils.isEmpty(url)) {// 如果URL不是空字符串
+	        url = url.substring(url.lastIndexOf('?') + 1);
+	        String paramaters[] = url.split("&");
+	        for (String param : paramaters) {
+	            String values[] = param.split("=");
+	            System.out.println(values[1]);
+	            paramMap.put(values[0], values[1]);
+	        }
+	    }
+	       return paramMap;
 }
-	
+ 
+ /**
+  * 解析<a href=*>里的链接地址
+  * @param str
+  * @return
+  */
+ private static String  getMatchHrefUrl(String str){
+	String result=null; 
+    String patternString = "\\s*(?i)[h|H][r|R][e|E][f|F]\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))";
+ 	Pattern pattern = Pattern.compile(patternString,Pattern.CASE_INSENSITIVE);
+	Matcher matcher = pattern.matcher(str);
+	while (matcher.find()) {
+		String link=matcher.group();
+		link=link.replaceAll("[h|H][r|R][e|E][f|F]\\s*=\\s*(['|\"]*)", "");
+		result=link.replaceAll("['|\"]", "");
+	   }
+	     return result;
+    }
+
+ 
 }
