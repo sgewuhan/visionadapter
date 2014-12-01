@@ -84,7 +84,7 @@ public class WCToPMHelper {
 		try {   
 			PMPart pmPart = null;//PM中的半成品           
 			partPersistence =ModelServiceFactory.getInstance(codebasePath).get(PartPersistence.class);
-			pmPart = partPersistence.newInstance();  
+			
 			IBAUtils  partiba = new IBAUtils(wtPart);
             Debug.P(partOid);
             Debug.P(wtPart.getContainerName());
@@ -94,6 +94,13 @@ public class WCToPMHelper {
             pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
             Debug.P(pFolderId);
             boolean flag = true;
+            try{
+            	pmPart=partPersistence.getByPLMId(partOid);
+            }catch (NullPointerException e) {
+            	pmPart=null;
+ 		   } 
+            Debug.P("pmPart-->"+pmPart);
+            
  		   try {
  			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
  			 if(pmfolder==null){
@@ -102,8 +109,17 @@ public class WCToPMHelper {
  		    } catch (NullPointerException e) {
  		    	flag=false;
  		    }
+ 		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
  		   if(flag){
-            pmPart.setFolderIdByPLMId(pFolderId);
+ 			   Debug.P("pmMaterial-->"+pmPart);
+			   if(pmPart!=null){
+					String pmoid =  partiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						updatePMPart(pmoid, wtPart);
+					}
+				  }else{
+			pmPart = partPersistence.newInstance();  
+			pmPart.setFolderIdByPLMId(pFolderId);
  		    ObjectId objectId = new ObjectId();
  		    pmPart.set_id(objectId);
             pmPart.setPLMId(partOid);
@@ -141,6 +157,9 @@ public class WCToPMHelper {
 				Debug.P("create PMPart success");
 			}
 		}
+	 }else{
+		 Debug.P();
+	 }
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -196,7 +215,7 @@ public class WCToPMHelper {
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
 			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
-			pmProduct = productPersistence.newInstance();
+			
 			IBAUtils  partiba = new IBAUtils(wtPart);
            partFolderString = wtPart.getFolderPath();
            Debug.P(partFolderString);
@@ -204,11 +223,15 @@ public class WCToPMHelper {
            //partFolder=wtPart.getFolderingInfo().getFolder();
            Debug.P(partFolder);
            Debug.P(pFolderId);
-           ObjectId objectId =new ObjectId();
-           pmProduct.set_id(objectId);
            pFolderId=partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
 		   Debug.P(pFolderId);
 		   boolean flag = true;
+		   try{
+			   pmProduct=productPersistence.getByPLMId(partOid);
+           }catch (NullPointerException e) {
+        	   pmProduct=null;
+		   } 
+           Debug.P("pmProduct-->"+pmProduct);
 		   try {
 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
@@ -217,13 +240,24 @@ public class WCToPMHelper {
 		    } catch (NullPointerException e) {
 		    	flag=false;
 		   }
+		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
            if(flag){//如果PM端没有该文件夹对象
+        	   Debug.P("pmProduct-->"+pmProduct);
+			   if(pmProduct!=null){
+					String pmoid =  partiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						updatePMProductToPM(pmoid, wtPart);
+					}
+				  }else{
+        	   pmProduct = productPersistence.newInstance();
         	   pmProduct.setFolderIdByPLMId(pFolderId);
         	   pmProduct.setPLMId(partOid);
         	   Map<String,Object> plmData = new HashMap<String,Object>();
         	   plmData.put(Contants.PMNUMBER, wtPart.getNumber());
         	   plmData.put(Contants.PLMMID, "wt.part.WTPart:"+wtPart.getIterationInfo().getBranchId());;
         	   Debug.P(plmData);
+        	   ObjectId objectId =new ObjectId();
+               pmProduct.set_id(objectId);
         	   pmProduct.setPLMData(plmData);
         	   pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
         	   pmProduct.setObjectNumber(wtPart.getNumber());
@@ -250,7 +284,7 @@ public class WCToPMHelper {
         	   			reloadDeliverable(objectId.toString());
         	   			Debug.P("create pmproduct success");
         	   		}
-           }
+           }}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -283,7 +317,7 @@ public class WCToPMHelper {
 		try {
 			PMMaterial pmMaterial = null;//PM中的半成品   
 			materialPersistence = ModelServiceFactory.getInstance(codebasePath).get(MaterialPersistence.class);
-			pmMaterial = materialPersistence.newInstance();
+			
 			IBAUtils  partiba = new IBAUtils(wtPart);
            Debug.P(partOid);
            partFolderString = wtPart.getFolderPath();
@@ -294,6 +328,14 @@ public class WCToPMHelper {
            pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
            Debug.P(pFolderId);
            boolean flag = true;
+           
+           try{
+        	   pmMaterial=materialPersistence.getByPLMId(partOid);
+           }catch (NullPointerException e) {
+        	   pmMaterial=null;
+		   } 
+           Debug.P("pmMaterial-->"+pmMaterial);
+           
 		   try {
 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
@@ -302,7 +344,16 @@ public class WCToPMHelper {
 		    } catch (NullPointerException e) {
 		    	flag=false;
 		   }
+		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
            if(flag){//如果PM端没有该文件夹对象
+        	   Debug.P("pmMaterial-->"+pmMaterial);
+			   if(pmMaterial!=null){
+					String pmoid =  partiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						updatePMaterialToPM(pmoid, wtPart);
+					}
+				  }else{
+		    pmMaterial = materialPersistence.newInstance();   
            pmMaterial.setFolderIdByPLMId(pFolderId);
            pmMaterial.setPLMId(partOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
@@ -338,7 +389,7 @@ public class WCToPMHelper {
 				reloadDeliverable(objectId.toString());
 				Debug.P("create PMMaterial success");
 			}
-           }
+           }}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -370,7 +421,7 @@ public class WCToPMHelper {
 		try {
 			PMSupplyment pmSupplyment = null;//PM中的半成品        
 			supplymentPersistence = ModelServiceFactory.getInstance(codebasePath).get(SupplymentPersistence.class);
-			pmSupplyment = supplymentPersistence.newInstance();
+			
 			IBAUtils  partiba = new IBAUtils(wtPart);
 			
            Debug.P(partOid);
@@ -382,6 +433,11 @@ public class WCToPMHelper {
            pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
            Debug.P(pFolderId);
            boolean flag = true;
+           try{
+        	   pmSupplyment=supplymentPersistence.getByPLMId(partOid);
+           }catch (NullPointerException e) {
+        	   pmSupplyment=null;
+		   } 
 		   try {
 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
@@ -390,7 +446,16 @@ public class WCToPMHelper {
 		    } catch (NullPointerException e) {
 		    	flag=false;
 		   }
+		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
            if(flag){//如果PM端没有该文件夹对象
+        	   Debug.P("pmSupplyment-->"+pmSupplyment);
+			   if(pmSupplyment!=null){
+					String pmoid =  partiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						updateSupplyToPM(pmoid, wtPart);
+					}
+				  }else{
+        	   pmSupplyment = supplymentPersistence.newInstance();
 				pmSupplyment.setFolderIdByPLMId(pFolderId);
 				pmSupplyment.setPLMId(partOid);
 				Map<String, Object> plmData = new HashMap<String, Object>();
@@ -441,7 +506,7 @@ public class WCToPMHelper {
 					reloadDeliverable(objectId.toString());
 					Debug.P("create PMSupplyment success");
 				}
-			}
+			}}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -467,11 +532,11 @@ public class WCToPMHelper {
 		String pFolderId="";
 		CADDocumentPersistence cadDocPersistence =null;  //PM系统中的图纸持久化对象
 		Debug.P("将Windchill中的EPMDocument插入PM系统的数据库中");
-		docOid = epmdoc.toString();
+		docOid = getObjectOid(epmdoc);
 		try {
 			PMCADDocument pmcad = null;//PM中的半成品     
 			cadDocPersistence = ModelServiceFactory.getInstance(codebasePath).get(CADDocumentPersistence.class);
-			pmcad = cadDocPersistence.newInstance();
+			
 			IBAUtils  cadiba = new IBAUtils(epmdoc);
            Debug.P(docOid);
            docFolderString = epmdoc.getFolderPath();
@@ -486,16 +551,32 @@ public class WCToPMHelper {
 			 pFolderId = docFolder.getPersistInfo().getObjectIdentifier().getStringValue();
 	            Debug.P(pFolderId);
            boolean flag = true;
+           try{
+        	   pmcad=cadDocPersistence.getByPLMId(docOid);
+           }catch (NullPointerException e) {
+		    	pmcad=null;
+		   } 
+           Debug.P("pmcad-->"+pmcad);
 		   try {
 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
 				 flag=false;
 			 }
+			 
 		    } catch (NullPointerException e) {
 		    	flag=false;
-		   }
+		   } 
+		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
 		   if(flag){
-           pmcad.setFolderIdByPLMId(pFolderId);
+			   Debug.P("pmcad-->"+pmcad);
+			   if(pmcad!=null){
+					String pmoid =  cadiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						updatePMCADDoc(pmoid, epmdoc);
+					}
+				  }else{
+		   pmcad = cadDocPersistence.newInstance();
+		   pmcad.setFolderIdByPLMId(pFolderId);
            pmcad.setPLMId(docOid);
            Map<String,Object> plmData = new HashMap<String,Object>();
            plmData.put(Contants.PMNUMBER, epmdoc.getNumber());
@@ -527,7 +608,7 @@ public class WCToPMHelper {
                 reloadDeliverable(objectId.toString());
                 Debug.P("create PMCADDocument success");
 			}
-           }
+           }}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -548,12 +629,12 @@ public class WCToPMHelper {
 		PackagePersistence packagePersistence=null;         //PM系统中的原材料持久化对象
 		
 		String weight ="";
-		Debug.P("将Windchill中的半成品插入PM系统的数据库中");
+		Debug.P("将Windchill中的包装材料插入PM系统的数据库中");
 		partOid = getObjectOid(wtPart);
 		try {
 			PMPackage pmPackage = null;//PM中的包装材料      
 			packagePersistence = ModelServiceFactory.getInstance(codebasePath).get(PackagePersistence.class);
-			pmPackage = packagePersistence.newInstance();
+			
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Debug.P(partOid);
           partFolderString = wtPart.getFolderPath();
@@ -564,6 +645,11 @@ public class WCToPMHelper {
           pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
           Debug.P(pFolderId);
           boolean flag = true;
+          try{
+        	  pmPackage=packagePersistence.getByPLMId(partOid);
+          }catch (NullPointerException e) {
+        	  pmPackage=null;
+		   } 
 		   try {
 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
@@ -572,8 +658,17 @@ public class WCToPMHelper {
 		    } catch (NullPointerException e) {
 		    	flag=false;
 		   }
+		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
 		   if(flag){
-          pmPackage.setFolderIdByPLMId(pFolderId);
+			   Debug.P("pmPackage-->"+pmPackage);
+			   if(pmPackage!=null){
+					String pmoid =  partiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						updatePMPackageToPM(pmoid, wtPart);
+					}
+				  }else{
+		  pmPackage = packagePersistence.newInstance();
+		  pmPackage.setFolderIdByPLMId(pFolderId);
           pmPackage.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
           plmData.put(Contants.PMNUMBER, wtPart.getNumber());
@@ -608,7 +703,7 @@ public class WCToPMHelper {
 				reloadDeliverable(objectId.toString());
 				Debug.P("create pmPackage success");
 			}
-          }
+          }}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -640,7 +735,7 @@ public class WCToPMHelper {
 		try {
 			PMJigTools pmJigTools = null;//PM中的备品备料        
 			jigTollsPersistence = ModelServiceFactory.getInstance(codebasePath).get(JigToolsPersistence.class);
-			pmJigTools = jigTollsPersistence.newInstance();
+			
 			IBAUtils  partiba = new IBAUtils(wtPart);
           Debug.P(partOid);
           partFolderString = wtPart.getFolderPath();
@@ -650,6 +745,11 @@ public class WCToPMHelper {
           pFolderId = partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
           Debug.P(pFolderId);
           boolean flag = true;
+          try{
+        	  pmJigTools=jigTollsPersistence.getByPLMId(partOid);
+          }catch (NullPointerException e) {
+        	  pmJigTools=null;
+		   } 
 		   try {
 			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
@@ -658,7 +758,16 @@ public class WCToPMHelper {
 		    } catch (NullPointerException e) {
 		    	flag=false;
 		   }
+		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
 		   if(flag){
+			   Debug.P("pmJigTools-->"+pmJigTools);
+			   if(pmJigTools!=null){
+					String pmoid =  partiba.getIBAValue(Contants.PMID);
+					if(StringUtils.isNotEmpty(pmoid)){
+						UpdateJigToolPartToPM(pmoid, wtPart);;
+					}
+				  }else{
+		  pmJigTools = jigTollsPersistence.newInstance();
           pmJigTools.setFolderIdByPLMId(pFolderId);
           pmJigTools.setPLMId(partOid);
           Map<String,Object> plmData = new HashMap<String,Object>();
@@ -694,7 +803,7 @@ public class WCToPMHelper {
 				reloadDeliverable(objectId.toString());
 				Debug.P("create pmJigTools success");
 			}
-          }
+          }}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -709,7 +818,7 @@ public class WCToPMHelper {
 	public static void updatePMCADDoc(String pmoid,EPMDocument epmdoc){
 		String docOid ="";    //EPMDoc的Oid 
 		CADDocumentPersistence cadDocPersistence =null;  //PM系统中的图纸持久化对象
-		Debug.P("将Windchill中的EPMDocument插入PM系统的数据库中");
+		Debug.P("更新Windchill中的EPMDocument-----------");
 		docOid = epmdoc.toString();
 		try {
 			PMCADDocument pmcad = null;//PM中的图纸
@@ -746,7 +855,7 @@ public class WCToPMHelper {
 				cadiba.setIBAValue(Contants.PMREQUEST, "update");
 				cadiba.updateIBAPart(epmdoc);
 				//reloadPermission(pmoid);
-				Debug.P("update PMPart success");
+				Debug.P("update PMCADDocument success");
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -821,7 +930,7 @@ public class WCToPMHelper {
 		String partOid ="";    //WC部件Oid 
 		ProductPersistence productPersistence =null;  //PM系统中的成品持久化对象
 		String weight ="";
-		Debug.P("更新PM系统的数据库-----------》"+wtPart.getNumber());
+		Debug.P("更新PM系统的成品-----------》"+wtPart.getNumber());
 		try {
 			partOid = getObjectOid(wtPart);
 			PMProduct pmProduct = null;//PM中的成品           
@@ -881,7 +990,7 @@ public class WCToPMHelper {
 		String partOid ="";    //WC部件Oid 
 		MaterialPersistence materialPersistence=null;         //PM系统中的原材料持久化对象
 		String weight ="";
-		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
+		Debug.P("更新Windchill中的原材料---------------"+wtPart.getNumber());
 		partOid = getObjectOid(wtPart);
 		try {
 			PMMaterial pmMaterial = null;//PM中的原材料          
@@ -941,7 +1050,7 @@ public class WCToPMHelper {
 		String partOid ="";    //WC部件Oid 
 		PackagePersistence packagePersistence=null;         //PM系统中的包装材料持久化对象
 		String weight ="";
-		Debug.P("更新Windchill中的半成品---------------"+wtPart.getNumber());
+		Debug.P("更新Windchill中的包装材料---------------"+wtPart.getNumber());
 		partOid = getObjectOid(wtPart);
 		try {
 			PMPackage pmPackage = null;//PM中的包装材料          
@@ -1200,7 +1309,7 @@ public class WCToPMHelper {
 			   }
 			   if(flag){
 				pmMaterial = materialPersistence.get(objecdId);
-				Debug.P("将Windchill中的半成品从PM系统的数据库中删除-----》"+pmMaterial.getCommonName());
+				Debug.P("将Windchill中的原材料从PM系统的数据库中删除-----》"+pmMaterial.getCommonName());
 				WriteResult wresult = pmMaterial.doRemove();   //
 				String error = wresult.getError();
 				if(StringUtils.isEmpty(error)){
@@ -1261,7 +1370,7 @@ public class WCToPMHelper {
 			    	flag=false;
 			   }
 	           if(flag){//如果PM端有该对象
-				Debug.P("将Windchill中的备品备料从PM系统的数据库中删除-----》"+pmcad.getCommonName());
+				Debug.P("将Windchill中的PMCADDocument从PM系统的数据库中删除-----》"+pmcad.getCommonName());
 				WriteResult wresult = pmcad.doRemove();   //
 				String error = wresult.getError();
 				if(StringUtils.isEmpty(error)){
