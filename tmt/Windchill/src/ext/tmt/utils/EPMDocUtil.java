@@ -13,6 +13,7 @@ import wt.epm.EPMDocument;
 import wt.epm.EPMDocumentMaster;
 import wt.epm.build.EPMBuildHistory;
 import wt.epm.build.EPMBuildRule;
+import wt.epm.workspaces.EPMWorkspaceHelper;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
 import wt.fc.QueryResult;
@@ -246,5 +247,8 @@ public class EPMDocUtil {
 				ContentServerHelper.service.updateContent(doc, applicationdata,primary);
 			}
 	   }
+    
+
+    
 
 }

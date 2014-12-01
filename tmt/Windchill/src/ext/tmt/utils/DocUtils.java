@@ -85,6 +85,7 @@ import wt.vc.wip.CheckoutLink;
 import wt.vc.wip.WorkInProgressHelper;
 
 import com.infoengine.util.UrlEncoder;
+import com.mongodb.WriteResult;
 import com.ptc.core.meta.common.TypeIdentifier;
 import com.ptc.core.meta.server.TypeIdentifierUtility;
 import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinitionMaster;
@@ -224,13 +225,15 @@ public class DocUtils implements RemoteAccess{
 			if(attachments!=null&&attachments.size()>0){
 				for (IFileProvider provider : attachments) {
 					ByteArrayOutputStream bsout=new ByteArrayOutputStream();
-					provider.write(bsout);
-					sins=new ByteArrayInputStream(bsout.toByteArray());
-					linkDocument(document, provider.getFileName(), sins, "0", null);
+						provider.write(bsout);
+						sins=new ByteArrayInputStream(bsout.toByteArray());
+						linkDocument(document, provider.getFileName(), sins, "0", null);
 				}
 			}
 			
-		      } catch (IOException e) {
+			
+			
+		      }catch (IOException e) {
 			      e.printStackTrace();
 			      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
 		    }
@@ -239,10 +242,14 @@ public class DocUtils implements RemoteAccess{
 		if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal()))
 			document = (WTDocument) WorkInProgressHelper.service.checkin(document, "add primary file");
 	   }
+		//添加下载链接地址
+		if(document!=null){
+			addDownloadURL2PM(pmdoc,document);
+		}
 		 return document;
 	}
 	
-	
+
 	
 	
 	
@@ -1427,27 +1434,35 @@ public class DocUtils implements RemoteAccess{
 	 */
 	  private static void addDownloadURL2PM(PMDocument pm_document, WTDocument doc)
 				throws Exception {
-			//写内容文件链接
-			URLFileProvider fp = new URLFileProvider();
-			String fileName  =pm_document.getContent().getFileName();
-			String url = GenericUtil.getPrimaryContentUrl(doc);
-			fp.setFileName(fileName);
-			fp.setUrl(url);
-			pm_document.setPLMContent(fp);
-			//写附件
-			List<IFileProvider> attachement = new ArrayList<IFileProvider>();
-			Map<String, String> map = DocUtils.getAllAttachementsDownloadURL(doc);
-			Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
-			while(iterator.hasNext()){
-				Entry<String, String> entry = iterator.next();
-				fileName = entry.getKey();
-				url = entry.getValue();
-				fp = new URLFileProvider();
-				fp.setFileName(fileName);
-				fp.setUrl(url);
-				attachement.add(fp);
-			}
-			pm_document.setPLMAttachments(attachement);
+			if(pm_document!=null&&doc!=null){
+				Debug.P("------->>>>Add Dwn_URL2PM>>>>>>PM Doc:"+pm_document.get_id()+"   ;WC_DOCNum:"+doc.getNumber());
+				IFileProvider content = pm_document.getContent();
+				URLFileProvider fp = new URLFileProvider();
+				if(content!=null){
+					//写内容文件链接
+					String fileName  =pm_document.getContent().getFileName();
+					String url = GenericUtil.getPrimaryContentUrl(doc);
+					fp.setFileName(fileName);
+					fp.setUrl(url);
+					pm_document.setPLMContent(fp);
+				}
+					//写附件
+					List<IFileProvider> attachement = new ArrayList<IFileProvider>();
+					Map<String, String> map = DocUtils.getAllAttachementsDownloadURL(doc);
+					Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
+					while(iterator.hasNext()){
+						Entry<String, String> entry = iterator.next();
+						String file_Name = entry.getKey();
+						String url = entry.getValue();
+						fp = new URLFileProvider();
+						fp.setFileName(file_Name);
+						fp.setUrl(url);
+						attachement.add(fp);
+					}
+					pm_document.setPLMAttachments(attachement);
+					Debug.P("----->>>>>Add DownLoadURL End");
+				}
+
 		}
 	
 	

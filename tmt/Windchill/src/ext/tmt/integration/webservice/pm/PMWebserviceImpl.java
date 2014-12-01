@@ -142,7 +142,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			String folderName=pmfolder.getCommonName().trim();
 			Debug.P("------>>>Folder:"+folderName+"  ContainerName:"+containerName+"  isContainer="+isContainer+"  ParentFolderID="+parent_wcId);
 			try{
-		    	SessionHelper.manager.setAdministrator();
+		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+//				SessionHelper.manager.setAdministrator();
 		    	WTContainer container=checkWTContainerExist(containerName);
 		    	if(iscreate){//是否同步防止重复创建
 			    	 //如果父项是容器则在容器下创建文件夹
@@ -199,10 +200,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	       	 //获得Windchill 文件夹对象
 	       	 String foid=folder.getPLMId();
 	       	 String containerName=folder.getContainerName();
-	      	 Debug.P("------->>Modify Folder:"+folder.getCommonName()+" ;FOID="+foid+"   ;ContainerName="+containerName);
+	      	 Debug.P("------->>Modify PM Folder:"+folder.getCommonName()+" ;WC_PLMID="+foid+"   ;ContainerName="+containerName);
 	      	 try{
+//	      		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	      		 SessionHelper.manager.setAdministrator();
-	    		 Debug.P("----->>PM Edit Windchill Folder_OID:"+foid);
 		       	 if(!StringUtils.isEmpty(foid)){
 		       		Persistable persistable=GenericUtil.getPersistableByOid(foid);
 		       		if(persistable!=null){
@@ -221,7 +222,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	      		 e.printStackTrace();
 	      		 throw new Exception("Windchill修改文件夹("+foid+")信息失败!");
 	      	 }finally{
-	      		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+	      		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	      	 }
 	       }
      	       return count;
@@ -248,7 +249,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            	 FolderPersistence folderPersistence = ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
 		        	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PM文件夹对象
 		        	 checkNull(folder);
-			         SessionHelper.manager.setAdministrator();
+		        	 SessionHelper.manager.setAdministrator();
 			         String containerName=folder.getContainerName();
 			        //获得Windchill的PLMID
 			        String foid=folder.getPLMId();
@@ -274,7 +275,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        		 throw new Exception("Windchill删除文件夹("+foid+"失败!");
 	        	}finally{
 	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-	        	 }
+	        	}
 	       }
 	    }
      	            return count;
@@ -334,8 +335,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	String containerName=pmfolder.getContainerName();
 	        	Debug.P("----->>>>WC   Folder ID:"+wc_foid+"  是否为PM的容器文件夹:"+isContainer +"  ;ContaienrName:"+containerName);
 	        	try{
-	        		SessionHelper.manager.setAdministrator();
-	        		  Persistable persistable=null;
+	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+//	        		SessionHelper.manager.setAdministrator();
+	        		Persistable persistable=null;
 	        		  WTContainer container=null;
 	        		  Debug.P("------>>>PM DOC_ID："+pm_docId+"是否新建到Windchill="+iscreate);
 	        		  if(iscreate){//判断是否已同步到Windchill
@@ -368,14 +370,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            		pm_document.setMajorVid(document.getVersionIdentifier().getValue());
 	            		pm_document.setSecondVid(Integer.valueOf(document.getIterationIdentifier().getValue()));
 	            		WriteResult result=pm_document.doUpdate();//修改
-	            		Debug.P("----->>>PM Return:("+result.getN()+")Create PMID:"+wcId+"  ;PM_Document:"+pm_document.getPLMId());
+	            		Debug.P("----->>>PM Return:("+result.getN()+")Create WCID:"+wcId+"  ;PM_Document:"+pm_docId);
 	            		count=1;
 	        		  }
 	        	}catch(Exception e){
 	        		 e.printStackTrace();
 	        		throw new Exception("Windchill 创建("+pm_document.getCommonName()+")文档失败!");
 	        	}finally{
-	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+	        		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	}
 	     }
          	     return count;
@@ -409,8 +411,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
      		String doc_id=pm_document.getPLMId();
      		Debug.P("------>>>>Windchill中是否已经创建("+pm_docName+"):"+isCreated+"  Doc_Windchill:"+doc_id);
 	     		try{
-	     			SessionHelper.manager.setAdministrator();
-	         		if(isCreated){
+	     			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+//	     			SessionHelper.manager.setAdministrator();
+	     			if(isCreated){
 	         			if(StringUtils.isEmpty(doc_id)) return 0;
 	         			String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
 	         			Persistable object= GenericUtil.getObjectByNumber(doc_num);
@@ -420,6 +423,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			    setDocIBAValuesMap(ibas, pm_document);//更新软属性
 	         				doc=(WTDocument) GenericUtil.checkout(doc);
 	         				doc=DocUtils.updateWTDocument(doc,pm_document, ibas);//更新文档
+	         				
 	         				if (doc != null) {
 	         					if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(doc, wt.session.SessionHelper.manager.getPrincipal()))
 	         						doc = (WTDocument) WorkInProgressHelper.service.checkin(doc, "update document Info");
@@ -473,6 +477,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
        	String wc_oid=pm_document.getPLMId();
        	Debug.P("------>>>PM("+pm_docId+")<--->Windchill("+wc_oid+")");
        	try {
+//       		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
        		SessionHelper.manager.setAdministrator();
        		if(!StringUtils.isEmpty(wc_oid)){
        			String doc_num=(String) pm_document.getPLMData().get(ConstanUtil.NUMBER);
@@ -486,8 +491,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
    	    		e.printStackTrace();
    			   throw new Exception("Windchill删除文档对象("+wc_oid+")失败!");
    		   }finally{
-   			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-   		  }
+   			   SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+   		   }
        }
     	  return 0;
     }
@@ -524,8 +529,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     	 	   try {
     	 		  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
     			   if(!StringUtils.isEmpty(doc_num)){
-    			    	SessionHelper.manager.setAdministrator();
-    			    	Persistable object= GenericUtil.getObjectByNumber(doc_num);
+    				   SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+//    				   SessionHelper.manager.setAdministrator();
+    				   Persistable object= GenericUtil.getObjectByNumber(doc_num);
 	         			if(object!=null){
 	    			    	Folder folderObj=null;
 		         			if(isContainer){//容器
@@ -544,8 +550,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     		    }catch(Exception e){
     		    	e.printStackTrace();
     		    	throw new Exception("Windchill移动对象到("+wc_foid+")中失败!");
-    		    } finally {
-    	             SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+    		    }finally{
+    		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
     		    }
        }
 	 
@@ -685,8 +691,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	String wc_id=basic_object.getPLMId();
 	        	Debug.P("----------->>>Windchill PLMID:"+wc_id);
 	        	try {
-					SessionHelper.manager.setAdministrator();
-					if(!StringUtils.isEmpty(wc_id)){
+	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+//	        	SessionHelper.manager.setAdministrator();
+	        		if(!StringUtils.isEmpty(wc_id)){
 					     String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
 					     Persistable object=GenericUtil.getObjectByNumber(doc_num);
 					     if(object!=null){
@@ -750,7 +757,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			        String wc_id=basic_object.getPLMId();
 			        Debug.P("----------->>>Windchill PLMID:"+wc_id);
 			        try {
-						  SessionHelper.manager.setAdministrator();
+			        	  SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 						  String doc_num=(String) basic_object.getPLMData().get(ConstanUtil.NUMBER);
 					      Persistable object=GenericUtil.getObjectByNumber(doc_num);
 					      if(object!=null){
@@ -794,8 +801,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		              Debug.P("----Phase--->>>Windchill num:"+plm_num+"   ;Phase Value:"+phase);
 		              if(!StringUtils.isEmpty(plm_num)){
 		             try {
-					    SessionHelper.manager.setAdministrator();
-					    if(!StringUtils.isEmpty(phase)){
+		            	 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+		            	 if(!StringUtils.isEmpty(phase)){
 					    	Persistable persistable=GenericUtil.getObjectByNumber(plm_num);
 					        IBAUtils iba_values=new IBAUtils((IBAHolder)persistable);
 					        iba_values.setIBAValue(ConstanUtil.PHASE, phase);
@@ -807,8 +814,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 						 e.printStackTrace();
 						 throw new Exception("Windchill ("+plm_num+") 修改阶段失败!");
 					}finally{
-						 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
-					}       	        
+						SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
+					}       
 		        }    
 			 }
 		 }
@@ -846,11 +853,5 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		  return result;
 	 }
 
-
-//	 public static void main(String[] args) throws Exception {
-//		 String pid="VR:wt.epm.EPMDocument:174627";
-//		 String cid="VR:wt.epm.EPMDocument:96452";
-//		 getViewContentURL(cid);
-//	}
 	 
 }

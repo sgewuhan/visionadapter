@@ -2,6 +2,7 @@ package ext.tmt.part.listener;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -14,6 +15,7 @@ import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMDocUtil;
 import ext.tmt.utils.GenericUtil;
+import ext.tmt.utils.IBAHelper;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
@@ -55,6 +57,7 @@ import wt.type.TypeDefinitionReference;
 import wt.type.TypedUtility;
 import wt.util.WTAttributeNameIfc;
 import wt.util.WTException;
+import wt.util.WTPropertyVetoException;
 import wt.vc.VersionControlHelper;
 import wt.vc.wip.WorkInProgressHelper;
 import wt.vc.wip.WorkInProgressServiceEvent;
@@ -80,26 +83,15 @@ public class PartHelper implements Serializable {
 		flag = SessionServerHelper.manager.setAccessEnforced(false);
 		try {
 		partType=DocUtils.getType(wtPart);
-//		Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//		if(object !=null){
-//			wtPart=(WTPart)object;
-//		}
 		IBAUtils iba = new IBAUtils(wtPart);
-		Map ibaValues=LWCUtil.getAllAttribute(wtPart);
+		IBAUtils epmIba = null;
+		Debug.P("ibautils--->"+iba);
 		String sync=iba.getIBAValue(Contants.CYNCDATA);
 		String pmoids = iba.getIBAValue(Contants.PMID);
 		Debug.P("sync--->"+sync);
 		Debug.P("pmoids--->"+pmoids);
-		Debug.P(wtPart.getFolderPath());
 		Debug.P("eventType---------------->"+eventType);
         if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
-//				// 如果是新建修订版本或者新建视图版本
-//				if (WindchillUtil.isReviseVersion(wtPart)){
-//					IBAUtils ibaUtil = new IBAUtils(wtPart);
-//					ibaUtil.setIBAValue("IStoERP", "");
-//					ibaUtil.updateIBAPart(wtPart);
-//					return;
-//				}
 			   EPMDocument epmdoc = null;
 			   String productName="";	
 			   String prefix="";
@@ -107,20 +99,10 @@ public class PartHelper implements Serializable {
 			   if(StringUtils.isNotEmpty(partType)){
 				   partType=partType.replaceAll(" ", "").trim();
 			   }
-			   Debug.P(partNumber+"------------------->"+partType+" event--->"+eventType);
-			   Debug.P(partType.equals("wt.part.WTPart"));
-			   Debug.P(partType.contains(Contants.PRODUCTPART));
-			   Debug.P(partType.contains(Contants.SEMIFINISHEDPRODUCT));
-			   Debug.P(partType.contains(Contants.MATERIAL));
-			   Debug.P(partType.contains(Contants.SUPPLYMENT));
-			   Debug.P(partType.contains(Contants.TOOLPART));
-			   Debug.P(partType.contains(Contants.PACKINGPART));
-			   Debug.P();
-			   Debug.P();
-			   
-			   
+			   Debug.P("---777-->>>"+partNumber+"------------------->"+partType+" event--->"+eventType);
 			    String epmPartType="";
 			    if(partType.equals("wt.part.WTPart")){
+			    	Debug.P("--888--->wt.part.WTPart-->>>PartType:"+partType);
 			    	epmdoc=EPMDocUtil.getActiveEPMDocument(wtPart);
 			    	Debug.P("1-->"+epmdoc);
 			    	if(epmdoc==null){
@@ -128,7 +110,7 @@ public class PartHelper implements Serializable {
 			    	}
 			    	Debug.P("2-->"+epmdoc);
 			    	if(epmdoc!=null){
-			    		IBAUtils epmIba = new IBAUtils(epmdoc);
+			    		 epmIba = new IBAUtils(epmdoc);
 			    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
 			    	}
 			    	if(StringUtils.isNotEmpty(epmPartType)){
@@ -144,50 +126,41 @@ public class PartHelper implements Serializable {
 						}else{
 							return;
 						}
-						Debug.P(types);
 						if(types.contains("Product")){
-							partType=DocUtils.getDfmDocumentType(types).getIntHid();
-							Debug.P(partType);
+							Debug.P(types);
 							TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
 							wtPart.setPartType(PartType.getPartTypeDefault());
 							wtPart.setTypeDefinitionReference(typeDefinitionRef);
-							Debug.P("------->>WTPart IBA:"+ibaValues.size());
-						  	LWCUtil.setValue(wtPart, ibaValues);
+							
 							if (!PersistenceHelper.isPersistent(wtPart)) {
-								wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+								wtPart = (WTPart) PersistenceHelper.manager.store(wtPart);
 								wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
-							}else{
-								PersistenceServerHelper.manager.update(wtPart);
 							}
 						}
-					} 
+						setPartIBAValues(wtPart,epmdoc);
+						
+					}else{
+						throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+					}
 			    	partType=DocUtils.getType(wtPart);
-			    	Debug.P(partNumber+"------------------->"+partType);
-			    	
+			    	Debug.P("---888End------>>>"+partNumber+"------------------->"+partType);
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
-			    	//wtPart.setEndItem(true);
-//			    	if (!PersistenceHelper.isPersistent(wtPart)) {
-//						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
-//						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
-//					}else{
-//						PersistenceServerHelper.manager.update(wtPart);
-//					}
+			    	
 				//成品编码=TX+三位分类码+四位流水码。其中分类码为成品所在产品库容器名称的前三个字符，自动根据成品所在产品库获取。
 					productName=wtPart.getContainerName();
+					Debug.P("---999---Contants.PRODUCTPART-->>>PartType:"+partType+"   PartNum:"+wtPart.getNumber()+"   productName:"+productName);
 					//批量导入部件时如果导入的部件编码含有TX则不修改部件编码
 					if(wtPart.getNumber().toUpperCase().contains("TX")){
+						WCToPMHelper.CreatePMProductToPM(wtPart);
 						return;
 					}
 					if(!productName.toUpperCase().contains("TX")){
 						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
 					}
-					Debug.P("productName--------->"+productName);
 					prefix=productName.substring(0, productName.indexOf("-"));
-//					if(!prefix.toUpperCase().contains("TX")){
-//						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
-//					}
 					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")
 							||prefix.toUpperCase().trim().contains("TX113")||prefix.toUpperCase().trim().contains("TX114")||prefix.toUpperCase().trim().contains("TX115")){
+						WCToPMHelper.CreatePMProductToPM(wtPart);
 						return;
 					}
 					
@@ -215,15 +188,13 @@ public class PartHelper implements Serializable {
 						changePartNumber(wtPart,newNumber);
 					}
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//					if(object !=null){
-//						wtPart=(WTPart)object;
-//					}
-					Debug.P("------->>SET PRODUCTPART IBA:"+ibaValues.size());
-				  	LWCUtil.setValue(wtPart, ibaValues);
+					Debug.P("----999------>>part:"+wtPart.getName()+"  partNum"+wtPart.getNumber());
 					WCToPMHelper.CreatePMProductToPM(wtPart);
+					Debug.P("---999-->>>>CreatePMProductToPM  Success!!");
+					
 				} else //如果是半成品
 				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+					Debug.P("--1000--Contants.SEMIFINISHEDPRODUCT-->>>PartType:"+partType);
 					if(wtPart.isEndItem()){
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
 					} 
@@ -231,13 +202,12 @@ public class PartHelper implements Serializable {
 					isKHpart=iba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
 					Debug.P("WTPart -->"+isKHpart);
 					//如果部件上的 空簧部件分类 值为空，则从部件关联的EPMDocument上获取
-					if(StringUtils.isEmpty(isKHpart)){
-						IBAUtils epmIBA = new IBAUtils(epmdoc);
-						isKHpart=epmIBA.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
-						Debug.P("EPMDocument -->"+isKHpart);
+					if(StringUtils.isEmpty(isKHpart)&&epmdoc!=null){
+						  IBAUtils epmIBA = new IBAUtils(epmdoc);
+						  isKHpart=epmIBA.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
+						 Debug.P("EPMDocument -->"+isKHpart);
 					}
 					if(StringUtils.isNotEmpty(isKHpart)){
-						//prefix=productName.substring(0, 5);
 						int i= 0;
 						do {
 							partNumber=isKHpart+StringUtil.int2String(i,4);
@@ -248,80 +218,135 @@ public class PartHelper implements Serializable {
 							i++;
 						} while (i < 100000);
 						changePartNumber(wtPart,newNumber);
-//						Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//						if(object !=null){
-//							wtPart=(WTPart)object;
-//						}
 						wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					}
-					Debug.P("------->>SET SEMIFINISHEDPRODUCT IBA:"+ibaValues.size());
-				  	LWCUtil.setValue(wtPart, ibaValues);
+				     Debug.P("CreatePartToPM-->");	
 					WCToPMHelper.CreatePartToPM(wtPart);
 				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
-//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//					if(object !=null){
-//						wtPart=(WTPart)object;
-//					}
+					 Debug.P("--10001---CreatePMaterialToPM-->");	
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-					Debug.P("------->>SET MATERIAL IBA:"+ibaValues.size());
-				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreatePMaterialToPM(wtPart);
 				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
-//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//					if(object !=null){
-//						wtPart=(WTPart)object;
-//					}
+					 Debug.P("--10002--CreateSupplyToPM-->");	
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-					Debug.P("------->>SET SUPPLYMENT IBA:"+ibaValues.size());
-				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreateSupplyToPM(wtPart);
 				}else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
-//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//					if(object !=null){
-//						wtPart=(WTPart)object;
-//					}
-					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-					Debug.P("------->>SET PACKINGPART IBA:"+ibaValues.size());
-				  	LWCUtil.setValue(wtPart, ibaValues);
+					 Debug.P("--10003--CreatePMPackageToPM-->");	
+					 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMPackageToPM(wtPart);
 				}else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
-//					Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//					if(object !=null){
-//						wtPart=(WTPart)object;
-//					}
+					Debug.P("---10004---CreateJigToolPartToPM--->");
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-					Debug.P("------->>SET TOOLPART IBA:"+ibaValues.size());
-				  	LWCUtil.setValue(wtPart, ibaValues);
 					WCToPMHelper.CreateJigToolPartToPM(wtPart);
 				}
-			    
+			 
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
-			Debug.P("------->>SET UPDATE IBA:"+ibaValues.size());
-		  	LWCUtil.setValue(wtPart, ibaValues);
-			if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果是成品
-				WCToPMHelper.CreatePMProductToPM( wtPart);
-			  }else if(partType.contains(Contants.PRODUCTPART)){ //如果是半成品
-				  WCToPMHelper.CreatePartToPM( wtPart);
-			  }else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+			Debug.P("----2000----->>>>StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)------------------");
+			EPMDocument epmdoc = EPMDocUtil.getActiveEPMDocument(wtPart);
+			String epmPartType="";
+	    	Debug.P("1-->"+epmdoc);
+	    	if(epmdoc==null){
+	    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+	    	}
+	    	Debug.P("2-->"+epmdoc);
+			if(epmdoc!=null){
+	    		 epmIba = new IBAUtils(epmdoc);
+	    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+	    	}
+	    	if(StringUtils.isNotEmpty(epmPartType)){
+	    		epmPartType=epmPartType.replaceAll(" ", "").trim();
+	    	}
+	    	Debug.P(epmPartType);
+	    	Debug.P(StringUtils.isNotEmpty(epmPartType));
+	    	if(StringUtils.isNotEmpty(epmPartType)){
+				if(epmPartType.equals("半成品")){
+					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
+				}else if(epmPartType.equals("成品")){
+					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+				}else{
+					return;
+				}
+				Debug.P(types);
+				if(types.contains("Product")){
+					TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
+					wtPart.setPartType(PartType.getPartTypeDefault());
+					wtPart.setTypeDefinitionReference(typeDefinitionRef);
+					if (!PersistenceHelper.isPersistent(wtPart)) {
+						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+					}
+				}
+				setPartIBAValues(wtPart,epmdoc);
+			}else{
+				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+			}
+			
+	    	Debug.P(types);
+			if(types.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+				WCToPMHelper.CreatePartToPM( wtPart);
+			  }else if(types.contains(Contants.PRODUCTPART)){ //如果是成品
+				  WCToPMHelper.CreatePMProductToPM( wtPart);
+			  }else if(types.contains(Contants.MATERIAL)){ //如果是原材料
 					WCToPMHelper.CreatePMaterialToPM(wtPart);
-			  }else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+			  }else if(types.contains(Contants.SUPPLYMENT)){//如果是客供件
 					WCToPMHelper.CreateSupplyToPM(wtPart);
-			  }else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+			  }else if(types.contains(Contants.PACKINGPART)){//如果是包装材料
 					WCToPMHelper.CreatePMPackageToPM(wtPart);
-			  }else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+			  }else if(types.contains(Contants.TOOLPART)){//如果是备品备料
 					WCToPMHelper.CreateJigToolPartToPM( wtPart);
 			  }
-		}
-        else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+		} if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			Debug.P("-----2001-------->>>>>");
+			EPMDocument epmdoc = EPMDocUtil.getActiveEPMDocument(wtPart);
+			String epmPartType="";
+	    	Debug.P("1-->"+epmdoc);
+	    	if(epmdoc==null){
+	    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+	    	}
+	    	Debug.P("2-->"+epmdoc);
+			if(epmdoc!=null){
+	    		 epmIba = new IBAUtils(epmdoc);
+	    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+	    	}
+	    	if(StringUtils.isNotEmpty(epmPartType)){
+	    		epmPartType=epmPartType.replaceAll(" ", "").trim();
+	    	}
+	    	Debug.P(epmPartType);
+	    	if(StringUtils.isNotEmpty(epmPartType)){
+				if(epmPartType.equals("半成品")){
+					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
+				}else if(epmPartType.equals("成品")){
+					//wtPart.setEndItem(true);
+					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+				}else{
+					return;
+				}
+				Debug.P(types);
+				if(types.contains("Product")){
+					partType=DocUtils.getDfmDocumentType(types).getIntHid();
+					Debug.P(partType);
+					TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
+					wtPart.setPartType(PartType.getPartTypeDefault());
+					wtPart.setTypeDefinitionReference(typeDefinitionRef);
+					if (!PersistenceHelper.isPersistent(wtPart)) {
+						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+					}
+				}
+				setPartIBAValues(wtPart,epmdoc);
+			}else{
+				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+			}
+	    	
+		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-            Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
+            Debug.P("----2002---POST_STORE-------------pmoid----------->"+pmoid);
             Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
 			if(object !=null){
 				wtPart=(WTPart)object;
 			}
             if(WorkInProgressHelper.isCheckedOut(wtPart)){
-    			Debug.P("------->>SET POST_STORE IBA:"+ibaValues.size());
-    		  	LWCUtil.setValue(wtPart, ibaValues);
+            	
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -335,17 +360,12 @@ public class PartHelper implements Serializable {
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
 					WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
 			  }
+			
             }
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-//			Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
-//			if(object !=null){
-//				wtPart=(WTPart)object;
-//			}
 			wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-            Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
-			Debug.P("------->>SET POST_STORE IBA:"+ibaValues.size());
-		  	LWCUtil.setValue(wtPart, ibaValues);
+            Debug.P("---2003--POST_CHECKIN-----------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -363,7 +383,7 @@ public class PartHelper implements Serializable {
 		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
 			 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-			   Debug.P("PRE_DELETE-----------------pmoid----------->"+pmoid);
+			   Debug.P("--2004--PRE_DELETE-----------------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.deletePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -438,9 +458,75 @@ public class PartHelper implements Serializable {
 			SessionServerHelper.manager.setAccessEnforced(flag);
 		}
 	}
-	public static void main(String[] args) {
-		String str="TXA6-半  成  品";
-		System.out.println(str.replaceAll(" ", "").trim());
-		System.out.println(str.substring(0,str.indexOf("-")));
+
+	/*
+	 * CORRECT_DATE=, AUDITOR=, Part_Type=半成品, PROCESS_REVIEW_DATE=, Project_NO=, Material=10, DRAWN_BY=, 
+	 * AirSpringClassification= , DRAWN_DATE=, Weight=0.0000000000000, CORRECTOR=, STANDARDIZE=, PROCESS_REVIEWER=,
+	 * APPROVE_DATE=, ModifiedBy=null, PHASE=S, CyncData=null, CreatorBy=null, Material_Classification= , 
+	 * PMRequest=null, STANDARDIZE_DATE=, PMId=null, Project_Name=null, AUDIT_DATE=, Product_NO=, APPROVER=, Material_NO=}
+	 */
+	public static void setPartIBAValues(WTPart part,EPMDocument cad) throws Exception{
+
+		 IBAUtils partIBA = new IBAUtils(part);
+		 IBAUtils cadIBA = new IBAUtils(cad);
+		 
+		 String Part_Type=cadIBA.getIBAValue(Contants.PART_TYPE);
+		 String Material=cadIBA.getIBAValue(Contants.MATERIAL);
+		 String AirSpringClassification=cadIBA.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
+		 String Weight=cadIBA.getIBAValue(Contants.WEIGHT);
+		 String PHASE=cadIBA.getIBAValue(Contants.PHASE);
+		 String Product_NO=cadIBA.getIBAValue(Contants.PRODUCTNO);
+		 String Material_NO=cadIBA.getIBAValue(Contants.MATERIALNO);
+		 String Material_Classification=cadIBA.getIBAValue(Contants.MATERIALGROUP);
+		 
+		 partIBA.setIBAValue(Contants.PART_TYPE, Part_Type);
+		 if(StringUtils.isEmpty(Material)){
+			 Material="";
+		 }else{
+			 if(Material.equals("Default")){
+				 Material="";
+			 }
+		 }
+		 partIBA.setIBAValue(Contants.MATERIAL, Material);
+		 if(StringUtils.isEmpty(AirSpringClassification)){
+			 AirSpringClassification="";
+		 }else{
+			 if(AirSpringClassification.equals("Default")){
+				 AirSpringClassification="";
+			 }
+		 }
+		 partIBA.setIBAValue(Contants.AIRSPRINGCLASSIFICATION, AirSpringClassification);
+		 partIBA.setIBAValue(Contants.WEIGHT, Weight);
+		 partIBA.setIBAValue(Contants.PHASE, PHASE);
+		 if(StringUtils.isEmpty(Product_NO)){
+			 Product_NO="";
+		 }else{
+			 if(Product_NO.equals("Default")){
+				 Product_NO="";
+			 }
+		 }
+		 partIBA.setIBAValue(Contants.PRODUCTNO, Product_NO);
+		 if(StringUtils.isEmpty(Material_NO)){
+			 Material_NO="";
+		 }else{
+			 if(Material_NO.equals("Default")){
+				 Material_NO="";
+			 }
+		 }
+		 partIBA.setIBAValue(Contants.MATERIALNO,Material_NO );
+		 if(StringUtils.isEmpty(Material_Classification)){
+			 Material_Classification="";
+		 }else{
+			 if(Material_Classification.equals("Default")){
+				 Material_Classification="";
+			 }
+		 }
+		 partIBA.setIBAValue(Contants.MATERIALGROUP, Material_Classification);
+		 partIBA.updateIBAPart(part);
+		 Debug.P("----------updateIBAPart-------------------");
 	}
+	
+	
+	
+
 }

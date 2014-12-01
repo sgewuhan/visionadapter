@@ -60,7 +60,7 @@ function handleStateChange(){
 <body  bgColor=#ffffff>
 							验证成功，页面正在跳转...
 <script></script>	
-<iframe width=1420 height=1000 name=aa frameborder=0 src="http://crh-tmt.plm.com/Windchill/app/#ptc1/tcomp/infoPage?oid=VR<%=Oid%>&u8=1"></iframe>
+<iframe width=1420 height=1000 name=aa frameborder=0 src="/Windchill/wtcore/jsp/wvs/viewer/pviewlite.jsp?url=http://plm-tmt.teg.cn/Windchill/servlet/WindchillAuthGW/com.ptc.wvs.server.util.WVSContentHelper/redirectDownload/autocad.pvs?HttpOperationItem=wt.content.ApplicationData%3A96366&ContentHolder=wt.viewmarkup.DerivedImage%3A96346&u8=1&objref=OR%3Awt.epm.EPMDocument%3A96459&repref=OR%3Awt.viewmarkup.DerivedImage%3A96346','ProductViewLite','800','650','0','0')"></iframe>
 </body>
 
 </html>

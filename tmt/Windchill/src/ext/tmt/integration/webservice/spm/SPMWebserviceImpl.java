@@ -1,6 +1,27 @@
 package ext.tmt.integration.webservice.spm;
 
+import java.io.File;
+import java.io.IOException;
+
+import ext.tmt.utils.Debug;
+import wt.util.WTProperties;
+
 public class SPMWebserviceImpl {
+	
+	
+	private static String EXPORT_TEMP="物料主数据 填写模板.xls";//导出成品,半成品的模板文件
+	
+	private static String codebase_path=null;
+	static{
+		WTProperties wtproperties;
+		try {
+			wtproperties = WTProperties.getLocalProperties();
+			codebase_path= wtproperties.getProperty("wt.codebase.location");
+			codebase_path=codebase_path+File.separator+"excel_template";
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
 	/**
@@ -55,7 +76,32 @@ public class SPMWebserviceImpl {
     }
     
 	
+    
+     /**
+       * 导出成品,半成品物料信息Excel文件
+      */
+      private static void exportProd2Excel(){
+    	File file=getFileByName(EXPORT_TEMP);//获得Codebase下的模板文件
+    	//获得所有的成品，半成品信息
+    	
+    	//将结果集回写到Excel中
+    	
+    }
 	
-	
+      
+      /**
+       *获得Excel模板文件
+       * @return File
+       */
+      private static File getFileByName(String fileName){
+    	  if(codebase_path==null) return null;
+    	   File file=new File(codebase_path);
+    	   if(file.isDirectory()){
+    		   String tempPath=codebase_path+File.separator+fileName;
+    		   Debug.P("------>>>>Excel Model File Path:"+tempPath);
+    		   file=new File(tempPath);
+    	   }
+    	    return file;
+      }
 
 }

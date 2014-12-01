@@ -4,10 +4,14 @@ import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.sg.visionadapter.CADDocumentPersistence;
+import com.sg.visionadapter.ModelServiceFactory;
+
 import wt.epm.EPMDocument;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.fc.QueryResult;
+import wt.folder.Folder;
 import wt.inf.container.WTContainer;
 import wt.part.WTPart;
 import wt.query.QuerySpec;
@@ -44,6 +48,8 @@ public class EPMDocHelper implements Serializable {
 		String pmoids = iba.getIBAValue(Contants.PMID);
 		Debug.P("sync--->"+sync);
 		Debug.P("pmoids--->"+pmoids);
+		String pmoid = iba.getIBAValue(Contants.PMID);
+		Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
         if (StringUtils.isEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			try {
 				flag = SessionServerHelper.manager.setAccessEnforced(false);
@@ -58,12 +64,15 @@ public class EPMDocHelper implements Serializable {
 				SessionServerHelper.manager.setAccessEnforced(flag);
 			}
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			Folder docFolder=  wt.folder.FolderHelper.service.getFolder(epmdoc);
+			Debug.P("epmdocFolder---->"+docFolder);
+			if(docFolder.getFolderPath().contains("工作区"))
 			WCToPMHelper.CreateEPMDocToPM(epmdoc);
 		}
-        else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
-			String pmoid = iba.getIBAValue(Contants.PMID);
+		else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+			//String pmoid = iba.getIBAValue(Contants.PMID);
             Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
-            Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
+            //Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
 			if(object !=null){
 				epmdoc=(EPMDocument)object;
 			}
@@ -71,16 +80,17 @@ public class EPMDocHelper implements Serializable {
 			  WCToPMHelper.updatePMCADDoc(pmoid, epmdoc);
             }
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
-			String pmoid = iba.getIBAValue(Contants.PMID);
-			Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
+			//String pmoid = iba.getIBAValue(Contants.PMID);
+			//获得历史的工作副本
+			
+			//Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
 			if(object !=null){
 				epmdoc=(EPMDocument)object;
 			}
+			
             Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
             WCToPMHelper.updatePMCADDoc(pmoid, epmdoc);
-		}else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
-			String pmoid = iba.getIBAValue(Contants.PMID);
-			Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
+		}else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
 			if(object !=null){
 				epmdoc=(EPMDocument)object;
 			}

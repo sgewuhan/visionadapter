@@ -7,8 +7,10 @@ import ext.tmt.utils.Debug;
 
 
 import wt.epm.EPMDocument;
+import wt.epm.workspaces.EPMWorkspaceManagerEvent;
 import wt.events.KeyedEvent;
 import wt.events.KeyedEventListener;
+import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.part.WTPart;
 import wt.services.ManagerException;
@@ -45,10 +47,11 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 			// 获取事件类型
 			String eventType = keyedEvent.getEventType();
 			if (target instanceof EPMDocument) {
-				Debug.P("eventType--->"+eventType);
-				EPMDocHelper.listenerEPMDoc((EPMDocument)target, eventType);
+				EPMDocument epm=(EPMDocument)target;
+				Debug.P("EPM eventType--->"+eventType);
+				EPMDocHelper.listenerEPMDoc(epm, eventType);
+				PersistenceHelper.manager.store(epm);
 			}
-
 		}
 
 		public EPMDocListener(String manager_name) {
@@ -86,6 +89,9 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
         
         String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
 		getManagerService().addEventListener(listener, POST_UPDATE);
+		
+		//add by qiaokai
+	    getManagerService().addEventListener(listener, EPMWorkspaceManagerEvent.generateEventKey(EPMWorkspaceManagerEvent.POST_WORKSPACE_CHECKIN));
  
 //        String PER_POST = PersistenceManagerEvent
 //                .generateEventKey(PersistenceManagerEvent.PRE_STORE);

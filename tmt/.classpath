@@ -3,8 +3,6 @@
 	<classpathentry kind="src" path="Windchill/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="codebase1" sourcepath="/visionadapter/src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Windchill_lib"/>
-	<classpathentry kind="lib" path="C:/Users/Administrator/Desktop/visionadapter.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/codebase_jar"/>
 	<classpathentry kind="output" path="codebase1"/>
 </classpath>

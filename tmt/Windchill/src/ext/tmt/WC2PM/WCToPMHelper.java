@@ -187,7 +187,7 @@ public class WCToPMHelper {
 		String pFolderId="";
 		ProductPersistence productPersistence =null;  //PM系统中的成品持久化对象
 		String weight ="";
-		Debug.P("将Windchill中的成品插入PM系统的数据库中");
+		Debug.P("---999---->>>>>>将Windchill中的成品插入PM系统的数据库中");
 		Debug.P(wtPart.toString());
 		partOid = getObjectOid(wtPart);
 		Debug.P(wtPart.getPersistInfo().getObjectIdentifier().getId());

@@ -5,7 +5,11 @@ import com.ptc.core.logging.LogFactory;
 import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
 import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
 import com.ptc.windchill.uwgm.common.util.PrintHelper;
+
+import ext.tmt.utils.EPMDocUtil;
+
 import java.util.Map;
+
 import wt.epm.EPMDocument;
 import wt.epm.modelitems.ModelItem;
 import wt.epm.workspaces.EPMWorkspace;
@@ -161,12 +165,15 @@ public class DefaultAutoAssociatePartFinderCreator implements
 						"com.ptc.windchill.uwgm.common.autoassociate.autoassociateResource",
 						"77", new Object[] { s1 });
 			throw new WTException(wtmessage);
-		} else if(s1.equals("本图")) {
+		} else if("本图".equals(s1)) {
 			log.debug((new StringBuilder())
 					.append("Create number is 本图  part!---------------"));
 			return null;
 		}else{
-			return WTPartUtilities.createNewPart(associatepartdescriptor);
+			WTPart part=WTPartUtilities.createNewPart(associatepartdescriptor);
+			EPMDocument epm=EPMDocUtil.getActiveEPMDocument(part);
+			System.out.println(epm.getName());
+			return part ;
 		}
 	}
 
