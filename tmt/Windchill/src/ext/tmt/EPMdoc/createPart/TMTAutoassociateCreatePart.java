@@ -1,9 +1,16 @@
 package ext.tmt.EPMdoc.createPart;
 
 
+import wt.epm.EPMDocument;
+import wt.epm.modelitems.ModelItem;
+import wt.epm.workspaces.EPMWorkspace;
+import wt.fc.collections.WTCollection;
+import wt.fc.collections.WTKeyedMap;
 import wt.part.WTPart;
+import wt.pom.UniquenessException;
 import wt.util.WTException;
 import wt.util.WTPropertyVetoException;
+import wt.vc.VersionControlException;
 
 import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
 import com.ptc.windchill.uwgm.common.autoassociate.DefaultAutoAssociatePartFinderCreator;
@@ -14,6 +21,22 @@ public class TMTAutoassociateCreatePart extends DefaultAutoAssociatePartFinderCr
 	
 	TMTAutoassociateCreatePart(){
 		
+	}
+	@Override
+	public void initSearchMatchingParts(WTCollection wtcollection,
+			WTKeyedMap wtkeyedmap, EPMWorkspace epmworkspace)
+			throws WTException {
+		// TODO Auto-generated method stub
+		super.initSearchMatchingParts(wtcollection, wtkeyedmap, epmworkspace);
+	}
+	
+	@Override
+	public WTPart findOrCreateWTPart(EPMDocument epmdocument,
+			ModelItem modelitem, EPMWorkspace epmworkspace) throws WTException,
+			WTPropertyVetoException, VersionControlException,
+			UniquenessException {
+		// TODO Auto-generated method stub
+		return super.findOrCreateWTPart(epmdocument, modelitem, epmworkspace);
 	}
 	@Override
 	public WTPart createNewWTPart(

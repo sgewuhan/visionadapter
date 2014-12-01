@@ -26,8 +26,8 @@
     }
   } 
   String Oid = request.getParameter("Oid");
-  String user = request.getParameter("user");
-  String pass = request.getParameter("pass");
+  String user = request.getParameter("username");
+  String pass = request.getParameter("password");
 %>
 <script>
 	
@@ -45,7 +45,7 @@ function login(){
 	}else {  
 		xhr = new XMLHttpRequest();
 	}
-	xhr.open("POST", "../netmarkets/jsp/ping.htm", false, username,password);
+	xhr.open("POST", "../netmarkets/jsp/ping.htm", false, <%=user%>,<%=pass%>);
 	xhr.onreadystatechange=handleStateChange;
 	xhr.send(null);
 }

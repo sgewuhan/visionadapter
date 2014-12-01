@@ -7,6 +7,7 @@ import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
 import com.ptc.windchill.uwgm.common.util.PrintHelper;
 
 import ext.tmt.utils.EPMDocUtil;
+import ext.tmt.utils.IBAUtils;
 
 import java.util.Map;
 
