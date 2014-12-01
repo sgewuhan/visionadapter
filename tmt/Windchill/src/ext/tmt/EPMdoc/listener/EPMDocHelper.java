@@ -4,10 +4,14 @@ import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.sg.visionadapter.CADDocumentPersistence;
+import com.sg.visionadapter.ModelServiceFactory;
+
 import wt.epm.EPMDocument;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.fc.QueryResult;
+import wt.folder.Folder;
 import wt.inf.container.WTContainer;
 import wt.part.WTPart;
 import wt.query.QuerySpec;
@@ -44,32 +48,25 @@ public class EPMDocHelper implements Serializable {
 		String pmoids = iba.getIBAValue(Contants.PMID);
 		Debug.P("sync--->"+sync);
 		Debug.P("pmoids--->"+pmoids);
+		Folder docFolder=  wt.folder.FolderHelper.service.getFolder(epmdoc);
+		Debug.P("epmdocFolder---->"+docFolder);
         if (StringUtils.isEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
-			try {
-				flag = SessionServerHelper.manager.setAccessEnforced(false);
-//				// 如果是新建修订版本或者新建视图版本
-//				if (WindchillUtil.isReviseVersion(epmdoc)){
-//					return;
-//				}
-				WCToPMHelper.CreateEPMDocToPM(epmdoc);
-			}catch(Exception e){
-				e.printStackTrace();
-			} finally {
-				SessionServerHelper.manager.setAccessEnforced(flag);
-			}
+        	if(!docFolder.getFolderPath().contains("工作区"))	
+        	  WCToPMHelper.CreateEPMDocToPM(epmdoc);
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
-			WCToPMHelper.CreateEPMDocToPM(epmdoc);
+			if(!docFolder.getFolderPath().contains("工作区"))
+			    WCToPMHelper.CreateEPMDocToPM(epmdoc);
 		}
-        else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+		else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
             Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
             Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
 			if(object !=null){
 				epmdoc=(EPMDocument)object;
 			}
-            if(WorkInProgressHelper.isCheckedOut(epmdoc)){
+            //if(WorkInProgressHelper.isCheckedOut(epmdoc)){
 			  WCToPMHelper.updatePMCADDoc(pmoid, epmdoc);
-            }
+           // }
 		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
 			Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
@@ -77,7 +74,9 @@ public class EPMDocHelper implements Serializable {
 				epmdoc=(EPMDocument)object;
 			}
             Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
-            WCToPMHelper.updatePMCADDoc(pmoid, epmdoc);
+           // if(WorkInProgressHelper.isCheckedOut(epmdoc)){
+  			   WCToPMHelper.updatePMCADDoc(pmoid, epmdoc);
+            //  }
 		}else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
 			Object object =GenericUtil.getObjectByNumber(epmdoc.getNumber());
@@ -85,7 +84,9 @@ public class EPMDocHelper implements Serializable {
 				epmdoc=(EPMDocument)object;
 			}
 			   Debug.P("PRE_DELETE-----------------pmoid----------->"+pmoid);
-			   WCToPMHelper.deletePMCADDoc(pmoid, epmdoc);
+			   if(!WorkInProgressHelper.isCheckedOut(epmdoc)){
+			     WCToPMHelper.deletePMCADDoc(pmoid, epmdoc);
+			   }
 		}     
 	}
 	/*

@@ -47,7 +47,19 @@ function handleStateChange(){
 	}
 }
 
+var iframe = document.createElement("iframe");
+iframe.src = "http://plm-tmt.teg.cn/Windchill/app/#ptc1/tcomp/infoPage?oid=OR:<%=folderOid%>&ContainerOid=OR:<%=containerOid%>&u8=1";
+
+if (iframe.attachEvent){
+    iframe.attachEvent("onload", login();
+    } else {
+    iframe.onload = login();
+}
+
+document.body.appendChild(iframe);
+
 </script>
+</head>
 <body  bgColor=#ffffff>							
 <script>login();</script>	
 <iframe width=1360 height=1030 name=aa frameborder=0 src="http://plm-tmt.teg.cn/Windchill/app/#ptc1/tcomp/infoPage?oid=OR:<%=folderOid%>&ContainerOid=OR:<%=containerOid%>&u8=1"></iframe>
