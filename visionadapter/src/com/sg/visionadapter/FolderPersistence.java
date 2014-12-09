@@ -40,7 +40,7 @@ public class FolderPersistence extends PersistenceService<PMFolder> {
 	public List<String> getNoSyncFolderId() {
 		List<String> ids = new ArrayList<String>();
 		DBCursor find = collection.find(new BasicDBObject().append(
-				PMFolder.PLM_ID, null));
+				PMFolder.PLM_ID, null).append(PMFolder.F_IS_CONTAINER, new BasicDBObject("$ne",true)));
 		while(find.hasNext()) {
 			DBObject data = find.next();
 			ObjectId id = (ObjectId) data.get(VisionObject._ID);
