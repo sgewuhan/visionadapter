@@ -26,7 +26,7 @@ public class PMFolder extends VisionObject {
 
 	private static final String CONTAINER_NAME = "containername";
 
-	private static final String F_IS_CONTAINER = "iscontainer";
+	public static final String F_IS_CONTAINER = "iscontainer";
 
 	/**
 	 * @return the projectId
