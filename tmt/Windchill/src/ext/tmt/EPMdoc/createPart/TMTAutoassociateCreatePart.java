@@ -44,7 +44,7 @@ public class TMTAutoassociateCreatePart extends DefaultAutoAssociatePartFinderCr
 			throws WTException, WTPropertyVetoException {
 		// TODO Auto-generated method stub
 		String number = associatepartdescriptor.getPartNumber();
-		Debug.P("part number -->"+number);
+		Debug.P("---->>TMT Auto part number -->"+number);
 		if(number!=null&&"本图".equals(number)){
 			return null;
 		}else{

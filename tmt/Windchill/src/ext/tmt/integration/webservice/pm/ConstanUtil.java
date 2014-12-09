@@ -44,6 +44,10 @@ public class ConstanUtil {
 	public static String WC_RELEASED="RELEASED";
 	public static String WC_DESPOSED="OBSOLETE";
 	
+	public static String PMID="PMId";
+	public static String WTDOCTYPE="wt.doc.WTDocument";
+	
+	
 	
 
 }

@@ -139,112 +139,125 @@ public class DocUtils implements RemoteAccess{
 		{
 
 		
-		String doc_Number=getWTDocumentNumber();//默认排序编码
-		
-		WTDocument document =WTDocument.newWTDocument();
-		
-		//文档类型
-		if (!StringUtils.isEmpty(docType)) {
-		  String docTypeEnum = GenericUtil.getTypeByName(docType);//根据现实名称获取软类型
-	      if(StringUtils.isEmpty(docTypeEnum)){
-	         throw new WTException("--->>在windchill中无法找到"+docTypeEnum+"这个文档类型!");
-	      } 
-	      TypeDefinitionReference typeDefinitionRef   = TypedUtility.getTypeDefinitionReference(docTypeEnum);
-	       if (typeDefinitionRef == null) {
-				Debug.P("ERROR :typeDefinitionRef is null,docType="+ docType);
-				return null;
-			}
-	        document.setTypeDefinitionReference(typeDefinitionRef);
-		}else{//默认常规文档
-			 DocumentType type=wt.doc.DocumentType.toDocumentType("$$Document");
-			 document.setDocType(type);
-		}
-		
-		String doc_Name=pmdoc.getCommonName();
-		document.setName(doc_Name);
-		document.setNumber(doc_Number);
-		//容器对象
-	    String containerName=pmdoc.getContainerName();
-	    Debug.P("------>>>PM  ContainerName:"+containerName);
-		WTContainer container=GenericUtil.getWTContainerByName(containerName);
-		
-//		EnumeratedType type[] = DocumentType.getDocumentTypeDefault().getSelectableValueSet();
-//		document.setDocType((DocumentType) type[1]);
-//		EnumeratedType aenumeratedtype[] = DepartmentList.getDepartmentListSet();
-//		document.setDepartment((DepartmentList) aenumeratedtype[1]);
-		document.setContainer(container);
-		document.setOrganization(container.getOrganization());
-		
-		//指定文件的位置
-		if(folder!=null){
-			FolderHelper.assignLocation(document, folder);
-		}
-		String description=pmdoc.getDescription();
-		if (StringUtils.isEmpty(description)){
-			document.setDescription(description);
-		}	
-		
-//		WTUser wtuser=null;
-//		try {//获取用户信息
-//		    wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(username);
-//		} catch (WTException e) {//获取虚名用户
-//			 wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(vmUserName);
-//		}
-//	    Debug.P("---->VmUser:"+vmUserName+"   ;UserName="+wtuser);
-//		VersionControlHelper.assignIterationCreator(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//创建者
-//		VersionControlHelper.setIterationModifier(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//更新者
-//		OwnershipHelper.setOwner(doc, wtuser); //所有者
-		
-		if (ibas != null && !ibas.isEmpty()) {
-			LWCUtil.setValueBeforeStore(document,ibas);
-		}
-
-		 document = (WTDocument) PersistenceHelper.manager.save(document);
-		 Debug.P("---New--->>WTDoc:"+document.getFolderPath() +"(LifecycleState:"+document.getLifeCycleName()+")   Success!!!");
-	
-		PersistenceHelper.manager.refresh(document);
-		
-		//文档
-		ByteArrayInputStream pins=null;
-		ByteArrayInputStream sins=null;
-		String contentUrl=pmdoc.getUrl();//PM主内容路径
+		WTDocument document =null;
+		Transaction tx = null;
 		try {
-			IFileProvider content = pmdoc.getContent();//PM主文档流
-			if(content!=null){
-				   String pname=content.getFileName();//PM主文件名称
-			    	//上传主文档信息
-					ByteArrayOutputStream bout=new ByteArrayOutputStream();
-	    			content.write(bout);
-	    			pins=new ByteArrayInputStream(bout.toByteArray());
-	    			linkDocument(document, pname, pins, "1", contentUrl);
-			}
-
-			
-			//上传附件信息
-			List<IFileProvider> attachments = pmdoc.getAttachments();
-			if(attachments!=null&&attachments.size()>0){
-				for (IFileProvider provider : attachments) {
-					ByteArrayOutputStream bsout=new ByteArrayOutputStream();
-						provider.write(bsout);
-						sins=new ByteArrayInputStream(bsout.toByteArray());
-						linkDocument(document, provider.getFileName(), sins, "0", null);
+			  tx=new Transaction();
+			  tx.start();
+			  String doc_Number=getWTDocumentNumber();//默认排序编码
+			  document =WTDocument.newWTDocument();
+			//文档类型
+			if (!StringUtils.isEmpty(docType)) {
+			  String docTypeEnum = GenericUtil.getTypeByName(docType);//根据现实名称获取软类型
+		      if(StringUtils.isEmpty(docTypeEnum)){
+		         throw new WTException("--->>在windchill中无法找到"+docTypeEnum+"这个文档类型!");
+		      } 
+		      TypeDefinitionReference typeDefinitionRef   = TypedUtility.getTypeDefinitionReference(docTypeEnum);
+		       if (typeDefinitionRef == null) {
+					Debug.P("ERROR :typeDefinitionRef is null,docType="+ docType);
+					return null;
 				}
+		        document.setTypeDefinitionReference(typeDefinitionRef);
+			}else{//默认常规文档
+				 DocumentType type=wt.doc.DocumentType.toDocumentType("$$Document");
+				 document.setDocType(type);
 			}
 			
+			String doc_Name=pmdoc.getCommonName();
+			document.setName(doc_Name);
+			document.setNumber(doc_Number);
+			//容器对象
+		    String containerName=pmdoc.getContainerName();
+		    Debug.P("------>>>PM  ContainerName:"+containerName);
+			WTContainer container=GenericUtil.getWTContainerByName(containerName);
 			
+//			EnumeratedType type[] = DocumentType.getDocumentTypeDefault().getSelectableValueSet();
+//			document.setDocType((DocumentType) type[1]);
+//			EnumeratedType aenumeratedtype[] = DepartmentList.getDepartmentListSet();
+//			document.setDepartment((DepartmentList) aenumeratedtype[1]);
+			document.setContainer(container);
+			document.setOrganization(container.getOrganization());
 			
-		      }catch (IOException e) {
-			      e.printStackTrace();
-			      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
-		    }
+			//指定文件的位置
+			if(folder!=null){
+				FolderHelper.assignLocation(document, folder);
+			}
+			String description=pmdoc.getDescription();
+			if (StringUtils.isEmpty(description)){
+				document.setDescription(description);
+			}	
+			
+//			WTUser wtuser=null;
+//			try {//获取用户信息
+//			    wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(username);
+//			} catch (WTException e) {//获取虚名用户
+//				 wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(vmUserName);
+//			}
+//		    Debug.P("---->VmUser:"+vmUserName+"   ;UserName="+wtuser);
+//			VersionControlHelper.assignIterationCreator(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//创建者
+//			VersionControlHelper.setIterationModifier(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//更新者
+//			OwnershipHelper.setOwner(doc, wtuser); //所有者
+			
+		     
+			if (ibas != null && !ibas.isEmpty()) {
+				LWCUtil.setValueBeforeStore(document,ibas);
+			}
+	     
+			 document = (WTDocument) PersistenceHelper.manager.save(document);
+			 Debug.P("---New--->>WTDoc:"+document.getFolderPath() +"(LifecycleState:"+document.getLifeCycleName()+")   Success!!!");
 		
-		if (document != null) {
-		if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal()))
-			document = (WTDocument) WorkInProgressHelper.service.checkin(document, "add primary file");
-	   }
-		//添加下载链接地址
-		if(document!=null){
-			addDownloadURL2PM(pmdoc,document);
+			PersistenceHelper.manager.refresh(document);
+			
+			//文档
+			ByteArrayInputStream pins=null;
+			ByteArrayInputStream sins=null;
+			String contentUrl=pmdoc.getUrl();//PM主内容路径
+			try {
+				IFileProvider content = pmdoc.getContent();//PM主文档流
+				if(content!=null){
+					   String pname=content.getFileName();//PM主文件名称
+				    	//上传主文档信息
+						ByteArrayOutputStream bout=new ByteArrayOutputStream();
+		    			content.write(bout);
+		    			pins=new ByteArrayInputStream(bout.toByteArray());
+		    			linkDocument(document, pname, pins, "1", contentUrl);
+				}
+
+				
+				//上传附件信息
+				List<IFileProvider> attachments = pmdoc.getAttachments();
+				if(attachments!=null&&attachments.size()>0){
+					for (IFileProvider provider : attachments) {
+						ByteArrayOutputStream bsout=new ByteArrayOutputStream();
+							provider.write(bsout);
+							sins=new ByteArrayInputStream(bsout.toByteArray());
+							linkDocument(document, provider.getFileName(), sins, "0", null);
+					}
+				}
+				
+				
+				
+			      }catch (IOException e) {
+				      e.printStackTrace();
+				      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
+			    }
+			
+			if (document != null) {
+			if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal()))
+				document = (WTDocument) WorkInProgressHelper.service.checkin(document, "add primary file");
+		   }
+			//添加下载链接地址
+			if(document!=null){
+				addDownloadURL2PM(pmdoc,document);
+			}
+			  tx.commit();
+	    	  tx=null;
+		} catch (Exception e) {
+		     e.printStackTrace();
+		}finally{
+			if(tx!=null){
+			    tx.rollback();
+			}
 		}
 		 return document;
 	}
@@ -1368,7 +1381,6 @@ public class DocUtils implements RemoteAccess{
 			
 			trans = new Transaction();
 			trans.start();
-			
 			clearAllContent(doc);//清除历史文档信息
 			if (!doc.getName().equals(docName)) {//如果名称不一致则改名称
 				rename(doc, docName);
@@ -1418,6 +1430,7 @@ public class DocUtils implements RemoteAccess{
 			throw new Exception("Windchill读取PM系统文档("+docName+")文件流异常!");
 		} catch (Exception e) {
 			e.printStackTrace();
+		}finally{
 			if (trans != null){
 				trans.rollback();
 			}

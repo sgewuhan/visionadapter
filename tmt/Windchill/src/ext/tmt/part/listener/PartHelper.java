@@ -28,6 +28,7 @@ import wt.change2.WTChangeRequest2;
 import wt.csm.navigation.ClassificationNode;
 import wt.epm.EPMDocument;
 import wt.fc.Identified;
+import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.fc.PersistenceServerHelper;
@@ -64,7 +65,10 @@ import wt.vc.wip.WorkInProgressHelper;
 import wt.vc.wip.WorkInProgressServiceEvent;
 
 public class PartHelper implements Serializable {
-	private static final long serialVersionUID = 2304592616754675533L;
+	
+	private static final long serialVersionUID = 2304592616754675533L; 
+	
+	private static final String MATER_NO="Material_NO";
 
 	/** 
 	 * 监听WTPart事件
@@ -107,9 +111,12 @@ public class PartHelper implements Serializable {
 			    	epmdoc=EPMDocUtil.getActiveEPMDocument(wtPart);
 			    	Debug.P("1-->"+epmdoc);
 			    	if(epmdoc==null){
-			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+			    		List<Persistable> persistables=EPMDocUtil.getEPMDocumentByIBA(MATER_NO, wtPart.getNumber());
+			    		//查找里面最后更新时间最晚的一条数据
+			    		epmdoc=getLastModifierObject(persistables);
+//			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
 			    	}
-			    	Debug.P("2-->"+epmdoc);
+			    	Debug.P("211-->"+epmdoc);
 			    	if(epmdoc!=null){
 			    		 epmIba = new IBAUtils(epmdoc);
 			    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
@@ -635,14 +642,27 @@ public class PartHelper implements Serializable {
 	}
 	
 	
-	
-	public static void main(String[] args) {
-		String str="TXA6-半  成  品";
-		System.out.println(str.replaceAll(" ", "").trim());
-		System.out.println(str.substring(0,str.indexOf("-")));
+	private static EPMDocument getLastModifierObject(List<Persistable> objects){
+		EPMDocument result=null;
+		if(objects!=null){
+			Debug.P("-------->>>getLastModifierObject(Objects Size:)"+objects.size());
+			long cpTime=0L;
+			for(int i=0;i<objects.size();i++){
+				EPMDocument temp_epm=(EPMDocument) objects.get(i);
+				if(result==null){
+					cpTime=temp_epm.getModifyTimestamp().getTime();
+					result=temp_epm;
+				}else{
+					long temp_modTime=temp_epm.getModifyTimestamp().getTime();
+					if(temp_modTime>cpTime){
+						cpTime=temp_modTime;
+						result=temp_epm;
+					}
+				}
+			}
+		}
+	          	return result;
 	}
-	
-	
 	
 
 }

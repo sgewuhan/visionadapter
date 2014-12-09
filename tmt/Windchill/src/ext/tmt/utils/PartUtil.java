@@ -62,19 +62,19 @@ public class PartUtil implements RemoteAccess {
 	private static String DEFAULT_VIEW="Design";//默认部件视图
 	
 	
-	//创建部件的测试
-	public static void main(String[] args) throws Exception {
-		String partName="Car_20141022";
-		String num="Car_NUM00000001";
-		String containerName="TMT_201401";
-		String part_folder="/TMT_Demo1/TDE001";
-		String type="";
-		String userName="zwx82599";
-		String vmUser="PM-RW";
-		Map ibas=new HashMap();
-		createWTPart(partName,num,containerName,part_folder,null,null,null,null,userName,vmUser,null,null,ibas,true);
-		
-	}
+//	//创建部件的测试
+//	public static void main(String[] args) throws Exception {
+//		String partName="Car_20141022";
+//		String num="Car_NUM00000001";
+//		String containerName="TMT_201401";
+//		String part_folder="/TMT_Demo1/TDE001";
+//		String type="";
+//		String userName="zwx82599";
+//		String vmUser="PM-RW";
+//		Map ibas=new HashMap();
+//		createWTPart(partName,num,containerName,part_folder,null,null,null,null,userName,vmUser,null,null,ibas,true);
+//		
+//	}
 	
 	
 	
@@ -483,8 +483,7 @@ public class PartUtil implements RemoteAccess {
 					.refresh(partLink);
 			result = true;
 		} else {
-			throw new Exception("部件:" + part.getNumber() + " 和文档:"
-					+ doc.getName() + "已有关联");
+			throw new Exception("部件:" + part.getNumber() + " 和文档:"+ doc.getName() + "已有关联");
 		}
 		return result;
 	}
