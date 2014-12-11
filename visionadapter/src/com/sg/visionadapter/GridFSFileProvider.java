@@ -2,6 +2,7 @@ package com.sg.visionadapter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.bson.types.ObjectId;
@@ -10,6 +11,7 @@ import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 /**
  * 保存在GridFSFile中的文件
@@ -94,4 +96,22 @@ public class GridFSFileProvider implements IFileProvider {
 		}
 	}
 
+	@Override
+	public ObjectId writeToGridFS(InputStream in, ObjectId gridfsObjectId,
+			String fileName, String namespace, DB db, DBObject metadata)
+			throws IOException {
+		if (gridfsObjectId == null) {
+			gridfsObjectId = new ObjectId();
+		}
+		GridFS gridfs = new GridFS(db, namespace);
+		GridFSInputFile file = gridfs.createFile(in, true);
+		file.put("_id", gridfsObjectId); //$NON-NLS-1$
+		file.setFilename(fileName);
+
+		if (metadata != null) {
+			file.setMetaData(metadata);
+		}
+		file.save();
+		return gridfsObjectId;
+	}
 }
