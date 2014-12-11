@@ -2,9 +2,13 @@ package com.sg.visionadapter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.bson.types.ObjectId;
+
 import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBObject;
 
 public class URLFileProvider implements IFileProvider {
@@ -46,6 +50,13 @@ public class URLFileProvider implements IFileProvider {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	@Override
+	public ObjectId writeToGridFS(InputStream in, ObjectId gridfsObjectId,
+			String fileName, String namespace, DB db, DBObject metadata)
+			throws IOException {
+		return null;
 	}
 
 }
