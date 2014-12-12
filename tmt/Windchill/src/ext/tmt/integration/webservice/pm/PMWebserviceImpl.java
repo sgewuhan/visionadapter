@@ -4,35 +4,14 @@ package ext.tmt.integration.webservice.pm;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.bson.types.ObjectId; 
+import org.bson.types.ObjectId;
 
-import com.mongodb.WriteResult;
-import com.ptc.wvs.common.ui.VisualizationHelper;
-import com.ptc.wvs.server.util.WVSContentHelper;
-import com.sg.visionadapter.BasicDocument;
-import com.sg.visionadapter.DocumentPersistence;
-import com.sg.visionadapter.FolderPersistence;
-import com.sg.visionadapter.ModelServiceFactory;
-import com.sg.visionadapter.PMDocument;
-import com.sg.visionadapter.PMFolder;
-
-import ext.tmt.folder.api.FolderService;
-import ext.tmt.folder.impl.FolderServiceImpl;
-
-
-import ext.tmt.utils.Contants;
-import ext.tmt.utils.Debug;
-import ext.tmt.utils.DocUtils;
-import ext.tmt.utils.FolderUtil;
-import ext.tmt.utils.GenericUtil;
-import ext.tmt.utils.IBAUtils;
-import ext.tmt.utils.LWCUtil;
-import wt.content.ApplicationData;
-import wt.content.ContentHolder;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
@@ -54,6 +33,24 @@ import wt.vc.VersionControlException;
 import wt.vc.VersionControlHelper;
 import wt.vc.Versioned;
 import wt.vc.wip.WorkInProgressHelper;
+
+import com.mongodb.WriteResult;
+import com.sg.visionadapter.BasicDocument;
+import com.sg.visionadapter.DocumentPersistence;
+import com.sg.visionadapter.FolderPersistence;
+import com.sg.visionadapter.ModelServiceFactory;
+import com.sg.visionadapter.PMDocument;
+import com.sg.visionadapter.PMFolder;
+
+import ext.tmt.folder.api.FolderService;
+import ext.tmt.folder.impl.FolderServiceImpl;
+import ext.tmt.utils.Contants;
+import ext.tmt.utils.Debug;
+import ext.tmt.utils.DocUtils;
+import ext.tmt.utils.FolderUtil;
+import ext.tmt.utils.GenericUtil;
+import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.LWCUtil;
 
 
 
@@ -846,6 +843,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		  return result;
 	 }
 
+	 public static List queryWCObjectByPM(String pmid ,String class1,String class2,boolean falg){
+		 List pmList = new ArrayList();
+		 
+		 
+		 return pmList;
+	 } 
+	 
+	 
+	 
 
 //	 public static void main(String[] args) throws Exception {
 //		 String pid="VR:wt.epm.EPMDocument:174627";
