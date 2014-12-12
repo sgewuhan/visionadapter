@@ -111,7 +111,7 @@ public class WCToPMHelper {
  		    }
  		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
  		   if(flag){
- 			   Debug.P("pmMaterial-->"+pmPart);
+ 			   Debug.P("pmPart-->"+pmPart);
 			   if(pmPart!=null){
 					String pmoid =  partiba.getIBAValue(Contants.PMID);
 					if(StringUtils.isNotEmpty(pmoid)){
