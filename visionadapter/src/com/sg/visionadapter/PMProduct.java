@@ -12,6 +12,7 @@ import com.mongodb.WriteResult;
 public final class PMProduct extends BasicPart  {
 
 	private static final String FORMULAR = "formularnumber";
+	private static final String PRODUCT_NUMBER = "productnumber";
 	
 	
 	@Override
@@ -70,6 +71,4 @@ public final class PMProduct extends BasicPart  {
 		put(EDITOR, "editor.document.product");
 		return super.doInsert();
 	}
-
-	
 }

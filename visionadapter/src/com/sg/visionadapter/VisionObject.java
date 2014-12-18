@@ -285,6 +285,11 @@ public abstract class VisionObject extends BasicDBObject implements
 		WriteResult wr = collection.insert(this);
 		return wr;
 	}
+	
+	public WriteResult doInsertSimple() throws Exception {
+		WriteResult wr = collection.insert(this);
+		return wr;
+	}
 
 	private void extendProjectData() throws Exception {
 		PMFolder folder = getParentFolder();
