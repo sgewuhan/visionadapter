@@ -42,9 +42,11 @@ import com.sg.visionadapter.PartPersistence;
 import com.sg.visionadapter.ProductPersistence;
 import com.sg.visionadapter.SupplymentPersistence;
 
+import ext.tmt.integration.webservice.pm.ConstanUtil;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.FolderUtil;
+import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.Utils;
 
@@ -111,7 +113,7 @@ public class WCToPMHelper {
  		    }
  		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
  		   if(flag){
- 			   Debug.P("pmMaterial-->"+pmPart);
+ 			   Debug.P("pmPart-->"+pmPart);
 			   if(pmPart!=null){
 					String pmoid =  partiba.getIBAValue(Contants.PMID);
 					if(StringUtils.isNotEmpty(pmoid)){
@@ -583,6 +585,7 @@ public class WCToPMHelper {
            plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
            plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
            plmData.put(Contants.PLMMID, "wt.epm.EPMDocument:"+epmdoc.getIterationInfo().getBranchId());
+           plmData.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(epmdoc));
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM部件名称
 			pmcad.setObjectNumber(epmdoc.getNumber());
@@ -837,6 +840,7 @@ public class WCToPMHelper {
            plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
            plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
            plmData.put(Contants.PLMMID, "wt.epm.EPMDocument:"+epmdoc.getIterationInfo().getBranchId());
+           plmData.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(epmdoc));
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM图纸名称
 			pmcad.setObjectNumber(epmdoc.getNumber());

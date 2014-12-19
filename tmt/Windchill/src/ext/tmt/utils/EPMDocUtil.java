@@ -14,6 +14,7 @@ import wt.content.ContentHelper;
 import wt.content.ContentItem;
 import wt.content.ContentRoleType;
 import wt.content.ContentServerHelper;
+import wt.doc.WTDocument;
 import wt.epm.EPMDocument;
 import wt.epm.EPMDocumentMaster;
 import wt.epm.build.EPMBuildHistory;
@@ -91,9 +92,11 @@ public class EPMDocUtil {
          QueryResult qr=null;
          qs= new QuerySpec(EPMDocument.class);
          SearchCondition sc = new SearchCondition(EPMDocument.class,"master>name", SearchCondition.LIKE, name);
-         qs.appendSearchCondition(sc);
+         SearchCondition latestIteration = new SearchCondition(EPMDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+         qs.appendWhere(sc);
+         qs.appendAnd();
+         qs.appendWhere(latestIteration);
          qr= PersistenceHelper.manager.find(qs);
-         
          while(qr.hasMoreElements()) {
         	 EPMDoc=(EPMDocument)qr.nextElement();
              break;

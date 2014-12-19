@@ -33,6 +33,7 @@ import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.fc.PersistenceServerHelper;
 import wt.fc.QueryResult;
+import wt.folder.Folder;
 import wt.iba.definition.StringDefinition;
 import wt.iba.value.ReferenceValue;
 import wt.iba.value.StringValue;
@@ -96,7 +97,12 @@ public class PartHelper implements Serializable {
 		Debug.P("sync--->"+sync);
 		Debug.P("pmoids--->"+pmoids);
 		Debug.P("eventType---------------->"+eventType);
+		Folder docFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+		Debug.P("partFolder---->"+docFolder);
         if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+        	if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+        		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
+        	}
 			   EPMDocument epmdoc = null;
 			   String productName="";	
 			   String prefix="";
@@ -267,6 +273,9 @@ public class PartHelper implements Serializable {
 			 
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_MODIFY)) {
 			Debug.P("partType----->"+partType); 
+			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+        		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
+        	}
 			if(partType.equals("wt.part.WTPart")){
 			EPMDocument epmdoc = EPMDocUtil.getActiveEPMDocument(wtPart);
 			String epmPartType="";
@@ -348,6 +357,9 @@ public class PartHelper implements Serializable {
 			  }
 			
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+        		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
+        	}
 			Debug.P("StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)------------------");
 			Debug.P("partType----->"+partType); 
 			if(partType.equals("wt.part.WTPart")){
@@ -513,6 +525,8 @@ public class PartHelper implements Serializable {
 					WCToPMHelper.deletePMJigTools(pmoid, wtPart);
 			  }
 		}    
+		}catch(Exception e){
+			throw new Exception("部件创建/同步出错，请联系管理员"+e.getMessage());
 		}finally {
 			SessionServerHelper.manager.setAccessEnforced(flag);
 		}

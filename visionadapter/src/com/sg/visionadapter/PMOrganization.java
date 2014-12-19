@@ -7,17 +7,15 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 
-public class PMOrganization extends BasicDBObject {
+public class PMOrganization extends BasicDBObject implements
+		IPersistenceService {
 
 	public static final String F_FACTORY = "factory";
 	public static final String FACTORY_CODE = "code";
 	public static final String FACTORY_NAME = "factoryname";
+	public static final String collectionName = "organization";
 
 	protected DBCollection collection;
-
-	public PMOrganization() {
-		collection = ModelServiceFactory.service.getCollection("organization");
-	}
 
 	@SuppressWarnings("unchecked")
 	public List<String> getAllFactoryList() {
@@ -30,5 +28,15 @@ public class PMOrganization extends BasicDBObject {
 			resule.add((String) dbo.get(FACTORY_CODE));
 		}
 		return resule;
+	}
+
+	@Override
+	public String getCollectionName() {
+		return collectionName;
+	}
+
+	@Override
+	public void setCollection(DBCollection col) {
+		this.collection = col;
 	}
 }

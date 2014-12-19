@@ -252,7 +252,6 @@ public class FolderUtil implements RemoteAccess{
 		if(entry!=null&&purposeFolder!=null) {
 			Debug.P("--------->>>移动对象到文件:"+purposeFolder.getFolderPath());
 			entry=FolderHelper.service.changeFolder(entry, purposeFolder);
-			PersistenceHelper.manager.refresh(entry);
 		}
 		
 	}

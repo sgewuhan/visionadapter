@@ -743,7 +743,7 @@ public class EPMUtil {
 		SearchCondition sc = new SearchCondition(EPMDocument.class,
 				EPMDocument.NUMBER, SearchCondition.EQUAL, num);
 		qs.appendWhere(sc);
-		if (!ver.equals("")) {
+		if (StringUtils.isNotEmpty(ver)) {
 			qs.appendAnd();
 			qs.appendWhere(new SearchCondition(new KeywordExpression(
 					"A0.versionida2versioninfo"), SearchCondition.EQUAL,

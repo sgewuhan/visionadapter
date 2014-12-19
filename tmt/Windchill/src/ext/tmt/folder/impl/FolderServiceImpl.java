@@ -127,6 +127,7 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 			 //删除文件夹下的对象
 			QueryResult result= FolderHelper.service.findFolderContents(subfolder);//返回文件夹内的实体FolderEntry
 			if(result==null) continue;
+			Debug.P("----->>>Delete Folder Entry  Start-----");
 			while(result.hasMoreElements()){
 				FolderEntry entry=(FolderEntry) result.nextElement();
 				if(entry instanceof WTDocument){//如果是文档对象
