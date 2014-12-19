@@ -36,6 +36,7 @@ import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.part.WTPart;
 import wt.pds.StatementSpec;
+import wt.pom.Transaction;
 import wt.query.ClassAttribute;
 import wt.query.ConstantExpression;
 import wt.query.QuerySpec;
@@ -162,7 +163,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			String parent_wcId=parentFolder.getPLMId();//获得父项对象Id
 			String folderName=pmfolder.getCommonName().trim();
 			Debug.P("------>>>Folder:"+folderName+"  ContainerName:"+containerName+"  isContainer="+isContainer+"  ParentFolderID="+parent_wcId);
+			Transaction tx = null;
 			try{
+				tx=new Transaction();
+				tx.start();
 		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 		    	WTContainer container=checkWTContainerExist(containerName);
 		    	if(iscreate){
@@ -187,9 +191,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			                  Debug.P("----->>>创建同步Windchill文件夹:("+folderName+")成功!");
 			    	    }
 			    	 }
+		    	tx.commit();
+		    	tx=null;
 		    }catch(Exception e){
 		    	e.printStackTrace();
 		    	throw new Exception("Windchill创建文件夹("+folderName+")失败!");
+		    }finally{
+		    	if(tx!=null){
+				   tx.rollback();
+				}
 		    }
 	 }
 	 

@@ -24,6 +24,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFS;
 import com.sg.visionadapter.DocumentPersistence;
+import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.GridFSFileProvider;
 import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.ModelServiceFactory;
@@ -481,9 +482,11 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     		PMDocument pmdoc=docPersistence.newInstance();
     		String docId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
     		Folder folder=FolderHelper.getFolder(doc);
-    		Debug.P("---->>>>Folder:"+folder.getPersistInfo().getObjectIdentifier().getStringValue());
-    		String pmid=(String) LWCUtil.getValue(folder, SPMConsts.PMID);
-    		Debug.P("---->>>Set WC Doc ID:"+docId+"  PMFOID:"+pmid);
+    		if(folder==null) throw new Exception("Windchill Doc"+docId+" 对应的文件夹为空不存在!");
+    		String doc_foid=folder.getPersistInfo().getObjectIdentifier().getStringValue();
+    		FolderPersistence folderPersistence=factory.get(FolderPersistence.class);
+    		ObjectId foid=folderPersistence.getFolderIdByPLMId(doc_foid);
+    		Debug.P("----WCFID:"+doc_foid+" 对应的PMId:"+foid.toString());
     		ObjectId pmdocId=new ObjectId();
     		pmdoc.set_id(pmdocId);
     		pmdoc.setObjectNumber(doc.getNumber());
@@ -492,7 +495,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     		pmdoc.setStatus(doc.getState().getState().getDisplay());
     		pmdoc.setOwner(doc.getCreatorName());
     		pmdoc.setPLMData(getObjectInfo(doc));
-    		pmdoc.setFolderId(new ObjectId(pmid));
+    		pmdoc.setFolderId(foid);
     		pmdoc.setMajorVid(doc.getVersionIdentifier().getValue());
     		pmdoc.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
     		//上传主内文档
