@@ -2,25 +2,25 @@ package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 
-public class PMProductItem extends VisionObject {
+public class PMProductItem extends BasicDBObject {
  
-	@Override
-	public PMFolder getParentFolder() {
-		return null;
-	}
-
-	public void setProductNumber(String productNumber) {
-		setValue(DESC, productNumber);
+	private static final String F_ID = "_id";
+	private static final String F_DESC = "desc";
+	private static final String F_PROJECTID = "project_id";
+	protected DBCollection collection;
+	
+	public PMProductItem() {
+		collection = ModelServiceFactory.service.getCollection("productitem");
 	}
 	
-	public void setProjectId(ObjectId projectId) {
-		setValue(PROJECT_ID,projectId);
-	}
-	
-	@Override
-	public WriteResult doInsert() throws Exception {
-		return super.doInsertSimple();
+	public WriteResult doInsertProductNumToProductItem(String prductNumber, ObjectId projectId) {
+		WriteResult rs = collection.insert(new BasicDBObject().append(F_ID, new ObjectId()).append(F_PROJECTID, projectId).append(F_DESC, prductNumber));
+		return rs;
+		
 	}
 }
