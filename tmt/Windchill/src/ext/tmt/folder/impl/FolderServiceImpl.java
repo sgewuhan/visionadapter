@@ -29,7 +29,7 @@ import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 
 /**
- * æ–‡ä»¶å¤¹æœåŠ¡
+ * ÎÄ¼ş¼Ğ·şÎñ
  * @author public759
  * @date 2014-10-20
  * @version V1.0
@@ -37,7 +37,7 @@ import ext.tmt.utils.GenericUtil;
  */
 public class FolderServiceImpl implements FolderService ,RemoteAccess{
 	
-	 private static String ORG_NAME="TMT";//TMTæ—¶ä»£æ–°æ
+	 private static String ORG_NAME="TMT";//TMTÊ±´úĞÂ²Ä
 	 
 
 
@@ -45,11 +45,11 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 	public  Folder createFolder(String parentFolderPath,String newFolderName, String containerName,String containerType) throws WTException {
 		Folder folderResult=null;
 		if(StringUtils.isEmpty(containerName)){
-			Debug.P("--------->>å‚æ•°(containerName)ä¸ºç©ºå€¼----->>>");
+			Debug.P("--------->>²ÎÊı(containerName)Îª¿ÕÖµ----->>>");
 			return folderResult;
 		}
 		try {
-			//æŸ¥è¯¢æ˜¯å¦å­˜åœ¨è¯¥å®¹å™¨å¯¹è±¡,æ²¡æœ‰å°±åˆ›å»ºå®¹å™¨å¯¹è±¡
+			//²éÑ¯ÊÇ·ñ´æÔÚ¸ÃÈİÆ÷¶ÔÏó,Ã»ÓĞ¾Í´´½¨ÈİÆ÷¶ÔÏó
 			WTContainer container=GenericUtil.checkWTContainer(ORG_NAME,containerName,containerType);
 			String folderPath=null;
 			if(!StringUtils.isEmpty(newFolderName)){
@@ -58,9 +58,9 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 				folderPath=parentFolderPath;
 			}
 			if(!folderPath.startsWith("/")){folderPath="/"+folderPath;}
-			Folder folder=FolderUtil.getFolderRef(folderPath, container, true);//å¦‚æœæ–‡ä»¶ç›®å½•ä¸å­˜åœ¨æ—¶åˆ™åˆ›å»ºæ–‡ä»¶å¤¹
+			Folder folder=FolderUtil.getFolderRef(folderPath, container, true);//Èç¹ûÎÄ¼şÄ¿Â¼²»´æÔÚÊ±Ôò´´½¨ÎÄ¼ş¼Ğ
 		    if(folder!=null){
-		       Debug.P("------>>>>>æ–‡ä»¶å¤¹ç›®å½•è·¯å¾„="+folder.getFolderPath());
+		       Debug.P("------>>>>>ÎÄ¼ş¼ĞÄ¿Â¼Â·¾¶="+folder.getFolderPath());
 		       folderResult=folder;
 		   }
 		} catch (Exception e) {
@@ -72,7 +72,7 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 	
 	
 	
-	//ä¿®æ”¹æ–‡ä»¶å¤¹åç§°
+	//ĞŞ¸ÄÎÄ¼ş¼ĞÃû³Æ
 	@Override
 	public int editFolder(String targetPath, String newFolderName,
 			String containerName) {
@@ -88,7 +88,7 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 			 }
 		  SubFolder subFolder=FolderUtil.changeFolderName(targetPath, newFolderName,WTContainerRef.newWTContainerRef(wtcontainer));
 		  if(subFolder!=null){
-			  Debug.P("----------->>ä¿®æ”¹æˆåŠŸåçš„æ–‡ä»¶å¤¹åç§°:"+subFolder.getName());
+			  Debug.P("----------->>ĞŞ¸Ä³É¹¦ºóµÄÎÄ¼ş¼ĞÃû³Æ:"+subFolder.getName());
 			  flag=1;
 		  }
 		} catch (Exception e) {
@@ -101,15 +101,15 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 
 
 	
-	//åˆ é™¤æ–‡ä»¶å¤¹
+	//É¾³ıÎÄ¼ş¼Ğ
 	@Override
 	public int deleteFolder(String folderPath, String containerName)throws WTException {
 	  int flag=0;
 	  if(StringUtils.isEmpty(folderPath)||StringUtils.isEmpty(containerName)) return flag;
 	  Transaction tx=null;
 	  try {
-		 //è·å¾—æ–‡ä»¶å¤¹å¯¹è±¡ä¸‹çš„æ‰€æœ‰å­æ–‡ä»¶å¤¹(ä»é‡Œå‘å¤–åˆ é™¤)
-		 Debug.P("------>>>>æ–‡ä»¶è·¯å¾„:"+folderPath+"  ;Container="+containerName);
+		 //»ñµÃÎÄ¼ş¼Ğ¶ÔÏóÏÂµÄËùÓĞ×ÓÎÄ¼ş¼Ğ(´ÓÀïÏòÍâÉ¾³ı)
+		 Debug.P("------>>>>ÎÄ¼şÂ·¾¶:"+folderPath+"  ;Container="+containerName);
 		 tx = new Transaction();
 		 tx.start();
 		 WTContainer container=GenericUtil.getWTContainerByName(containerName);
@@ -117,19 +117,20 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 		 Folder folder=FolderUtil.getFolderRef(folderPath, container, false);
 		  if(folder==null) return flag;
 		 List<Folder> folderList=new ArrayList<Folder>();
-		 folderList.add(folder);//æ·»åŠ æœ¬èº«
-		 FolderUtil.getFolderTree(folder, folderList);//è¿”å›æ–‡ä»¶å¤¹ä¸‹çš„å­æ–‡ä»¶å¯¹è±¡
+		 folderList.add(folder);//Ìí¼Ó±¾Éí
+		 FolderUtil.getFolderTree(folder, folderList);//·µ»ØÎÄ¼ş¼ĞÏÂµÄ×ÓÎÄ¼ş¶ÔÏó
 		 int index=folderList.size();
 
 		 for(int i=index-1;i>=0;i--){
-			 Folder subfolder=folderList.get(i);//å€’å™è¾“å‡ºæ–‡ä»¶å¤¹
+			 Folder subfolder=folderList.get(i);//µ¹ĞğÊä³öÎÄ¼ş¼Ğ
 			 Debug.P("---->>>FolderName:"+subfolder.getName());
-			 //åˆ é™¤æ–‡ä»¶å¤¹ä¸‹çš„å¯¹è±¡
-			QueryResult result= FolderHelper.service.findFolderContents(subfolder);//è¿”å›æ–‡ä»¶å¤¹å†…çš„å®ä½“FolderEntry
+			 //É¾³ıÎÄ¼ş¼ĞÏÂµÄ¶ÔÏó
+			QueryResult result= FolderHelper.service.findFolderContents(subfolder);//·µ»ØÎÄ¼ş¼ĞÄÚµÄÊµÌåFolderEntry
 			if(result==null) continue;
+			Debug.P("----->>>Delete Folder Entry  Start-----");
 			while(result.hasMoreElements()){
 				FolderEntry entry=(FolderEntry) result.nextElement();
-				if(entry instanceof WTDocument){//å¦‚æœæ˜¯æ–‡æ¡£å¯¹è±¡
+				if(entry instanceof WTDocument){//Èç¹ûÊÇÎÄµµ¶ÔÏó
 					WTDocument wtdoc=(WTDocument)entry;
 					Debug.P("------>>WTDocument_Number:"+wtdoc.getNumber());
 					GenericUtil.deleteDoc(wtdoc, null);
@@ -145,7 +146,7 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 			}
 			
 			 PersistenceHelper.manager.refresh(subfolder);
-			  //åˆ é™¤å½“å‰æ–‡ä»¶å¤¹
+			  //É¾³ıµ±Ç°ÎÄ¼ş¼Ğ
 			 PersistenceHelper.manager.delete(subfolder);
 		 }
 		    tx.commit();
@@ -164,20 +165,20 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 	}
 	
 	
-	//æ–‡ä»¶å¤¹ä¸­çš„å¯¹è±¡ç§»åŠ¨
+	//ÎÄ¼ş¼ĞÖĞµÄ¶ÔÏóÒÆ¶¯
 	@Override
 	public int moveObjectFolder(String newFolderPath,String containerName,String num) throws WTException {
 		int flag=0;
 	    if(StringUtils.isEmpty(newFolderPath)||StringUtils.isEmpty(num)){
-	    	throw new WTException("--->moveObjectFolderå‚æ•°ä¸èƒ½ä¸ºç©º:newFolderPath="+newFolderPath+"  ;Num="+num+"  ï¼›ContainerName="+containerName);
+	    	throw new WTException("--->moveObjectFolder²ÎÊı²»ÄÜÎª¿Õ:newFolderPath="+newFolderPath+"  ;Num="+num+"  £»ContainerName="+containerName);
 	    }
 	    try {
-	    	//ç›®æ ‡æ–‡ä»¶å¤¹
+	    	//Ä¿±êÎÄ¼ş¼Ğ
 	    	WTContainer container=GenericUtil.getWTContainerByName(containerName);
 	    	if(container==null) return flag;
 			Folder folder=FolderUtil.getFolderRef(newFolderPath, container,false);
 			if(folder==null)  return flag;
-			//ç›®æ ‡å¯¹è±¡
+			//Ä¿±ê¶ÔÏó
 			Persistable persistable=GenericUtil.getObjectByNumber(num);
 			if(persistable!=null){
 				FolderUtil.changeFolder((FolderEntry)persistable, folder);
@@ -218,14 +219,14 @@ public class FolderServiceImpl implements FolderService ,RemoteAccess{
 //		     String oldFolderPath="TMT_Demo1_LB2/TDE001_LB2";
 //		     String newFolder="TDE001_LB201";
 //		     String containerName="TMT_201401_LB2";
-//		     new FolderServiceImpl().editFolder(oldFolderPath,newFolder,containerName);//ç¼–è¾‘æ–‡ä»¶å¤¹åç§°
-		//ç§»åŠ¨æ–‡ä»¶å¤¹ä¸‹çš„å¯¹è±¡
+//		     new FolderServiceImpl().editFolder(oldFolderPath,newFolder,containerName);//±à¼­ÎÄ¼ş¼ĞÃû³Æ
+		//ÒÆ¶¯ÎÄ¼ş¼ĞÏÂµÄ¶ÔÏó
 //		     String newFolderPath="/TMT_Demo1_LB2/TDE001_LB201";
 //		     String libName="TMT_201401_LB2";
 //		     String objNum="0000000043";
 //		     int flag=new FolderServiceImpl(). moveObjectFolder(newFolderPath,libName,objNum);   
 //		     System.out.println("---->>Out:"+flag);
-		//åˆ é™¤æ–‡ä»¶ä¸‹ä¸‹çš„å¯¹è±¡ åŒ…æ‹¬ä¸ä¹‹å…³è”çš„å…³ç³»
+		//É¾³ıÎÄ¼şÏÂÏÂµÄ¶ÔÏó °üÀ¨ÓëÖ®¹ØÁªµÄ¹ØÏµ
 //		    RemoteMethodServer rms = RemoteMethodServer.getDefault();
 //		    rms.setUserName("wcadmin");
 //		    rms.setPassword("wcadmin");

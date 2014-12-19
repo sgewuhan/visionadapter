@@ -383,7 +383,7 @@ public class GenericUtil implements RemoteAccess {
 	
 	
 	/**
-	 *é€šè¿‡å¯¹è±¡å è·å¾—å¯¹è±¡Masters
+	 *Í¨¹ı¶ÔÏóÃû »ñµÃ¶ÔÏóMasters
 	 * @param objclass
 	 * @param objectname
 	 * @return Persistable
@@ -405,7 +405,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	/**
-	 * è®¾ç½®å¯¹è±¡ç”Ÿå‘½å‘¨æœŸçŠ¶æ€
+	 * ÉèÖÃ¶ÔÏóÉúÃüÖÜÆÚ×´Ì¬
 	 * 
 	 * @param obj
 	 * @param stateName
@@ -441,8 +441,8 @@ public class GenericUtil implements RemoteAccess {
 
 	
 /**
- * æ ¹æ®ç¼–å·æŸ¥è¯¢(åŒ…å«WTDocument,WTPart,EPMDocument)
- * @param num å¯¹è±¡ç¼–å·
+ * ¸ù¾İ±àºÅ²éÑ¯(°üº¬WTDocument,WTPart,EPMDocument)
+ * @param num ¶ÔÏó±àºÅ
  * @return
  * @throws WTException
  */
@@ -453,22 +453,22 @@ public class GenericUtil implements RemoteAccess {
 		Persistable master_persistable =null;
 		if(StringUtils.isEmpty(num)) return persistable;
 	     
-		//EPMæ–‡æ¡£
+		//EPMÎÄµµ
 		QuerySpec criteria = new QuerySpec(EPMDocumentMaster.class);
 		criteria.setAdvancedQueryEnabled(true);
 		criteria.appendSearchCondition(new SearchCondition(EPMDocumentMaster.class, "number",SearchCondition.EQUAL, num, true));
 		QueryResult result_epm = PersistenceHelper.manager.find(criteria);
-		if(result_epm!=null&&result_epm.size()>0){//å›¾æ¡£å¯¹è±¡
+		if(result_epm!=null&&result_epm.size()>0){//Í¼µµ¶ÔÏó
 			master_persistable = (Persistable) result_epm.nextElement();
 		}else {
 				 criteria = new QuerySpec(WTDocumentMaster.class);
 				criteria.setAdvancedQueryEnabled(true);
 				criteria.appendSearchCondition(new SearchCondition(WTDocumentMaster.class, "number",SearchCondition.EQUAL, num, true));
 				QueryResult result_doc = PersistenceHelper.manager.find(criteria);
-				if(result_doc!=null&&result_doc.size()>0){//æ–‡æ¡£å¯¹è±¡
+				if(result_doc!=null&&result_doc.size()>0){//ÎÄµµ¶ÔÏó
 					 master_persistable = (Persistable) result_doc.nextElement();
 				}
-				else{//éƒ¨ä»¶å¯¹è±¡
+				else{//²¿¼ş¶ÔÏó
 					criteria = new QuerySpec(WTPartMaster.class);
 					criteria.setAdvancedQueryEnabled(true);
 					criteria.appendSearchCondition(new SearchCondition(WTPartMaster.class, "number",SearchCondition.EQUAL, num, true));
@@ -506,7 +506,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 
 	/**
-	 * é€šè¿‡å®¹å™¨åæŸ¥è¯¢å®¹å™¨å¯¹è±¡(å­˜å‚¨åº“å¯¹è±¡,äº§å“åº“å¯¹è±¡)
+	 * Í¨¹ıÈİÆ÷Ãû²éÑ¯ÈİÆ÷¶ÔÏó(´æ´¢¿â¶ÔÏó,²úÆ·¿â¶ÔÏó)
 	 * get Container by Name
 	 * @param name
 	 * @return WTContainer
@@ -519,9 +519,9 @@ public class GenericUtil implements RemoteAccess {
 				WTLibrary.NAME, SearchCondition.EQUAL, containerName);
 		qs.appendWhere(sc);
 		QueryResult qr = PersistenceHelper.manager.find(qs);
-		if (qr.size() > 0){//å­˜å‚¨åº“å®¹å™¨
+		if (qr.size() > 0){//´æ´¢¿âÈİÆ÷
 			wtc = (WTContainer) qr.nextElement();
-		}else {//äº§å“åº“å®¹å™¨
+		}else {//²úÆ·¿âÈİÆ÷
 			qs = new QuerySpec(PDMLinkProduct.class);
 			sc = new SearchCondition(PDMLinkProduct.class, PDMLinkProduct.NAME,
 					SearchCondition.EQUAL, containerName);
@@ -539,11 +539,11 @@ public class GenericUtil implements RemoteAccess {
 	
 	
     /**
-     * æ–°å»ºä¸€ä¸ªLibraryå®¹å™¨, ä½¿ç”¨å¸¸è§„å­˜å‚¨åº“æ¨¡æ¿, å¦‚æ²¡æœ‰, åˆ™åˆ›å»ºé»˜è®¤å­˜å‚¨åº“æ¨¡æ¿
-     * @param orgName        ç»„ç»‡åç§°
-     * @param libName           å®¹å™¨åç§°
-     * @param libDescription    å®¹å™¨æè¿°
-     * @return                  å®¹å™¨çš„reference
+     * ĞÂ½¨Ò»¸öLibraryÈİÆ÷, Ê¹ÓÃ³£¹æ´æ´¢¿âÄ£°å, ÈçÃ»ÓĞ, Ôò´´½¨Ä¬ÈÏ´æ´¢¿âÄ£°å
+     * @param orgName        ×éÖ¯Ãû³Æ
+     * @param libName           ÈİÆ÷Ãû³Æ
+     * @param libDescription    ÈİÆ÷ÃèÊö
+     * @return                  ÈİÆ÷µÄreference
      * @throws Exception
      */
     public static WTLibrary createLibrary(String orgName,String libName, String libDescription)
@@ -553,12 +553,12 @@ public class GenericUtil implements RemoteAccess {
     
     
     /**
-     * æ–°å»ºä¸€ä¸ªLibraryå®¹å™¨, éœ€æŒ‡å®šå®¹å™¨æ¨¡æ¿åç§°
-     * @param orgName       æŒ‡å®šçš„ç»„ç»‡å
-     * @param libName           å®¹å™¨åç§°
-     * @param libDescription    å®¹å™¨æè¿°
-     * @param templatename      å®¹å™¨æ¨¡æ¿åç§°
-     * @return                  å®¹å™¨çš„reference
+     * ĞÂ½¨Ò»¸öLibraryÈİÆ÷, ĞèÖ¸¶¨ÈİÆ÷Ä£°åÃû³Æ
+     * @param orgName       Ö¸¶¨µÄ×éÖ¯Ãû
+     * @param libName           ÈİÆ÷Ãû³Æ
+     * @param libDescription    ÈİÆ÷ÃèÊö
+     * @param templatename      ÈİÆ÷Ä£°åÃû³Æ
+     * @return                  ÈİÆ÷µÄreference
      * @throws Exception
      */
     public static WTLibrary createLibrary(String orgName,String libName, String libDescription, String templateName) throws Exception {
@@ -569,13 +569,13 @@ public class GenericUtil implements RemoteAccess {
 //            Object[] values = {orgName,libName, libDescription, templateName };
 //            return (WTLibrary) RemoteMethodServer.getDefault().invoke(method, klass, null,types, values);
 //        }else{
-        	//è·å–ç»„ç»‡å®¹å™¨
+        	//»ñÈ¡×éÖ¯ÈİÆ÷
 //          WTUser me = (WTUser) SessionHelper.manager.getPrincipal();
 //          WTOrganization org = OrganizationServicesHelper.manager.getOrganization(me);
 //          WTContainerRef orgContainerRef = WTContainerHelper.service.getOrgContainerRef(org);
           WTOrganization target_org=OrganizationServicesHelper.manager.getOrganization(orgName, ((ExchangeContainer) WTContainerHelper.getExchangeRef().getContainer()).getContextProvider());
           if(target_org==null){
-         	 Debug.P("-------->>>ç»„ç»‡("+orgName+")ä¸å­˜åœ¨,æ— æ³•åˆ›å»º!");
+         	 Debug.P("-------->>>×éÖ¯("+orgName+")²»´æÔÚ,ÎŞ·¨´´½¨!");
          	 return null;
           }
      	    OrgContainer orgContainer=WTContainerHelper.service.getOrgContainer(target_org);
@@ -583,7 +583,7 @@ public class GenericUtil implements RemoteAccess {
           WTLibrary lib = WTLibrary.newWTLibrary();
 //          WTContainerRef libRef = null;
 //          boolean accessEnforced = SessionServerHelper.manager.setAccessEnforced(false);
-//          Vector orgAdmins = findOrgAdmins(target_org);//è·å–è¿™ä¸ªç”¨æˆ·æ‰€åœ¨ç»„ç»‡çš„ç®¡ç†å‘˜
+//          Vector orgAdmins = findOrgAdmins(target_org);//»ñÈ¡Õâ¸öÓÃ»§ËùÔÚ×éÖ¯µÄ¹ÜÀíÔ±
 //          if (orgAdmins == null || orgAdmins.size() == 0)
 //              SessionHelper.manager.setAdministrator();
 //          else {
@@ -594,16 +594,16 @@ public class GenericUtil implements RemoteAccess {
               lib.setName(libName);
               if (libDescription != null)
               lib.setDescription(libDescription);
-              //å®šä¹‰å®¹å™¨æ¨¡æ¿
+              //¶¨ÒåÈİÆ÷Ä£°å
               WTContainerTemplate containerTemplate = ContainerTemplateHelper.service.getContainerTemplate(WTContainerHelper.getExchangeRef(), templateName, WTLibrary.class);
-              if(containerTemplate==null){//å¦‚æœä¸ºç©ºåˆ™å–é»˜è®¤çš„æ¨¡æ¿
+              if(containerTemplate==null){//Èç¹ûÎª¿ÕÔòÈ¡Ä¬ÈÏµÄÄ£°å
               	containerTemplate=getEmptyTemplate(WTLibrary.class,orgContainer.getContainerReference());
               }
               //            WTContainerTemplateRef containerTemplateRef = ContainerTemplateHelper.service.getContainerTemplateRef(
 //              orgContainerRef, templateName, WTLibrary.class);
 //              if (containerTemplateRef == null) {
 //                  WTContainerTemplate containerTemplate = DefaultWTContainerTemplate.newDefaultWTContainerTemplate(
-//                          "é»˜è®¤å­˜å‚¨åº“æ¨¡æ¿", WTLibrary.class.getName());//è¿™é‡Œçš„å­˜å‚¨åº“åç§°ï¼šâ€œé»˜è®¤å­˜å‚¨åº“æ¨¡æ¿â€
+//                          "Ä¬ÈÏ´æ´¢¿âÄ£°å", WTLibrary.class.getName());//ÕâÀïµÄ´æ´¢¿âÃû³Æ£º¡°Ä¬ÈÏ´æ´¢¿âÄ£°å¡±
 //                  containerTemplate = ContainerTemplateHelper.service.createContainerTemplate(
 //                          orgContainerRef, containerTemplate);
 //                  containerTemplateRef = WTContainerTemplateRef.newWTContainerTemplateRef(containerTemplate);
@@ -620,11 +620,11 @@ public class GenericUtil implements RemoteAccess {
     }
     
     /**
-     * åˆ›å»ºäº§å“åº“
-     * @param orgName ç»„ç»‡åç§°
-     * @param productName äº§å“åº“åç§°
-     * @param templateName æ¨¡æ¿åç§°
-     * @param wtproduct äº§å“
+     * ´´½¨²úÆ·¿â
+     * @param orgName ×éÖ¯Ãû³Æ
+     * @param productName ²úÆ·¿âÃû³Æ
+     * @param templateName Ä£°åÃû³Æ
+     * @param wtproduct ²úÆ·
      * @return  PDMLinkProduct
      * @throws WTException
      * @throws WTPropertyVetoException
@@ -634,25 +634,25 @@ public class GenericUtil implements RemoteAccess {
     	if(wtproduct==null){
     		result=PDMLinkProduct.newPDMLinkProduct();
     	}else{
-    		result=PDMLinkProduct.newPDMLinkProduct(wtproduct);//åˆå§‹åŒ–äº§å“åº“åç§°
+    		result=PDMLinkProduct.newPDMLinkProduct(wtproduct);//³õÊ¼»¯²úÆ·¿âÃû³Æ
     	}
 //    	Enumeration orgs = OrganizationServicesHelper.manager.findLikeOrganizations(WTOrganization.NAME, orgName, ((ExchangeContainer) WTContainerHelper.getExchangeRef().getContainer()).getContextProvider());
 //    	WTUser me = (WTUser) SessionHelper.manager.getPrincipal();
 //        WTOrganization org = OrganizationServicesHelper.manager.getOrganization(me);
-    	 //é€šè¿‡åç§°è·å–ç»„ç»‡å®¹å™¨
+    	 //Í¨¹ıÃû³Æ»ñÈ¡×éÖ¯ÈİÆ÷
     	WTOrganization target_org=OrganizationServicesHelper.manager.getOrganization(orgName, ((ExchangeContainer) WTContainerHelper.getExchangeRef().getContainer()).getContextProvider());
          if(target_org==null){
-        	 Debug.P("-------->>>ç»„ç»‡("+orgName+")ä¸å­˜åœ¨,æ— æ³•åˆ›å»º!");
+        	 Debug.P("-------->>>×éÖ¯("+orgName+")²»´æÔÚ,ÎŞ·¨´´½¨!");
         	 return null;
          }
     	OrgContainer orgContainer=WTContainerHelper.service.getOrgContainer(target_org);
         result.setContainer(orgContainer);
         result.setName(productName);
         
-        //å®šä¹‰å®¹å™¨
+        //¶¨ÒåÈİÆ÷
         WTContainerTemplate template=ContainerTemplateHelper.service.getContainerTemplate(WTContainerHelper.getExchangeRef(), templateName, PDMLinkProduct.class);
         
-        if(template==null){//å¦‚æœä¸ºç©ºåˆ™å–é»˜è®¤çš„æ¨¡æ¿
+        if(template==null){//Èç¹ûÎª¿ÕÔòÈ¡Ä¬ÈÏµÄÄ£°å
         	template=getEmptyTemplate(PDMLinkProduct.class,orgContainer.getContainerReference());
         }
         
@@ -668,7 +668,7 @@ public class GenericUtil implements RemoteAccess {
     
     
     /**
-     * è·å–é»˜è®¤çš„æ¨¡æ¿å®¹å™¨
+     * »ñÈ¡Ä¬ÈÏµÄÄ£°åÈİÆ÷
      * @param containerClass
      * @param containerRef
      * @return
@@ -687,7 +687,7 @@ public class GenericUtil implements RemoteAccess {
     }
     
     /**
-     * åˆ›å»ºç©ºæ¨¡æ¿
+     * ´´½¨¿ÕÄ£°å
      * @param name
      * @param containerClass
      * @param parentRef
@@ -867,8 +867,8 @@ public class GenericUtil implements RemoteAccess {
 	/**
 	 * check in a object with comments
 	 * @param w
-	 * @param note å¤‡æ³¨
-	 * @param WTUser ç”¨æˆ·å¯¹è±¡
+	 * @param note ±¸×¢
+	 * @param WTUser ÓÃ»§¶ÔÏó
 	 * @return
 	 * @throws WTPropertyVetoException
 	 * @throws WTException
@@ -1010,7 +1010,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	/***
-	 * ä¸Šä¼ é™„ä»¶
+	 * ÉÏ´«¸½¼ş
 	 * set a file as PRIMARY Content
 	 * @param ch
 	 * @param filename
@@ -1058,7 +1058,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	/**
-	 * è·å–å¯¹è±¡å¯è§†åŒ–çš„è¶…é“¾æ¥åœ°å€
+	 * »ñÈ¡¶ÔÏó¿ÉÊÓ»¯µÄ³¬Á´½ÓµØÖ·
 	 * @param object
 	 * @return
 	 * @throws Exception
@@ -1082,7 +1082,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	/**
-	 * è·å¾—å¯¹è±¡çš„å¯è§†åŒ–æ–‡ä»¶ä¸‹è½½åœ°å€
+	 * »ñµÃ¶ÔÏóµÄ¿ÉÊÓ»¯ÎÄ¼şÏÂÔØµØÖ·
 	 * @param ch
 	 * @return
 	 */
@@ -1112,11 +1112,11 @@ public class GenericUtil implements RemoteAccess {
 			           }
 				  }
 			  }else {
-				   throw new Exception("å¯è§†åŒ–ä¸æ”¯æŒè¯¥å¯¹è±¡("+object+")!");
+				   throw new Exception("¿ÉÊÓ»¯²»Ö§³Ö¸Ã¶ÔÏó("+object+")!");
 			   }
 			} catch (Exception e) {
 			   e.printStackTrace();
-			   throw new Exception("è·å–å¯¹è±¡å¯è§†åŒ–ä¸‹è½½é“¾æ¥å¤±è´¥!");
+			   throw new Exception("»ñÈ¡¶ÔÏó¿ÉÊÓ»¯ÏÂÔØÁ´½ÓÊ§°Ü!");
 			}
 		  }
 		      return viewUrl;
@@ -1475,7 +1475,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
   /**
-   * è·å¾—æœ¬åœ°çš„codebaseè·¯å¾„åœ°å€
+   * »ñµÃ±¾µØµÄcodebaseÂ·¾¶µØÖ·
    * @return
    * @throws IOException
    */
@@ -1751,7 +1751,7 @@ public class GenericUtil implements RemoteAccess {
 	
 	
 	/**
-	 * è·å¾—æœ€æ–°ç‰ˆæœ¬
+	 * »ñµÃ×îĞÂ°æ±¾
 	 * @param master
 	 * @return
 	 * @throws WTException
@@ -1767,7 +1767,7 @@ public class GenericUtil implements RemoteAccess {
 	
 	
 	/**
-	 * è·å¾—WTDocumentæ–‡æ¡£ã€EPMå¯¹è±¡ç¼–ç é“¾æ¥
+	 * »ñµÃWTDocumentÎÄµµ¡¢EPM¶ÔÏó±àÂëÁ´½Ó
 	 * get a Object info URL
 	 * @param objtype
 	 * @param number
@@ -1824,7 +1824,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	/**
-	 * è·å¾—Windchill Hostå‰ç¼€é“¾æ¥å­—ä¸²ï¼Œæ¯”å¦‚Http://pbi.huawei.com
+	 * »ñµÃWindchill HostÇ°×ºÁ´½Ó×Ö´®£¬±ÈÈçHttp://pbi.huawei.com
 	 * get a  URL  exclude host name 
 	 * @param theUrl
 	 * @return
@@ -1840,7 +1840,7 @@ public class GenericUtil implements RemoteAccess {
 	}
 	
 	/**
-	 * å¾—åˆ°ç‰ˆæœ¬ä¿¡æ¯
+	 * µÃµ½°æ±¾ĞÅÏ¢
 	 * @param wto
 	 * @return
 	 */
@@ -1860,7 +1860,7 @@ public class GenericUtil implements RemoteAccess {
     }
 	
 	/**
-	 * æ–‡ä»¶å¤¹ç§»åŠ¨
+	 * ÎÄ¼ş¼ĞÒÆ¶¯
 	 * move a object to other foler
 	 * @param obj
 	 * @param folder
@@ -1878,9 +1878,9 @@ public class GenericUtil implements RemoteAccess {
 	
 	
 	/**
-	 * æŒä¹…åŒ–ä¹‹å‰æ›´æ”¹å¯¹è±¡çš„æ‰¿æ‹…è€…(åˆ›å»ºè€…)
-	 * @param userName ç”¨æˆ·å
-	 * @param objNum å¯¹è±¡ç¼–å·
+	 * ³Ö¾Ã»¯Ö®Ç°¸ü¸Ä¶ÔÏóµÄ³Ğµ£Õß(´´½¨Õß)
+	 * @param userName ÓÃ»§Ãû
+	 * @param objNum ¶ÔÏó±àºÅ
 	 * @throws WTException
 	 */
 	public static void changeCreator(String userName,String objNum)throws WTException{
@@ -1964,7 +1964,7 @@ public class GenericUtil implements RemoteAccess {
 
 
 	/**
-	 * è·å¾—å—å½±å“å¯¹è±¡
+	 * »ñµÃÊÜÓ°Ïì¶ÔÏó
 	 * get the Effect objects
 	 * @param wtco
 	 * @return
@@ -2026,9 +2026,9 @@ public class GenericUtil implements RemoteAccess {
 
 	
 	  /**
-     * è·å–ä¸€ä¸ªOrganizationçš„æ‰€æœ‰ç®¡ç†å‘˜
+     * »ñÈ¡Ò»¸öOrganizationµÄËùÓĞ¹ÜÀíÔ±
      * 
-     * @param org   ç»„ç»‡å¯¹è±¡
+     * @param org   ×éÖ¯¶ÔÏó
      * @return      Vector of organization administrators
      * @throws Exception
      */
@@ -2065,9 +2065,9 @@ public class GenericUtil implements RemoteAccess {
     
     
     /**
-	 *  æ ¹æ®oidæ‰¾åˆ°Persistableå¯¹è±¡
-	 *  ORå¼€å¤´çš„oidå¯ä»¥çœç•¥OR:,VRå¼€å¤´çš„oidå¿…é¡»ä»¥VRï¼šå¼€å¤´
-	 * @param oid  å¯¹è±¡çš„oid
+	 *  ¸ù¾İoidÕÒµ½Persistable¶ÔÏó
+	 *  OR¿ªÍ·µÄoid¿ÉÒÔÊ¡ÂÔOR:,VR¿ªÍ·µÄoid±ØĞëÒÔVR£º¿ªÍ·
+	 * @param oid  ¶ÔÏóµÄoid
 	 * @return  Persistable
 	 */
 	public static Persistable getPersistableByOid(String oid) {
@@ -2085,7 +2085,7 @@ public class GenericUtil implements RemoteAccess {
 //        	   WTUser previous = null;
 //                WTPrincipal wtadministrator = null;
         	try {
-	    		// åˆ‡æ¢session
+	    		// ÇĞ»»session
 //	        previous = (WTUser) SessionHelper.manager.getPrincipal();
 //			wtadministrator = SessionHelper.manager.getAdministrator();
 //			SessionContext.setEffectivePrincipal(wtadministrator);
@@ -2104,10 +2104,10 @@ public class GenericUtil implements RemoteAccess {
 	
 	
 	/**
-	 * é‡æ–°è®¾ç½®å¯¹è±¡ç”Ÿå‘½å‘¨æœŸçŠ¶æ€
-	 * @param LifeCycleManaged å¯¹è±¡
+	 * ÖØĞÂÉèÖÃ¶ÔÏóÉúÃüÖÜÆÚ×´Ì¬
+	 * @param LifeCycleManaged ¶ÔÏó
 	 * @param stateName String
-	 * @return ä¿®æ”¹åçš„å¯¹è±¡
+	 * @return ĞŞ¸ÄºóµÄ¶ÔÏó
 	 */
 	public static LifeCycleManaged changeState(LifeCycleManaged lm, String stateName) {
 		
@@ -2129,14 +2129,14 @@ public class GenericUtil implements RemoteAccess {
 
 	
 	/**
-	 * ç‰ˆæœ¬ä¿®è®¢ (A.1-->B.4) (æ–¹æ³•éœ€æ”¾åœ¨checkoutå’Œcheckinä¹‹é—´)
+	 * °æ±¾ĞŞ¶© (A.1-->B.4) (·½·¨Ğè·ÅÔÚcheckoutºÍcheckinÖ®¼ä)
 	 * @param persistable
 	 * @param version
 	 * @param iteration
 	 */
 	public static Persistable changeVersion(Persistable persistable,String version,String iteration){
 		
-		    //ä¾‹å­:å°†ç‰ˆæœ¬ç”±B.5å˜æˆC.1
+		    //Àı×Ó:½«°æ±¾ÓÉB.5±ä³ÉC.1
 			try {
 			      String versionStr=getVersionInfo((WTObject) persistable);
 			      String comVersion=version+"."+iteration;
@@ -2164,7 +2164,7 @@ public class GenericUtil implements RemoteAccess {
 		
 	
 	/**
-	 * åªä¿®è®¢å¤§ç‰ˆæœ¬å·
+	 * Ö»ĞŞ¶©´ó°æ±¾ºÅ
 	 * @param persistable
 	 * @param revision
 	 * @return
@@ -2179,9 +2179,9 @@ public class GenericUtil implements RemoteAccess {
 	
 	
 	/**
-	 * åˆ é™¤æ–‡æ¡£(åŒ…å«ä¸ä¹‹å…³è”çš„å…³ç³»)
-	 * @param number æ–‡æ¡£ç¼–ç 
-	 * @param version å¦‚æœç‰ˆæœ¬ä¸æŒ‡å®šåˆ™åˆ é™¤æ‰€æœ‰çš„å†å²ç‰ˆæœ¬
+	 * É¾³ıÎÄµµ(°üº¬ÓëÖ®¹ØÁªµÄ¹ØÏµ)
+	 * @param number ÎÄµµ±àÂë
+	 * @param version Èç¹û°æ±¾²»Ö¸¶¨ÔòÉ¾³ıËùÓĞµÄÀúÊ·°æ±¾
 	 * @throws WTException
 	 * @throws InvocationTargetException 
 	 * @throws RemoteException 
@@ -2199,7 +2199,7 @@ public class GenericUtil implements RemoteAccess {
 				   Debug.P("---->>Delete WTDocument Sucess!!");
 				} catch (PropertyVetoException e1) {
 					e1.printStackTrace();
-					throw new WTException("PropertyVetoException:åˆ é™¤ä¸»å†…å®¹å¤±è´¥!");
+					throw new WTException("PropertyVetoException:É¾³ıÖ÷ÄÚÈİÊ§°Ü!");
 				}finally{
 					if(tx!=null){
 						tx.rollback();
@@ -2211,7 +2211,7 @@ public class GenericUtil implements RemoteAccess {
 
 	  
 	  /**
-	   * åˆ é™¤éƒ¨ä»¶
+	   * É¾³ı²¿¼ş
 	   * @param number
 	   * @param version
 	   * @throws WTException
@@ -2244,7 +2244,7 @@ public class GenericUtil implements RemoteAccess {
 	    
 	    
 	    /**
-	     * åˆ é™¤å›¾æ¡£å¯¹è±¡
+	     * É¾³ıÍ¼µµ¶ÔÏó
 	     * @param number
 	     * @param version
 	     * @throws WTException 
@@ -2283,8 +2283,8 @@ public class GenericUtil implements RemoteAccess {
 	    
 	    
 	    /**
-	     * åˆ é™¤å¯¹è±¡(æ–‡æ¡£å¯¹è±¡,éƒ¨ä»¶å¯¹è±¡,å›¾æ¡£å¯¹è±¡)
-	     * å¦‚æœç‰ˆæœ¬ä¸ºç©ºåˆ™åˆ é™¤æ‰€æœ‰çš„å¯¹è±¡ç‰ˆæœ¬
+	     * É¾³ı¶ÔÏó(ÎÄµµ¶ÔÏó,²¿¼ş¶ÔÏó,Í¼µµ¶ÔÏó)
+	     * Èç¹û°æ±¾Îª¿ÕÔòÉ¾³ıËùÓĞµÄ¶ÔÏó°æ±¾
 	     * @param obj
 	     * @param deleteAllVersion
 	     */
@@ -2326,7 +2326,7 @@ public class GenericUtil implements RemoteAccess {
 		                        .getVector());
 		            }
 		            
-		            // åˆ é™¤å…³è”Link
+		            // É¾³ı¹ØÁªLink
 		            // Debug.P("deleting relations: " + linkSet.size());
 		            for (Iterator it = linkSet.iterator(); it.hasNext();) {
 		                BinaryLink link = (BinaryLink) it.next();
@@ -2355,8 +2355,8 @@ public class GenericUtil implements RemoteAccess {
 	    
 	    
 		/**
-		 * é€šè¿‡å¯¹è±¡ç±»å‹çš„æ˜¾ç¤ºåç§°æ¥è·å–æ–‡æ¡£çš„ç±»å‹
-		 * @param name					æ–‡æ¡£ç±»å‹çš„æ˜¾ç¤ºåç§°
+		 * Í¨¹ı¶ÔÏóÀàĞÍµÄÏÔÊ¾Ãû³ÆÀ´»ñÈ¡ÎÄµµµÄÀàĞÍ
+		 * @param name					ÎÄµµÀàĞÍµÄÏÔÊ¾Ãû³Æ
 		 * @return
 		 * @throws WTException
 		 */
@@ -2378,9 +2378,9 @@ public class GenericUtil implements RemoteAccess {
 		}
 		
 		/**
-		 * é€‚ç”¨äºæŒä¹…åŒ–åä¿®æ”¹å¯¹è±¡çš„åˆ›å»ºè€…/ä¿®æ”¹è€…(å‰ææ¡ä»¶:å¯¹è±¡éœ€å…ˆæ£€å‡º)
-		 *@param userName ç”¨æˆ·å¯¹è±¡
-		 *@param persistable æŒä¹…åŒ–å¯¹è±¡
+		 * ÊÊÓÃÓÚ³Ö¾Ã»¯ºóĞŞ¸Ä¶ÔÏóµÄ´´½¨Õß/ĞŞ¸ÄÕß(Ç°ÌáÌõ¼ş:¶ÔÏóĞèÏÈ¼ì³ö)
+		 *@param userName ÓÃ»§¶ÔÏó
+		 *@param persistable ³Ö¾Ã»¯¶ÔÏó
 		 * 
 		 */
 		public static void changeWTPrincipalField(String userName,Persistable persistable,String modifyType)throws WTException,Exception{
@@ -2388,7 +2388,7 @@ public class GenericUtil implements RemoteAccess {
                     
 			 try {
 				  
-				     //è·å¾—ç”¨æˆ·å¯¹è±¡
+				     //»ñµÃÓÃ»§¶ÔÏó
 				     WTUser user= OrganizationServicesHelper.manager.getUser(userName);
 				     PersistenceHelper.manager.refresh(persistable,false,true);
 				     WTPrincipalReference userRef= WTPrincipalReference.newWTPrincipalReference(user);
@@ -2401,23 +2401,23 @@ public class GenericUtil implements RemoteAccess {
 				    	 methodRef=_IterationInfo.class.getDeclaredMethod(METHOD_MODIFIER, principalRef);
 				     }
 				       
-				     if(methodRef==null){ throw new WTException("--------->>>ä¿®æ”¹å¯¹è±¡ç±»å‹æ–¹æ³•ä¸å­˜åœ¨:"+modifyType);}
+				     if(methodRef==null){ throw new WTException("--------->>>ĞŞ¸Ä¶ÔÏóÀàĞÍ·½·¨²»´æÔÚ:"+modifyType);}
 				     methodRef.setAccessible(true);
                     
 	                if(persistable instanceof EPMDocument){
 	                	EPMDocument epmObject=(EPMDocument)persistable;
-	                	methodRef.invoke(epmObject.getIterationInfo(), new Object[]{userRef});//åˆ›å»ºè€…
+	                	methodRef.invoke(epmObject.getIterationInfo(), new Object[]{userRef});//´´½¨Õß
 	                	PersistenceHelper.manager.modify(epmObject);
 	                    PersistenceHelper.manager.refresh(epmObject);
 	                }else if(persistable instanceof WTDocument){
 	                	WTDocument docObject=(WTDocument)persistable;
-	                	methodRef.invoke(docObject.getIterationInfo(), new Object[]{userRef});//åˆ›å»ºè€…
+	                	methodRef.invoke(docObject.getIterationInfo(), new Object[]{userRef});//´´½¨Õß
 	                	SessionHelper.manager.setAuthenticatedPrincipal(userName);
 	                    PersistenceHelper.manager.modify(docObject);
 	                    PersistenceHelper.manager.refresh(docObject);
 	                }else if(persistable instanceof WTPart){
 	                	WTPart partObject=(WTPart)persistable;
-	                	methodRef.invoke(partObject.getIterationInfo(), new Object[]{userRef});//åˆ›å»ºè€…
+	                	methodRef.invoke(partObject.getIterationInfo(), new Object[]{userRef});//´´½¨Õß
 	                	SessionHelper.manager.setAuthenticatedPrincipal(userName);
 	                    PersistenceHelper.manager.modify(partObject);
 	                    PersistenceHelper.manager.refresh(partObject);
@@ -2430,7 +2430,7 @@ public class GenericUtil implements RemoteAccess {
 		
 	    
 		/**
-		 * æ£€å‡ºå¯¹è±¡
+		 * ¼ì³ö¶ÔÏó
 		 * @param wtobject
 		 * @return
 		 * @throws InterruptedException
@@ -2476,7 +2476,7 @@ public class GenericUtil implements RemoteAccess {
 
 		
 		/**
-		 * æ£€å…¥å¯¹è±¡
+		 * ¼ìÈë¶ÔÏó
 		 * @param wtobject
 		 * @return
 		 * @throws WorkInProgressException
@@ -2510,9 +2510,9 @@ public class GenericUtil implements RemoteAccess {
 	    
 		
 		/**
-		 * æ£€æŸ¥æ˜¯å¦å­˜åœ¨è¯¥å®¹å™¨å¯¹è±¡ï¼Œæ²¡æœ‰å°±åˆ›å»ºæ”¹å®¹å™¨å¯¹è±¡
+		 * ¼ì²éÊÇ·ñ´æÔÚ¸ÃÈİÆ÷¶ÔÏó£¬Ã»ÓĞ¾Í´´½¨¸ÄÈİÆ÷¶ÔÏó
 		 * @param wtContainerName
-		 * @param containerType  åˆ›å»ºå®¹å™¨å¯¹è±¡çš„ç±»å‹(1:äº§å“åº“ 2:å­˜å‚¨åº“)
+		 * @param containerType  ´´½¨ÈİÆ÷¶ÔÏóµÄÀàĞÍ(1:²úÆ·¿â 2:´æ´¢¿â)
 		 * @throws WTException
 		 */
 		public static WTContainer checkWTContainer(String orgName,String wtContainerName,String containerType)throws WTException{
@@ -2520,11 +2520,11 @@ public class GenericUtil implements RemoteAccess {
 			WTContainer container=null;
 			try {
 				container=getWTContainerByName(wtContainerName);
-				if(container==null){//åˆ›å»ºå®¹å™¨å¯¹è±¡
+				if(container==null){//´´½¨ÈİÆ÷¶ÔÏó
 					if("1".equals(containerType)){
-						container=createPDMLinkProduct(orgName, wtContainerName, "", null);//TMTæ˜¯ç»„ç»‡åç§°
+						container=createPDMLinkProduct(orgName, wtContainerName, "", null);//TMTÊÇ×éÖ¯Ãû³Æ
 					}else{
-						container=createLibrary(orgName, wtContainerName, "é»˜è®¤TMTå­˜å‚¨åº“æè¿°");
+						container=createLibrary(orgName, wtContainerName, "Ä¬ÈÏTMT´æ´¢¿âÃèÊö");
 					}
 				}
 			} catch (Exception e) {
@@ -2536,7 +2536,7 @@ public class GenericUtil implements RemoteAccess {
 		
 	
 		/**
-		 * ç§»åŠ¨å¯¹è±¡åˆ°å®¹å™¨ä¸‹(åŒ…å«äº§å“åº“å’Œå­˜å‚¨åº“)
+		 * ÒÆ¶¯¶ÔÏóµ½ÈİÆ÷ÏÂ(°üº¬²úÆ·¿âºÍ´æ´¢¿â)
 		 * @param object
 		 * @param containerName
 		 */
@@ -2558,7 +2558,7 @@ public class GenericUtil implements RemoteAccess {
 				 }
 				 
 				 FolderHelper.service.changeFolder(map);
-				 Debug.P("-------->>>ç§»åŠ¨å¯¹è±¡åˆ°å®¹å™¨æˆåŠŸ!");
+				 Debug.P("-------->>>ÒÆ¶¯¶ÔÏóµ½ÈİÆ÷³É¹¦!");
 			 }
 
 			
@@ -2567,7 +2567,7 @@ public class GenericUtil implements RemoteAccess {
 		
 		
 		/**
-		 * æ„é€ äº§å“å®¹å™¨æ–‡ä»¶å¤¹
+		 * ¹¹Ôì²úÆ·ÈİÆ÷ÎÄ¼ş¼Ğ
 		 * @param containerName
 		 * @return
 		 * @throws Exception
@@ -2596,7 +2596,7 @@ public class GenericUtil implements RemoteAccess {
 		
 		
 		/**
-		 * è®¾ç½®å¤§ç‰ˆæœ¬
+		 * ÉèÖÃ´ó°æ±¾
 		 * @param versioned
 		 * @param s
 		 */
@@ -2668,7 +2668,7 @@ public class GenericUtil implements RemoteAccess {
 	    }
 	    
 	    /**
-	     * è®¾ç½®å°ç‰ˆæœ¬
+	     * ÉèÖÃĞ¡°æ±¾
 	     * @param iterated
 	     * @param s
 	     */
@@ -2733,7 +2733,7 @@ public static void moveObject2OtherContainer(String containerOid,String targetFo
 		
 
 /**
- * è®¾ç½®EPMå·¥ä½œåŒºå±æ€§
+ * ÉèÖÃEPM¹¤×÷ÇøÊôĞÔ
  * @param ws
  * @param epm
  * @param attr_name
@@ -2754,13 +2754,13 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 
 
 /**
- * è·å–URlå­—ç¬¦ä¸²ä¸­çš„
+ * »ñÈ¡URl×Ö·û´®ÖĞµÄ
  * @param url
  * @return
  */
  public static  Map<String, String> getURLParams(String url) {
 	    Map<String, String> paramMap = new HashMap<String, String>();
-	    if (!StringUtils.isEmpty(url)) {// å¦‚æœURLä¸æ˜¯ç©ºå­—ç¬¦ä¸²
+	    if (!StringUtils.isEmpty(url)) {// Èç¹ûURL²»ÊÇ¿Õ×Ö·û´®
 	        url = url.substring(url.lastIndexOf('?') + 1);
 	        String paramaters[] = url.split("&");
 	        for (String param : paramaters) {
@@ -2773,7 +2773,7 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 }
  
  /**
-  * è§£æ<a href=*>é‡Œçš„é“¾æ¥åœ°å€
+  * ½âÎö<a href=*>ÀïµÄÁ´½ÓµØÖ·
   * @param str
   * @return
   */
@@ -2790,5 +2790,7 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 	     return result;
     }
 
+ 
+ 
  
 }

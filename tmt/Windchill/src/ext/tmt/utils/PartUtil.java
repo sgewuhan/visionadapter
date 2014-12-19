@@ -13,6 +13,8 @@ import wt.csm.navigation.ClassificationNode;
 import wt.doc.WTDocument;
 import wt.doc.WTDocumentMaster;
 import wt.epm.EPMDocument;
+import wt.fc.Identified;
+import wt.fc.IdentityHelper;
 import wt.fc.ObjectVector;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
@@ -36,6 +38,7 @@ import wt.part.PartType;
 import wt.part.WTPart;
 import wt.part.WTPartDescribeLink;
 import wt.part.WTPartHelper;
+import wt.part.WTPartMasterIdentity;
 import wt.part.WTPartReferenceLink;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
@@ -700,7 +703,26 @@ public class PartUtil implements RemoteAccess {
 		return type;
 
 		}
-
+	
+	
+   /**
+    * 修改名称 
+    * @param part 部件对象
+    * @param newName 新名称
+    * @return
+    * @throws Exception
+    */
+	public static WTPart rename(WTPart part,String newName)throws Exception{
+		if(StringUtils.isNotEmpty(newName)){
+			Identified Identified = (Identified) part.getMaster();
+			WTPartMasterIdentity masterIde=(WTPartMasterIdentity) Identified.getIdentificationObject();
+			masterIde.setName(newName);
+			IdentityHelper.service.changeIdentity(Identified, masterIde);
+			part=(WTPart) PersistenceHelper.manager.refresh(part);
+		}
+		  return part;
+	}
+	
 
 	    
 	    
