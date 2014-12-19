@@ -4,7 +4,6 @@ import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 
 public class PMProductItem extends BasicDBObject {

@@ -1,7 +1,5 @@
 package com.sg.visionadapter;
 
-import java.util.List;
-
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
