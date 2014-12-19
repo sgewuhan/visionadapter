@@ -51,9 +51,15 @@ public class EPMDocHelper implements Serializable {
 		Folder docFolder=  wt.folder.FolderHelper.service.getFolder(epmdoc);
 		Debug.P("epmdocFolder---->"+docFolder);
         if (StringUtils.isEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
+        	if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+        		throw new Exception("不允许将EPM文档检入到容器根文件夹下！请重新指定文件夹");
+        	}
         	if(!docFolder.getFolderPath().contains("工作区"))	
         	  WCToPMHelper.CreateEPMDocToPM(epmdoc);
 		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+        		throw new Exception("不允许将EPM文档检入到容器根文件夹下！请重新指定文件夹");
+        	}
 			if(!docFolder.getFolderPath().contains("工作区"))
 			    WCToPMHelper.CreateEPMDocToPM(epmdoc);
 		}

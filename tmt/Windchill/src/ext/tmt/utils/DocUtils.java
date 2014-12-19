@@ -13,10 +13,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;  
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.Map.Entry;
+import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -38,6 +38,7 @@ import wt.doc.WTDocumentMaster;
 import wt.doc.WTDocumentMasterIdentity;
 import wt.enterprise.Master;
 import wt.enterprise.RevisionControlled;
+import wt.epm.EPMDocument;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
 import wt.fc.ObjectNoLongerExistsException;
@@ -51,14 +52,6 @@ import wt.folder.FolderHelper;
 import wt.iba.value.IBAHolder;
 import wt.iba.value.service.IBAValueHelper;
 import wt.inf.container.WTContainer;
-import wt.inf.container.WTContainerRef;
-import wt.lifecycle.LifeCycleHelper;
-import wt.lifecycle.LifeCycleManaged;
-import wt.lifecycle.LifeCycleServerHelper;
-import wt.lifecycle.LifeCycleTemplate;
-import wt.lifecycle.LifeCycleTemplateMaster;
-import wt.lifecycle.LifeCycleTemplateReference;
-import wt.lifecycle.State;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.org.WTUser;
@@ -72,6 +65,9 @@ import wt.query.QueryException;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.query.TableColumn;
+import wt.representation.Representable;
+import wt.representation.Representation;
+import wt.representation.RepresentationHelper;
 import wt.session.SessionHelper;
 import wt.session.SessionServerHelper;
 import wt.type.TypeDefinitionReference;
@@ -90,12 +86,9 @@ import com.ptc.core.meta.server.TypeIdentifierUtility;
 import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinitionMaster;
 import com.ptc.netmarkets.model.NmOid;
 import com.ptc.netmarkets.util.beans.NmCommandBean;
-import com.ptc.windchill.enterprise.copy.server.CoreMetaUtility;
 import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.URLFileProvider;
-
-import ext.tmt.integration.webservice.pm.ConstanUtil;
 
 
 
@@ -530,6 +523,113 @@ public class DocUtils implements RemoteAccess{
 		}
 		return partNumber;
 	}
+	
+	/**
+	 * 获取文档关联的部件
+	 * @author Eilaiwang
+	 * @param doc
+	 * @return
+	 * @return ArrayList
+	 * @Description
+	 */
+	public static List getDescribePartsByDoc(WTDocument doc){
+		List<String> partList = new ArrayList<String>();
+		try {
+			QueryResult qr2 = PersistenceHelper.manager.navigate(doc, WTPartDescribeLink.DESCRIBES_ROLE,
+					WTPartDescribeLink.class,true);
+			while(qr2.hasMoreElements()){
+				WTPart part = (WTPart)qr2.nextElement();
+				Debug.P("2--->"+part.getNumber());
+				IBAUtils iba = new IBAUtils(part);
+				partList.add(iba.getIBAValue(Contants.PMID));
+			}
+		
+		} catch (WTException e) {
+			e.printStackTrace();
+		}
+        return partList;
+	}
+
+	/**
+	 * 获取文档关联的部件
+	 * @author Eilaiwang
+	 * @param doc
+	 * @return
+	 * @return ArrayList
+	 * @Description
+	 */
+	public static List getDescribePartsByEPMDoc(EPMDocument epmdoc){
+		List<String> partList = new ArrayList<String>();
+		try {
+			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc, WTPartDescribeLink.DESCRIBES_ROLE,
+					WTPartDescribeLink.class,true);
+			while(qr2.hasMoreElements()){
+				WTPart part = (WTPart)qr2.nextElement();
+				Debug.P("2--->"+part.getNumber());
+				IBAUtils iba = new IBAUtils(part);
+				partList.add(iba.getIBAValue(Contants.PMID));
+			}
+		
+		} catch (WTException e) {
+			e.printStackTrace();
+		}
+        return partList;
+	}
+
+	/**
+	 * 获取对象的表示法
+	 * @param representable
+	 * @return
+	 */
+	public static ApplicationData getPdfRep(Representable representable) {
+		ApplicationData ad = null;
+		Representation representation;
+		try {
+			representation = RepresentationHelper.service.getDefaultRepresentation(representable);// 得到表示法
+			Debug.P("representation-->"+representation);
+			if (representation != null) {
+				representation = (Representation) ContentHelper.service.getContents(representation); // 得到表示法的ContentHolder（内容持有者）
+				Vector vector1 = ContentHelper.getContentList(representation);// 得到内容列表
+				Debug.P("vector1  size  -->"+vector1.size());
+				int l = 0;
+				boolean flag = false;
+				for(int i=0;i<vector1.size();i++){//先循环判断可视化列表中有没有PDF格式的文件，如果没有则获取DWG格式的文件
+					if (vector1.get(l) instanceof ApplicationData) {
+						ad = (ApplicationData) vector1.get(l);
+						if (StringUtil.getExtension(ad.getFileName()).equalsIgnoreCase("pdf")) // 取得是pdf文档的表示法
+						{
+							flag=true;
+						}
+					}
+				}
+				for (l = 0; l < vector1.size(); l++) {
+					if (vector1.get(l) instanceof ApplicationData) {
+						ad = (ApplicationData) vector1.get(l);
+							Debug.P("===>>>>>>>The representation is "+ ad.getFileName());
+						if(flag){
+							if (StringUtil.getExtension(ad.getFileName()).equalsIgnoreCase("pdf")) // 取得是pdf文档的表示法
+							{
+								return ad;
+							}
+						}else{
+							if (StringUtil.getExtension(ad.getFileName()).equalsIgnoreCase("dwg")) // 取得是dwg文档的表示法
+							{
+								return ad;
+							}
+						}
+					}
+				}
+				if (l == vector1.size()) {
+					return null;
+				}
+			}
+		} catch (WTException e) {
+			e.printStackTrace();
+		} catch (PropertyVetoException e) {
+			e.printStackTrace();
+		}
+		return ad;
+	}
 
 	/**
 	 * 根据文档编码查询工装图纸对象文档对象
@@ -626,6 +726,35 @@ public class DocUtils implements RemoteAccess{
 		return type;
 
 		}
+	
+
+	/**
+	 *获得文档的参考文档的PMID
+	 * get all DependsOn wtdoc of this
+	 * @param doc
+	 * @return
+	 * @throws Exception
+	 */
+	public static List<String> getWTDocPMIDByWTDocument(WTDocument doc)
+			throws Exception {
+		List<String> docList = new ArrayList<String>();
+		QueryResult v = WTDocumentHelper.service.getDependsOnWTDocuments(doc,
+				false);
+		Vector vector = v.getObjectVector().getVector();
+		for (int k = 0; k < vector.size(); k++) {
+			WTDocumentDependencyLink docLink = (WTDocumentDependencyLink) vector
+					.get(k);
+			/*
+			 * Object[] o = docLink.getAllObjects(); for(int m = 0;m <
+			 * o.length;m++) { if(o[m] instanceof WTDocument) { WTDocument doc1
+			 * = (WTDocument)o[m]; docList.add(doc1); } }
+			 */
+			WTDocument document = docLink.getDependsOn();
+			IBAUtils iba = new IBAUtils(document);
+			docList.add(iba.getIBAValue(Contants.PMID));
+		}
+		return docList;
+	}
 	
 	
 	/**

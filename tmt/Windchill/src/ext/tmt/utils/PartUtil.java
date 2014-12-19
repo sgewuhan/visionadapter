@@ -11,9 +11,11 @@ import org.apache.commons.lang.StringUtils;
 
 import wt.csm.navigation.ClassificationNode;
 import wt.doc.WTDocument;
+import wt.doc.WTDocumentHelper;
 import wt.doc.WTDocumentMaster;
 import wt.epm.EPMDocument;
 import wt.fc.ObjectVector;
+import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
 import wt.fc.QueryResult;
@@ -36,6 +38,7 @@ import wt.part.PartType;
 import wt.part.WTPart;
 import wt.part.WTPartDescribeLink;
 import wt.part.WTPartHelper;
+import wt.part.WTPartMaster;
 import wt.part.WTPartReferenceLink;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
@@ -46,6 +49,7 @@ import wt.vc.Iterated;
 import wt.vc.VersionControlHelper;
 import wt.vc.VersionIdentifier;
 import wt.vc.Versioned;
+import wt.vc.config.ConfigSpec;
 import wt.vc.config.LatestConfigSpec;
 import wt.vc.views.View;
 import wt.vc.views.ViewHelper;
@@ -55,6 +59,8 @@ import wt.vc.wip.WorkInProgressState;
 
 import com.ptc.core.meta.common.TypeIdentifier;
 import com.ptc.core.meta.server.TypeIdentifierUtility;
+
+import ext.tmt.part.PartUtils;
 // part工具类
 public class PartUtil implements RemoteAccess {
 	
@@ -540,6 +546,122 @@ public class PartUtil implements RemoteAccess {
 	
 	
 	
+	
+	/**
+	 * 获取部件的说明方文档的PMID
+	 * @author Eilaiwang
+	 * @param part
+	 * @return
+	 * @throws WTException
+	 * @return WTDocument
+	 * @Description
+	 */
+	public static List<String> getDescriptDocPMIdBy(WTPart part) throws WTException{
+		WTDocument doc =null;
+		List<String> docList = new ArrayList<String>();
+//		List<WTDocument> docList = new ArrayList<WTDocument>();
+		QueryResult qr =WTPartHelper.service.getDescribedByDocuments(part);
+		Debug.P("部件："+part.getNumber()+"关联的说明方文档数量："+qr.size());
+		while (qr.hasMoreElements()) {
+			Object obj = qr.nextElement();
+			if(obj instanceof WTDocument){
+				doc=(WTDocument)obj;
+				Debug.P("部件："+part.getNumber()+"关联的说明方文档---》"+doc.getNumber());
+				IBAUtils iba = new IBAUtils(doc);
+				docList.add(iba.getIBAValue(Contants.PROJECTNO));
+			}
+		}
+		
+		return docList;
+	}
+	
+	/**
+	 * 获取部件的参考文档
+	 * @author Eilaiwang
+	 * @param part
+	 * @return
+	 * @throws WTException
+	 * @return List<WTDocument>
+	 * @Description
+	 */
+	public static WTDocument getReferenceDocByPart(WTPart part) throws WTException{
+		WTDocument doc =null;
+		String documentType="";
+		QueryResult qr = WTPartHelper.service.getReferencesWTDocumentMasters(part);
+		while(qr.hasMoreElements()){
+			Object object=qr.nextElement();
+	    	if(object instanceof WTDocumentMaster){
+			    WTDocumentMaster doct = (WTDocumentMaster)object;
+		         doc = DocUtils.getDocByNumber(doct.getNumber());
+		         IBAUtils iba = new IBAUtils(doc);
+		         documentType=iba.getIBAValue("com.plm.hyth.documentType");
+		         Debug.P(documentType);
+		         if(StringUtils.isNotEmpty(documentType)&&documentType.equals("XH")){
+		        	 return doc;
+		         }
+			}
+		}
+       return doc;
+	}
+	
+
+	/**
+	 * 查询BOM中零部件的单层子部件的pmid
+	 * 
+	 * @param parentPart
+	 * @return
+	 * @throws WTException
+	 * @throws RemoteException
+	 */
+	public static List<String> queryPartPMIDByBOM(WTPart parentPart) throws WTException {
+		List<String> list = new ArrayList<String>();
+		ConfigSpec configSpec = WTPartHelper.service.findWTPartConfigSpec();
+		int index = 0;
+		list = querySubBOMList(parentPart,configSpec, list, index);
+		return list;
+	}
+
+	@SuppressWarnings({ "deprecation", "unchecked" })
+	private static List<String> querySubBOMList(WTPart parentPart, ConfigSpec configSpec, List<String> list, int index) throws WTException {
+		QueryResult qr = WTPartHelper.service.getUsesWTParts(parentPart, configSpec);
+		Vector<Object> vector = qr.getObjectVectorIfc().getVector();
+		Debug.P("BOM数量----------》"+vector.size());
+		for (int i = 0; i < vector.size(); i++) {
+			Persistable[] persist = (Persistable[]) vector.get(i);
+			WTPart part=(WTPart) persist[1];
+			if(part!=null){
+				IBAUtils iba = new IBAUtils(part);
+				list.add(iba.getIBAValue(Contants.PMID));
+			}
+		}
+		return list;
+	}
+	
+	
+	/**
+	 * 根据子部件查询父部件
+	 * @param part
+	 * @return
+	 * @throws WTException
+	 */
+	public static  List<String> queryPrentPartsByParts(WTPart part) throws WTException{
+		List<String> list = new ArrayList<String>();
+		WTPart parts =null;
+		WTPartMaster partMaster= (WTPartMaster)part.getMaster();
+		QueryResult qr = WTPartHelper.service.getUsedByWTParts(partMaster);
+		while(qr.hasMoreElements()){
+			Object obj = (Object)qr.nextElement();
+			Debug.P(obj);
+			if(obj instanceof WTPart){
+				 parts =(WTPart)obj;
+				 IBAUtils iba = new IBAUtils(parts);
+				 list.add(iba.getIBAValue(Contants.PMID));
+			}
+		}
+		return list;
+	}
+	
+	
 	/**
 	 * 获取与部件管理的图样文档的编号
 	 * @author Eilaiwang
@@ -601,6 +723,32 @@ public class PartUtil implements RemoteAccess {
 	       }	
 		return list;
 	}
+	
+	/**
+	 * 获取与部件关联的EPMDocument
+	 * @author Eilaiwang
+	 * @param part
+	 * @return
+	 * @throws WTException
+	 * @return List<EPMDocument>
+	 * @Description
+	 */
+	public static List<String> getEPMDocPMIDByPart(WTPart part)throws WTException{
+		List<String> list = new ArrayList<String>();
+	    		   //EPMDocument doc = EPMDocUtil.getActiveEPMDocument(part);
+		QueryResult qr = WTPartHelper.service.getDescribedByDocuments(part);
+	       while(qr.hasMoreElements()){
+	    	   Object obj = qr.nextElement();
+	    	   if(obj instanceof EPMDocument){
+	    		   EPMDocument doc =(EPMDocument)obj;
+	    			   Debug.P("EPMDocument---->"+doc.getCADName());
+	    			   IBAUtils iba = new IBAUtils(doc);
+	    			   list.add(iba.getIBAValue(Contants.PROJECTNO));
+	    		   }
+	       }
+		return list;
+	}
+	
 	
 	
 	/**
