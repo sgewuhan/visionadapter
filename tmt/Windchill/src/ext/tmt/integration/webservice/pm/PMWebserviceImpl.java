@@ -67,7 +67,7 @@ import wt.wvs.VisualizationHelperFactory;
 
 
 /**
- * Webservice·şÎñÊµÏÖÀà
+ * WebserviceæœåŠ¡å®ç°ç±»
  * @author public759
  *
  */
@@ -78,7 +78,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	private static final long serialVersionUID = -9012564223029784741L;
 
 
-	/*ÎÄ¼ş¼Ğ·şÎñ½Ó¿Ú*/
+	/*æ–‡ä»¶å¤¹æœåŠ¡æ¥å£*/
 	 private  static FolderService folderService=new FolderServiceImpl();
 	 
 	 
@@ -110,7 +110,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	 /**
-	  * ´´½¨ÎÄ¼ş¼Ğ½á¹¹
 	  * @param result
 	  * @throws Exception
 	  */
@@ -130,37 +129,36 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 
 	 /**
-	  * ´´½¨ÎÄ¼ş¼Ğ
+	  *  åˆ›å»ºæ–‡ä»¶å¤¹
 	  * @param pm_id
 	 * @throws Exception 
 	  */
 	 private  static  void createFolderEntry(String objectId) throws Exception{
 		    Folder folderResult=null;
-		    //Ê×ÏÈµÃµ½PM Folder¶ÔÏó
+		    //é¦–å…ˆå¾—åˆ°PM Folderå¯¹è±¡
 		    if(objectId==null) {throw new IllegalArgumentException("----Args PMID is Null");}
 		    ModelServiceFactory factory= ModelServiceFactory.getInstance(codebasePath);
 			FolderPersistence folderPersistence = factory.get(FolderPersistence.class);
-			PMFolder pmfolder=folderPersistence.get(new ObjectId(objectId));//PMÎÄ¼ş¼Ğ¶ÔÏó
+			PMFolder pmfolder=folderPersistence.get(new ObjectId(objectId));//PMæ–‡ä»¶å¤¹å¯¹è±¡
 			checkNull(pmfolder);
 			boolean iscreate=pmfolder.getPLMId()==null?true:false;
-			PMFolder parentFolder=pmfolder.getParentFolder();//¸¸ÎÄ¼ş¼Ğ
+			PMFolder parentFolder=pmfolder.getParentFolder();//çˆ¶æ–‡ä»¶å¤¹
 			checkNull(parentFolder);
 			String containerName=pmfolder.getContainerName();//ContainerName
-			boolean  isContainer=parentFolder.isContainer();//ÊÇ·ñÎªÈİÆ÷
-			String parent_wcId=parentFolder.getPLMId();//»ñµÃ¸¸Ïî¶ÔÏóId
+			boolean  isContainer=parentFolder.isContainer();//æ˜¯å¦ä¸ºå®¹å™¨
+			String parent_wcId=parentFolder.getPLMId();//è·å¾—çˆ¶é¡¹å¯¹è±¡Id
 			String folderName=pmfolder.getCommonName().trim();
 			Debug.P("------>>>Folder:"+folderName+"  ContainerName:"+containerName+"  isContainer="+isContainer+"  ParentFolderID="+parent_wcId);
 			try{
 		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 		    	WTContainer container=checkWTContainerExist(containerName);
-		    	if(iscreate){//ÊÇ·ñÍ¬²½·ÀÖ¹ÖØ¸´´´½¨
-			    	 //Èç¹û¸¸ÏîÊÇÈİÆ÷ÔòÔÚÈİÆ÷ÏÂ´´½¨ÎÄ¼ş¼Ğ
+		    	if(iscreate){
+		    		 //å¦‚æœçˆ¶é¡¹æ˜¯å®¹å™¨åˆ™åœ¨å®¹å™¨ä¸‹åˆ›å»ºæ–‡ä»¶å¤¹
 			    	 if(isContainer){
 			    		  Debug.P("-----Container----->>>Ready Create FolderPath: "+(DEFAULT+"/"+folderName));
 			    		  String folderPath=DEFAULT+"/"+folderName;
 			    		  folderResult=FolderUtil.getFolderRef(folderPath,container,true);
 			    	 }else{
-			    		 //·ñÔò»ñµÃ¸¸ÏîµÄÎÄ¼ş¼Ğ¶ÔÏó
 			    		 Persistable persistable=GenericUtil.getPersistableByOid(parent_wcId);
 			    		 if(persistable!=null&&persistable instanceof Folder){
 			 	             Folder parent_Folder=(Folder)persistable;
@@ -168,25 +166,24 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			 	            }
 			    	      }
 			    	    if(folderResult!=null){
-			                  //»ØĞ´Windchill Folder Oidµ½PMÏµÍ³
 			                  String wc_oid=folderResult.getPersistInfo().getObjectIdentifier().getStringValue();//OID
 			                  Debug.P("------Windchill Folder_OID:"+wc_oid);
 			                  pmfolder.setPLMId(wc_oid);
 			                  pmfolder.setPLMData(getObjectInfo(folderResult));
-			                  pmfolder.doUpdate();//ĞŞ¸Ä
-			                  Debug.P("----->>>´´½¨Í¬²½WindchillÎÄ¼ş¼Ğ:("+folderName+")³É¹¦!");
+			                  pmfolder.doUpdate();
+			                  Debug.P("----->>>åˆ›å»ºåŒæ­¥Windchillæ–‡ä»¶å¤¹:("+folderName+")æˆåŠŸ!");
 			    	    }
 			    	 }
 		    }catch(Exception e){
 		    	e.printStackTrace();
-		    	throw new Exception("Windchill´´½¨ÎÄ¼ş¼Ğ("+folderName+")Ê§°Ü!");
+		    	throw new Exception("Windchillåˆ›å»ºæ–‡ä»¶å¤¹("+folderName+")å¤±è´¥!");
 		    }
 	 }
 	 
 	 /**
-	  * ĞŞ¸ÄÎÄ¼ş¼ĞÃû³Æ
+	  * ä¿®æ”¹æ–‡ä»¶å¤¹åç§°
 	  * @param objectId 
-	  * @param newFolderName ĞÂÎÄ¼ş¼ĞÃû³Æ
+	  * @param newFolderName 
 	  * @return
 	  */
 	 public static int modifyFolderEntry(String objectId,String newFolderName)throws Exception{
@@ -200,17 +197,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	           Object[] vals = {objectId,newFolderName};
 	           return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 	       }else{
-	  		 //²éÑ¯PMÎÄ¼ş¼Ğ¶ÔÏó
+	    	   //æŸ¥è¯¢PMæ–‡ä»¶å¤¹å¯¹è±¡
 	  		 FolderPersistence folderPersistence =  ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
-	       	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PMÎÄ¼ş¼Ğ¶ÔÏó
+	       	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PMé–¿ç†¶èŒçº­é”‹å«¹é–¿ç†·å½¨ç’è§„å«¹é–¿ç†¸æ»é·ï¿½
 	       	 String folderName=folder.getCommonName();
 	       	 checkNull(folder);
-	       	 //»ñµÃWindchill ÎÄ¼ş¼Ğ¶ÔÏó
 	       	 String foid=folder.getPLMId();
 	       	 String containerName=folder.getContainerName();
 	      	 Debug.P("------->>Modify PM Folder:"+folder.getCommonName()+" ;WC_PLMID="+foid+"   ;ContainerName="+containerName);
 	      	 try{
-//	      		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	      		 SessionHelper.manager.setAdministrator();
 		       	 if(!StringUtils.isEmpty(foid)){
 		       		Persistable persistable=GenericUtil.getPersistableByOid(foid);
@@ -220,11 +215,11 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		       				String folderPath=folderObj.getFolderPath();
 		       				String fName=folderObj.getName();
 		       				Debug.P("----->>>OldFolderName:"+fName+"  NewFolderName="+folderName);
-		       				if(!StringUtils.equals(fName, folderName)){//²»Ò»ÖÂÔòĞŞ¸Ä
+		       				if(!StringUtils.equals(fName, folderName)){
 		       					count=folderService.editFolder(folderPath, folderName, containerName);
 			       				if(count>0){
 			       					folder.doUpdate();
-			       					Debug.P("------>>PM ¸üĞÂ OldFolderName("+fName+") ³ÉNewFolderName("+folderName+")Success!");
+			       					Debug.P("------>>PM æ›´æ–° OldFolderName("+fName+") æˆNewFolderName("+folderName+")Success!");
 			       				}
 		       				}
 		       			}
@@ -232,7 +227,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		       	 }
 	      	 }catch(Exception e){
 	      		 e.printStackTrace();
-	      		 throw new Exception("WindchillĞŞ¸ÄÎÄ¼ş¼Ğ("+foid+")ĞÅÏ¢Ê§°Ü!");
+	      		 throw new Exception("Windchillä¿®æ”¹æ–‡ä»¶å¤¹("+foid+")ä¿¡æ¯å¤±è´¥!");
 	      	 }finally{
 	      		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	      	 }
@@ -241,7 +236,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 }
 	 
 	 /**
-	  * É¾³ıÎÄ¼ş¼Ğ°üº¬ÎÄ¼ş¼ĞÏÂµÄ¶ÔÏó
+	  ** åˆ é™¤æ–‡ä»¶å¤¹åŒ…å«æ–‡ä»¶å¤¹ä¸‹çš„å¯¹è±¡
 	 * @throws IllegalAccessException 
 	 * @throws Exception 
 	  * 
@@ -259,22 +254,22 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        }else{
 	             if(!StringUtils.isEmpty(objectId)){
 	            	 FolderPersistence folderPersistence = ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class);
-		        	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));//PMÎÄ¼ş¼Ğ¶ÔÏó
+		        	 PMFolder folder=folderPersistence.get(new ObjectId(objectId));
 		        	 checkNull(folder);
 		        	 SessionHelper.manager.setAdministrator();
 			         String containerName=folder.getContainerName();
-			        //»ñµÃWindchillµÄPLMID
+			        //Windchill ID
 			        String foid=folder.getPLMId();
 		        	try{
 			        	 if(StringUtils.isNotEmpty(foid)){
 			        		Debug.P("------Ready Delete FolderName:"+folder.getCommonName()+"  Windchill FolderId:"+foid);
 			          		Persistable persistable=GenericUtil.getPersistableByOid(foid);
 			          		if(persistable!=null){
-			          			if(persistable instanceof Folder){//ÊÇ·ñÎªÎÄ¼ş¼ĞÀàĞÍ
+			          			if(persistable instanceof Folder){
 			          				Folder folderObj=(Folder)persistable;
 			          				String folderPath=folderObj.getFolderPath();
 			          				count=folderService.deleteFolder(folderPath, containerName);
-			          				if(count>0){//Èç¹ûWindchillÉ¾³ı³É¹¦ÔòÉ¾³ıPMÏµÍ³Êı¾İ
+			          				if(count>0){
 			          					folder.doRemove();
 			          					Debug.P("----Remove PM Folder:"+folder.getCommonName()+" Success!");
 			          				}
@@ -284,7 +279,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			          	 }
 	        	}catch(Exception e){
 	        		 e.printStackTrace();
-	        		 throw new Exception("WindchillÉ¾³ıÎÄ¼ş¼Ğ("+foid+"Ê§°Ü!");
+	        		 throw new Exception("Windchillåˆ é™¤æ–‡ä»¶å¤¹("+foid+"å¤±è´¥!");
 	        	}finally{
 	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	}
@@ -305,7 +300,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	}
 	
 	/**
-	 * ¼ì²éÈİÆ÷ÊÇ·ñ´æÔÚ
+	 *æ£€æŸ¥å®¹å™¨æ˜¯å¦å­˜åœ¨
 	 * @param containerName
 	 * @throws Exception
 	 */
@@ -314,16 +309,16 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	try{
 		 container=GenericUtil.getWTContainerByName(containerName);
 		if(container==null){
-			throw new Exception("WindchillÖĞ²»´æÔÚPMÖĞµÄÈİÆ÷¶ÔÏó,ÇëÁªÏµ¹ÜÀíÔ±ÅäÖÃ!");
+			throw new Exception("Windchillä¸­ä¸å­˜åœ¨PMä¸­çš„å®¹å™¨å¯¹è±¡,è¯·è”ç³»ç®¡ç†å‘˜é…ç½®!");
 		}
 	} catch (Exception e) {
-		throw new Exception("Windchill²éÑ¯("+containerName+")Òì³£!");
+		 throw new Exception("WindchillæŸ¥è¯¢("+containerName+")å¼‚å¸¸!");
 	  }
         return container;
 } 
 	
 	/**
-	 * ´´½¨WTDocumentÎÄµµ
+	 * é–¿ç†¸æ»é·çƒ½æ•“é‚ã‚†å«¹WTDocumenté–¿ç†¶èŒçº°å¤‹å«¹
 	 * @param pm_docId
 	 */
     public static int  createWTDocumentEntry(String pm_docId) throws Exception{
@@ -336,52 +331,48 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            Object[] vals = {pm_docId};
 	            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 	     }else{
-	        	//»ñµÃPMÎÄµµ¶ÔÏó
 	    		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
 	        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
-	        	PMFolder pmfolder=pm_document.getFolder();//»ñµÃÎÄµµËùÔÚµÄPMÎÄ¼ş¼Ğ
-	        	String wc_foid=pmfolder.getPLMId();//Windchill ÎÄ¼ş¼Ğ Oid 
+	        	PMFolder pmfolder=pm_document.getFolder();
+	        	String wc_foid=pmfolder.getPLMId();
 	        	boolean isContainer=pmfolder.isContainer();
-	        	boolean iscreate=pm_document.getPLMId()==null?true:false;//ÊÇ·ñÒÑÍ¬²½µ½Windchill
-	        	WTDocument doc=checkWTDocumentWrite2PM(pm_docId);//Á¬Í¨ĞÔ¼ì²é
+	        	boolean iscreate=pm_document.getPLMId()==null?true:false;
+	        	WTDocument doc=checkWTDocumentWrite2PM(pm_docId);
 		    	if(doc!=null){
 		    		String plmId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
 		    		pm_document.setPLMData(getObjectInfo(doc));
 		    		pm_document.setPLMId(plmId);
 		    		pm_document.setMajorVid(doc.getVersionIdentifier().getValue());
             		pm_document.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
-		    		pm_document.doUpdate();//ĞŞ¸Ä
+		    		pm_document.doUpdate();//é–¿ç†ºæ½¾é—ˆâ•‚å«¹
             		Debug.P("----->>>PM WCID:"+plmId+"  ;PM_Document:"+pm_docId);
 		    		return 1;
 		    	}
 	        	String containerName=pmfolder.getContainerName();
-	        	Debug.P("----->>>>WC   Folder ID:"+wc_foid+"  ÊÇ·ñÎªPMµÄÈİÆ÷ÎÄ¼ş¼Ğ:"+isContainer +"  ;ContaienrName:"+containerName);
+	        	Debug.P("----->>>>WC   Folder ID:"+wc_foid+"  æ˜¯å¦ä¸ºPMçš„å®¹å™¨æ–‡ä»¶å¤¹:"+isContainer +"  ;ContaienrName:"+containerName);
 	        	try{
 	        		Persistable persistable=null;
 	        		  WTContainer container=null;
-	        		  Debug.P("------>>>PM DOC_ID£º"+pm_docId+"ÊÇ·ñĞÂ½¨µ½Windchill="+iscreate);
-	        		  if(iscreate){//ÅĞ¶ÏÊÇ·ñÒÑÍ¬²½µ½Windchill
-	        			  //ÎÄ¼ş¼Ğ¶ÔÏó
+	        		  Debug.P("------>>>PM DOC_IDï¼š"+pm_docId+"æ˜¯å¦æ–°å»ºåˆ°Windchill="+iscreate);
+	        		  if(iscreate){
 	            		  if(!StringUtils.isEmpty(wc_foid)){
 		        				persistable=GenericUtil.getPersistableByOid(wc_foid);
-		        		  }else{//´´½¨µ½ÈİÆ÷ÏÂ
+		        		  }else{
 		        			   container=GenericUtil.getWTContainerByName(containerName);
 		        			   persistable=GenericUtil.createNewPath(container);
 		        		  }
-		        		if(persistable instanceof Folder){//ÎÄ¼ş¼Ğ
+		        		if(persistable instanceof Folder){
 		        			Folder folder=(Folder)persistable;
-		                   //ÅĞ¶ÏÎÄµµÊÇ·ñÒÑ´´½¨
 		       			   boolean isEmpty=StringUtils.isEmpty(pm_document.getPLMId());
-		        			if(isEmpty){//ĞÂ½¨
-		            			Map ibas=new HashMap();//ÈíÊôĞÔ¼¯ºÏ
+		        			if(isEmpty){
+		            			Map ibas=new HashMap();
 		            			setDocIBAValuesMap(ibas, pm_document);
 		            			WTDocument document= DocUtils.createDocument(pm_document, null,VMUSER,ibas,folder);
-		            			//»ØĞ´WindchillĞÅÏ¢µ½PM
 				        		if(document!=null){
-				        			if(isContainer){//ÈİÆ÷
+				        			if(isContainer){
 			        					GenericUtil.moveObject2Container(document, container,folder);
-			        				}else{//ÎÄ¼ş¼Ğ
+			        				}else{
 			        					FolderUtil.changeFolder(document,folder);
 			        				}
 				            		String wcId=document.getPersistInfo().getObjectIdentifier().getStringValue();
@@ -389,7 +380,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				            		pm_document.setPLMId(wcId);
 				            		pm_document.setMajorVid(document.getVersionIdentifier().getValue());
 				            		pm_document.setSecondVid(Integer.valueOf(document.getIterationIdentifier().getValue()));
-				            		WriteResult result=pm_document.doUpdate();//ĞŞ¸Ä
+				            		WriteResult result=pm_document.doUpdate();
 				            		
 				            		Debug.P("----->>>PM Return:("+result.getN()+")Create WCID:"+wcId+"  ;PM_Document:"+pm_docId);
 				            		count=1;
@@ -399,7 +390,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        		  }
 	        	}catch(Exception e){
 	        		 e.printStackTrace();
-	        		throw new Exception("Windchill ´´½¨("+pm_document.getCommonName()+")ÎÄµµÊ§°Ü!");
+	        		 throw new Exception("Windchill åˆ›å»º("+pm_document.getCommonName()+")æ–‡æ¡£å¤±è´¥!");
 	        	}finally{
 	        		 SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	}
@@ -409,7 +400,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     
 
     /**
-     * ¸üĞÂÎÄµµĞÅÏ¢
+     * æ›´æ–°æ–‡æ¡£ä¿¡æ¯
      * @param pm_id
      * @param newDocName
      * @return
@@ -430,10 +421,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	     	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
 	     	checkNull(pm_document);
 	     	String pm_docName=pm_document.getCommonName();
-	     	//ÅĞ¶ÏÊÇ·ñÒÑ¾­Í¬²½µ½Windchill
+	     	//é–¿ç†·å½¨ç’è§„å«¹é–¿ç†»î‘é‘ã‚†å«¹é–¿ç†ºç¤é¾å‘®å«¹éšå²„æ•“é‚ã‚†å«¹é–¿ç†¸æ»é·ç¨ºindchill
      		boolean isCreated=pm_document.getPLMId()==null?false:true;
      		String doc_id=pm_document.getPLMId();
-     		Debug.P("------>>>>WindchillÖĞÊÇ·ñÒÑ¾­´´½¨("+pm_docName+"):"+isCreated+"  Doc_Windchill:"+doc_id);
+     		Debug.P("------>>>>Windchillä¸­æ˜¯å¦å·²ç»åˆ›å»º("+pm_docName+"):"+isCreated+"  Doc_Windchill:"+doc_id);
 	     		try{
 	     			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 //	     			SessionHelper.manager.setAdministrator();
@@ -443,26 +434,25 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			if(object!=null&&object instanceof WTDocument){
 	         				WTDocument doc=(WTDocument)getLastObjectByNum(object);
 	         				Map ibas=LWCUtil.getAllAttribute(doc);
-	         			    setDocIBAValuesMap(ibas, pm_document);//¸üĞÂÈíÊôĞÔ
+	         			    setDocIBAValuesMap(ibas, pm_document);
 	         				doc=(WTDocument) GenericUtil.checkout(doc);
-	         				doc=DocUtils.updateWTDocument(doc,pm_document, ibas);//¸üĞÂÎÄµµ
+	         				doc=DocUtils.updateWTDocument(doc,pm_document, ibas);
 	         				if (doc != null) {
 	         					if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(doc, wt.session.SessionHelper.manager.getPrincipal()))
 	         						doc = (WTDocument) WorkInProgressHelper.service.checkin(doc, "update document Info");
 	         				   }
 	         			
-	             			//²Ù×÷Íê»Øµ÷doUpdate()
 	         				pm_document.setPLMData(getObjectInfo(doc));
 	         				pm_document.setPLMId(doc.getPersistInfo().getObjectIdentifier().getStringValue());
 	         				pm_document.setMajorVid(doc.getVersionIdentifier().getValue());
 	         				pm_document.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
 	         				pm_document.doUpdate();
-	         			    Debug.P("------>>>Update PM_DocumentName£º"+pm_docName+" Success!");
+	         			   Debug.P("------>>>Update PM_DocumentNameï¼š"+pm_docName+" Success!");
 	         			}
 	         		}
 	     		}catch(Exception e){
 	     			e.printStackTrace();
-	     			throw new Exception("Windchill¸üĞÂ("+doc_id+")ÎÄµµ¶ÔÏóÊ§°Ü!");
+	     			throw new Exception("Windchillæ›´æ–°("+doc_id+")æ–‡æ¡£å¯¹è±¡å¤±è´¥!");
 	     		}finally{
 	     			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	     		}
@@ -475,14 +465,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	
 	
     /**
-     * É¾³ıÎÄµµ¶ÔÏó
+     *  åˆ é™¤æ–‡æ¡£å¯¹è±¡
      * @param pm_docId
      * @return
      * @throws Exception
      */
     public static int deleteWTDocumentEntry(String pm_docId)throws Exception{
     	
-       Debug.P("------>>>Delete PM_DocumentID£º"+pm_docId);
+    	   Debug.P("------>>>Delete PM_DocumentIDï¼š"+pm_docId);
        
   	   if (!RemoteMethodServer.ServerFlag) {
            String method = "deleteWTDocumentEntry";
@@ -495,11 +485,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
        	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
        	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
        	checkNull(pm_document);
-       	 //»ñµÃPM ÎÄµµ¶ÔÓ¦µÄWindchillÎÄµµID
        	String wc_oid=pm_document.getPLMId();
        	Debug.P("------>>>PM("+pm_docId+")<--->Windchill("+wc_oid+")");
        	try {
-//       		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
        		SessionHelper.manager.setAdministrator();
        		if(!StringUtils.isEmpty(wc_oid)){
        			Persistable object=GenericUtil.getPersistableByOid(wc_oid);
@@ -513,7 +501,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
            	  }
    	    	} catch(Exception e){
    	    		e.printStackTrace();
-   			   throw new Exception("WindchillÉ¾³ıÎÄµµ¶ÔÏó("+wc_oid+")Ê§°Ü!");
+   	    	   throw new Exception("Windchillåˆ é™¤æ–‡æ¡£å¯¹è±¡("+wc_oid+")å¤±è´¥!");
    		   }finally{
    			   SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
    		   }
@@ -523,14 +511,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     
     
     /**
-     * Í¬²½ÒÆ¶¯PMÎÄµµµÄÂ·¾¶µ½WindchillÏµÍ³ÖĞ¸ü¸Ä
+     *  åŒæ­¥ç§»åŠ¨PMæ–‡æ¡£çš„è·¯å¾„åˆ°Windchillç³»ç»Ÿä¸­æ›´æ”¹
      * @param pm_docId
      * @return
      * @throws Exception
      */
     public static int moveWTDocumentEntry(String pm_docId)throws Exception{
 
-   	 Debug.P("------>>>Move Path PM_DocumentID £º"+pm_docId);
+     Debug.P("------>>>Move Path PM_DocumentID ï¼š"+pm_docId);
 	 checkNull(pm_docId);
 	 if (!RemoteMethodServer.ServerFlag) {
            String method = "moveWTDocumentEntry";
@@ -541,10 +529,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
        }else{
     	     BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_docId);
     	 	 checkNull(basic_object);
-    	 	//¸ù¾İPMÎÄ¼ş¼ĞÕÒµ½ÓëÖ®¶ÔÓ¦µÄWindchillÎÄ¼ş¼ĞOid
     	     PMFolder folder=basic_object.getFolder();
     	     checkNull(folder);
-    	 	 //ÅĞ¶ÏÎÄ¼ş¼ĞÊÇ·ñÎªÈİÆ÷Root
     	 	 boolean isContainer=folder.isContainer();
     	 	 String containerName=folder.getContainerName();
     	 	 checkNull(folder);
@@ -559,14 +545,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			if(object!=null){
 	         				object=getLastObjectByNum(object);
 	    			    	Folder folderObj=null;
-		         			if(isContainer){//ÈİÆ÷
+		         			if(isContainer){
 		         				    Debug.P("----->>>IsContainer:"+isContainer);
 		         					WTContainer container=GenericUtil.getWTContainerByName(containerName);
 		         					folderObj=GenericUtil.createNewPath(container);
-		         					GenericUtil.moveObject2Container(object, container, folderObj);//ÒÆ¶¯µ½ÈİÆ÷Ä¿Â¼ÏÂ
+		         					GenericUtil.moveObject2Container(object, container, folderObj);//é–¿ç†ºå«›ç’è§„å«¹é–¿ç†¸æ»é·çƒ½æ•“é‚ã‚†å«¹é–¿ç†¸æ»é·é£æ´°è¤°æ›¢æ•“é‚ã‚†å«¹
 		         					 Debug.P("----->>>moveObject2Container:"+object);
-		         				}else{//ÎÄ¼ş¼Ğ
-		         					if(StringUtils.isEmpty(wc_foid)){throw new Exception("ÎÄµµ("+basic_object.getCommonName()+")Ä¿±êÎÄ¼ş¼Ğ("+folder.getCommonName()+")ÔÚWindchillÏµÍ³²»´æÔÚ ,ÎŞ·¨Ö´ĞĞÒÆ¶¯²Ù×÷!");}
+		         				}else{
+		         					if(StringUtils.isEmpty(wc_foid)){throw new Exception("æ–‡æ¡£("+basic_object.getCommonName()+")ç›®æ ‡æ–‡ä»¶å¤¹("+folder.getCommonName()+")åœ¨Windchillç³»ç»Ÿä¸å­˜åœ¨ ,æ— æ³•æ‰§è¡Œç§»åŠ¨æ“ä½œ!");}
 		         					folderObj=(Folder) GenericUtil.getPersistableByOid(wc_foid);
 		         					if(folderObj!=null){
 		         						Debug.P("----->>>>Start Move Folder"+folderObj.getName());
@@ -580,7 +566,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     			    }
     		    }catch(Exception e){
     		    	e.printStackTrace();
-    		    	throw new Exception("WindchillÒÆ¶¯¶ÔÏóµ½("+wc_foid+")ÖĞÊ§°Ü!");
+    		    	throw new Exception("Windchillç§»åŠ¨å¯¹è±¡åˆ°("+wc_foid+")ä¸­å¤±è´¥!");
     		    }finally{
     		    	SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
     		    }
@@ -591,7 +577,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     
     
     /**
-     * »ñÈ¡¶ÔÏó×îĞÂ°æ±¾
+     *  è·å–å¯¹è±¡æœ€æ–°ç‰ˆæœ¬
      * @param object
      * @throws Exception
      */
@@ -613,30 +599,29 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     }
     
 	/**
-	 * Ó³ÉäÎÄµµ¶ÔÏó¶ÔÏóÈíÊôĞÔ
+	 *  æ˜ å°„æ–‡æ¡£å¯¹è±¡å¯¹è±¡è½¯å±æ€§
 	 * @param ibas
 	 * @param object
 	 * @throws WTException
 	 */
 	private  static void setDocIBAValuesMap(Map ibas,PMDocument object )throws WTException{
-		//ÉèÖÃ¶ÔÏó²ÎÊı
 		if(!StringUtils.isEmpty(object.getPhase())){
-			 ibas.put(ConstanUtil.PHASE, object.getPhase());//½×¶Î
+			 ibas.put(ConstanUtil.PHASE, object.getPhase());
 		}
 		if(!StringUtils.isEmpty(object.getProductNumber())){
-			ibas.put(ConstanUtil.PROJECTNO,object.getProductNumber());//ÏîÄ¿±àºÅ
+			ibas.put(ConstanUtil.PROJECTNO,object.getProductNumber());
 		}
 		if(!StringUtils.isEmpty(object.getProjectWorkOrder())){
-			ibas.put(ConstanUtil.WORKORDER, object.getProjectWorkOrder());//¹¤×÷ÁîºÅ
+			ibas.put(ConstanUtil.WORKORDER, object.getProjectWorkOrder());
 		}
 		if(!StringUtils.isEmpty(object.getProductNumber())){
-			  ibas.put(ConstanUtil.PRODUCTNO, object.getProductNumber());//¹ØÁªµÄ³ÉÆ·ºÅ
+			  ibas.put(ConstanUtil.PRODUCTNO, object.getProductNumber());
 		}
 		if(!StringUtils.isEmpty(object.getCreateByUserId())){
-			  ibas.put(Contants.PMCREATOR, object.getCreateByUserId());//´´½¨Õß
+			  ibas.put(Contants.PMCREATOR, object.getCreateByUserId());
 		}
 		if(!StringUtils.isEmpty(object.getModifiedUserId())){
-			  ibas.put(Contants.PMMODIFYEDBY, object.getModifiedUserId());//ĞŞ¸ÄÕß
+			  ibas.put(Contants.PMMODIFYEDBY, object.getModifiedUserId());
 		}
 		if(StringUtils.isNotEmpty(object.get_id().toString())){
 			ibas.put(ConstanUtil.PMID, object.get_id().toString());
@@ -646,7 +631,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	
 
 	/**
-	 * »ñÈ¡¶ÔÏóµÄÊôĞÔĞÅÏ¢
+	 *è·å–å¯¹è±¡çš„å±æ€§ä¿¡æ¯
 	 * @param object
 	 * @throws WTException
 	 */
@@ -660,7 +645,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				   result.put(ConstanUtil.NUMBER, part.getNumber());
 				   result.put(ConstanUtil.CREATOR, part.getCreator().getName());
 				   result.put(ConstanUtil.MODIFIER, part.getModifier().getName());
-				   //»ñÈ¡¶ÔÏóµÄÈíÊôĞÔ¼¯ºÏ
 				   Map<String,Object> ibas=LWCUtil.getAllAttribute(part);
 				   result.putAll(ibas);
 			   }else if(object instanceof EPMDocument){
@@ -674,7 +658,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				   result.put(ConstanUtil.CREATEDATE, epm.getCreateTimestamp().toString());
 				   result.put(ConstanUtil.MODIFYDATE, epm.getModifyTimestamp().toString());
 				   result.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(epm));
-				   //»ñÈ¡¶ÔÏóµÄÈíÊôĞÔ¼¯ºÏ
 				   Map<String,Object> ibas=LWCUtil.getAllAttribute(epm);
 				   result.putAll(ibas);
 			   }else if(object instanceof WTDocument){
@@ -689,14 +672,12 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //			   result.put(ConstanUtil.CREATEDATE, doc.getCreateTimestamp().toString());
 //			   result.put(ConstanUtil.MODIFYDATE, doc.getModifyTimestamp().toString());
 				   result.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(doc));
-				   //»ñÈ¡¶ÔÏóµÄÈíÊôĞÔ¼¯ºÏ
 				   Map<String,Object> ibas=LWCUtil.getAllAttribute(doc);
 				   result.putAll(ibas);
 			   }else if(object instanceof Folder){
 				   Folder folder=(Folder)object;
 				   result.put(ConstanUtil.NAME, folder.getName());
 			   }
-			     //¶ÔÏóÁ´½ÓµØÖ·
 			     result.put(ConstanUtil.OBJECT_URL, GenericUtil.getObjUrl(object));
 		  }
 		        return result;
@@ -704,7 +685,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	
 	
 	 /**
-	  * »ñµÃ¶ÔÏóµÄ°æ±¾(A.3)
+	  * é–¿ç†¸æ»é·é”‹ç‡é–¿ç†¸æ»é·çƒ½æ•“æ¸šãƒ§å¢—éˆï¿½A.3)
 	  * @param object
 	  * @return
 	  */
@@ -725,7 +706,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	 /**
-	  * ĞŞ¶©°æ±¾
+	  *è·å¾—å¯¹è±¡çš„ç‰ˆæœ¬(A.3)
 	  * @param pm_oid
 	  * @throws Exception
 	  */
@@ -739,14 +720,12 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		            Object[] vals = {pm_id};
 		            RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 		     }else{
-		    	 //»ñÈ¡PMÎÄµµ¶ÔÏó
+		    	//è·å–PMæ–‡æ¡£å¯¹è±¡
 	             BasicDocument basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
 	             checkNull(basic_object);
-			   //»ñµÃWindChill ID
 	        	String wc_id=basic_object.getPLMId();
 	        	Debug.P("----------->>>Windchill PLMID:"+wc_id);
 	        	try {
-//	        		SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 	        	    SessionHelper.manager.setAdministrator();
 	        		if(!StringUtils.isEmpty(wc_id)){
 					     Persistable object=GenericUtil.getPersistableByOid(wc_id);
@@ -756,7 +735,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 						 Persistable newobject= VersionControlHelper.service.newVersion((Versioned) object);
 						 FolderHelper.assignLocation((FolderEntry) newobject,folder);
 						 PersistenceHelper.manager.save(newobject);
-						 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);//ĞŞ¶©Ê±½«¶ÔÏóÉúÃüÖÜÆÚ×´Ì¬¸ÄÎª¹¤×÷ÖĞ
+						 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);//é–¿ç†ºæ½¾ç’è§„å«¹éƒå •æ•“é‚ã‚†å«¹é–¿ç†¸æ»é·çƒ½æ•“é‚ã‚†å«¹é–¿ç†¸æ»é·çƒ½æ•“é‚ã‚†å«¹é–¿ç†¸æ»é·çƒ½æ•“é‚ã‚†å«¹é˜èˆµï¿½é–¿ç†¸æ»é·èœ‚è´Ÿé–¿ç†¸æ»é·çƒ½æ•“é‚ã‚†å«¹é–¿ç†¸æ»é·ï¿½
 						 PersistenceHelper.manager.refresh(newobject);
 						 if(newobject instanceof EPMDocument){
 							 EPMDocument empdoc=(EPMDocument)newobject;
@@ -779,7 +758,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					basic_object.doSetErrorMessage(10, "PLM ĞŞ¶©("+wc_id+")Éı¼¶°æ±¾Òì³£!");
+					basic_object.doSetErrorMessage(10, "PLM ä¿®è®¢("+wc_id+")å‡çº§ç‰ˆæœ¬å¼‚å¸¸!");
 				    throw new Exception(e.getMessage());
 				}finally{
 					SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
@@ -790,7 +769,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 }
 
 	 /**
-	  * ĞŞ¸ÄÉúÃüÖÜÆÚ×´Ì¬
+	  * ä¿®æ”¹ç”Ÿå‘½å‘¨æœŸçŠ¶æ€
 	  * @param pm_id
 	  * @return
 	  */
@@ -804,11 +783,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	            Object[] vals = {pm_id};
 	            RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 	     }else{
-			 //»ñÈ¡PMÎÄµµ¶ÔÏó
 			  if(!StringUtils.isEmpty(pm_id)){
 				     BasicDocument  basic_object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
 			      	 checkNull(basic_object);
-			      	//»ñµÃWindChill ID
 			        String wc_id=basic_object.getPLMId();
 			        Debug.P("----------->>>Windchill PLMID:"+wc_id);
 			        try {
@@ -824,7 +801,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 					      }
 			        } catch (Exception e) {
 					    e.printStackTrace();
-					    throw new Exception("Windchill ĞŞ¸Ä¶ÔÏó("+wc_id+"ÉúÃüÖÜÆÚ×´Ì¬Ê§°Ü!");
+					    throw new Exception("Windchill ä¿®æ”¹å¯¹è±¡("+wc_id+"ç”Ÿå‘½å‘¨æœŸçŠ¶æ€å¤±è´¥!");
 					}finally{
 						SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 					}
@@ -834,7 +811,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	 /**
-	  * ¸ü¸Ä¶ÔÏó½×¶Î
+	  * æ›´æ”¹å¯¹è±¡é˜¶æ®µ
 	  * @param pm_id
 	  * @throws Exception
 	  */
@@ -849,10 +826,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		            return (Integer)RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
 		     }else{
 				  if(!StringUtils.isEmpty(pm_id)){
-					  //¸ù¾İpm_idĞŞ¸Ä½×¶ÎĞÅÏ¢
 					  BasicDocument object=ModelServiceFactory.getInstance(codebasePath).getBasicDocumentById(pm_id);
-		              String phase=object.getPhase();//½×¶Î
-		           	  String wc_id=object.getPLMId();//PM¶ÔÓ¦µÄWindchill Number×Ö¶Î
+		              String phase=object.getPhase();
+		           	  String wc_id=object.getPLMId();
 		              Debug.P("----Phase--->>>Windchill ID:"+wc_id+"   ;Phase Value:"+phase);
 		              if(!StringUtils.isEmpty(wc_id)){
 		             try {
@@ -868,7 +844,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 					    }
 					 } catch (Exception e) {
 						 e.printStackTrace();
-						 throw new Exception("Windchill ("+wc_id+") ĞŞ¸Ä½×¶ÎÊ§°Ü!");
+						 throw new Exception("Windchill ("+wc_id+") ä¿®æ”¹é˜¶æ®µå¤±è´¥!");
 					}finally{
 						SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 					}       
@@ -882,7 +858,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	 /**
-	  * »ñµÃ¶ÔÏóµÄ¿ÉÊÓ»¯Á´½Ó
+	  * è·å¾—å¯¹è±¡çš„å¯è§†åŒ–é“¾æ¥
 	  * @param plmId
 	  * @return
 	  */
@@ -903,7 +879,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		    }
 		    Debug.P("------->>>>>View URL:"+result);
 		} catch (Exception e) {
-		   throw new Exception("»ñÈ¡¶ÔÏóµÄ¿ÉÊÓ»¯Á´½ÓÊ§°Ü!");
+			e.printStackTrace();
+			 throw new Exception("è·å–å¯¹è±¡çš„å¯è§†åŒ–é“¾æ¥å¤±è´¥!");
 		}finally{
 			SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 		}
@@ -912,11 +889,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 
 	 
 	 /**
-	  * ¼ì²é¶ÔÏóÊÇ·ñ»ØĞ´µ½PMÏµÍ³
+	  * æ£€æŸ¥å¯¹è±¡æ˜¯å¦å›å†™åˆ°PMç³»ç»Ÿ
 	  * @return
 	  */
 	 private static WTDocument checkWTDocumentWrite2PM(String pmOid){
-		 //Ğ£ÑéÁ¬Í¨ĞÔÊı¾İĞÅÏ¢
 		WTDocument doc=null;
 	    Map<String,String> ibaValues=new HashMap<String,String>();
 	    ibaValues.put(ConstanUtil.PMID, pmOid);
@@ -925,27 +901,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	    	doc=(WTDocument)list.get(0);
 	    }
 	      return doc;
-	 }
-	 
-	 public static void main(String[] args) throws Exception {
-		   String oid="VR:wt.epm.EPMDocument:4975395";
-		  Persistable object=GenericUtil.getPersistableByOid(oid);
-		  if(object!=null){
-			  object=getLastObjectByNum(object);
-			  VisualizationHelper visualizationHelper = VisualizationHelper.newVisualizationHelper();
-			  String [] arr= visualizationHelper.getDefaultVisualizationStringsForSearch(object, Locale.US);
-//			  String [] arr=visualizationHelper.getDefaultVisualizationData(object.toString(),true,Locale.US);
-			  boolean flag=visualizationHelper.isWVSEnabled();
-			  System.out.println("----flag:"+flag);
-			  if(flag){
-				  String fl=visualizationHelper.DEFAULT_THUMBNAILS_PROP_PAGE_PREF_VALUE;
-                  System.out.println("->>>>>>"+fl);
-			  }
-//			  visualizationHelper.getppwAutoloadPref(arg0)
-			  int pindx=visualizationHelper.productViewLinkIndex();
-			  System.out.println("---->>>Link:"+arr[pindx]);
-		  }
-		
 	 }
 	 
 	 

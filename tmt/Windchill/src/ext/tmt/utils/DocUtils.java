@@ -102,7 +102,7 @@ import ext.tmt.integration.webservice.pm.ConstanUtil;
 
 
 /**
- * ±¾ÀàÓÃÓÚ´¦ÀíÎÄµµµÄÒ»Ğ©²Ù×÷
+ * æœ¬ç±»ç”¨äºå¤„ç†æ–‡æ¡£çš„ä¸€äº›æ“ä½œ
  * 
  * @author Tony
  */
@@ -125,12 +125,12 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ´´½¨WTDocument
-	 * @param pmdoc  PMÎÄµµ±àºÅ
-	 * @param docType ÎÄµµÀàĞÍ
-	 *@param  vmuser ĞéÄâÓÃ»§
-	 *@param ibas ÈíÊôĞÔ¼¯ºÏ
-	 *@param lifecycleName ÉúÃüÖÜÆÚ×´Ì¬Ä£°åÃû³Æ
+	 * åˆ›å»ºWTDocument
+	 * @param pmdoc  PMæ–‡æ¡£ç¼–å·
+	 * @param docType æ–‡æ¡£ç±»å‹
+	 *@param  vmuser è™šæ‹Ÿç”¨æˆ·
+	 *@param ibas è½¯å±æ€§é›†åˆ
+	 *@param lifecycleName ç”Ÿå‘½å‘¨æœŸçŠ¶æ€æ¨¡æ¿åç§°
 	 * @return
 	 * @throws Exception
 	 * @throws WTException
@@ -144,13 +144,13 @@ public class DocUtils implements RemoteAccess{
 		try {
 			  tx=new Transaction();
 			  tx.start();
-			  String doc_Number=getWTDocumentNumber();//Ä¬ÈÏÅÅĞò±àÂë
+			  String doc_Number=getWTDocumentNumber();//é»˜è®¤æ’åºç¼–ç 
 			  document =WTDocument.newWTDocument();
-			//ÎÄµµÀàĞÍ
+			//æ–‡æ¡£ç±»å‹
 			if (!StringUtils.isEmpty(docType)) {
-			  String docTypeEnum = GenericUtil.getTypeByName(docType);//¸ù¾İÏÖÊµÃû³Æ»ñÈ¡ÈíÀàĞÍ
+			  String docTypeEnum = GenericUtil.getTypeByName(docType);//æ ¹æ®ç°å®åç§°è·å–è½¯ç±»å‹
 		      if(StringUtils.isEmpty(docTypeEnum)){
-		         throw new WTException("--->>ÔÚwindchillÖĞÎŞ·¨ÕÒµ½"+docTypeEnum+"Õâ¸öÎÄµµÀàĞÍ!");
+		         throw new WTException("--->>åœ¨windchillä¸­æ— æ³•æ‰¾åˆ°"+docTypeEnum+"è¿™ä¸ªæ–‡æ¡£ç±»å‹!");
 		      } 
 		      TypeDefinitionReference typeDefinitionRef   = TypedUtility.getTypeDefinitionReference(docTypeEnum);
 		       if (typeDefinitionRef == null) {
@@ -158,7 +158,7 @@ public class DocUtils implements RemoteAccess{
 					return null;
 				}
 		        document.setTypeDefinitionReference(typeDefinitionRef);
-			}else{//Ä¬ÈÏ³£¹æÎÄµµ
+			}else{//é»˜è®¤å¸¸è§„æ–‡æ¡£
 				 DocumentType type=wt.doc.DocumentType.toDocumentType("$$Document");
 				 document.setDocType(type);
 			}
@@ -166,7 +166,7 @@ public class DocUtils implements RemoteAccess{
 			String doc_Name=pmdoc.getCommonName();
 			document.setName(doc_Name);
 			document.setNumber(doc_Number);
-			//ÈİÆ÷¶ÔÏó
+			//å®¹å™¨å¯¹è±¡
 		    String containerName=pmdoc.getContainerName();
 		    Debug.P("------>>>PM  ContainerName:"+containerName);
 			WTContainer container=GenericUtil.getWTContainerByName(containerName);
@@ -178,7 +178,7 @@ public class DocUtils implements RemoteAccess{
 			document.setContainer(container);
 			document.setOrganization(container.getOrganization());
 			
-			//Ö¸¶¨ÎÄ¼şµÄÎ»ÖÃ
+			//æŒ‡å®šæ–‡ä»¶çš„ä½ç½®
 			if(folder!=null){
 				FolderHelper.assignLocation(document, folder);
 			}
@@ -188,15 +188,15 @@ public class DocUtils implements RemoteAccess{
 			}	
 			
 //			WTUser wtuser=null;
-//			try {//»ñÈ¡ÓÃ»§ĞÅÏ¢
+//			try {//è·å–ç”¨æˆ·ä¿¡æ¯
 //			    wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(username);
-//			} catch (WTException e) {//»ñÈ¡ĞéÃûÓÃ»§
+//			} catch (WTException e) {//è·å–è™šåç”¨æˆ·
 //				 wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(vmUserName);
 //			}
 //		    Debug.P("---->VmUser:"+vmUserName+"   ;UserName="+wtuser);
-//			VersionControlHelper.assignIterationCreator(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//´´½¨Õß
-//			VersionControlHelper.setIterationModifier(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//¸üĞÂÕß
-//			OwnershipHelper.setOwner(doc, wtuser); //ËùÓĞÕß
+//			VersionControlHelper.assignIterationCreator(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//åˆ›å»ºè€…
+//			VersionControlHelper.setIterationModifier(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//æ›´æ–°è€…
+//			OwnershipHelper.setOwner(doc, wtuser); //æ‰€æœ‰è€…
 			
 		     
 			if (ibas != null && !ibas.isEmpty()) {
@@ -208,15 +208,15 @@ public class DocUtils implements RemoteAccess{
 		
 			PersistenceHelper.manager.refresh(document);
 			
-			//ÎÄµµ
+			//æ–‡æ¡£
 			ByteArrayInputStream pins=null;
 			ByteArrayInputStream sins=null;
-			String contentUrl=pmdoc.getUrl();//PMÖ÷ÄÚÈİÂ·¾¶
+			String contentUrl=pmdoc.getUrl();//PMä¸»å†…å®¹è·¯å¾„
 			try {
-				IFileProvider content = pmdoc.getContent();//PMÖ÷ÎÄµµÁ÷
+				IFileProvider content = pmdoc.getContent();//PMä¸»æ–‡æ¡£æµ
 				if(content!=null){
-					   String pname=content.getFileName();//PMÖ÷ÎÄ¼şÃû³Æ
-				    	//ÉÏ´«Ö÷ÎÄµµĞÅÏ¢
+					   String pname=content.getFileName();//PMä¸»æ–‡ä»¶åç§°
+				    	//ä¸Šä¼ ä¸»æ–‡æ¡£ä¿¡æ¯
 						ByteArrayOutputStream bout=new ByteArrayOutputStream();
 		    			content.write(bout);
 		    			pins=new ByteArrayInputStream(bout.toByteArray());
@@ -224,7 +224,7 @@ public class DocUtils implements RemoteAccess{
 				}
 
 				
-				//ÉÏ´«¸½¼şĞÅÏ¢
+				//ä¸Šä¼ é™„ä»¶ä¿¡æ¯
 				List<IFileProvider> attachments = pmdoc.getAttachments();
 				if(attachments!=null&&attachments.size()>0){
 					for (IFileProvider provider : attachments) {
@@ -239,14 +239,14 @@ public class DocUtils implements RemoteAccess{
 				
 			      }catch (IOException e) {
 				      e.printStackTrace();
-				      throw new Exception("WindchillÍ¬²½¶ÁÈ¡PMÎÄµµ("+doc_Name+")ÎÄ¼şÁ÷Òì³£");
+				      throw new Exception("WindchillåŒæ­¥è¯»å–PMæ–‡æ¡£("+doc_Name+")æ–‡ä»¶æµå¼‚å¸¸");
 			    }
 			
 			if (document != null) {
 			if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal()))
 				document = (WTDocument) WorkInProgressHelper.service.checkin(document, "add primary file");
 		   }
-			//Ìí¼ÓÏÂÔØÁ´½ÓµØÖ·
+			//æ·»åŠ ä¸‹è½½é“¾æ¥åœ°å€
 			if(document!=null){
 				addDownloadURL2PM(pmdoc,document);
 			}
@@ -267,12 +267,12 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ÉÏ´«Ö÷ÎÄµµ»òÕßÊÇ¸½¼ş¶ÔÏó
-	 * @param document ÎÄµµ¶ÔÏó
-	 * @param file ÎÄ¼şÃû
-	 * @param ÎÄ¼şÁ÷
-	 * @param type ÉÏ´«ÀàĞÍ (1£ºÖ÷ÎÄµµ¶ÔÏó 0:¸½¼ş¶ÔÏó)
-	 * @param isCreated ÊÇ·ñÒÑ´æÔÚÎÄµµÁ÷
+	 * ä¸Šä¼ ä¸»æ–‡æ¡£æˆ–è€…æ˜¯é™„ä»¶å¯¹è±¡
+	 * @param document æ–‡æ¡£å¯¹è±¡
+	 * @param file æ–‡ä»¶å
+	 * @param æ–‡ä»¶æµ
+	 * @param type ä¸Šä¼ ç±»å‹ (1ï¼šä¸»æ–‡æ¡£å¯¹è±¡ 0:é™„ä»¶å¯¹è±¡)
+	 * @param isCreated æ˜¯å¦å·²å­˜åœ¨æ–‡æ¡£æµ
 	 * @return  
 	 * @throws Exception
 	 */
@@ -284,7 +284,7 @@ public class DocUtils implements RemoteAccess{
 		try {
 			tx = new Transaction();
 			tx.start();
-			if(ins!=null){//ÎÄ¼şÁ÷
+			if(ins!=null){//æ–‡ä»¶æµ
 				ApplicationData app = ApplicationData.newApplicationData(document);
 				if("1".equals(type)){
 					app.setRole(ContentRoleType.PRIMARY);
@@ -295,7 +295,7 @@ public class DocUtils implements RemoteAccess{
 				app.setUploadedFromPath("");
 				app = ContentServerHelper.service.updateContent((ContentHolder) document, app, ins);
 				ins.close();
-			}else{//Á´½ÓµØÖ·
+			}else{//é“¾æ¥åœ°å€
 				if(!StringUtils.isEmpty(contentUrl)){
 					URLData urldata=URLData.newURLData(document);
 					urldata.setUrlLocation(contentUrl);
@@ -323,9 +323,9 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ÉèÖÃÎÄµµµÄIBAÊôĞÔ
-	 * @param doc						ÎÄµµ¶ÔÏó
-	 * @param table						ÎÄµµµÄIBAÊôĞÔ
+	 * è®¾ç½®æ–‡æ¡£çš„IBAå±æ€§
+	 * @param doc						æ–‡æ¡£å¯¹è±¡
+	 * @param table						æ–‡æ¡£çš„IBAå±æ€§
 	 * @throws Exception
 	 */
 	public void setIbaAttribute(WTDocument doc, Hashtable<String, String> table) throws Exception{
@@ -342,7 +342,7 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 *»ñµÃÎÄµµ¶ÔÏóµÄÖ÷ÎÄµµÎÄ¼şÃû³Æ
+	 *è·å¾—æ–‡æ¡£å¯¹è±¡çš„ä¸»æ–‡æ¡£æ–‡ä»¶åç§°
 	 * @param doc
 	 * @return
 	 */
@@ -359,7 +359,7 @@ public class DocUtils implements RemoteAccess{
 			}
 		}else{
 			try {
-				//»ñÈ¡ÎÄµµ¶ÔÏó
+				//è·å–æ–‡æ¡£å¯¹è±¡
 				ContentHolder contentHolder=ContentHelper.service.getContents((ContentHolder)doc);
 				ContentItem item=ContentHelper.getPrimary((FormatContentHolder)contentHolder);
 				ApplicationData appData=(ApplicationData)item;
@@ -373,7 +373,7 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 * ¸üĞÂÍ¼ÑùÎÄµµĞÅÏ¢£¬°üÀ¨±àÂë£¬ÒÔ¼°ºÍ±àÂëÏàÍ¬µÄÁã²¿¼ş½øĞĞ¹ØÁª
+	 * æ›´æ–°å›¾æ ·æ–‡æ¡£ä¿¡æ¯ï¼ŒåŒ…æ‹¬ç¼–ç ï¼Œä»¥åŠå’Œç¼–ç ç›¸åŒçš„é›¶éƒ¨ä»¶è¿›è¡Œå…³è”
 	 * 
 	 * @param nmCommandBean
 	 * @throws WTPropertyVetoException
@@ -396,7 +396,7 @@ public class DocUtils implements RemoteAccess{
 	}
 
 //	/**
-//	 * ¸ù¾İ½âÑ¹µÄzip°üÖĞµÄÎÄ¼ş£¬´´½¨Í¼Ö½¶ÔÏó
+//	 * æ ¹æ®è§£å‹çš„zipåŒ…ä¸­çš„æ–‡ä»¶ï¼Œåˆ›å»ºå›¾çº¸å¯¹è±¡
 //	 * 
 //	 * @param folderPath
 //	 * @param wtContainerRef
@@ -407,7 +407,7 @@ public class DocUtils implements RemoteAccess{
 //		File dir = new File(targetPath);
 //		File[] files = dir.listFiles();
 //		boolean result = false;
-//		Transaction tran =new Transaction();// ´´½¨ÊÂÎñ
+//		Transaction tran =new Transaction();// åˆ›å»ºäº‹åŠ¡
 //		tran.start();
 //		try{
 //        Debug.P(files.length);
@@ -447,7 +447,7 @@ public class DocUtils implements RemoteAccess{
 //	}
 
 //	/**
-//	 * ´´½¨Í¼Ö½ÎÄµµ¶ÔÏó
+//	 * åˆ›å»ºå›¾çº¸æ–‡æ¡£å¯¹è±¡
 //	 * 
 //	 * @param drwNumber
 //	 * @param strFileName
@@ -458,7 +458,7 @@ public class DocUtils implements RemoteAccess{
 //	private static WTDocument createDoc(String drwNumber, String strFileName, WTContainerRef wtContainerRef, WTDocument zipDocument) {
 //		WTDocument document = null;
 //		try {
-//			// Í¼ÑùÎÄµµÀàĞÍ
+//			// å›¾æ ·æ–‡æ¡£ç±»å‹
 //			String DrwDocType = "WCTYPE|wt.doc.WTDocument|com.SYFJ_windchill.DrawDoc";
 //			document = WTDocument.newWTDocument();
 //			String folderPath = zipDocument.getFolderPath();
@@ -469,14 +469,14 @@ public class DocUtils implements RemoteAccess{
 //			document.setName(drwNumber);
 //			document.setNumber(drwNumber);
 //			document.setContainerReference(wtContainerRef);
-//			// ÉèÖÃÎÄ¼ş¼Ğ
+//			// è®¾ç½®æ–‡ä»¶å¤¹
 //			if (folder != null)
 //				FolderHelper.assignLocation((FolderEntry) document, folder);
-//			// ÉèÖÃÎÄµµ´óÀà
+//			// è®¾ç½®æ–‡æ¡£å¤§ç±»
 //			TypeIdentifier id = TypeHelper.getTypeIdentifier(DrwDocType);
 //			document = (WTDocument) CoreMetaUtility.setType(document, id);
 //			document = (WTDocument) PersistenceHelper.manager.save(document);
-//			// ÉèÖÃÎÄµµÀàĞÍÎª»úĞµÀà
+//			// è®¾ç½®æ–‡æ¡£ç±»å‹ä¸ºæœºæ¢°ç±»
 //			IBAUtils.setIBAStringValue(document, Contants.DOCTYPE, Contants.MACHINERYDOC);
 //			IBAUtils.updateIBAHolder(document);
 //			updateDocContent(document, strFileName);
@@ -489,7 +489,7 @@ public class DocUtils implements RemoteAccess{
 //	}
 
 	/**
-	 * ¸ù¾İÎÄµµÃû³Æ²éÕÒ¶ÔÓ¦µÄWTDocument£¬Èç¹ûÎÄµµ¶ÔÓ¦µÄÎÄ¼şÎªDBFÎÄ¼ş£¬Ôò·µ»Ø£¬·ñÔò·µ»Ø¿Õ
+	 * æ ¹æ®æ–‡æ¡£åç§°æŸ¥æ‰¾å¯¹åº”çš„WTDocumentï¼Œå¦‚æœæ–‡æ¡£å¯¹åº”çš„æ–‡ä»¶ä¸ºDBFæ–‡ä»¶ï¼Œåˆ™è¿”å›ï¼Œå¦åˆ™è¿”å›ç©º
 	 * 
 	 * @param docName
 	 * @return
@@ -524,11 +524,11 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ¸ù¾İÎÄµµ±àÂë²úÕÒÏàÍ¬±àÂëµÄÁã²¿¼ş²¢½øĞĞ¹ØÁª Èç¹ûÁã²¿¼ş²»´æÔÚ£¬ÔòÓÃÎÄµµ±àÂë´´½¨ĞÂµÄÁã²¿¼ş²¢½øĞĞ¹ØÁª
-	 * Èç¹ûÎªÏµÁĞ¼ş£¬ÔòÖ»ĞèºÍ±àÂëÏàÍ¬µÄÁã²¿¼ş½øĞĞ¹ØÁª£¬²»´´½¨ĞÂµÄÁã²¿¼ş
+	 * æ ¹æ®æ–‡æ¡£ç¼–ç äº§æ‰¾ç›¸åŒç¼–ç çš„é›¶éƒ¨ä»¶å¹¶è¿›è¡Œå…³è” å¦‚æœé›¶éƒ¨ä»¶ä¸å­˜åœ¨ï¼Œåˆ™ç”¨æ–‡æ¡£ç¼–ç åˆ›å»ºæ–°çš„é›¶éƒ¨ä»¶å¹¶è¿›è¡Œå…³è”
+	 * å¦‚æœä¸ºç³»åˆ—ä»¶ï¼Œåˆ™åªéœ€å’Œç¼–ç ç›¸åŒçš„é›¶éƒ¨ä»¶è¿›è¡Œå…³è”ï¼Œä¸åˆ›å»ºæ–°çš„é›¶éƒ¨ä»¶
 	 * 
 	 * @param document
-	 *            ÎÄµµ
+	 *            æ–‡æ¡£
 	 * @throws WTPropertyVetoException
 	 */
 	public static void linkDocument2Part(WTDocument document) throws WTPropertyVetoException {
@@ -558,7 +558,7 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/***
-	 * ¸ù¾İÎÄµµµÄ±àÂëÉú³É¶ÔÓ¦Áã²¿¼şµÄ±àÂë
+	 * æ ¹æ®æ–‡æ¡£çš„ç¼–ç ç”Ÿæˆå¯¹åº”é›¶éƒ¨ä»¶çš„ç¼–ç 
 	 * 
 	 * @param docNumber
 	 * @return
@@ -581,11 +581,11 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ¸ù¾İÎÄµµ±àÂë²éÑ¯¹¤×°Í¼Ö½¶ÔÏóÎÄµµ¶ÔÏó
+	 * æ ¹æ®æ–‡æ¡£ç¼–ç æŸ¥è¯¢å·¥è£…å›¾çº¸å¯¹è±¡æ–‡æ¡£å¯¹è±¡
 	 * 
 	 * @param docNumber
-	 *            ÎÄµµ±àÂë
-	 * @return WTDocument ÎÄµµ¶ÔÏó
+	 *            æ–‡æ¡£ç¼–ç 
+	 * @return WTDocument æ–‡æ¡£å¯¹è±¡
 	 * @throws WTException
 	 */
 	public static WTDocument getDocumentByNumber(String docNumber) throws WTException {
@@ -662,7 +662,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * »ñÈ¡¶ÔÏóÀàĞÍ
+	 * è·å–å¯¹è±¡ç±»å‹
 	 * @author Eilaiwang
 	 * @param object
 	 * @return
@@ -678,7 +678,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 *»ñµÃ ²Î¿¼ÎÄµµ¼¯ºÏ
+	 *è·å¾— å‚è€ƒæ–‡æ¡£é›†åˆ
 	 * get all DependsOn wtdoc of this
 	 * @param doc
 	 * @return
@@ -736,11 +736,11 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 * ¸ù¾İÎÄµµ±àÂë²éÑ¯ÎÄµµ¶ÔÏó
+	 * æ ¹æ®æ–‡æ¡£ç¼–ç æŸ¥è¯¢æ–‡æ¡£å¯¹è±¡
 	 * 
 	 * @param docNumber
-	 *            ÎÄµµ±àÂë
-	 * @return WTDocument ÎÄµµ¶ÔÏó   
+	 *            æ–‡æ¡£ç¼–ç 
+	 * @return WTDocument æ–‡æ¡£å¯¹è±¡   
 	 * @throws WTException
 	 */
 	public static WTDocument getDocByNumber(String docNumber) throws WTException {
@@ -769,10 +769,10 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ¸ü¸ÄÎÄµµ¶ÔÏó±àÂë
+	 * æ›´æ”¹æ–‡æ¡£å¯¹è±¡ç¼–ç 
 	 * 
-	 * @param ´ı¸ü´ı±àÂë¶ÔÏó
-	 * @param ĞÂ±àÂë
+	 * @param å¾…æ›´å¾…ç¼–ç å¯¹è±¡
+	 * @param æ–°ç¼–ç 
 	 * @throws WTException 
 	 */
 
@@ -805,7 +805,7 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ¸ù¾İ¶ÔÏó»ñÈ¡ÎÄµµ¸½¼şµÄÎÄ¼şÃû
+	 * æ ¹æ®å¯¹è±¡è·å–æ–‡æ¡£é™„ä»¶çš„æ–‡ä»¶å
 	 * 
 	 * @param document
 	 * @return
@@ -845,9 +845,9 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * »ñµÃÖ÷ÎÄµµ¶ÔÏóµÄÏÂÔØµØÖ·
-	 * @param docNum ÎÄµµ±àÂë
-	 * @return Map<String,ApplicationData> key:ÏÂÔØµØÖ· value:ÎÄµµÁ÷
+	 * è·å¾—ä¸»æ–‡æ¡£å¯¹è±¡çš„ä¸‹è½½åœ°å€
+	 * @param docNum æ–‡æ¡£ç¼–ç 
+	 * @return Map<String,ApplicationData> key:ä¸‹è½½åœ°å€ value:æ–‡æ¡£æµ
 	 * @throws WTException
 	 */
 	public static Map<String,InputStream>  getPrimaryContentDownloadInfo(String docNum) throws WTException{
@@ -891,7 +891,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ¸ù¾İ¶ÔÏó»ñÈ¡ÎÄµµ¸½¼şµÄÈ«Ãû
+	 * æ ¹æ®å¯¹è±¡è·å–æ–‡æ¡£é™„ä»¶çš„å…¨å
 	 * 
 	 * @param document
 	 * @return
@@ -916,7 +916,7 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ÅĞ¶ÏÍ¼Ö½ÊÇ·ñÎª½ÓÏßÍ¼
+	 * åˆ¤æ–­å›¾çº¸æ˜¯å¦ä¸ºæ¥çº¿å›¾
 	 * 
 	 * @param str
 	 * @return
@@ -931,7 +931,7 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ÏÂÔØÍ¼Ö½ÎÄµµµ½Ö¸¶¨Â·¾¶
+	 * ä¸‹è½½å›¾çº¸æ–‡æ¡£åˆ°æŒ‡å®šè·¯å¾„
 	 * 
 	 * @param doc
 	 * @param path
@@ -961,7 +961,7 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 * »ñµÃÎÄµµ¶ÔÏóµÄËùÓĞ¸½¼şĞÅÏ¢
+	 * è·å¾—æ–‡æ¡£å¯¹è±¡çš„æ‰€æœ‰é™„ä»¶ä¿¡æ¯
 	 * @param holder
 	 * @throws WTException 
 	 */
@@ -980,16 +980,16 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * »ñµÃËùÓĞµÄ¸½¼şµÄÏÂÔØÁ´½Ó
+	 * è·å¾—æ‰€æœ‰çš„é™„ä»¶çš„ä¸‹è½½é“¾æ¥
 	 * @param holder
-	 * @return Map (key:¸½¼şµÄÃû³Æ ; value:¸½¼şµÄÁ´½Ó)
+	 * @return Map (key:é™„ä»¶çš„åç§° ; value:é™„ä»¶çš„é“¾æ¥)
 	 * @throws Exception
 	 */
 	public static Map<String,String> getAllAttachementsDownloadURL(ContentHolder holder)throws Exception{
 		Map<String,String> map=new HashMap<String,String>();
 		if(holder!=null){
 			FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service.getContents(holder);
-			List<ApplicationData> attachements=getAttachmentAppicationData(holder);//»ñÈ¡ÎÄµµ¶ÔÏóµÄ¸½¼şĞÅÏ¢
+			List<ApplicationData> attachements=getAttachmentAppicationData(holder);//è·å–æ–‡æ¡£å¯¹è±¡çš„é™„ä»¶ä¿¡æ¯
             for (ApplicationData app : attachements) {
             	  String  fileName=app.getFileName();
 				 String app_url=ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
@@ -1005,7 +1005,7 @@ public class DocUtils implements RemoteAccess{
 	
 
 	/**
-	 * ÏÂÔØdbfÎÄµµµ½Ö¸¶¨Â·¾¶,²¢·µ»ØÎÄ¼şÃû
+	 * ä¸‹è½½dbfæ–‡æ¡£åˆ°æŒ‡å®šè·¯å¾„,å¹¶è¿”å›æ–‡ä»¶å
 	 * 
 	 * @param doc
 	 * @param path
@@ -1036,7 +1036,7 @@ public class DocUtils implements RemoteAccess{
 	}
 
 	/**
-	 * ¸üĞÂÎÄµµÄÚÈİ
+	 * æ›´æ–°æ–‡æ¡£å†…å®¹
 	 * 
 	 * @param doc
 	 * @param filepath
@@ -1049,7 +1049,7 @@ public class DocUtils implements RemoteAccess{
 			
 			doc = getWorkingCopyOfDoc(doc);
 
-			 //Çå³ıÖ÷ÎÄµµÄÚÈİ
+			 //æ¸…é™¤ä¸»æ–‡æ¡£å†…å®¹
 			ContentHolder contentholder = (ContentHolder) doc;
 			contentholder = ContentHelper.service.getContents(contentholder);
 			List contentListForTarget = ContentHelper.getContentListAll(contentholder);
@@ -1109,7 +1109,7 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 *»ñÈ¡ºóÌ¨µÄ±àÂëĞòÁĞºÅ
+	 *è·å–åå°çš„ç¼–ç åºåˆ—å·
 	 * @return
 	 * @throws NumberFormatException
 	 * @throws WTException
@@ -1147,7 +1147,7 @@ public class DocUtils implements RemoteAccess{
 	//------------------------------Add by qiaokaikai----------------------------------------//
 	
 	/**
-	 * °ÑÎÄµµ¶ÔÏó×ª»»ÎÄµµÁ÷
+	 * æŠŠæ–‡æ¡£å¯¹è±¡è½¬æ¢æ–‡æ¡£æµ
 	 * @auth public759
 	 * @Date 2014-10-17
 	 */
@@ -1164,7 +1164,7 @@ public class DocUtils implements RemoteAccess{
 			}
 		}else{
 			try {
-				//»ñÈ¡ÎÄµµ¶ÔÏó
+				//è·å–æ–‡æ¡£å¯¹è±¡
 				ContentHolder contentHolder=ContentHelper.service.getContents((ContentHolder)doc);
 				ContentItem item=ContentHelper.getPrimary((FormatContentHolder)contentHolder);
 				ApplicationData appData=(ApplicationData)item;
@@ -1180,7 +1180,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * É¾³ı²¿¼ş¡¢ÎÄµµµÄ¹ØÁª¹ØÏµ
+	 * åˆ é™¤éƒ¨ä»¶ã€æ–‡æ¡£çš„å…³è”å…³ç³»
 	 * @param part
 	 * @param doc
 	 * @throws Exception
@@ -1205,7 +1205,7 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 * ¸ù¾İÎÄµµ±àºÅ²éÑ¯ÎÄµµĞÅÏ¢
+	 * æ ¹æ®æ–‡æ¡£ç¼–å·æŸ¥è¯¢æ–‡æ¡£ä¿¡æ¯
 	 * @param documentnumber
 	 * @return
 	 * @throws WTException
@@ -1219,7 +1219,7 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 * »ñµÃ×îĞÂ°æ±¾
+	 * è·å¾—æœ€æ–°ç‰ˆæœ¬
 	 * @param master
 	 * @return
 	 * @throws WTException
@@ -1235,7 +1235,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ÎÄµµÖØÃüÃû
+	 * æ–‡æ¡£é‡å‘½å
 	 * @param newDocName
 	 * @param doc
 	 * @return
@@ -1268,7 +1268,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ¸üĞÂÄÚÈİ
+	 * æ›´æ–°å†…å®¹
 	 * @param ch
 	 * @param applicationdata
 	 * @param fileName
@@ -1285,7 +1285,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * É¾³ıÄÚÈİ
+	 * åˆ é™¤å†…å®¹
 	 * @param appDataPDF
 	 * @throws WTException
 	 */
@@ -1299,8 +1299,8 @@ public class DocUtils implements RemoteAccess{
 
 	
 	/**
-	 * É¾³ıÎÄµµÒÔ¼°ºÍ²¿¼şµÄ²Î¿¼¹ØÏµ
-	 * @param doc				ÎÄµµ¶ÔÏó
+	 * åˆ é™¤æ–‡æ¡£ä»¥åŠå’Œéƒ¨ä»¶çš„å‚è€ƒå…³ç³»
+	 * @param doc				æ–‡æ¡£å¯¹è±¡
 	 * @throws WTException
 	 */
 	public static void deleteDependencyLink(WTDocument doc) throws WTException{
@@ -1323,8 +1323,8 @@ public class DocUtils implements RemoteAccess{
 	}
 	
 	/**
-	 * É¾³ıÎÄµµÒÔ¼°ºÍ²¿¼şÃèÊöµÄ¹ØÏµ
-	 * @param doc				ÎÄµµ¶ÔÏó
+	 * åˆ é™¤æ–‡æ¡£ä»¥åŠå’Œéƒ¨ä»¶æè¿°çš„å…³ç³»
+	 * @param doc				æ–‡æ¡£å¯¹è±¡
 	 * @throws WTException
 	 */
 	public static void deleteDescribeLink(WTDocument doc) throws WTException{
@@ -1345,9 +1345,9 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ¸øÎÄµµ¹ØÁªÏà¹Ø¸½¼ş
-	 * @param doc				WTDocument¶ÔÏó
-	 * @param fileRoute			ÎïÀíÎÄµµÂ·¾¶
+	 * ç»™æ–‡æ¡£å…³è”ç›¸å…³é™„ä»¶
+	 * @param doc				WTDocumentå¯¹è±¡
+	 * @param fileRoute			ç‰©ç†æ–‡æ¡£è·¯å¾„
 	 * @throws Exception
 	 */
 	public void associateFile(WTDocument doc, String fileRoute) throws Exception{
@@ -1367,7 +1367,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ÎÄµµÖØÃüÃû
+	 * æ–‡æ¡£é‡å‘½å
 	 * rename a wtdoc
 	 * @param wtdoc
 	 * @param newName
@@ -1394,11 +1394,11 @@ public class DocUtils implements RemoteAccess{
 
 
 	/**
-	 *  ¸üĞÂÎÄµµ¶ÔÏóÊôĞÔ
-	 * @param doc  ÎÄµµ¶ÔÏó
-	 * @param  pmdoc PMÎÄµµ¶ÔÏó
-	 * @param ibas ÈíÊôĞÔ¼¯ºÏ
-	 * @param lifecycleName ÉúÃüÖÜÆÚÄ£°åÃû³Æ
+	 *  æ›´æ–°æ–‡æ¡£å¯¹è±¡å±æ€§
+	 * @param doc  æ–‡æ¡£å¯¹è±¡
+	 * @param  pmdoc PMæ–‡æ¡£å¯¹è±¡
+	 * @param ibas è½¯å±æ€§é›†åˆ
+	 * @param lifecycleName ç”Ÿå‘½å‘¨æœŸæ¨¡æ¿åç§°
 	 * @return WTDocumnet
 	 * @throws WTException
 	 */
@@ -1410,8 +1410,8 @@ public class DocUtils implements RemoteAccess{
 			
 			trans = new Transaction();
 			trans.start();
-			clearAllContent(doc);//Çå³ıÀúÊ·ÎÄµµĞÅÏ¢
-			if (!doc.getName().equals(docName)) {//Èç¹ûÃû³Æ²»Ò»ÖÂÔò¸ÄÃû³Æ
+			clearAllContent(doc);//æ¸…é™¤å†å²æ–‡æ¡£ä¿¡æ¯
+			if (!doc.getName().equals(docName)) {//å¦‚æœåç§°ä¸ä¸€è‡´åˆ™æ”¹åç§°
 				rename(doc, docName);
 			}
 			
@@ -1419,23 +1419,23 @@ public class DocUtils implements RemoteAccess{
 				LWCUtil.setValue( doc,ibas);
 			}
 
-			//ĞŞ¸Ä¶ÔÏóĞŞ¸ÄÈË×Ö¶Î
+			//ä¿®æ”¹å¯¹è±¡ä¿®æ”¹äººå­—æ®µ
           //GenericUtil.changeWTPrincipalField(modifyUser, doc, SET_MODIFIER);
 		    PersistenceHelper.manager.refresh(doc);
-			//ÉÏ´«Ö÷ÎÄµµ»ò¸½¼şĞÅÏ¢
+			//ä¸Šä¼ ä¸»æ–‡æ¡£æˆ–é™„ä»¶ä¿¡æ¯
 		    String contentUrl=pm_document.getUrl();
-			IFileProvider content = pm_document.getContent();//PMÖ÷ÎÄµµÁ÷
+			IFileProvider content = pm_document.getContent();//PMä¸»æ–‡æ¡£æµ
 			ByteArrayInputStream pins=null;
 			ByteArrayInputStream sins=null;
 			if(content!=null){
-			String pname=content.getFileName();//PMÖ÷ÎÄ¼şÃû³Æ
-			//ÉÏ´«Ö÷ÎÄµµĞÅÏ¢(ÊµÏÖÏÈÇå³ıÖ÷ÎÄµµÄÚÈİ)
+			String pname=content.getFileName();//PMä¸»æ–‡ä»¶åç§°
+			//ä¸Šä¼ ä¸»æ–‡æ¡£ä¿¡æ¯(å®ç°å…ˆæ¸…é™¤ä¸»æ–‡æ¡£å†…å®¹)
 				ByteArrayOutputStream bout=new ByteArrayOutputStream();
     			content.write(bout);
     			pins=new ByteArrayInputStream(bout.toByteArray());
     			doc=linkDocument(doc, pname, pins, "1", contentUrl);
 			}
-			//ÉÏ´«¸½¼şĞÅÏ¢(Ä¿Ç°Î´ÊµÏÖÉ¾³ı¸½¼şĞÅÏ¢)
+			//ä¸Šä¼ é™„ä»¶ä¿¡æ¯(ç›®å‰æœªå®ç°åˆ é™¤é™„ä»¶ä¿¡æ¯)
 			List<IFileProvider> attachments = pm_document.getAttachments();
 			Debug.P("---->>>Attachement:"+attachments==null?"0":attachments.size());
 			if(attachments!=null&&attachments.size()>0){
@@ -1449,14 +1449,14 @@ public class DocUtils implements RemoteAccess{
 			
 			
 			   
-           //Ìí¼ÓÏÂÔØÁ´½Ó
+           //æ·»åŠ ä¸‹è½½é“¾æ¥
 			addDownloadURL2PM(pm_document,doc);
 			trans.commit();
 			trans=null;
 			return doc;
 		}catch(IOException e){
 			e.printStackTrace();
-			throw new Exception("Windchill¶ÁÈ¡PMÏµÍ³ÎÄµµ("+docName+")ÎÄ¼şÁ÷Òì³£!");
+			throw new Exception("Windchillè¯»å–PMç³»ç»Ÿæ–‡æ¡£("+docName+")æ–‡ä»¶æµå¼‚å¸¸!");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
@@ -1469,9 +1469,9 @@ public class DocUtils implements RemoteAccess{
 	   
 	
 	/**
-	 * Ìí¼ÓÖ÷ÄÚÈİºÍ¸½¼şµÄÏÂÔØÁ´½ÓµØÖ·
-	 * @param pm_document PMÎÄµµ¶ÔÏó
-	 * @param doc WindchillÎÄµµ¶ÔÏó
+	 * æ·»åŠ ä¸»å†…å®¹å’Œé™„ä»¶çš„ä¸‹è½½é“¾æ¥åœ°å€
+	 * @param pm_document PMæ–‡æ¡£å¯¹è±¡
+	 * @param doc Windchillæ–‡æ¡£å¯¹è±¡
 	 * @throws Exception
 	 */
 	  private static void addDownloadURL2PM(PMDocument pm_document, WTDocument doc)
@@ -1481,14 +1481,14 @@ public class DocUtils implements RemoteAccess{
 				IFileProvider content = pm_document.getContent();
 				URLFileProvider fp = new URLFileProvider();
 				if(content!=null){
-					//Ğ´ÄÚÈİÎÄ¼şÁ´½Ó
+					//å†™å†…å®¹æ–‡ä»¶é“¾æ¥
 					String fileName  =pm_document.getContent().getFileName();
 					String url = GenericUtil.getPrimaryContentUrl(doc);
 					fp.setFileName(fileName);
 					fp.setUrl(url);
 					pm_document.setPLMContent(fp);
 				}
-					//Ğ´¸½¼ş
+					//å†™é™„ä»¶
 					List<IFileProvider> attachement = new ArrayList<IFileProvider>();
 					Map<String, String> map = DocUtils.getAllAttachementsDownloadURL(doc);
 					Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
@@ -1510,12 +1510,12 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * Èç¹û´æÔÚÖ÷ÎÄµµÄÚÈİÔòÇå³ıÖ÷ÎÄµµÄÚÈİ
+	 * å¦‚æœå­˜åœ¨ä¸»æ–‡æ¡£å†…å®¹åˆ™æ¸…é™¤ä¸»æ–‡æ¡£å†…å®¹
 	 * @param doc
 	 * @throws PropertyVetoException 
 	 */
 	public static void clearContent(WTDocument doc)throws PropertyVetoException,WTException {
-		 //Çå³ıÖ÷ÎÄµµÄÚÈİ
+		 //æ¸…é™¤ä¸»æ–‡æ¡£å†…å®¹
 		ContentHolder contentholder = (ContentHolder) doc;
 		contentholder = ContentHelper.service.getContents(contentholder);
        if(contentholder!=null){
@@ -1534,15 +1534,15 @@ public class DocUtils implements RemoteAccess{
 	
 
 	/**
-	 * Çå³ıÖ÷ÎÄµµ°üÀ¨¸½¼şĞÅÏ¢
+	 * æ¸…é™¤ä¸»æ–‡æ¡£åŒ…æ‹¬é™„ä»¶ä¿¡æ¯
 	 * @param doc
 	 * @throws Exception
 	 */
 	public static void clearAllContent(WTDocument doc)throws Exception{
-		//Çå³ıÄÚÈİ(°üº¬¸½¼ş)
+		//æ¸…é™¤å†…å®¹(åŒ…å«é™„ä»¶)
 		FormatContentHolder holder = (FormatContentHolder) ContentHelper.service.getContents(doc);
 		if(holder!=null){
-	        //Ê×ÏÈÇå³ıÒÑÓĞµÄ
+	        //é¦–å…ˆæ¸…é™¤å·²æœ‰çš„
 	        Vector items = ContentHelper.getContentListAll(holder);
 	        if(items!=null && items.size()>0) {
 	        	Debug.P("-------->>>>Vector-Contents:"+items.size());
@@ -1560,7 +1560,7 @@ public class DocUtils implements RemoteAccess{
 	
 	
 	/**
-	 * ¸ù¾İÀàĞÍÃû³Æ²éÑ¯ÀàĞÍ¶ÔÏó
+	 * æ ¹æ®ç±»å‹åç§°æŸ¥è¯¢ç±»å‹å¯¹è±¡
 	 * @author blueswang
 	 * @param objType
 	 * @return
@@ -1580,10 +1580,10 @@ public class DocUtils implements RemoteAccess{
 			queryspec.appendSearchCondition(sc1);
 			qr = PersistenceHelper.manager.find(queryspec);
 			while (qr.hasMoreElements()){
-				wtm= (WTTypeDefinitionMaster) qr.nextElement();//²é³öµÄÊÇËùÓĞÎÄµµÀàĞÍ
+				wtm= (WTTypeDefinitionMaster) qr.nextElement();//æŸ¥å‡ºçš„æ˜¯æ‰€æœ‰æ–‡æ¡£ç±»å‹
 				//System.out.println(wtm.getHierarchyDisplayNameKey());
 				//System.out.println(wtm.getDisplayNameKey());
-				if (objType.equals(wtm.getHierarchyDisplayNameKey())){//¹ıÂËµÃµ½ÎÒÃÇÏëÒªµÄÎÄµµÀàĞÍDFM
+				if (objType.equals(wtm.getHierarchyDisplayNameKey())){//è¿‡æ»¤å¾—åˆ°æˆ‘ä»¬æƒ³è¦çš„æ–‡æ¡£ç±»å‹DFM
 					Debug.P(wtm.getDescriptionKey() + "   ---    "+ wtm.getIntHid());
 					return wtm;
 				}

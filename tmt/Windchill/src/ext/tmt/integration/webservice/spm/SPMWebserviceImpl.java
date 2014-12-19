@@ -49,33 +49,33 @@ public class SPMWebserviceImpl{
 	
 	 
     /**
-     * µÚÒ»¸öÁ÷³ÌµÄÊµÏÖ·½·¨
-     * @param workflow Á÷³ÌID
-     * @param times ±ä¸ü´ÎÊı
-     * @param factory ¹¤³§
+     * ç¬¬ä¸€ä¸ªæµç¨‹çš„å®ç°æ–¹æ³•
+     * @param workflow æµç¨‹ID
+     * @param times å˜æ›´æ¬¡æ•°
+     * @param factory å·¥å‚
      * @return
      * @throws Exception
      */
     public static String processorForSpm1(String workflow, int times,String factory)throws Exception{
     	
     	Debug.P("processorForSpm1  paramaters -->"+ workflow + " --- " + times + " --- "+ factory);
-    	// IBAÊôĞÔ¼¯ºÏ
+    	// IBAå±æ€§é›†åˆ
          Map<String,Object>  ibaMap = new HashMap<String,Object>();
    	
-        //»ù´¡ÊôĞÔ¼¯ºÏ
+        //åŸºç¡€å±æ€§é›†åˆ
         HashMap<String,String>  baseMap= new HashMap<String,String>();
         
-        //Windchill×Ö¶ÎÓ³Éä¼¯ºÏ
+        //Windchillå­—æ®µæ˜ å°„é›†åˆ
        Map<String,String> mapDatas= getWCMappingFieldBySPM();
        Debug.P("------->>>Mapping Collection:"+mapDatas.toString());
         
         ResultSet resultSet = null;
-        String containerName = SPMConsts.SPMCONTAINER_NAME;//ÈİÆ÷ÀàĞÍ
+        String containerName = SPMConsts.SPMCONTAINER_NAME;//å®¹å™¨ç±»å‹
         String result = null;
-        ConnectionPool connectionPool=DBFactory.getConnectionPool();//Á¬½Ó³Ø
+        ConnectionPool connectionPool=DBFactory.getConnectionPool();//è¿æ¥æ± 
         try {
             SessionHelper.manager.setAdministrator();
-            //Ê×´Î½Ó¿Ú·¢²¼
+            //é¦–æ¬¡æ¥å£å‘å¸ƒ
             if (workflow != null && times == 1) {
                 String sql = "select * from CSR_WLSXSQ,CSR_JSTZSX where CSR_JSTZSX.WORKFLOW = CSR_WLSXSQ.WORKFLOW and CSR_JSTZSX.TIMES = '"
                         + 1 + "' AND CSR_WLSXSQ.WORKFLOW = '" + workflow + "'";
@@ -83,36 +83,36 @@ public class SPMWebserviceImpl{
                 resultSet =connectionPool.getConnection().executeQuery(sql);
                 while (resultSet.next()) {
                     
-                    //»ù±¾ÊôĞÔ
-                    String material_num = resultSet.getString(SPMConsts.MATERIAL_NUM);//ÎïÁÏ±àÂë
-                    String material_name = resultSet.getString(SPMConsts.MATERIAL_NAME);//ÎïÁÏÃû³Æ 
+                    //åŸºæœ¬å±æ€§
+                    String material_num = resultSet.getString(SPMConsts.MATERIAL_NUM);//ç‰©æ–™ç¼–ç 
+                    String material_name = resultSet.getString(SPMConsts.MATERIAL_NAME);//ç‰©æ–™åç§° 
 //                    Debug.P("---processorForSpm1-->>>>Material Number:"+material_num+"  MaterialName:"+material_name);
-                    if(StringUtils.isEmpty(material_name)||StringUtils.isEmpty(material_num)) continue;//¹ıÂËÎïÁÏÃû³ÆºÍ±àºÅÎª¿ÕµÄÊı¾İ
-                	String material_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//ÎïÁÏĞ¡ÀàÂ·¾¶
+                    if(StringUtils.isEmpty(material_name)||StringUtils.isEmpty(material_num)) continue;//è¿‡æ»¤ç‰©æ–™åç§°å’Œç¼–å·ä¸ºç©ºçš„æ•°æ®
+                	String material_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//ç‰©æ–™å°ç±»è·¯å¾„
                     if(StringUtils.isNotEmpty(material_category)){
                     	material_category=SPMConsts.ROOT+material_category;
                     }
-                	baseMap.put(SPMConsts.KEY_MATER_CATEGORY,material_category==null?"":material_category.trim());//ÎïÁÏĞ¡ÀàÈ«Â·¾¶
+                	baseMap.put(SPMConsts.KEY_MATER_CATEGORY,material_category==null?"":material_category.trim());//ç‰©æ–™å°ç±»å…¨è·¯å¾„
                     baseMap.put(SPMConsts.KEY_CONTAINERNAME, containerName==null?"":containerName.trim());
                     baseMap.put(SPMConsts.KEY_NUMBER, material_num==null?"":material_num.trim());
                     baseMap.put(SPMConsts.KEY_NAME, material_name==null?"":material_name.trim());
                     
-                    // Windchill ÈíÊôĞÔ
+                    // Windchill è½¯å±æ€§
                 	String att_key = resultSet.getString(SPMConsts.IBA_KEY);
                     String att_value = resultSet.getString(SPMConsts.IBA_VALUE);
                     if(StringUtils.isEmpty(att_key)) continue;
-                    Debug.P("-->>IBA Key£º"+att_key+"="+att_value);
-                    //¹ıÂËµôWindchillÏµÍ³²»´æÔÚµÄÈíÊôĞÔ
+                    Debug.P("-->>IBA Keyï¼š"+att_key+"="+att_value);
+                    //è¿‡æ»¤æ‰Windchillç³»ç»Ÿä¸å­˜åœ¨çš„è½¯å±æ€§
                     String contain_key=mapDatas.get(att_key);
-                    if(StringUtils.isNotEmpty(contain_key)){//Èç¹û¶ÔÓ¦ÅäÖÃÎÄ¼şKeyÔò´æ·Å
-                    	if(SPMConsts.SPM_MATER_TYPE.equals(att_key)){//ÎïÁÏÀàĞÍ
+                    if(StringUtils.isNotEmpty(contain_key)){//å¦‚æœå¯¹åº”é…ç½®æ–‡ä»¶Keyåˆ™å­˜æ”¾
+                    	if(SPMConsts.SPM_MATER_TYPE.equals(att_key)){//ç‰©æ–™ç±»å‹
                     		baseMap.put(mapDatas.get(att_key).trim(), mapDatas.get(att_value)==null?"":mapDatas.get(att_value).trim());
                     	}else{
-                    		ibaMap.put(mapDatas.get(att_key).trim(),att_value==null?"":att_value.trim());//WindchillÈíÊôĞÔ
+                    		ibaMap.put(mapDatas.get(att_key).trim(),att_value==null?"":att_value.trim());//Windchillè½¯å±æ€§
                     	}
                     }
                 }
-                    //ÅĞ¶ÏÎïÁÏµÄ´æÔÚĞÔ
+                    //åˆ¤æ–­ç‰©æ–™çš„å­˜åœ¨æ€§
                    if(!baseMap.isEmpty()){
                        String object_num=baseMap.get(SPMConsts.KEY_NUMBER);
                        Persistable object= hasExistObject(object_num);
@@ -122,102 +122,102 @@ public class SPMWebserviceImpl{
                           	   WTPart partObject=(WTPart)object;
                                CsrSpmUtil.updatePartInfo(partObject,baseMap, ibaMap);
                                Debug.P("----->>>Update WTPart("+partObject.getPersistInfo().getObjectIdentifier().getStringValue()+")Success!!");
-                               result= "¸üĞÂÎïÁÏ³É¹¦";
+                               result= "æ›´æ–°ç‰©æ–™æˆåŠŸ";
                            }
                       } else {
                         try {
-                            // ¸ù¾İµÚÒ»´Î·¢²¼ÕÒµ½»ù±¾ĞÅÏ¢´´½¨part
-                        	//Èç¹ûÎïÁÏÀàĞÍÎ´×öÓ³ÉäÔò²»´´½¨
+                            // æ ¹æ®ç¬¬ä¸€æ¬¡å‘å¸ƒæ‰¾åˆ°åŸºæœ¬ä¿¡æ¯åˆ›å»ºpart
+                        	//å¦‚æœç‰©æ–™ç±»å‹æœªåšæ˜ å°„åˆ™ä¸åˆ›å»º
                         	String partType=baseMap.get(SPMConsts.PART_TYPE);
                         	if(StringUtils.isNotEmpty(partType)){
                         	   	Debug.P("---->>>Ready Create Part: Type="+partType);
                         		CsrSpmUtil.createNewPart(baseMap, ibaMap,mapDatas);
-                        		result="´´½¨ÎïÁÏ³É¹¦";
+                        		result="åˆ›å»ºç‰©æ–™æˆåŠŸ";
                         	}
                         } catch (Exception e) {
-                            return e.getLocalizedMessage();// Ö±½Ó½«´íÎóĞÅÏ¢½øĞĞ·µ»Ø
+                            return e.getLocalizedMessage();// ç›´æ¥å°†é”™è¯¯ä¿¡æ¯è¿›è¡Œè¿”å›
                         }
                      }
                    }
               } else if (workflow != null && (times == 2 || times == 3)) {
-                String partNo = null;//ĞèÒª¸üĞÂµÄÎïÁÏ±àºÅ
+                String partNo = null;//éœ€è¦æ›´æ–°çš„ç‰©æ–™ç¼–å·
                 String sql = "select * from CSR_JSTZSX where TIMES = '" + times + "' AND WORKFLOW = '" + workflow + "'";
                 resultSet =connectionPool.getConnection().executeQuery(sql);
                 while (resultSet.next()) {
-                	//ÈíÊôĞÔ,»ù±¾ÊôĞÔ
-//               String spm_workflow = resultSet.getString(SPMConsts.SPM_WORKFLOW);//·¢²¼Á÷³ÌID
-//               String spm_creator = resultSet.getString(SPMConsts.SPM_CREATOR);//Á÷³Ì´´½¨Õß
-                    String spm_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//ÎïÁÏĞ¡ÀàÈ«Â·¾¶
-                    partNo = resultSet.getString(SPMConsts.MATERIAL_NUM);//ÎïÁÏ±àÂë
-                    String spm_name=resultSet.getString(SPMConsts.MATERIAL_NAME);//ÎïÁÏÃû³Æ
+                	//è½¯å±æ€§,åŸºæœ¬å±æ€§
+//               String spm_workflow = resultSet.getString(SPMConsts.SPM_WORKFLOW);//å‘å¸ƒæµç¨‹ID
+//               String spm_creator = resultSet.getString(SPMConsts.SPM_CREATOR);//æµç¨‹åˆ›å»ºè€…
+                    String spm_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//ç‰©æ–™å°ç±»å…¨è·¯å¾„
+                    partNo = resultSet.getString(SPMConsts.MATERIAL_NUM);//ç‰©æ–™ç¼–ç 
+                    String spm_name=resultSet.getString(SPMConsts.MATERIAL_NAME);//ç‰©æ–™åç§°
                     baseMap.put(SPMConsts.KEY_NAME, spm_name);
                     
-                    String att_key = resultSet.getString(SPMConsts.IBA_KEY);//ÈíÊôĞÔName
+                    String att_key = resultSet.getString(SPMConsts.IBA_KEY);//è½¯å±æ€§Name
                     if(StringUtils.isEmpty(att_key)) continue;
-                    String att_value = resultSet.getString(SPMConsts.IBA_VALUE);//ÈíÊôĞÔValue
+                    String att_value = resultSet.getString(SPMConsts.IBA_VALUE);//è½¯å±æ€§Value
     
-                    //ÉèÖÃÈíÊôĞÔ¼¯ºÏ(×ÛºÏµÈ¼¶,ÎïÁÏÀàĞÍ,ĞÍºÅ¹æ¸ñ)
-                    //¹ıÂËµôWindchillÏµÍ³²»´æÔÚµÄÈíÊôĞÔ
+                    //è®¾ç½®è½¯å±æ€§é›†åˆ(ç»¼åˆç­‰çº§,ç‰©æ–™ç±»å‹,å‹å·è§„æ ¼)
+                    //è¿‡æ»¤æ‰Windchillç³»ç»Ÿä¸å­˜åœ¨çš„è½¯å±æ€§
                     String contain_key=mapDatas.get(att_key);
-                    if(StringUtils.isNotEmpty(contain_key)){//Èç¹û¶ÔÓ¦ÅäÖÃÎÄ¼şKeyÔò´æ·Å
+                    if(StringUtils.isNotEmpty(contain_key)){//å¦‚æœå¯¹åº”é…ç½®æ–‡ä»¶Keyåˆ™å­˜æ”¾
                          ibaMap.put(mapDatas.get(att_key).trim(), att_value==null?"":att_value.trim());
                       }
-                      //·ÖÀàÊôĞÔ
+                      //åˆ†ç±»å±æ€§
                     if(StringUtils.isNotEmpty(mapDatas.get(SPMConsts.MATERIAL_PATH))){
                     	ibaMap.put(mapDatas.get(SPMConsts.MATERIAL_PATH), spm_category);
                     }
-                }//Ñ­»·½áÊø
+                }//å¾ªç¯ç»“æŸ
 
-                //¸üĞÂÈíÊôĞÔ
+                //æ›´æ–°è½¯å±æ€§
                 Debug.P("---->>>ibaMap is " + ibaMap.toString());
                 if (!ibaMap.isEmpty()) {
                    CsrSpmUtil.updatePartForIba(partNo, ibaMap, "");
                 }
 
-                // ÎïÁÏÉ¾³ı ±êÊ¶Î¬»¤
+                // ç‰©æ–™åˆ é™¤ æ ‡è¯†ç»´æŠ¤
                 if (times == 3) {
                 	Debug.P("------------>>>Times:"+times+"  PartNo:"+partNo);
                 	if(StringUtils.isNotEmpty(partNo)){
                         WTPart part = PartUtil.getLastPartbyNumViwe(partNo,Contants.DESIGN);
                         if (part == null) {
-                            result = "PLM²»´æÔÚ±àºÅÎª(" + partNo + ")DesignÊÓÍ¼µÄ²¿¼ş¡£";
+                            result = "PLMä¸å­˜åœ¨ç¼–å·ä¸º(" + partNo + ")Designè§†å›¾çš„éƒ¨ä»¶ã€‚";
                             return result;
                         }
                         if (StringUtils.isEmpty(factory)) {
-                            result = "¹¤³§(factory)²ÎÊıÎª¿Õ";
+                            result = "å·¥å‚(factory)å‚æ•°ä¸ºç©º";
                             return result;
                         }
 
                         if (part != null) {
                         	 IBAUtils partIba=new IBAUtils(part);
-                        	 String  _factory=partIba.getIBAValue(SPMConsts.FACTORY);//ÏµÍ³FactoryÈíÊôĞÔÖµ
+                        	 String  _factory=partIba.getIBAValue(SPMConsts.FACTORY);//ç³»ç»ŸFactoryè½¯å±æ€§å€¼
                              Set<String> factory_set=splitStr2Set(_factory,",");
-                            if (StringUtils.isEmpty(_factory)) {//Èç¹ûÎïÁÏ²»´æÔÚ¹¤³§,ÔòÉèÖÃÎªÒÑ·ÏÆú
+                            if (StringUtils.isEmpty(_factory)) {//å¦‚æœç‰©æ–™ä¸å­˜åœ¨å·¥å‚,åˆ™è®¾ç½®ä¸ºå·²åºŸå¼ƒ
                                 GenericUtil.changeState(part, SPMConsts.DESPOSED);
-                            } else {//´æÔÚ¹¤³§²ÎÊıÔòÉ¾³ıÖ¸¶¨²ÎÊıĞÅÏ¢
-                            	Debug.P("------>>²ÎÊıFactory:"+factory+"(ÓÃÓÚÉ¾³ı)");
+                            } else {//å­˜åœ¨å·¥å‚å‚æ•°åˆ™åˆ é™¤æŒ‡å®šå‚æ•°ä¿¡æ¯
+                            	Debug.P("------>>å‚æ•°Factory:"+factory+"(ç”¨äºåˆ é™¤)");
                                 String[] factories = factory.split(",");
                                 if (factories != null && factories.length > 0) {
                                     for (int i = 0; i < factories.length; i++) {
                                         String fac = factories[i];
-                                        if(factory_set.contains(fac)){//Èç¹û´æÔÚÔòÉ¾³ı???(ÊÇ·ñÓëÖêÖŞËùÒ»ÖÂ)
+                                        if(factory_set.contains(fac)){//å¦‚æœå­˜åœ¨åˆ™åˆ é™¤???(æ˜¯å¦ä¸æ ªæ´²æ‰€ä¸€è‡´)
                                         	factory_set.remove(fac);
                                         }
                                     }
                                 }
                                 
-                                //½«Set½á¹û¼¯×ª»»³É×Ö·û´®
+                                //å°†Setç»“æœé›†è½¬æ¢æˆå­—ç¬¦ä¸²
                                 String factory_iba=setCollection2Str(factory_set);
                                 List<String> fac_res=CsrSpmUtil.getAllPMFactory();
-                                if(!fac_res.contains(fac_res)){//Èç¹û²»´æÔÚĞÂ²ÄµÄ¹¤³§ÔòĞŞ¸Ä×´Ì¬Îª ÒÑ×÷·Ï
+                                if(!fac_res.contains(fac_res)){//å¦‚æœä¸å­˜åœ¨æ–°æçš„å·¥å‚åˆ™ä¿®æ”¹çŠ¶æ€ä¸º å·²ä½œåºŸ
                                 	  GenericUtil.changeState(part, SPMConsts.DESPOSED);
                                 }
-                               //¸üĞÂËùÊô¹¤³§IBAÊôĞÔ
+                               //æ›´æ–°æ‰€å±å·¥å‚IBAå±æ€§
                                 IBAUtils iba=new IBAUtils(part);
                                 iba.setIBAValue(SPMConsts.FACTORY, factory_iba==null?"":factory_iba);
                                 iba.updateIBAPart(part);
                             }
-                               result = "É¾³ı¹¤³§³É¹¦";
+                               result = "åˆ é™¤å·¥å‚æˆåŠŸ";
                         }
                 	}
                 }
@@ -238,9 +238,9 @@ public class SPMWebserviceImpl{
 
     
     /**
-     * ¸üĞÂ À©½¨¹¤³§ÎïÁÏ
-     * @param partNumber ²¿¼ş±àºÅ
-     * @param workflow Á÷³ÌID
+     * æ›´æ–° æ‰©å»ºå·¥å‚ç‰©æ–™
+     * @param partNumber éƒ¨ä»¶ç¼–å·
+     * @param workflow æµç¨‹ID
      * @param mark 
      * @return
      */
@@ -248,65 +248,65 @@ public class SPMWebserviceImpl{
     	Debug.P("---processorForSpm2--->>>partNumber:"+partNumber+"  ;workflow:"+workflow+"  ;mark:"+mark );
     	String result = null;
         ResultSet resultSet = null;
-    	// IBAÊôĞÔ¼¯ºÏ
+    	// IBAå±æ€§é›†åˆ
         Map<String,Object>  ibaMap = new HashMap<String,Object>();
-        //»ù´¡ÊôĞÔ¼¯ºÏ
+        //åŸºç¡€å±æ€§é›†åˆ
         HashMap<String,String>  baseMap= new HashMap<String,String>();
-        //Windchill×Ö¶ÎÓ³Éä¼¯ºÏ
+        //Windchillå­—æ®µæ˜ å°„é›†åˆ
         Map<String,String> mapDatas= getWCMappingFieldBySPM();
         Debug.P("------->>>Mapping Collection:"+mapDatas.toString());
-   	    ConnectionPool connectionPool=DBFactory.getConnectionPool();//Á¬½Ó³Ø
+   	    ConnectionPool connectionPool=DBFactory.getConnectionPool();//è¿æ¥æ± 
         try {
         	  SessionServerHelper.manager.setAccessEnforced(false);
-        	  //ÏÈ²éÑ¯ËùÊô¹¤³§ÊÇ·ñÎªÊ±´úĞÂ²Ä
+        	  //å…ˆæŸ¥è¯¢æ‰€å±å·¥å‚æ˜¯å¦ä¸ºæ—¶ä»£æ–°æ
                 if(StringUtils.isNotEmpty(workflow)){
                     String sql = "select * from CSR_SXWH where WORKFLOW = '" + workflow + "'";
                     Debug.P("--->>SQL:"+sql);
                     resultSet = connectionPool.getConnection().executeQuery( sql);
-                    while (resultSet.next()) {//»ñÈ¡×îĞÂÎ¬»¤ÊôĞÔ
-                    	String spm_proNum=resultSet.getString(SPMConsts.MATERIAL_NUM);//ÎïÁÏ±àÂë
+                    while (resultSet.next()) {//è·å–æœ€æ–°ç»´æŠ¤å±æ€§
+                    	String spm_proNum=resultSet.getString(SPMConsts.MATERIAL_NUM);//ç‰©æ–™ç¼–ç 
                     	Debug.P("---processorForSpm2-->>>>Material Number:"+spm_proNum);
                     	baseMap.put(SPMConsts.KEY_NUMBER, spm_proNum);
                     	if(StringUtils.isEmpty(spm_proNum)){
-                    		return "ÎïÁÏ±àÂëÎª¿Õ";
+                    		return "ç‰©æ–™ç¼–ç ä¸ºç©º";
                     	}
                     	if(spm_proNum.equals(partNumber)){
-                    		String classification=resultSet.getString(SPMConsts.MATERIAL_PATH);//ÎïÁÏĞ¡Àà
-                    		String change_reason=resultSet.getString(SPMConsts.SPM_WLCONTENT);//±ä¸üÔ­Òò
+                    		String classification=resultSet.getString(SPMConsts.MATERIAL_PATH);//ç‰©æ–™å°ç±»
+                    		String change_reason=resultSet.getString(SPMConsts.SPM_WLCONTENT);//å˜æ›´åŸå› 
                     		String attr_key=resultSet.getString(SPMConsts.IBA_KEY);
                     		String attr_value=resultSet.getString(SPMConsts.IBA_VALUE);
                     		
-                    		//ÎïÁÏÃû³Æ
+                    		//ç‰©æ–™åç§°
                     		if(SPMConsts.ATTKEY_NAME.equals(attr_key)){
                     			baseMap.put(SPMConsts.ATTKEY_NAME, attr_value==null?"":attr_value.trim());
                     		}
                     		
-                    		//Í¼Ö½±àºÅ
+                    		//å›¾çº¸ç¼–å·
                     		if(SPMConsts.SPM_TUZHIBIANHAO.equals(attr_key)){
                     			baseMap.put(SPMConsts.SPM_TUZHIBIANHAO, attr_value==null?"":attr_value.trim());
                     		}
                     		
                     		String chek_key=mapDatas.get(attr_key);
-                    		//ÆäËûÅäÖÃµÄÈíÊôĞÔ
+                    		//å…¶ä»–é…ç½®çš„è½¯å±æ€§
                     		if(StringUtils.isNotEmpty(chek_key)){
                     			ibaMap.put(mapDatas.get(attr_key).trim(), attr_value==null?"":attr_value.trim());
                     		}
-                    		//ÎïÁÏ·ÖÀàÊôĞÔ
+                    		//ç‰©æ–™åˆ†ç±»å±æ€§
                     		if(StringUtils.isNotEmpty(mapDatas.get(SPMConsts.MATERIAL_PATH))){
                     			ibaMap.put(mapDatas.get(SPMConsts.MATERIAL_PATH), classification==null?"":classification.trim());
                     		}
                     	   
-                    		//±ä¸üÔ­Òò
+                    		//å˜æ›´åŸå› 
                     		if(StringUtils.isNotEmpty(mapDatas.get(SPMConsts.SPM_WLCONTENT))){
                     			ibaMap.put(mapDatas.get(SPMConsts.SPM_WLCONTENT), change_reason==null?"":change_reason.trim());
                     		}
                     	}	
-                    }//Ñ­»·½áÊø
+                    }//å¾ªç¯ç»“æŸ
                     
                     String materNo=baseMap.get(SPMConsts.KEY_NUMBER);
                  	WTPart part=(WTPart) GenericUtil.getObjectByNumber(materNo);
-                 	if(part!=null){//ÀúÊ·ÎïÁÏ
-                        //Ä¬ÈÏµ¥Î»
+                 	if(part!=null){//å†å²ç‰©æ–™
+                        //é»˜è®¤å•ä½
                         String defaultUnit=(String) ibaMap.get(SPMConsts.KEY_UNIT);
                         Debug.P("--->>>>defaultUnit:"+defaultUnit);
                         if(StringUtils.isNotEmpty(defaultUnit)){
@@ -315,18 +315,18 @@ public class SPMWebserviceImpl{
                            	 ibaMap.put(SPMConsts.KEY_UNIT, defaultUnit);
                             }
                         }
-                 	 //¸üĞÂÎïÁÏĞÅÏ¢
-               	     Debug.P("--Mark:¸üĞÂ-->>>UpdateIBA:"+ibaMap);
+                 	 //æ›´æ–°ç‰©æ–™ä¿¡æ¯
+               	     Debug.P("--Mark:æ›´æ–°-->>>UpdateIBA:"+ibaMap);
                      part=(WTPart) GenericUtil.checkout(part);
                      LWCUtil.setValue(part, ibaMap);
-            		 Debug.P("---Mark:¸üĞÂ-->>>UpdateIBA-->>>Success!");
-            			//Èç¹û±ä¸üNameÔò¸üĞÂÎïÁÏÃû³Æ
+            		 Debug.P("---Mark:æ›´æ–°-->>>UpdateIBA-->>>Success!");
+            			//å¦‚æœå˜æ›´Nameåˆ™æ›´æ–°ç‰©æ–™åç§°
              		String mater_name=baseMap.get(SPMConsts.ATTKEY_NAME);
-             		if(StringUtils.isNotEmpty(mater_name)){//Ãû³Æ²»Ò»ÖÂÔòĞŞ¸Ä
+             		if(StringUtils.isNotEmpty(mater_name)){//åç§°ä¸ä¸€è‡´åˆ™ä¿®æ”¹
              			CsrSpmUtil.changePartName(part, mater_name.trim());
              		}
              		
-             		//¸üĞÂÃèÊöÎÄµµĞÅÏ¢(ÃèÊöÎÄµµÍ¼Ö½±àºÅ)
+             		//æ›´æ–°æè¿°æ–‡æ¡£ä¿¡æ¯(æè¿°æ–‡æ¡£å›¾çº¸ç¼–å·)
                      if(StringUtils.isNotEmpty(baseMap.get(SPMConsts.SPM_TUZHIBIANHAO))){
                      	Debug.P("---->>Update TZ Described:"+baseMap.get(SPMConsts.SPM_TUZHIBIANHAO));
                      	CsrSpmUtil.updateDescribedDocument(part,baseMap.get(SPMConsts.SPM_TUZHIBIANHAO).trim());
@@ -337,22 +337,22 @@ public class SPMWebserviceImpl{
                  			part = (WTPart) WorkInProgressHelper.service.checkin(part, "update Part Info");
                        }
                      
-             		//¸üĞÂÉúÃüÖÜÆÚ×´Ì¬(Èç¹û¹¤³§±ä¸üÎª·ÇÊ±´úĞÂ²ÄÎïÁÏÔòÉèÖÃ³ÉÒÑ×÷·Ï)
+             		//æ›´æ–°ç”Ÿå‘½å‘¨æœŸçŠ¶æ€(å¦‚æœå·¥å‚å˜æ›´ä¸ºéæ—¶ä»£æ–°æç‰©æ–™åˆ™è®¾ç½®æˆå·²ä½œåºŸ)
               		String partFactory=(String) LWCUtil.getValue(part, SPMConsts.FACTORY);
-              		boolean isDel=matchFactory(partFactory);//ÓëPMÏµÍ³Æ¥Åä
+              		boolean isDel=matchFactory(partFactory);//ä¸PMç³»ç»ŸåŒ¹é…
               		if(!isDel){
               			part=(WTPart) GenericUtil.changeState(part, SPMConsts.DESPOSED);
               			PersistenceHelper.manager.refresh(part);
               		}
-                 	}else {//À©½¨ÎïÁÏ
+                 	}else {//æ‰©å»ºç‰©æ–™
                  		 String mater_factory=(String) ibaMap.get(SPMConsts.FACTORY);
                          boolean hasexisted=matchFactory(mater_factory);
-                 		 if(hasexisted){//°üº¬Ê±´ú¹¤³§Ôò´´½¨
-                 			Debug.P("--->>À©½¨¹¤³§:"+mater_factory+" ´´½¨ÎïÁÏ.");
+                 		 if(hasexisted){//åŒ…å«æ—¶ä»£å·¥å‚åˆ™åˆ›å»º
+                 			Debug.P("--->>æ‰©å»ºå·¥å‚:"+mater_factory+" åˆ›å»ºç‰©æ–™.");
                  			processorForSpm1(workflow, 1, mater_factory);
                  		}
                  	}
-                       result="²Ù×÷³É¹¦";
+                       result="æ“ä½œæˆåŠŸ";
                 }   
 		} catch (Exception e) {
 			 e.printStackTrace();
@@ -370,16 +370,16 @@ public class SPMWebserviceImpl{
     
 
     /**
-     * Æ¥ÅäĞÂ²Ä¹¤³§
+     * åŒ¹é…æ–°æå·¥å‚
      * @param factorys
      * @return
      * @throws Exception
      */
     private  static  boolean matchFactory(String factorys) throws Exception{
-        //»ñÈ¡PMµÄ¹¤³§ĞÅÏ¢
+        //è·å–PMçš„å·¥å‚ä¿¡æ¯
         List<String> fac_res=CsrSpmUtil.getAllPMFactory();
-	    Debug.P("--matchFactory-->>>Ê±´úĞÂ²ÄµÄ¹¤³§:"+fac_res+"  SPM Factory:"+factorys);
-       boolean flag=false;//Ä¬ÈÏ²»ÊôÓÚÊ±´úĞÂ²Ä
+	    Debug.P("--matchFactory-->>>æ—¶ä»£æ–°æçš„å·¥å‚:"+fac_res+"  SPM Factory:"+factorys);
+       boolean flag=false;//é»˜è®¤ä¸å±äºæ—¶ä»£æ–°æ
        if(StringUtils.isNotEmpty(factorys)){
          List<String> maters_list=Arrays.asList(factorys.split(","));
          for (String str : maters_list) {
@@ -395,7 +395,7 @@ public class SPMWebserviceImpl{
     
     
     /**
-     * »ñÈ¡´´½¨¸Ã²¿¼şÊ±µÄworkflow
+     * è·å–åˆ›å»ºè¯¥éƒ¨ä»¶æ—¶çš„workflow
      * 
      * @return
      * @throws SQLException
@@ -420,7 +420,7 @@ public class SPMWebserviceImpl{
 
     
     /**
-     * »ñÈ¡¸üĞÂÀúÊ·¼ÇÂ¼
+     * è·å–æ›´æ–°å†å²è®°å½•
      * 
      * @param partNumber
      * @param conn
@@ -444,38 +444,38 @@ public class SPMWebserviceImpl{
     
 
     /**
-     * Îª²¿¼ş´´½¨¹ØÁªÎÄµµ
+     * ä¸ºéƒ¨ä»¶åˆ›å»ºå…³è”æ–‡æ¡£
      * @param partNumber
-     * @param workflow Á÷³ÌID
-     * @param factory ¹¤³§
+     * @param workflow æµç¨‹ID
+     * @param factory å·¥å‚
      * @return
      * @throws Exception
      */
     public static String createDocForPart(String partNumber, String workflow,String factory) throws Exception{
-       Debug.P("--createDocForPart-->>>Îª²¿¼ş´´½¨¹ØÁªÎÄµµ partNumber=[" + partNumber + "] workflow=["+ workflow + "] factory=[" + factory + "]");
+       Debug.P("--createDocForPart-->>>ä¸ºéƒ¨ä»¶åˆ›å»ºå…³è”æ–‡æ¡£ partNumber=[" + partNumber + "] workflow=["+ workflow + "] factory=[" + factory + "]");
        ResultSet resultSet = null;
        String resultInfo = "";
        try {
     	   SessionServerHelper.manager.setAccessEnforced(false);
     	   if (partNumber != null) {
-    		   ConnectionPool connectionPool=DBFactory.getConnectionPool();//Á¬½Ó³Ø
+    		   ConnectionPool connectionPool=DBFactory.getConnectionPool();//è¿æ¥æ± 
     		   String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from CSR_FJJL where WLNUMBER = '"+ partNumber + "'";
     		   Debug.P("--->SQL:"+sql);
     		   resultSet = connectionPool.getConnection().executeQuery(sql);
     		   while (resultSet.next()) {
     			  String spm_num = resultSet.getString(SPMConsts.MATERIAL_NUM);
     			  if(StringUtils.isEmpty(spm_num)){
-    				  return "ÎïÁÏ±àºÅÎª¿Õ";
+    				  return "ç‰©æ–™ç¼–å·ä¸ºç©º";
     			  }
     		      WTPart part=null;
 			      try {
 			    	  part= (WTPart) GenericUtil.getObjectByNumber(spm_num);
 				     } catch (Exception e) {
-					    Debug.P("---->>>NumberÎª("+spm_num+")²¿¼şÔÚWindchillÖĞ²»´æÔÚ!");
+					    Debug.P("---->>>Numberä¸º("+spm_num+")éƒ¨ä»¶åœ¨Windchillä¸­ä¸å­˜åœ¨!");
 					    continue;
 				   }
     			  Debug.P("---->>>SPM_NUM="+spm_num);
-    			  //»ù±¾ÊôĞÔ¼¯ºÏ
+    			  //åŸºæœ¬å±æ€§é›†åˆ
     			  HashMap<String, String> baseMap = new HashMap<String, String>();
     	
     			  if(spm_num.equals(partNumber)){
@@ -485,30 +485,30 @@ public class SPMWebserviceImpl{
     			
     			      if(part!=null){
     			    	   Debug.P("----->>>DOC_WTPart:"+part.getPersistInfo().getObjectIdentifier().getStringValue()+"   SPMDocNum:"+docNumber);
-    			    	   //ÎÄµµ´´½¨µ½²¿¼şÍ¬Ä¿Â¼ÏÂ
+    			    	   //æ–‡æ¡£åˆ›å»ºåˆ°éƒ¨ä»¶åŒç›®å½•ä¸‹
     			    	   String folderPath= part.getFolderPath();
     			    	   folderPath=folderPath.substring(0,folderPath.lastIndexOf("/"));
     			    	   String containerName=part.getContainerName();
-    			    	   Debug.P("----->>Part("+partNumber+")µÄÎÄ¼ş¼ĞÂ·¾¶:"+folderPath+"  ;containerName:"+containerName);
+    			    	   Debug.P("----->>Part("+partNumber+")çš„æ–‡ä»¶å¤¹è·¯å¾„:"+folderPath+"  ;containerName:"+containerName);
     			    	   baseMap.put(SPMConsts.KEY_NUMBER, docNumber==null?"":docNumber.trim());
     			    	   baseMap.put(SPMConsts.KEY_FOLDER, folderPath==null?"":folderPath.trim()); 
-    			    	   baseMap.put(SPMConsts.KEY_NAME, docName==null?"":docName.trim());//ÎÄµµÃû³Æ
-    	    			   baseMap.put(SPMConsts.KEY_LOCATION_PATH, location_path==null?"":location_path.trim());//Ö÷ÎÄµµÂ·¾¶
+    			    	   baseMap.put(SPMConsts.KEY_NAME, docName==null?"":docName.trim());//æ–‡æ¡£åç§°
+    	    			   baseMap.put(SPMConsts.KEY_LOCATION_PATH, location_path==null?"":location_path.trim());//ä¸»æ–‡æ¡£è·¯å¾„
     	    			   baseMap.put(SPMConsts.KEY_CONTAINERNAME, containerName==null?"":containerName.trim());
     	    			   
-    	    			   //´´½¨ÎÄµµ¶ÔÏóĞÅÏ¢
+    	    			   //åˆ›å»ºæ–‡æ¡£å¯¹è±¡ä¿¡æ¯
     	    			   WTDocument doc=CsrSpmUtil.createNewDocument(baseMap, null);
-    	    			   if(doc!=null){//½¨Á¢ÎÄµµ²¿¼şµÄÃèÊö¹ØÏµ
+    	    			   if(doc!=null){//å»ºç«‹æ–‡æ¡£éƒ¨ä»¶çš„æè¿°å…³ç³»
     	    				   PartUtil.createDescriptionLink(part, doc);
     	    			   }
     			      }
     			  }
-    		   }//Ñ­»·½áÊø
-    		   resultInfo="²Ù×÷³É¹¦";
+    		   }//å¾ªç¯ç»“æŸ
+    		   resultInfo="æ“ä½œæˆåŠŸ";
     	   }
 	     } catch (Exception e) {
 		     e.printStackTrace();
-		     resultInfo="²Ù×÷Ê§°Ü";
+		     resultInfo="æ“ä½œå¤±è´¥";
 	     }finally{
 	    	  if (resultSet != null) {
 	             resultSet.close();
@@ -523,21 +523,21 @@ public class SPMWebserviceImpl{
 
 
     /**
-     * Îª²¿¼şĞŞ¸Ä¹ØÁªÎÄµµ
+     * ä¸ºéƒ¨ä»¶ä¿®æ”¹å…³è”æ–‡æ¡£
      */
     public static String updateDocForPart(String partNumber, String workflow)throws Exception{
     	
     	Debug.P("---->>>updateDocForPart Number: " + partNumber + "workflow is " + workflow);
-    	//»ù±¾ÊôĞÔ¼¯ºÏ
+    	//åŸºæœ¬å±æ€§é›†åˆ
     	 HashMap<String, String> baseMap = new HashMap<String, String>();
-    	 //IBAÊôĞÔ¼¯ºÏ
+    	 //IBAå±æ€§é›†åˆ
 //    	 HashMap<String, String> ibaMap = new HashMap<String, String>();
     	 ResultSet resultSet = null;
          String  resultInfo = "";
          try {
         	 SessionServerHelper.manager.setAccessEnforced(false);
         	 if (partNumber != null) {
-        		 ConnectionPool connectionPool=DBFactory.getConnectionPool();//Á¬½Ó³Ø
+        		 ConnectionPool connectionPool=DBFactory.getConnectionPool();//è¿æ¥æ± 
         		 String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from CSR_FJJL where WLNUMBER = '" + partNumber + "'";
                  Debug.P("--->>SQL:"+sql);
                  resultSet = connectionPool.getConnection().executeQuery(sql);
@@ -545,10 +545,10 @@ public class SPMWebserviceImpl{
                 	 String spm_prodnum=resultSet.getString(SPMConsts.MATERIAL_NUM);
                 	 String doc_number=resultSet.getString(SPMConsts.SPM_DOCNUMBER);
                 	 if(StringUtils.isEmpty(spm_prodnum)){
-                		 return "ÎïÁÏ±àÂëÎª¿Õ";
+                		 return "ç‰©æ–™ç¼–ç ä¸ºç©º";
                 	 }
                 	
-                	 Debug.P("-----SPM>>>WLNUMBER("+partNumber+")¶ÔÓ¦µÄÊôĞÔ×Ö¶ÎDOCNUMBERÎª["+doc_number+"]");
+                	 Debug.P("-----SPM>>>WLNUMBER("+partNumber+")å¯¹åº”çš„å±æ€§å­—æ®µDOCNUMBERä¸º["+doc_number+"]");
                 	 baseMap.put(SPMConsts.KEY_NUMBER, doc_number==null?"":doc_number.trim());
                 	 if(partNumber.equals(spm_prodnum)){
                 		 String docName=resultSet.getString(SPMConsts.SPM_DOCNAME);
@@ -557,31 +557,31 @@ public class SPMWebserviceImpl{
     			         try {
     			    	    part= (WTPart) GenericUtil.getObjectByNumber(spm_prodnum);
 					      } catch (Exception e) {
-						     Debug.P("---->PART_ERROR:Num=("+spm_prodnum+")²¿¼şÔÚWindchillÖĞ²»´æÔÚ!");
+						     Debug.P("---->PART_ERROR:Num=("+spm_prodnum+")éƒ¨ä»¶åœ¨Windchillä¸­ä¸å­˜åœ¨!");
 						     continue;
 					     }
     			         
     				      if(part!=null){
        			    	   Debug.P("----->>>DOC_WTPart:"+part.getPersistInfo().getObjectIdentifier().getStringValue());
-       			    	   //ÎÄµµ´´½¨µ½²¿¼şÍ¬Ä¿Â¼ÏÂ
+       			    	   //æ–‡æ¡£åˆ›å»ºåˆ°éƒ¨ä»¶åŒç›®å½•ä¸‹
        			    	   String folderPath=FolderHelper.service.getFolderPath(part);
        			    	   String containerName=part.getContainerName();
-       			    	   Debug.P("----->>Part("+partNumber+")µÄÎÄ¼ş¼ĞÂ·¾¶:"+folderPath+"  ;containerName:"+containerName);
+       			    	   Debug.P("----->>Part("+partNumber+")çš„æ–‡ä»¶å¤¹è·¯å¾„:"+folderPath+"  ;containerName:"+containerName);
        			    	   baseMap.put(SPMConsts.KEY_FOLDER, folderPath==null?"":folderPath.trim()); 
-       			    	   baseMap.put(SPMConsts.KEY_NAME, docName==null?"":docName.trim());//ÎÄµµÃû³Æ
-       	    			   baseMap.put(SPMConsts.KEY_LOCATION_PATH, location_path==null?"":location_path.trim());//Ö÷ÎÄµµÂ·¾¶
+       			    	   baseMap.put(SPMConsts.KEY_NAME, docName==null?"":docName.trim());//æ–‡æ¡£åç§°
+       	    			   baseMap.put(SPMConsts.KEY_LOCATION_PATH, location_path==null?"":location_path.trim());//ä¸»æ–‡æ¡£è·¯å¾„
        	    			   baseMap.put(SPMConsts.KEY_CONTAINERNAME, containerName==null?"":containerName.trim());
        	    		       
        	    			     
-       	    			      //¸üĞÂÎÄµµÄÚÈİ
+       	    			      //æ›´æ–°æ–‡æ¡£å†…å®¹
        	    			      if(StringUtils.isNotEmpty(doc_number)){
        	    			       WTDocument doc=(WTDocument) GenericUtil.getObjectByNumber(doc_number);
-         			             if(doc!=null){//ÎÄµµ¶ÔÏóÎª¿Õ
+         			             if(doc!=null){//æ–‡æ¡£å¯¹è±¡ä¸ºç©º
          			            	 CsrSpmUtil.reviseDocument(doc, baseMap, null);
          			             }
-       	    			    	resultInfo="¸üĞÂ²¿¼ş¹ØÁªµÄÎÄµµ³É¹¦";
+       	    			    	resultInfo="æ›´æ–°éƒ¨ä»¶å…³è”çš„æ–‡æ¡£æˆåŠŸ";
        	    			      }else{
-       	    			    	resultInfo="²¿¼şÎ´¸ü¸Ä";
+       	    			    	resultInfo="éƒ¨ä»¶æœªæ›´æ”¹";
        	    			      }
     				      }
                 	 }
@@ -591,7 +591,7 @@ public class SPMWebserviceImpl{
 			e.printStackTrace();
 		}catch (Exception e) {
 			 e.printStackTrace();
-			 throw new Exception("Windchill¸üĞÂ("+partNumber+")²¿¼ş¹ØÁªµÄÎÄµµÒì³£");
+			 throw new Exception("Windchillæ›´æ–°("+partNumber+")éƒ¨ä»¶å…³è”çš„æ–‡æ¡£å¼‚å¸¸");
 		}finally{
 			  if (resultSet != null) {
 		           resultSet.close();
@@ -603,33 +603,33 @@ public class SPMWebserviceImpl{
     
     
     /**
-     * SPMµ÷ÓÃ½Ó¿ÚÅĞ¶ÏÎïÁÏÔÚPLMÏµÍ³ÊÇ·ñ´æÔÚ¼¼Êõ¹æ¸ñÊé
-     * @return 0. ±íÊ¾²»´æÔÚ¼¼Êõ¹æ¸ñÊé 1.±íÊ¾´æÔÚ¼¼Êõ¹æ¸ñÊé
+     * SPMè°ƒç”¨æ¥å£åˆ¤æ–­ç‰©æ–™åœ¨PLMç³»ç»Ÿæ˜¯å¦å­˜åœ¨æŠ€æœ¯è§„æ ¼ä¹¦
+     * @return 0. è¡¨ç¤ºä¸å­˜åœ¨æŠ€æœ¯è§„æ ¼ä¹¦ 1.è¡¨ç¤ºå­˜åœ¨æŠ€æœ¯è§„æ ¼ä¹¦
      * @throws Exception 
      */
     public static String getJSGGSByPartNumber(String partNumber) throws Exception {
-    	 Debug.P("---getJSGGSByPartNumber--->>partNumber£º"+partNumber);
-    	 String result = "0";//Ä¬ÈÏ²»´æÔÚ
+    	 Debug.P("---getJSGGSByPartNumber--->>partNumberï¼š"+partNumber);
+    	 String result = "0";//é»˜è®¤ä¸å­˜åœ¨
          if (StringUtils.isEmpty(partNumber)){
-        	 return "ÎïÁÏ±àºÅ²ÎÊıÎª¿Õ";
+        	 return "ç‰©æ–™ç¼–å·å‚æ•°ä¸ºç©º";
          }
          try {
         	 SessionHelper.manager.setAdministrator();
              WTPart part =(WTPart) GenericUtil.getObjectByNumber(partNumber);
              if(part!=null){
             	  QueryResult qr = WTPartHelper.service .getDescribedByWTDocuments(part);
-            	  while(qr.hasMoreElements()){//ÅĞ¶ÏWindchillÊÇ·ñ´æÔÚ¼¼Êõ¹æ¸ñÎÄµµ
+            	  while(qr.hasMoreElements()){//åˆ¤æ–­Windchillæ˜¯å¦å­˜åœ¨æŠ€æœ¯è§„æ ¼æ–‡æ¡£
             		  WTDocument doc=(WTDocument) qr.nextElement();
             		  String type=GenericUtil.getTypeName(doc);
             		  Debug.P("--->>DocType:"+type);
-            		  if(StringUtils.equals(type, SPMConsts.TECHNICAL_SPEC)){//¼¼Êõ¹æ¸ñÊé
+            		  if(StringUtils.equals(type, SPMConsts.TECHNICAL_SPEC)){//æŠ€æœ¯è§„æ ¼ä¹¦
             			  result="1";
             		  }
             	  }
              }
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Exception("Windchill²éÑ¯("+partNumber+")¹ØÁªµÄ¼¼Êõ¹æ¸ñÊéÒì³£");
+			throw new Exception("WindchillæŸ¥è¯¢("+partNumber+")å…³è”çš„æŠ€æœ¯è§„æ ¼ä¹¦å¼‚å¸¸");
 		}finally{
 			 SessionServerHelper.manager.setAccessEnforced(true);
 		}
@@ -637,30 +637,30 @@ public class SPMWebserviceImpl{
     }
 
     /**
-     * SPMµ÷ÓÃ½Ó¿ÚÅĞ¶ÏÎïÁÏÔÚPLMÏµÍ³ÊÇ·ñ´æÔÚ²úÆ·ÊÖ²á
-     * @return 0. ±íÊ¾²»´æÔÚ²úÆ·ÊÖ²á 1.±íÊ¾´æÔÚ²úÆ·ÊÖ²á
+     * SPMè°ƒç”¨æ¥å£åˆ¤æ–­ç‰©æ–™åœ¨PLMç³»ç»Ÿæ˜¯å¦å­˜åœ¨äº§å“æ‰‹å†Œ
+     * @return 0. è¡¨ç¤ºä¸å­˜åœ¨äº§å“æ‰‹å†Œ 1.è¡¨ç¤ºå­˜åœ¨äº§å“æ‰‹å†Œ
      */
     public static String getCPSCByPartNumber(String partNumber) throws Exception {
-    	Debug.P("--getCPSCByPartNumber-->>>partNumber£º"+partNumber);
-    	 String result = "0";//Ä¬ÈÏ²»´æÔÚ
+    	Debug.P("--getCPSCByPartNumber-->>>partNumberï¼š"+partNumber);
+    	 String result = "0";//é»˜è®¤ä¸å­˜åœ¨
          if (StringUtils.isEmpty(partNumber)){
-        	 return "ÎïÁÏ±àºÅ²ÎÊıÎª¿Õ";
+        	 return "ç‰©æ–™ç¼–å·å‚æ•°ä¸ºç©º";
          }
          try {
         	 SessionServerHelper.manager.setAccessEnforced(false);
         	   WTPart part =(WTPart) GenericUtil.getObjectByNumber(partNumber);
         	   QueryResult qr = WTPartHelper.service .getDescribedByWTDocuments(part);
-         	  while(qr.hasMoreElements()){//ÅĞ¶ÏWindchillÊÇ·ñ´æÔÚ¼¼Êõ¹æ¸ñÎÄµµ
+         	  while(qr.hasMoreElements()){//åˆ¤æ–­Windchillæ˜¯å¦å­˜åœ¨æŠ€æœ¯è§„æ ¼æ–‡æ¡£
         		  WTDocument doc=(WTDocument) qr.nextElement();
         		  String type=GenericUtil.getTypeName(doc);
         		  Debug.P("--->>DocType:"+type);
-        		  if(StringUtils.equals(type, SPMConsts.PRODUCT_SPEC)){//²úÆ·ÊÖ²á
+        		  if(StringUtils.equals(type, SPMConsts.PRODUCT_SPEC)){//äº§å“æ‰‹å†Œ
         			  result="1";
         		  }
         	  }
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Exception("Windchill²éÑ¯("+partNumber+")¹ØÁªµÄ¼¼Êõ¹æ¸ñÊéÒì³£");
+			throw new Exception("WindchillæŸ¥è¯¢("+partNumber+")å…³è”çš„æŠ€æœ¯è§„æ ¼ä¹¦å¼‚å¸¸");
 		}finally{
 			 SessionServerHelper.manager.setAccessEnforced(true);
 		}
@@ -669,14 +669,14 @@ public class SPMWebserviceImpl{
     
 	
     /**
-     * ¼ì²éÎïÁÏÊÇ·ñÔÚ´æ´¢¿âÖĞ´æÔÚ
-     * 0. ±íÊ¾²»´æÔÚ´æ´¢¿â 1.±íÊ¾´æÔÚ´æ´¢¿â
+     * æ£€æŸ¥ç‰©æ–™æ˜¯å¦åœ¨å­˜å‚¨åº“ä¸­å­˜åœ¨
+     * 0. è¡¨ç¤ºä¸å­˜åœ¨å­˜å‚¨åº“ 1.è¡¨ç¤ºå­˜åœ¨å­˜å‚¨åº“
      */
     public static String checkPartFromLibrary(String partNumber)throws Exception {
-     	Debug.P("--checkPartFromLibrary-->>>partNumber£º"+partNumber);
-    	 String result = "0";//Ä¬ÈÏ²»´æÔÚ
+     	Debug.P("--checkPartFromLibrary-->>>partNumberï¼š"+partNumber);
+    	 String result = "0";//é»˜è®¤ä¸å­˜åœ¨
          if (StringUtils.isEmpty(partNumber)){
-        	 return "ÎïÁÏ±àºÅ²ÎÊıÎª¿Õ";
+        	 return "ç‰©æ–™ç¼–å·å‚æ•°ä¸ºç©º";
          }
          try {
         	 SessionServerHelper.manager.setAccessEnforced(false);
@@ -688,7 +688,7 @@ public class SPMWebserviceImpl{
         	 }
          } catch (Exception e) {
 			e.printStackTrace();
-			throw new Exception("Windchill²éÑ¯("+partNumber+")ÊÇ·ñ´æÔÚ´æ´¢¿âÖĞÒì³£");
+			throw new Exception("WindchillæŸ¥è¯¢("+partNumber+")æ˜¯å¦å­˜åœ¨å­˜å‚¨åº“ä¸­å¼‚å¸¸");
 		}finally{
 			 SessionServerHelper.manager.setAccessEnforced(true);
 		}
@@ -699,23 +699,23 @@ public class SPMWebserviceImpl{
     
     
     /**
-     * ÅĞ¶Ï¶ÔÏóµÄ´æÔÚĞÔ
+     * åˆ¤æ–­å¯¹è±¡çš„å­˜åœ¨æ€§
   * @throws WTException 
      */
     private static Persistable hasExistObject(String num) throws Exception{
- 	    if(StringUtils.isEmpty(num)) throw new Exception("NUMBERÊôĞÔ×Ö¶Î²ÎÊıÖµÎª¿Õ");
+ 	    if(StringUtils.isEmpty(num)) throw new Exception("NUMBERå±æ€§å­—æ®µå‚æ•°å€¼ä¸ºç©º");
  	    try {
  	        Persistable object=GenericUtil.getObjectByNumber(num);
  	         return object;
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new Exception("Windchill²éÑ¯¶ÔÏó±àºÅ("+num+")Òì³£!");
+				throw new Exception("WindchillæŸ¥è¯¢å¯¹è±¡ç¼–å·("+num+")å¼‚å¸¸!");
 			}
     }
        
        
        /**
-        * ¸ù¾İÖĞ¼ä±íµÄĞÅÏ¢²éÑ¯ÅäÖÃÎÄ¼şÖĞÓëÖ®¶ÔÓ¦µÄWindchillÊôĞÔÃû³Æ
+        * æ ¹æ®ä¸­é—´è¡¨çš„ä¿¡æ¯æŸ¥è¯¢é…ç½®æ–‡ä»¶ä¸­ä¸ä¹‹å¯¹åº”çš„Windchillå±æ€§åç§°
         * @param field
         * @return
         * @throws Exception
@@ -745,9 +745,9 @@ public class SPMWebserviceImpl{
        }
 
         /**
-         * ½«×Ö·û´®ÒÔÖ¸¶¨µÄ·Ö¸ô·ûÇĞ¸î´æ·Åµ½¼¯ºÏÖĞ
-         * @param target Ä¿±ê×Ö·û´®
-         * @param ÇĞ¸î·ûºÅ
+         * å°†å­—ç¬¦ä¸²ä»¥æŒ‡å®šçš„åˆ†éš”ç¬¦åˆ‡å‰²å­˜æ”¾åˆ°é›†åˆä¸­
+         * @param target ç›®æ ‡å­—ç¬¦ä¸²
+         * @param åˆ‡å‰²ç¬¦å·
          */
        private static Set<String> splitStr2Set(String target,String regex){
     	     Set<String>  result=new HashSet<String>();
