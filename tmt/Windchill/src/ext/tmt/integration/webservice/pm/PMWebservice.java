@@ -1,6 +1,9 @@
 package ext.tmt.integration.webservice.pm;
 
 
+import java.io.ObjectInputStream;
+import java.util.List;
+
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
@@ -75,9 +78,17 @@ public class PMWebservice extends JaxWsWebService
          PMWebserviceImpl.changePhase(objectId);
     }
     
-
+    @WebMethod(operationName="queryWCObjectByPM")
+    public List<String> queryWCObjectByPM(String pmid ,String class1,String class2,boolean flag)throws Exception
+    {
+         return PMWebserviceImpl.queryWCObjectByPM(pmid,class1,class2,true);
+    }
    
-    
+    @WebMethod(operationName="getRepresentationByPM")
+    public ObjectInputStream getRepresentationByPM(String pmid)throws Exception
+    {
+         return PMWebserviceImpl.getRepresentationByPM(pmid);
+    }
     
     
     
