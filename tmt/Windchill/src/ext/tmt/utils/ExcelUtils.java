@@ -17,6 +17,7 @@ import org.apache.poi.hssf.util.Region;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 
 public class ExcelUtils {
 
@@ -405,6 +406,14 @@ public class ExcelUtils {
 		return cordlist;
 	}
 
+	/**
+	 * 获得指定区域
+	 * @param row1
+	 * @param cell1
+	 * @param row2
+	 * @param cell2
+	 * @return
+	 */
 	private HashMap getArea(int row1, short cell1, int row2, short cell2) {
 		HashMap<String, Number> hs = new HashMap<String, Number>();
 		if (row1 == row2) {
@@ -434,5 +443,13 @@ public class ExcelUtils {
 		}
 		return hs;
 	}
+	
+   
+	public static void setCellValue(int rowIndex,int colIndex,Workbook workbook){
+           
+	}
+	
+	
+	
 
 }

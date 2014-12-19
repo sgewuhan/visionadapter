@@ -6,15 +6,20 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Vector;
 
 import ext.tmt.utils.Debug;
 import wt.util.WTException;
 
 public class DBUtils {
 
-	public static String PERPERTIES_PATH = "codebase" + File.separator + "ext"
+
+	
+	private static String PERPERTIES_PATH = "codebase" + File.separator + "ext"
 			+ File.separator + "tmt" + File.separator + "integration"
 			+ File.separator + "webservice" + File.separator +"spm"+ File.separator+ "db.properties";
+	
+	
 	
 	public static Connection conn;
 

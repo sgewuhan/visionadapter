@@ -6,7 +6,8 @@ import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
 import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
 import com.ptc.windchill.uwgm.common.util.PrintHelper;
 
-import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.Debug;
+import ext.tmt.utils.EPMDocUtil;
 
 import java.util.Map;
 
@@ -148,7 +149,8 @@ public class DefaultAutoAssociatePartFinderCreator implements
 			throw new IllegalStateException("Missing initialization!");
 		String s = associatepartdescriptor.getPartName();
 		String s1 = associatepartdescriptor.getPartNumber();
-		System.out.println("出现本图了-------------------------》"+s1);
+		Debug.P("出现本图了 PartName:-------------------------》"+s1);
+		Debug.P("出现本图了 PartNumber:-------------------------》"+s1);
 		if(s1 !=null &&s1.replace(" ", "").trim().equals("本图")){
 			System.out.println("出现本图了-------------------------》"+s1);
 			return null;
@@ -165,12 +167,16 @@ public class DefaultAutoAssociatePartFinderCreator implements
 						"com.ptc.windchill.uwgm.common.autoassociate.autoassociateResource",
 						"77", new Object[] { s1 });
 			throw new WTException(wtmessage);
-		} else if(s1.equals("本图")) {
+		} else if("本图".equals(s1)) {
 			log.debug((new StringBuilder())
 					.append("Create number is 本图  part!---------------"));
 			return null;
 		}else{
-			return WTPartUtilities.createNewPart(associatepartdescriptor);
+			Debug.P("------WTPartUtilities.createNewPart------>>>>Ready Create");
+			WTPart part=WTPartUtilities.createNewPart(associatepartdescriptor);
+			EPMDocument epm=EPMDocUtil.getActiveEPMDocument(part);
+			System.out.println(epm.getName());
+			return part ;
 		}
 	}
 

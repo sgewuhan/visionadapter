@@ -2,7 +2,6 @@ package ext.tmt.utils;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -11,9 +10,10 @@ import org.apache.commons.lang.StringUtils;
 
 import wt.csm.navigation.ClassificationNode;
 import wt.doc.WTDocument;
-import wt.doc.WTDocumentHelper;
 import wt.doc.WTDocumentMaster;
 import wt.epm.EPMDocument;
+import wt.fc.Identified;
+import wt.fc.IdentityHelper;
 import wt.fc.ObjectVector;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
@@ -39,6 +39,7 @@ import wt.part.WTPart;
 import wt.part.WTPartDescribeLink;
 import wt.part.WTPartHelper;
 import wt.part.WTPartMaster;
+import wt.part.WTPartMasterIdentity;
 import wt.part.WTPartReferenceLink;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
@@ -60,7 +61,6 @@ import wt.vc.wip.WorkInProgressState;
 import com.ptc.core.meta.common.TypeIdentifier;
 import com.ptc.core.meta.server.TypeIdentifierUtility;
 
-import ext.tmt.part.PartUtils;
 // part工具类
 public class PartUtil implements RemoteAccess {
 	
@@ -68,19 +68,19 @@ public class PartUtil implements RemoteAccess {
 	private static String DEFAULT_VIEW="Design";//默认部件视图
 	
 	
-	//创建部件的测试
-	public static void main(String[] args) throws Exception {
-		String partName="Car_20141022";
-		String num="Car_NUM00000001";
-		String containerName="TMT_201401";
-		String part_folder="/TMT_Demo1/TDE001";
-		String type="";
-		String userName="zwx82599";
-		String vmUser="PM-RW";
-		Map ibas=new HashMap();
-		createWTPart(partName,num,containerName,part_folder,null,null,null,null,userName,vmUser,null,null,ibas,true);
-		
-	}
+//	//创建部件的测试
+//	public static void main(String[] args) throws Exception {
+//		String partName="Car_20141022";
+//		String num="Car_NUM00000001";
+//		String containerName="TMT_201401";
+//		String part_folder="/TMT_Demo1/TDE001";
+//		String type="";
+//		String userName="zwx82599";
+//		String vmUser="PM-RW";
+//		Map ibas=new HashMap();
+//		createWTPart(partName,num,containerName,part_folder,null,null,null,null,userName,vmUser,null,null,ibas,true);
+//		
+//	}
 	
 	
 	
@@ -489,8 +489,7 @@ public class PartUtil implements RemoteAccess {
 					.refresh(partLink);
 			result = true;
 		} else {
-			throw new Exception("部件:" + part.getNumber() + " 和文档:"
-					+ doc.getName() + "已有关联");
+			throw new Exception("部件:" + part.getNumber() + " 和文档:"+ doc.getName() + "已有关联");
 		}
 		return result;
 	}
@@ -849,7 +848,26 @@ public class PartUtil implements RemoteAccess {
 		return type;
 
 		}
-
+	
+	
+   /**
+    * 修改名称 
+    * @param part 部件对象
+    * @param newName 新名称
+    * @return
+    * @throws Exception
+    */
+	public static WTPart rename(WTPart part,String newName)throws Exception{
+		if(StringUtils.isNotEmpty(newName)){
+			Identified Identified = (Identified) part.getMaster();
+			WTPartMasterIdentity masterIde=(WTPartMasterIdentity) Identified.getIdentificationObject();
+			masterIde.setName(newName);
+			IdentityHelper.service.changeIdentity(Identified, masterIde);
+			part=(WTPart) PersistenceHelper.manager.refresh(part);
+		}
+		  return part;
+	}
+	
 
 	    
 	    

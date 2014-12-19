@@ -1474,7 +1474,15 @@ public class GenericUtil implements RemoteAccess {
 		return type;
 	}
 	
-
+  /**
+   * 获得本地的codebase路径地址
+   * @return
+   * @throws IOException
+   */
+	public static String getCodebaseLocation() throws IOException{
+		WTProperties wtproperties= WTProperties.getLocalProperties();
+	    return wtproperties.getProperty("wt.codebase.location");
+	}
 
 	
 
@@ -2782,5 +2790,7 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 	     return result;
     }
 
+ 
+ 
  
 }

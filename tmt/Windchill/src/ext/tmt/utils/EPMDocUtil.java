@@ -2,7 +2,12 @@ package ext.tmt.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
+
+import org.apache.commons.lang.StringUtils;
 
 import wt.content.ApplicationData;
 import wt.content.ContentHelper;
@@ -14,9 +19,12 @@ import wt.epm.EPMDocument;
 import wt.epm.EPMDocumentMaster;
 import wt.epm.build.EPMBuildHistory;
 import wt.epm.build.EPMBuildRule;
+import wt.epm.workspaces.EPMWorkspaceHelper;
+import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
 import wt.fc.QueryResult;
+import wt.iba.definition.StringDefinition;
 import wt.part.WTPart;
 import wt.part.WTPartHelper;
 import wt.query.QuerySpec;
@@ -120,6 +128,42 @@ public class EPMDocUtil {
          }
          return EPMDoc;
     }
+    
+    /**
+     * 根据软属性的名称查询出对应的EPMDocument对象
+     * 
+     * @param partNum
+     * @return
+     * @throws Exception 
+     */
+    public static List<Persistable> getEPMDocumentByIBA(String IbaKey,String IbaValue) throws Exception{
+    	List<Persistable> objects=new ArrayList<Persistable>();
+    	Debug.P("----->>>>>IbaKey:"+IbaKey+"  IbaValue:"+IbaValue);
+    	if(StringUtils.isNotEmpty(IbaValue)&&StringUtils.isNotEmpty(IbaKey)){
+    		String sql="select M1.NAME,M1.DOCUMENTNUMBER  FROM  STRINGVALUE v1 ,STRINGDEFINITION d1,EPMDOCUMENT e1,EPMDOCUMENTMASTER m1 where D1.IDA2A2=v1.ida3a6 and v1.IDA3A4=e1.IDA2A2 and e1.IDA3MASTERREFERENCE=M1.IDA2A2 and d1.name=?  and v1.value=? ";
+    		String [] params={IbaKey,IbaValue};
+    		List<Hashtable<String,String>> result   =UserDefQueryUtil.commonQuery(sql, params);
+    	    if(result!=null&&result.size()>0){
+    	    	Debug.P("------>>>Get EpmDocument Result Size:"+result.size());
+    	    	for(int i=0;i<result.size();i++){
+    	    		 Hashtable<String, String> data_rows=result.get(i);
+    	    		 for(Iterator<?> ite=data_rows.keySet().iterator();ite.hasNext();){
+    	    			 String key=(String) ite.next();
+    	    			 if("DOCUMENTNUMBER".equals(key)){
+    	    				 String epmdoc_Num=data_rows.get(key);
+    	    				 Persistable object=GenericUtil.getObjectByNumber(epmdoc_Num);
+    	    				 objects.add(object);
+    	    			 }
+    	    		 }
+    	    	}
+    	    }
+    	}
+    	        return objects;
+    }
+    
+    
+    
+    
     
     
     
@@ -249,5 +293,8 @@ public class EPMDocUtil {
 				ContentServerHelper.service.updateContent(doc, applicationdata,primary);
 			}
 	   }
+    
+
+    
 
 }

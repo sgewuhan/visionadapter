@@ -28,6 +28,7 @@ import wt.change2.WTChangeRequest2;
 import wt.csm.navigation.ClassificationNode;
 import wt.epm.EPMDocument;
 import wt.fc.Identified;
+import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.fc.PersistenceServerHelper;
@@ -65,7 +66,10 @@ import wt.vc.wip.WorkInProgressHelper;
 import wt.vc.wip.WorkInProgressServiceEvent;
 
 public class PartHelper implements Serializable {
-	private static final long serialVersionUID = 2304592616754675533L;
+	
+	private static final long serialVersionUID = 2304592616754675533L; 
+	
+	private static final String MATER_NO="Material_NO";
 
 	/** 
 	 * 监听WTPart事件
@@ -109,12 +113,16 @@ public class PartHelper implements Serializable {
 			   Debug.P(partNumber+"------------------->"+partType+" event--->"+eventType);
 			    String epmPartType="";
 			    if(partType.equals("wt.part.WTPart")){
+			    	Debug.P("--888--->wt.part.WTPart-->>>PartType:"+partType);
 			    	epmdoc=EPMDocUtil.getActiveEPMDocument(wtPart);
 			    	Debug.P("1-->"+epmdoc);
 			    	if(epmdoc==null){
-			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+			    		List<Persistable> persistables=EPMDocUtil.getEPMDocumentByIBA(MATER_NO, wtPart.getNumber());
+			    		//查找里面最后更新时间最晚的一条数据
+			    		epmdoc=getLastModifierObject(persistables);
+//			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
 			    	}
-			    	Debug.P("2-->"+epmdoc);
+			    	Debug.P("211-->"+epmdoc);
 			    	if(epmdoc!=null){
 			    		 epmIba = new IBAUtils(epmdoc);
 			    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
@@ -172,6 +180,7 @@ public class PartHelper implements Serializable {
 			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
 				//成品编码=TX+三位分类码+四位流水码。其中分类码为成品所在产品库容器名称的前三个字符，自动根据成品所在产品库获取。
 					productName=wtPart.getContainerName();
+					Debug.P("---999---Contants.PRODUCTPART-->>>PartType:"+partType+"   PartNum:"+wtPart.getNumber()+"   productName:"+productName);
 					//批量导入部件时如果导入的部件编码含有TX则不修改部件编码
 					if(wtPart.getNumber().toUpperCase().contains("TX")){
 						WCToPMHelper.CreatePMProductToPM(wtPart);
@@ -180,7 +189,6 @@ public class PartHelper implements Serializable {
 					if(!productName.toUpperCase().contains("TX")){
 						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
 					}
-					Debug.P("productName--------->"+productName);
 					prefix=productName.substring(0, productName.indexOf("-"));
 					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")
 							||prefix.toUpperCase().trim().contains("TX113")||prefix.toUpperCase().trim().contains("TX114")||prefix.toUpperCase().trim().contains("TX115")){
@@ -211,9 +219,13 @@ public class PartHelper implements Serializable {
 						changePartNumber(wtPart,newNumber);
 					}
 					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+					Debug.P("----999------>>part:"+wtPart.getName()+"  partNum"+wtPart.getNumber());
 					WCToPMHelper.CreatePMProductToPM(wtPart);
+					Debug.P("---999-->>>>CreatePMProductToPM  Success!!");
+					
 				} else //如果是半成品
 				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+					Debug.P("--1000--Contants.SEMIFINISHEDPRODUCT-->>>PartType:"+partType);
 					if(wtPart.isEndItem()){
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
 					} 
@@ -498,7 +510,7 @@ public class PartHelper implements Serializable {
 		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
 			 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-			   Debug.P("PRE_DELETE-----------------pmoid----------->"+pmoid);
+			   Debug.P("--2004--PRE_DELETE-----------------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.deletePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -644,10 +656,27 @@ public class PartHelper implements Serializable {
 	}
 	
 	
-	
-	public static void main(String[] args) {
-		String str="TXA6-半  成  品";
-		System.out.println(str.replaceAll(" ", "").trim());
-		System.out.println(str.substring(0,str.indexOf("-")));
+	private static EPMDocument getLastModifierObject(List<Persistable> objects){
+		EPMDocument result=null;
+		if(objects!=null){
+			Debug.P("-------->>>getLastModifierObject(Objects Size:)"+objects.size());
+			long cpTime=0L;
+			for(int i=0;i<objects.size();i++){
+				EPMDocument temp_epm=(EPMDocument) objects.get(i);
+				if(result==null){
+					cpTime=temp_epm.getModifyTimestamp().getTime();
+					result=temp_epm;
+				}else{
+					long temp_modTime=temp_epm.getModifyTimestamp().getTime();
+					if(temp_modTime>cpTime){
+						cpTime=temp_modTime;
+						result=temp_epm;
+					}
+				}
+			}
+		}
+	          	return result;
 	}
+	
+
 }

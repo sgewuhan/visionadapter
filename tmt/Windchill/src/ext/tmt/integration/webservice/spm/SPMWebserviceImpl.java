@@ -1,440 +1,783 @@
 package ext.tmt.integration.webservice.spm;
 
-import java.sql.Connection;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+
+import ext.tmt.utils.Debug;
+import wt.session.SessionHelper;
+import wt.session.SessionServerHelper;
+import wt.util.WTException;
+import wt.util.WTProperties;
+import wt.vc.wip.WorkInProgressHelper;
+
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Vector;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import wt.iba.value.IBAHolder;
-import wt.lifecycle.LifeCycleManaged;
+import wt.doc.WTDocument;
+import wt.fc.Persistable;
+import wt.fc.PersistenceHelper;
+import wt.fc.QueryResult;
+import wt.folder.FolderHelper;
 import wt.part.WTPart;
+import wt.part.WTPartHelper;
 import ext.tmt.utils.Contants;
-import ext.tmt.utils.Debug;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
 
-public class SPMWebserviceImpl {
+
+public class SPMWebserviceImpl{
 	
-	 static Connection conn = null;
-	/**
+
+
+	
+	
+	 
+    /**
      * 第一个流程的实现方法
+     * @param workflow 流程ID
+     * @param times 变更次数
+     * @param factory 工厂
+     * @return
+     * @throws Exception
      */
-    public static String processorForSpm1(String workflow, int times,String factory){
+    public static String processorForSpm1(String workflow, int times,String factory)throws Exception{
     	
-    	Debug.P("processorForSpm1  paramaters -->"+ workflow + " --- " + times + " --- "
-                + factory);
-//    	
-//    	  // IBA属性集合
-//        Properties properties = new Properties();
-//        HashMap hashmap = new HashMap();
-//        HashMap para = new HashMap();
-//        // 分类属性集合
-//        HashMap<String, String> ibaMap = new HashMap<String, String>();
-//        ResultSet resultSet = null;
-//        String partType = Contants.PART_TYPE;
-//
-//        String containerName = Contants.PART_TYPE;
-//        String folderName = Contants.PART_TYPE;
-//        para.put("containerName", containerName);
-//        para.put("folderName", folderName);
-//        para.put("partType", partType);
-//
-//        String result = null;
-//        try {
-//            conn = DBUtils.getConnection();
-//            if (workflow != null && times == 1) {
-//                String sql = "select * from CSR_WLSXSQ,CSR_JSTZSX where CSR_JSTZSX.WORKFLOW = CSR_WLSXSQ.WORKFLOW and CSR_JSTZSX.TIMES = '"
-//                        + 1 + "' AND CSR_WLSXSQ.WORKFLOW = '" + workflow + "'";
-//                resultSet = DBUtils.executeQuery(conn, sql);
-//                while (resultSet.next()) {
-//                    // CSR_WLSXSQ
-//                    String WLNUMBER = resultSet.getString("WLNUMBER");
-//                    String WLNAME = resultSet.getString("WLNAME");
-//                    String WLXIAOLEI = resultSet.getString("WLXIAOLEI");
-//                    String ATTRKEY = resultSet.getString("ATTRKEY");
-//                    String ATTRVALUE = resultSet.getString("ATTRVALUE");
-//
-//                    hashmap.put("ATTRKEY", ATTRKEY);
-//                    hashmap.put("ATTRVALUE", ATTRVALUE);
-//                    hashmap.put("WLNUMBER", WLNUMBER);
-//                    hashmap.put("WLNAME", WLNAME);
-//                    hashmap.put("WLXIAOLEI", WLXIAOLEI);
-//
-//                    //hashmap = CsrSpmUtil.nullConvertEmptyForHashMap(hashmap);
-//                    Debug.P("hashmap is " + hashmap);
-//
-//                    para.put("number", (String) hashmap.get("WLNUMBER"));
-//                    para.put("name", (String) hashmap.get("WLNAME"));
-//                    para.put("WLXIAOLEI",
-//                             (String) hashmap.get("WLXIAOLEI"));
-//                    String zonghedengji = Contants.PART_TYPE;
-//                    String unit = Contants.PART_TYPE;
-//                    String xinghaoguige =Contants.PART_TYPE;
-//                    String wuliaoleixing = Contants.PART_TYPE;
-//
-//                    // 综合等级
-//                    if (((String) hashmap.get("ATTRKEY")).equals(zonghedengji)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY")
-//                                + "2", (String) hashmap.get("ATTRVALUE"));
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 基本计量单位
-//                    else if (((String) hashmap.get("ATTRKEY")).equals(unit)) {
-//                        para.put("unit", (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 物料类型
-//                    else if (((String) hashmap.get("ATTRKEY")).equals(wuliaoleixing)) {
-//                        Debug.P((String) hashmap.get("ATTRKEY") + "wuliaoleixing ============"
-//                                + Contants.PART_TYPE);
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"), Contants.PART_TYPE);
-//                        continue;
-//                    }
-//                    // 型号规格
-//                    else if (((String) hashmap.get("ATTRKEY")).equals(xinghaoguige)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"), (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    } else {
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"),(String) hashmap.get("ATTRVALUE"));
-//                    }
-//                }
-//
-//                para.put("ibaMap", ibaMap);
-//
-//                Boolean isExist = false;//WtUtil.isExistPart((String) para.get("number"), false);
-//                if (isExist) {
-//                    Debug.P("this part is exist");
-//                    return "此部件已经存在";
-//                } else {
-//                    try {
-//                        // 根据第一次发布找到基本信息创建part
-//                      //  CsrSpmUtil.createNewPart(para, properties);
-//                    } catch (Exception e) {
-//                        return e.getLocalizedMessage();// 直接将错误信息进行返回
-//                    }
-//
-//                }
-//            } else if (workflow != null && (times == 2 || times == 3)) {
-//                String partNo = null;
-//                String sql = "select * from CSR_JSTZSX where TIMES = '" + times
-//                        + "' AND WORKFLOW = '" + workflow + "'";
-//                resultSet = DBUtils.executeQuery(conn, sql);
-//                while (resultSet.next()) {
-//
-//                    String WORKFLOW = resultSet.getString("WORKFLOW");
-//                    String TIMES = resultSet.getString("TIMES");
-//                    String CREATOR = resultSet.getString("CREATOR");
-//                    String WLNUMBER = resultSet.getString("WLNUMBER");
-//                    String WLXIAOLEI = resultSet.getString("WLXIAOLEI");
-//                    String ATTRKEY = resultSet.getString("ATTRKEY");
-//                    String ATTRVALUE = resultSet.getString("ATTRVALUE");
-//
-//                    hashmap.put("ATTRVALUE", ATTRVALUE);
-//                    hashmap.put("TIMES", TIMES);
-//                    hashmap.put("ATTRKEY", ATTRKEY);
-//                    hashmap.put("WLXIAOLEI", WLXIAOLEI);
-//                    hashmap.put("WLNUMBER", WLNUMBER);
-//                    hashmap.put("CREATOR", CREATOR);
-//                    hashmap.put("WORKFLOW", WORKFLOW);
-//
-//                    //hashmap = CsrSpmUtil.nullConvertEmptyForHashMap(hashmap);
-//                    Debug.P("hashmap is " + hashmap);
-//                    partNo = (String) hashmap.get("WLNUMBER");// 取得要更新的part的编号
-//
-//                    String zonghedengji =Contants.PART_TYPE;
-//                    String xinghaoguige = Contants.PART_TYPE;
-//                    String wuliaoleixing = Contants.PART_TYPE;
-//
-//                    if (((String) hashmap.get("ATTRKEY")).equals(zonghedengji)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY")+ "2", (String) hashmap.get("ATTRVALUE"));
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"), (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    } else if (((String) hashmap.get("ATTRKEY")).equals(wuliaoleixing)) {
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"), "ATTRVALUE");
-//                        continue;
-//                    } else if (((String) hashmap.get("ATTRKEY")).equals(xinghaoguige)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    } else {
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                    }
-//                }
-//                if (!properties.isEmpty()) {
-//                    //CsrSpmUtil.updatePartForIba(partNo, properties, "");
-//                }
-//                if (!ibaMap.isEmpty()) {
-//                    String classificationPath = ROOT + (String) hashmap.get("WLXIAOLEI");// 取得分类path
-//                    // 根据第二次发布找到属性更新part
-//                    //CsrSpmUtil.updatePartClassificationIba(partNo,
-//                    //        classificationPath, ibaMap, "");
-//                }
-//
-//                // 物料删除标识维护
-//                if (times == 3) {
-//                    WTPart part = PartUtil.getLastPartbyNumViwe(partNo,
-//                            Contants.DESIGN);
-//                    if (part == null) {
-//                        result = "PLM不存在编号为" + partNo + "的部件。";
-//                        return result;
-//                    }
-//                    if (StringUtils.isEmpty(factory)) {
-//                        result = "删除工厂为空";
-//                        return result;
-//                    }
-//
-//                    if (part != null) {
-//                        IBAUtils utils = new IBAUtils((IBAHolder) part);
-//                        String suoshugongchang = utils
-//                                .getIBAValue("CSR_SUOSHUGONGCHANG");
-//                        String yizuofeigongchang = utils
-//                                .getIBAValue("CSR_YISHANCHUGONGCHANG");
-//                        Debug.P("yizuofeigongchang>>>>>" + yizuofeigongchang);
-//                        if (StringUtils.isEmpty(suoshugongchang)) {
-//                            GenericUtil.setLifeCycleState((LifeCycleManaged) part,
-//                                    "CSR_YIZUOFEI");
-//                        } else {
-//                            Vector<String> factoriesStrs = PrintSheet
-//                                    .transforVec(suoshugongchang);
-//                            Vector<String> yizuofeigongchangStrs = PrintSheet
-//                                    .transforVec(yizuofeigongchang);
-//
-//                            String[] factories = factory.split(",");
-//                            if (factories != null && factories.length > 0) {
-//                                for (int i = 0; i < factories.length; i++) {
-//                                    String fac = factories[i];
-//                                    if (factoriesStrs.contains(fac)) {
-//                                        factoriesStrs.remove(fac);
-//                                    }
-//                                    if (!yizuofeigongchangStrs.contains(fac)) {
-//                                        yizuofeigongchangStrs.add(fac);
-//                                    }
-//                                }
-//                            }
-//                            String suoshugongchang_new = PrintSheet
-//                                    .transforSTR2(factoriesStrs);
-//                            Debug.P("suoshugongchang_new---->"
-//                                    + suoshugongchang_new);
-//                            String yizuofeigongchang_new = PrintSheet
-//                                    .transforSTR2(yizuofeigongchangStrs);
-//                            Debug.P("yizuofeigongchang_new---->"
-//                                    + yizuofeigongchang_new);
-//                            WtUtil.updateIBAValue(part, "CSR_SUOSHUGONGCHANG",
-//                                    suoshugongchang_new);
-//                            WtUtil.updateIBAValue(part,
-//                                    "CSR_YISHANCHUGONGCHANG",
-//                                    yizuofeigongchang_new);
-//                            if (StringUtils.isEmpty(suoshugongchang)) {
-//                                CsrSpmUtil.setState((LifeCycleManaged) part,
-//                                        "CSR_YIZUOFEI");
-//                            }
-//                        }
-//                        result = "删除成功";
-//                    }
-//                }
-//            } else if (workflow != null && (times == 10 || times == 20)) {// 集成创建工具资源
-//                partType = CSRUtils.getProperty("csr.spm.resourcetype");
-//                containerName = CSRUtils
-//                        .getProperty("csr.resource.containername");
-//                folderName = CSRUtils.getProperty("csr.resource.foldername");
-//                para.put("containerName", containerName);
-//                para.put("folderName", folderName);
-//                para.put("partType", partType);
-//
-//                String sql = "select * from CSR_WLSXSQ,CSR_JSTZSX where CSR_JSTZSX.WORKFLOW = CSR_WLSXSQ.WORKFLOW and CSR_JSTZSX.TIMES = '"
-//                        + times
-//                        + "' AND CSR_WLSXSQ.WORKFLOW = '"
-//                        + workflow
-//                        + "'";
-//                resultSet = DBUtils.executeQuery(conn, sql);
-//                while (resultSet.next()) {
-//                    // CSR_WLSXSQ
-//                    String WLNUMBER = resultSet.getString("WLNUMBER");
-//                    String WLNAME = resultSet.getString("WLNAME");
-//                    String WLXIAOLEI = resultSet.getString("WLXIAOLEI");
-//                    String ATTRKEY = resultSet.getString("ATTRKEY");
-//                    String ATTRVALUE = resultSet.getString("ATTRVALUE");
-//
-//                    hashmap.put("ATTRKEY", ATTRKEY);
-//                    hashmap.put("ATTRVALUE", ATTRVALUE);
-//                    hashmap.put("WLNUMBER", WLNUMBER);
-//                    hashmap.put("WLNAME", WLNAME);
-//                    hashmap.put("WLXIAOLEI", WLXIAOLEI);
-//
-//                    hashmap = CsrSpmUtil.nullConvertEmptyForHashMap(hashmap);
-//                    Debug.P("hashmap is " + hashmap);
-//
-//                    para.put("number", (String) hashmap.get("WLNUMBER"));
-//                    para.put("name", (String) hashmap.get("WLNAME"));
-//
-//                    String ziyuanleixing = CSRUtils
-//                            .getProperty("csr.ziyuanleixing");
-//                    String unit = CSRUtils
-//                            .getProperty("csr.jibenjiliangdanwei");
-//                    String pinpai = CSRUtils.getProperty("csr.pinpai");
-//                    String pinpaiMust = CSRUtils.getProperty("csr.pinpai.must");
-//                    String xinghaoguige = CSRUtils
-//                            .getProperty("csr.xinghaoguige");
-//                    String xinghaoMust = CSRUtils
-//                            .getProperty("csr.xinghao.must");
-//                    String gongjutupian = CSRUtils
-//                            .getProperty("csr.gongjutupian");
-//                    String tuzhibianhao = CSRUtils
-//                            .getProperty("csr.tuzhibianhao");
-//                    String cshsyfw = CSRUtils
-//                            .getProperty("csr.canshuhuoshiyongfanwei");
-//
-//                    // 资源类型
-//                    if (((String) hashmap.get("ATTRKEY")).equals(ziyuanleixing)) {
-//                        String value = (String) hashmap.get("ATTRVALUE");
-//                        if (StringUtils.equals(value, "GJ")) {
-//                            value = "工具";
-//                        } else if (StringUtils.equals(value, "GZ")) {
-//                            value = "工装";
-//                        } else if (StringUtils.equals(value, "SB")) {
-//                            value = "设备";
-//                        }
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                value);
-//                        continue;
-//                    }
-//                    // 品牌
-//                    else if (((String) hashmap.get("ATTRKEY")).equals(pinpai)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 品牌（必填）
-//                    else if (((String) hashmap.get("ATTRKEY"))
-//                            .equals(pinpaiMust)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 型号（必填）
-//                    else if (((String) hashmap.get("ATTRKEY"))
-//                            .equals(xinghaoMust)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 型号规格
-//                    else if (((String) hashmap.get("ATTRKEY"))
-//                            .equals(xinghaoguige)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 基本计量单位
-//                    else if (((String) hashmap.get("ATTRKEY")).equals(unit)) {
-//                        para.put("unit", (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 工具图片
-//                    else if (((String) hashmap.get("ATTRKEY"))
-//                            .equals(gongjutupian)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 图纸编号
-//                    else if (((String) hashmap.get("ATTRKEY"))
-//                            .equals(tuzhibianhao)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    }
-//                    // 参数或使用范围
-//                    else if (((String) hashmap.get("ATTRKEY")).equals(cshsyfw)) {
-//                        properties.setProperty((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                        continue;
-//                    } else {
-//                        ibaMap.put((String) hashmap.get("ATTRKEY"),
-//                                (String) hashmap.get("ATTRVALUE"));
-//                    }
-//                }
-//
-//                para.put("ibaMap", ibaMap);
-//                Boolean isExist = WtUtil.isExistPart(
-//                        (String) para.get("number"), false);
-//                if (isExist) {
-//                    Debug.P("this resource is exist");
-//                    return "此资源已经存在";
-//                } else {
-//                    // 根据第一次发布找到基本信息创建resource
-//                    CsrSpmUtil.createNewResource(para, properties);
-//                }
-//            }
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//            result = "操作成功";
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return e.getLocalizedMessage();
-//        } finally {
-//            DBUtils.closeConnection();;
-//        }
-//        return result;
-//    	
-    	return "processorForSpm1";
+    	Debug.P("processorForSpm1  paramaters -->"+ workflow + " --- " + times + " --- "+ factory);
+    	// IBA属性集合
+         Map<String,Object>  ibaMap = new HashMap<String,Object>();
+   	
+        //基础属性集合
+        HashMap<String,String>  baseMap= new HashMap<String,String>();
+        
+        //Windchill字段映射集合
+       Map<String,String> mapDatas= getWCMappingFieldBySPM();
+       Debug.P("------->>>Mapping Collection:"+mapDatas.toString());
+        
+        ResultSet resultSet = null;
+        String containerName = SPMConsts.SPMCONTAINER_NAME;//容器类型
+        String result = null;
+        ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
+        try {
+            SessionHelper.manager.setAdministrator();
+            //首次接口发布
+            if (workflow != null && times == 1) {
+                String sql = "select * from CSR_WLSXSQ,CSR_JSTZSX where CSR_JSTZSX.WORKFLOW = CSR_WLSXSQ.WORKFLOW and CSR_JSTZSX.TIMES = '"
+                        + 1 + "' AND CSR_WLSXSQ.WORKFLOW = '" + workflow + "'";
+                Debug.P("--->SQL:"+sql);
+                resultSet =connectionPool.getConnection().executeQuery(sql);
+                while (resultSet.next()) {
+                    
+                    //基本属性
+                    String material_num = resultSet.getString(SPMConsts.MATERIAL_NUM);//物料编码
+                    String material_name = resultSet.getString(SPMConsts.MATERIAL_NAME);//物料名称 
+//                    Debug.P("---processorForSpm1-->>>>Material Number:"+material_num+"  MaterialName:"+material_name);
+                    if(StringUtils.isEmpty(material_name)||StringUtils.isEmpty(material_num)) continue;//过滤物料名称和编号为空的数据
+                	String material_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//物料小类路径
+                    if(StringUtils.isNotEmpty(material_category)){
+                    	material_category=SPMConsts.ROOT+material_category;
+                    }
+                	baseMap.put(SPMConsts.KEY_MATER_CATEGORY,material_category==null?"":material_category.trim());//物料小类全路径
+                    baseMap.put(SPMConsts.KEY_CONTAINERNAME, containerName==null?"":containerName.trim());
+                    baseMap.put(SPMConsts.KEY_NUMBER, material_num==null?"":material_num.trim());
+                    baseMap.put(SPMConsts.KEY_NAME, material_name==null?"":material_name.trim());
+                    
+                    // Windchill 软属性
+                	String att_key = resultSet.getString(SPMConsts.IBA_KEY);
+                    String att_value = resultSet.getString(SPMConsts.IBA_VALUE);
+                    if(StringUtils.isEmpty(att_key)) continue;
+                    Debug.P("-->>IBA Key："+att_key+"="+att_value);
+                    //过滤掉Windchill系统不存在的软属性
+                    String contain_key=mapDatas.get(att_key);
+                    if(StringUtils.isNotEmpty(contain_key)){//如果对应配置文件Key则存放
+                    	if(SPMConsts.SPM_MATER_TYPE.equals(att_key)){//物料类型
+                    		baseMap.put(mapDatas.get(att_key).trim(), mapDatas.get(att_value)==null?"":mapDatas.get(att_value).trim());
+                    	}else{
+                    		ibaMap.put(mapDatas.get(att_key).trim(),att_value==null?"":att_value.trim());//Windchill软属性
+                    	}
+                    }
+                }
+                    //判断物料的存在性
+                   if(!baseMap.isEmpty()){
+                       String object_num=baseMap.get(SPMConsts.KEY_NUMBER);
+                       Persistable object= hasExistObject(object_num);
+                       if (object!=null) {
+                           Debug.P("------->>>>this WTPart("+object_num+") has exist!");
+                           if(object instanceof WTPart){
+                          	   WTPart partObject=(WTPart)object;
+                               CsrSpmUtil.updatePartInfo(partObject,baseMap, ibaMap);
+                               Debug.P("----->>>Update WTPart("+partObject.getPersistInfo().getObjectIdentifier().getStringValue()+")Success!!");
+                               result= "更新物料成功";
+                           }
+                      } else {
+                        try {
+                            // 根据第一次发布找到基本信息创建part
+                        	//如果物料类型未做映射则不创建
+                        	String partType=baseMap.get(SPMConsts.PART_TYPE);
+                        	if(StringUtils.isNotEmpty(partType)){
+                        	   	Debug.P("---->>>Ready Create Part: Type="+partType);
+                        		CsrSpmUtil.createNewPart(baseMap, ibaMap,mapDatas);
+                        		result="创建物料成功";
+                        	}
+                        } catch (Exception e) {
+                            return e.getLocalizedMessage();// 直接将错误信息进行返回
+                        }
+                     }
+                   }
+              } else if (workflow != null && (times == 2 || times == 3)) {
+                String partNo = null;//需要更新的物料编号
+                String sql = "select * from CSR_JSTZSX where TIMES = '" + times + "' AND WORKFLOW = '" + workflow + "'";
+                resultSet =connectionPool.getConnection().executeQuery(sql);
+                while (resultSet.next()) {
+                	//软属性,基本属性
+//               String spm_workflow = resultSet.getString(SPMConsts.SPM_WORKFLOW);//发布流程ID
+//               String spm_creator = resultSet.getString(SPMConsts.SPM_CREATOR);//流程创建者
+                    String spm_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//物料小类全路径
+                    partNo = resultSet.getString(SPMConsts.MATERIAL_NUM);//物料编码
+                    String spm_name=resultSet.getString(SPMConsts.MATERIAL_NAME);//物料名称
+                    baseMap.put(SPMConsts.KEY_NAME, spm_name);
+                    
+                    String att_key = resultSet.getString(SPMConsts.IBA_KEY);//软属性Name
+                    if(StringUtils.isEmpty(att_key)) continue;
+                    String att_value = resultSet.getString(SPMConsts.IBA_VALUE);//软属性Value
+    
+                    //设置软属性集合(综合等级,物料类型,型号规格)
+                    //过滤掉Windchill系统不存在的软属性
+                    String contain_key=mapDatas.get(att_key);
+                    if(StringUtils.isNotEmpty(contain_key)){//如果对应配置文件Key则存放
+                         ibaMap.put(mapDatas.get(att_key).trim(), att_value==null?"":att_value.trim());
+                      }
+                      //分类属性
+                    if(StringUtils.isNotEmpty(mapDatas.get(SPMConsts.MATERIAL_PATH))){
+                    	ibaMap.put(mapDatas.get(SPMConsts.MATERIAL_PATH), spm_category);
+                    }
+                }//循环结束
+
+                //更新软属性
+                Debug.P("---->>>ibaMap is " + ibaMap.toString());
+                if (!ibaMap.isEmpty()) {
+                   CsrSpmUtil.updatePartForIba(partNo, ibaMap, "");
+                }
+
+                // 物料删除 标识维护
+                if (times == 3) {
+                	Debug.P("------------>>>Times:"+times+"  PartNo:"+partNo);
+                	if(StringUtils.isNotEmpty(partNo)){
+                        WTPart part = PartUtil.getLastPartbyNumViwe(partNo,Contants.DESIGN);
+                        if (part == null) {
+                            result = "PLM不存在编号为(" + partNo + ")Design视图的部件。";
+                            return result;
+                        }
+                        if (StringUtils.isEmpty(factory)) {
+                            result = "工厂(factory)参数为空";
+                            return result;
+                        }
+
+                        if (part != null) {
+                        	 IBAUtils partIba=new IBAUtils(part);
+                        	 String  _factory=partIba.getIBAValue(SPMConsts.FACTORY);//系统Factory软属性值
+                             Set<String> factory_set=splitStr2Set(_factory,",");
+                            if (StringUtils.isEmpty(_factory)) {//如果物料不存在工厂,则设置为已废弃
+                                GenericUtil.changeState(part, SPMConsts.DESPOSED);
+                            } else {//存在工厂参数则删除指定参数信息
+                            	Debug.P("------>>参数Factory:"+factory+"(用于删除)");
+                                String[] factories = factory.split(",");
+                                if (factories != null && factories.length > 0) {
+                                    for (int i = 0; i < factories.length; i++) {
+                                        String fac = factories[i];
+                                        if(factory_set.contains(fac)){//如果存在则删除???(是否与株洲所一致)
+                                        	factory_set.remove(fac);
+                                        }
+                                    }
+                                }
+                                
+                                //将Set结果集转换成字符串
+                                String factory_iba=setCollection2Str(factory_set);
+                                List<String> fac_res=CsrSpmUtil.getAllPMFactory();
+                                if(!fac_res.contains(fac_res)){//如果不存在新材的工厂则修改状态为 已作废
+                                	  GenericUtil.changeState(part, SPMConsts.DESPOSED);
+                                }
+                               //更新所属工厂IBA属性
+                                IBAUtils iba=new IBAUtils(part);
+                                iba.setIBAValue(SPMConsts.FACTORY, factory_iba==null?"":factory_iba);
+                                iba.updateIBAPart(part);
+                            }
+                               result = "删除工厂成功";
+                        }
+                	}
+                }
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+            return e.getLocalizedMessage();
+        } finally {
+        	if (resultSet != null) {
+                resultSet.close();
+            }
+            SessionHelper.manager.setAuthenticatedPrincipal("PM-RW");
+        }
+            return result;
+    }
+    
+    
+
+    
+    /**
+     * 更新 扩建工厂物料
+     * @param partNumber 部件编号
+     * @param workflow 流程ID
+     * @param mark 
+     * @return
+     */
+    public static String processorForSpm2(String partNumber, String workflow,String mark)throws Exception{
+    	Debug.P("---processorForSpm2--->>>partNumber:"+partNumber+"  ;workflow:"+workflow+"  ;mark:"+mark );
+    	String result = null;
+        ResultSet resultSet = null;
+    	// IBA属性集合
+        Map<String,Object>  ibaMap = new HashMap<String,Object>();
+        //基础属性集合
+        HashMap<String,String>  baseMap= new HashMap<String,String>();
+        //Windchill字段映射集合
+        Map<String,String> mapDatas= getWCMappingFieldBySPM();
+        Debug.P("------->>>Mapping Collection:"+mapDatas.toString());
+   	    ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
+        try {
+        	  SessionServerHelper.manager.setAccessEnforced(false);
+        	  //先查询所属工厂是否为时代新材
+                if(StringUtils.isNotEmpty(workflow)){
+                    String sql = "select * from CSR_SXWH where WORKFLOW = '" + workflow + "'";
+                    Debug.P("--->>SQL:"+sql);
+                    resultSet = connectionPool.getConnection().executeQuery( sql);
+                    while (resultSet.next()) {//获取最新维护属性
+                    	String spm_proNum=resultSet.getString(SPMConsts.MATERIAL_NUM);//物料编码
+                    	Debug.P("---processorForSpm2-->>>>Material Number:"+spm_proNum);
+                    	baseMap.put(SPMConsts.KEY_NUMBER, spm_proNum);
+                    	if(StringUtils.isEmpty(spm_proNum)){
+                    		return "物料编码为空";
+                    	}
+                    	if(spm_proNum.equals(partNumber)){
+                    		String classification=resultSet.getString(SPMConsts.MATERIAL_PATH);//物料小类
+                    		String change_reason=resultSet.getString(SPMConsts.SPM_WLCONTENT);//变更原因
+                    		String attr_key=resultSet.getString(SPMConsts.IBA_KEY);
+                    		String attr_value=resultSet.getString(SPMConsts.IBA_VALUE);
+                    		
+                    		//物料名称
+                    		if(SPMConsts.ATTKEY_NAME.equals(attr_key)){
+                    			baseMap.put(SPMConsts.ATTKEY_NAME, attr_value==null?"":attr_value.trim());
+                    		}
+                    		
+                    		//图纸编号
+                    		if(SPMConsts.SPM_TUZHIBIANHAO.equals(attr_key)){
+                    			baseMap.put(SPMConsts.SPM_TUZHIBIANHAO, attr_value==null?"":attr_value.trim());
+                    		}
+                    		
+                    		String chek_key=mapDatas.get(attr_key);
+                    		//其他配置的软属性
+                    		if(StringUtils.isNotEmpty(chek_key)){
+                    			ibaMap.put(mapDatas.get(attr_key).trim(), attr_value==null?"":attr_value.trim());
+                    		}
+                    		//物料分类属性
+                    		if(StringUtils.isNotEmpty(mapDatas.get(SPMConsts.MATERIAL_PATH))){
+                    			ibaMap.put(mapDatas.get(SPMConsts.MATERIAL_PATH), classification==null?"":classification.trim());
+                    		}
+                    	   
+                    		//变更原因
+                    		if(StringUtils.isNotEmpty(mapDatas.get(SPMConsts.SPM_WLCONTENT))){
+                    			ibaMap.put(mapDatas.get(SPMConsts.SPM_WLCONTENT), change_reason==null?"":change_reason.trim());
+                    		}
+                    	}	
+                    }//循环结束
+                    
+                    String materNo=baseMap.get(SPMConsts.KEY_NUMBER);
+                 	WTPart part=(WTPart) GenericUtil.getObjectByNumber(materNo);
+                 	if(part!=null){//历史物料
+                        //默认单位
+                        String defaultUnit=(String) ibaMap.get(SPMConsts.KEY_UNIT);
+                        Debug.P("--->>>>defaultUnit:"+defaultUnit);
+                        if(StringUtils.isNotEmpty(defaultUnit)){
+                            if(defaultUnit.equalsIgnoreCase(SPMConsts.EA)){
+                           	 defaultUnit=SPMConsts.EA;
+                           	 ibaMap.put(SPMConsts.KEY_UNIT, defaultUnit);
+                            }
+                        }
+                 	 //更新物料信息
+               	     Debug.P("--Mark:更新-->>>UpdateIBA:"+ibaMap);
+                     part=(WTPart) GenericUtil.checkout(part);
+                     LWCUtil.setValue(part, ibaMap);
+            		 Debug.P("---Mark:更新-->>>UpdateIBA-->>>Success!");
+            			//如果变更Name则更新物料名称
+             		String mater_name=baseMap.get(SPMConsts.ATTKEY_NAME);
+             		if(StringUtils.isNotEmpty(mater_name)){//名称不一致则修改
+             			CsrSpmUtil.changePartName(part, mater_name.trim());
+             		}
+             		
+             		//更新描述文档信息(描述文档图纸编号)
+                     if(StringUtils.isNotEmpty(baseMap.get(SPMConsts.SPM_TUZHIBIANHAO))){
+                     	Debug.P("---->>Update TZ Described:"+baseMap.get(SPMConsts.SPM_TUZHIBIANHAO));
+                     	CsrSpmUtil.updateDescribedDocument(part,baseMap.get(SPMConsts.SPM_TUZHIBIANHAO).trim());
+                     }
+                     
+                     if(part!=null){
+                 		if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(part, wt.session.SessionHelper.manager.getPrincipal()))
+                 			part = (WTPart) WorkInProgressHelper.service.checkin(part, "update Part Info");
+                       }
+                     
+             		//更新生命周期状态(如果工厂变更为非时代新材物料则设置成已作废)
+              		String partFactory=(String) LWCUtil.getValue(part, SPMConsts.FACTORY);
+              		boolean isDel=matchFactory(partFactory);//与PM系统匹配
+              		if(!isDel){
+              			part=(WTPart) GenericUtil.changeState(part, SPMConsts.DESPOSED);
+              			PersistenceHelper.manager.refresh(part);
+              		}
+                 	}else {//扩建物料
+                 		 String mater_factory=(String) ibaMap.get(SPMConsts.FACTORY);
+                         boolean hasexisted=matchFactory(mater_factory);
+                 		 if(hasexisted){//包含时代工厂则创建
+                 			Debug.P("--->>扩建工厂:"+mater_factory+" 创建物料.");
+                 			processorForSpm1(workflow, 1, mater_factory);
+                 		}
+                 	}
+                       result="操作成功";
+                }   
+		} catch (Exception e) {
+			 e.printStackTrace();
+	         return e.getLocalizedMessage();
+		}finally{
+		   	if (resultSet != null) {
+                resultSet.close();
+            }
+            SessionServerHelper.manager.setAccessEnforced(true);
+		}
+    	     return result;
     }
 
+    
+    
+
     /**
-     * 第二个流程的实现方法 变更流程
+     * 匹配新材工厂
+     * @param factorys
+     * @return
+     * @throws Exception
      */
-    public static String processorForSpm2(String partNumber, String workflow,String mark){
-    	
-    	return "processorForSpm2";
+    private  static  boolean matchFactory(String factorys) throws Exception{
+        //获取PM的工厂信息
+        List<String> fac_res=CsrSpmUtil.getAllPMFactory();
+	    Debug.P("--matchFactory-->>>时代新材的工厂:"+fac_res+"  SPM Factory:"+factorys);
+       boolean flag=false;//默认不属于时代新材
+       if(StringUtils.isNotEmpty(factorys)){
+         List<String> maters_list=Arrays.asList(factorys.split(","));
+         for (String str : maters_list) {
+			   if(fac_res.contains(str)){
+				   Debug.P("------>>>>TMT Factory:"+str);
+				   flag=true;
+				   break;
+			   }
+		   }
+       }
+         return flag;
     }
+    
+    
+    /**
+     * 获取创建该部件时的workflow
+     * 
+     * @return
+     * @throws SQLException
+     */
+    private static String getCreateWorkflow(String partNumber,ConnectionPool connectionPool)throws Exception {
+        String workflow = null;
+        if (StringUtils.isEmpty(partNumber)) {
+            return workflow;
+        }
+        try {
+            String sql = "select workflow from csr_wlsxsq where wlnumber='"+ partNumber + "' order by sqdate desc";
+            ResultSet resultSet = connectionPool.getConnection().executeQuery(sql);
+            while (resultSet.next()) {
+                workflow = resultSet.getString("workflow");
+                return workflow;
+            }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        return workflow;
+    }
+
+    
+    /**
+     * 获取更新历史记录
+     * 
+     * @param partNumber
+     * @param conn
+     * @return
+     * @throws SQLException
+     */
+
+    private static List<String> getUpdateHistry(String partNumber,ConnectionPool connectionPool) throws SQLException {
+        List<String> workflows = new ArrayList<String>();
+        if (StringUtils.isEmpty(partNumber)) {
+            return workflows;
+        }
+        String sql = "select workflow from CSR_SXWH where wlnumber = '"+ partNumber + "' order by cdate";
+        ResultSet resultSet = connectionPool.getConnection().executeQuery(sql);
+        while (resultSet.next()) {
+            String workflow = resultSet.getString("workflow");
+            workflows.add(workflow);
+        }
+           return workflows;
+    }
+    
 
     /**
      * 为部件创建关联文档
+     * @param partNumber
+     * @param workflow 流程ID
+     * @param factory 工厂
+     * @return
+     * @throws Exception
      */
-    public static String createDocForPart(String partNumber, String workflow,String factory){
-    	return "createDocForPart";
+    public static String createDocForPart(String partNumber, String workflow,String factory) throws Exception{
+       Debug.P("--createDocForPart-->>>为部件创建关联文档 partNumber=[" + partNumber + "] workflow=["+ workflow + "] factory=[" + factory + "]");
+       ResultSet resultSet = null;
+       String resultInfo = "";
+       try {
+    	   SessionServerHelper.manager.setAccessEnforced(false);
+    	   if (partNumber != null) {
+    		   ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
+    		   String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from CSR_FJJL where WLNUMBER = '"+ partNumber + "'";
+    		   Debug.P("--->SQL:"+sql);
+    		   resultSet = connectionPool.getConnection().executeQuery(sql);
+    		   while (resultSet.next()) {
+    			  String spm_num = resultSet.getString(SPMConsts.MATERIAL_NUM);
+    			  if(StringUtils.isEmpty(spm_num)){
+    				  return "物料编号为空";
+    			  }
+    		      WTPart part=null;
+			      try {
+			    	  part= (WTPart) GenericUtil.getObjectByNumber(spm_num);
+				     } catch (Exception e) {
+					    Debug.P("---->>>Number为("+spm_num+")部件在Windchill中不存在!");
+					    continue;
+				   }
+    			  Debug.P("---->>>SPM_NUM="+spm_num);
+    			  //基本属性集合
+    			  HashMap<String, String> baseMap = new HashMap<String, String>();
+    	
+    			  if(spm_num.equals(partNumber)){
+    				  String docName=resultSet.getString(SPMConsts.SPM_DOCNAME);
+    				  String docNumber=resultSet.getString(SPMConsts.SPM_DOCNUMBER);
+    			      String location_path=resultSet.getString(SPMConsts.SPM_LOCATION);
+    			
+    			      if(part!=null){
+    			    	   Debug.P("----->>>DOC_WTPart:"+part.getPersistInfo().getObjectIdentifier().getStringValue()+"   SPMDocNum:"+docNumber);
+    			    	   //文档创建到部件同目录下
+    			    	   String folderPath= part.getFolderPath();
+    			    	   folderPath=folderPath.substring(0,folderPath.lastIndexOf("/"));
+    			    	   String containerName=part.getContainerName();
+    			    	   Debug.P("----->>Part("+partNumber+")的文件夹路径:"+folderPath+"  ;containerName:"+containerName);
+    			    	   baseMap.put(SPMConsts.KEY_NUMBER, docNumber==null?"":docNumber.trim());
+    			    	   baseMap.put(SPMConsts.KEY_FOLDER, folderPath==null?"":folderPath.trim()); 
+    			    	   baseMap.put(SPMConsts.KEY_NAME, docName==null?"":docName.trim());//文档名称
+    	    			   baseMap.put(SPMConsts.KEY_LOCATION_PATH, location_path==null?"":location_path.trim());//主文档路径
+    	    			   baseMap.put(SPMConsts.KEY_CONTAINERNAME, containerName==null?"":containerName.trim());
+    	    			   
+    	    			   //创建文档对象信息
+    	    			   WTDocument doc=CsrSpmUtil.createNewDocument(baseMap, null);
+    	    			   if(doc!=null){//建立文档部件的描述关系
+    	    				   PartUtil.createDescriptionLink(part, doc);
+    	    			   }
+    			      }
+    			  }
+    		   }//循环结束
+    		   resultInfo="操作成功";
+    	   }
+	     } catch (Exception e) {
+		     e.printStackTrace();
+		     resultInfo="操作失败";
+	     }finally{
+	    	  if (resultSet != null) {
+	             resultSet.close();
+	           }
+	          SessionServerHelper.manager.setAccessEnforced(true);
+	      }
+       
+    	     return resultInfo;
     }
 
-    /**
-     * SPM调用接口判断物料在PLM系统是否存在技术规格书
-     * @return 0. 表示存在技术规格书 1.表示不存在技术规格书
-     */
-    public static String getJSGGSByPartNumber(String partNumber) {
-    	return "getJSGGSByPartNumber";
-    }
+    
 
-    /**
-     * SPM调用接口判断物料在PLM系统是否存在产品手册
-     * @return 0. 表示存在产品手册 1.表示不存在产品手册
-     */
-    public static String getCPSCByPartNumber(String partNumber) {
-    	return "getCPSCByPartNumber";
-    }
 
     /**
      * 为部件修改关联文档
      */
-    public static String updateDocForPart(String partNumber, String workflow){
-    	return "updateDocForPart";
+    public static String updateDocForPart(String partNumber, String workflow)throws Exception{
+    	
+    	Debug.P("---->>>updateDocForPart Number: " + partNumber + "workflow is " + workflow);
+    	//基本属性集合
+    	 HashMap<String, String> baseMap = new HashMap<String, String>();
+    	 //IBA属性集合
+//    	 HashMap<String, String> ibaMap = new HashMap<String, String>();
+    	 ResultSet resultSet = null;
+         String  resultInfo = "";
+         try {
+        	 SessionServerHelper.manager.setAccessEnforced(false);
+        	 if (partNumber != null) {
+        		 ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
+        		 String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from CSR_FJJL where WLNUMBER = '" + partNumber + "'";
+                 Debug.P("--->>SQL:"+sql);
+                 resultSet = connectionPool.getConnection().executeQuery(sql);
+                 while (resultSet.next()) {
+                	 String spm_prodnum=resultSet.getString(SPMConsts.MATERIAL_NUM);
+                	 String doc_number=resultSet.getString(SPMConsts.SPM_DOCNUMBER);
+                	 if(StringUtils.isEmpty(spm_prodnum)){
+                		 return "物料编码为空";
+                	 }
+                	
+                	 Debug.P("-----SPM>>>WLNUMBER("+partNumber+")对应的属性字段DOCNUMBER为["+doc_number+"]");
+                	 baseMap.put(SPMConsts.KEY_NUMBER, doc_number==null?"":doc_number.trim());
+                	 if(partNumber.equals(spm_prodnum)){
+                		 String docName=resultSet.getString(SPMConsts.SPM_DOCNAME);
+       			         String location_path=resultSet.getString(SPMConsts.SPM_LOCATION);
+       			         WTPart part=null;
+    			         try {
+    			    	    part= (WTPart) GenericUtil.getObjectByNumber(spm_prodnum);
+					      } catch (Exception e) {
+						     Debug.P("---->PART_ERROR:Num=("+spm_prodnum+")部件在Windchill中不存在!");
+						     continue;
+					     }
+    			         
+    				      if(part!=null){
+       			    	   Debug.P("----->>>DOC_WTPart:"+part.getPersistInfo().getObjectIdentifier().getStringValue());
+       			    	   //文档创建到部件同目录下
+       			    	   String folderPath=FolderHelper.service.getFolderPath(part);
+       			    	   String containerName=part.getContainerName();
+       			    	   Debug.P("----->>Part("+partNumber+")的文件夹路径:"+folderPath+"  ;containerName:"+containerName);
+       			    	   baseMap.put(SPMConsts.KEY_FOLDER, folderPath==null?"":folderPath.trim()); 
+       			    	   baseMap.put(SPMConsts.KEY_NAME, docName==null?"":docName.trim());//文档名称
+       	    			   baseMap.put(SPMConsts.KEY_LOCATION_PATH, location_path==null?"":location_path.trim());//主文档路径
+       	    			   baseMap.put(SPMConsts.KEY_CONTAINERNAME, containerName==null?"":containerName.trim());
+       	    		       
+       	    			     
+       	    			      //更新文档内容
+       	    			      if(StringUtils.isNotEmpty(doc_number)){
+       	    			       WTDocument doc=(WTDocument) GenericUtil.getObjectByNumber(doc_number);
+         			             if(doc!=null){//文档对象为空
+         			            	 CsrSpmUtil.reviseDocument(doc, baseMap, null);
+         			             }
+       	    			    	resultInfo="更新部件关联的文档成功";
+       	    			      }else{
+       	    			    	resultInfo="部件未更改";
+       	    			      }
+    				      }
+                	 }
+                 }
+           }
+		} catch(SQLException e){
+			e.printStackTrace();
+		}catch (Exception e) {
+			 e.printStackTrace();
+			 throw new Exception("Windchill更新("+partNumber+")部件关联的文档异常");
+		}finally{
+			  if (resultSet != null) {
+		           resultSet.close();
+		        }
+		     SessionServerHelper.manager.setAccessEnforced(false);
+		}
+    	  return   resultInfo;
     }
-	
+    
+    
     /**
-     * 检查物料是否在存储库中存在
+     * SPM调用接口判断物料在PLM系统是否存在技术规格书
+     * @return 0. 表示不存在技术规格书 1.表示存在技术规格书
+     * @throws Exception 
      */
-    public static String checkPartFromLibrary(String partNumber) {
-    	return "checkPartFromLibrary";
+    public static String getJSGGSByPartNumber(String partNumber) throws Exception {
+    	 Debug.P("---getJSGGSByPartNumber--->>partNumber："+partNumber);
+    	 String result = "0";//默认不存在
+         if (StringUtils.isEmpty(partNumber)){
+        	 return "物料编号参数为空";
+         }
+         try {
+        	 SessionHelper.manager.setAdministrator();
+             WTPart part =(WTPart) GenericUtil.getObjectByNumber(partNumber);
+             if(part!=null){
+            	  QueryResult qr = WTPartHelper.service .getDescribedByWTDocuments(part);
+            	  while(qr.hasMoreElements()){//判断Windchill是否存在技术规格文档
+            		  WTDocument doc=(WTDocument) qr.nextElement();
+            		  String type=GenericUtil.getTypeName(doc);
+            		  Debug.P("--->>DocType:"+type);
+            		  if(StringUtils.equals(type, SPMConsts.TECHNICAL_SPEC)){//技术规格书
+            			  result="1";
+            		  }
+            	  }
+             }
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Windchill查询("+partNumber+")关联的技术规格书异常");
+		}finally{
+			 SessionServerHelper.manager.setAccessEnforced(true);
+		}
+    	  return  result;
+    }
+
+    /**
+     * SPM调用接口判断物料在PLM系统是否存在产品手册
+     * @return 0. 表示不存在产品手册 1.表示存在产品手册
+     */
+    public static String getCPSCByPartNumber(String partNumber) throws Exception {
+    	Debug.P("--getCPSCByPartNumber-->>>partNumber："+partNumber);
+    	 String result = "0";//默认不存在
+         if (StringUtils.isEmpty(partNumber)){
+        	 return "物料编号参数为空";
+         }
+         try {
+        	 SessionServerHelper.manager.setAccessEnforced(false);
+        	   WTPart part =(WTPart) GenericUtil.getObjectByNumber(partNumber);
+        	   QueryResult qr = WTPartHelper.service .getDescribedByWTDocuments(part);
+         	  while(qr.hasMoreElements()){//判断Windchill是否存在技术规格文档
+        		  WTDocument doc=(WTDocument) qr.nextElement();
+        		  String type=GenericUtil.getTypeName(doc);
+        		  Debug.P("--->>DocType:"+type);
+        		  if(StringUtils.equals(type, SPMConsts.PRODUCT_SPEC)){//产品手册
+        			  result="1";
+        		  }
+        	  }
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Windchill查询("+partNumber+")关联的技术规格书异常");
+		}finally{
+			 SessionServerHelper.manager.setAccessEnforced(true);
+		}
+    	    return result;
     }
     
 	
-	
-	
+    /**
+     * 检查物料是否在存储库中存在
+     * 0. 表示不存在存储库 1.表示存在存储库
+     */
+    public static String checkPartFromLibrary(String partNumber)throws Exception {
+     	Debug.P("--checkPartFromLibrary-->>>partNumber："+partNumber);
+    	 String result = "0";//默认不存在
+         if (StringUtils.isEmpty(partNumber)){
+        	 return "物料编号参数为空";
+         }
+         try {
+        	 SessionServerHelper.manager.setAccessEnforced(false);
+        	 WTPart part =(WTPart) GenericUtil.getObjectByNumber(partNumber);
+        	 String partContainer = part.getContainerName();
+        	 Debug.P("-->Part state is " + part.getLifeCycleState().getDisplay().toString()+"  ;Part ContainerName:"+partContainer);
+        	 if(StringUtils.equals(partContainer, SPMConsts.SPMCONTAINER_NAME)){
+        	   	 result="1";
+        	 }
+         } catch (Exception e) {
+			e.printStackTrace();
+			throw new Exception("Windchill查询("+partNumber+")是否存在存储库中异常");
+		}finally{
+			 SessionServerHelper.manager.setAccessEnforced(true);
+		}
+    	  return result;
+    }
 
+    
+    
+    
+    /**
+     * 判断对象的存在性
+  * @throws WTException 
+     */
+    private static Persistable hasExistObject(String num) throws Exception{
+ 	    if(StringUtils.isEmpty(num)) throw new Exception("NUMBER属性字段参数值为空");
+ 	    try {
+ 	        Persistable object=GenericUtil.getObjectByNumber(num);
+ 	         return object;
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception("Windchill查询对象编号("+num+")异常!");
+			}
+    }
+       
+       
+       /**
+        * 根据中间表的信息查询配置文件中与之对应的Windchill属性名称
+        * @param field
+        * @return
+        * @throws Exception
+        */
+       private static String MAPPINGWCCONFIG_PATH="codebase" + File.separator + "ext"
+   			+ File.separator + "tmt" + File.separator + "integration"
+   			+ File.separator + "webservice" + File.separator +"spm"+ File.separator+ "SPMMapping.properties";
+       private static Map<String,String> getWCMappingFieldBySPM()throws Exception{
+    		Properties prop=new Properties();
+    		Map<String,String> mappingMap=new HashMap<String,String>();
+    	    String wthome = (String) (WTProperties.getLocalProperties()).getProperty("wt.home", "");
+			String tempPath = wthome + File.separator + MAPPINGWCCONFIG_PATH;
+			Debug.P("-------->>Mapping FilePath:"+tempPath);
+			FileInputStream fis = new FileInputStream(tempPath);
+			prop.load(new InputStreamReader(fis, "UTF-8"));
+			prop.load(fis);
+			if(prop!=null){
+			   Iterator<?> ite=prop.entrySet().iterator();
+				while(ite.hasNext()){
+					Entry entry=(Entry) ite.next();
+					String proName = (String) entry.getKey();
+					String value = (String) entry.getValue();
+					mappingMap.put(proName, value);
+				}
+			}
+			  return mappingMap;
+       }
+
+        /**
+         * 将字符串以指定的分隔符切割存放到集合中
+         * @param target 目标字符串
+         * @param 切割符号
+         */
+       private static Set<String> splitStr2Set(String target,String regex){
+    	     Set<String>  result=new HashSet<String>();
+    	     if(StringUtils.isEmpty(target)) return result;
+    	     String[] strs=target.split(regex);
+    	     for(int i=0;i<strs.length;i++){
+    	    	 if(StringUtils.isEmpty(strs[i])) continue;
+    	    	  result.add(strs[i]);
+    	     }
+    	      return result;   
+       } 
+       
+       
+       private static String setCollection2Str(Collection<?> collection){
+    	   StringBuffer bf=new StringBuffer();
+    	   String result=null;
+    	   if(collection!=null){
+    		   for(Iterator<?> ite=collection.iterator();ite.hasNext();){
+    			    String value=(String) ite.next();
+    			    if(StringUtils.isEmpty(value)) continue;
+    			    bf.append(value).append(",");
+    		   }
+    		   if(bf.toString().contains(",")){
+    			   result= bf.substring(0, bf.lastIndexOf(",")) ;
+    		   }
+    	   }
+    	        return result;
+       }
+       
+       
+
+       
 }

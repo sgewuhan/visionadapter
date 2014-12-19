@@ -34,6 +34,7 @@ import wt.inf.container.WTContainer;
 import wt.inf.container.WTContainerHelper;
 import wt.inf.container.WTContainerRef;
 import wt.method.RemoteAccess;
+import wt.pom.Transaction;
 import wt.session.SessionHelper;
 import wt.type.TypeDefinitionReference;
 import wt.type.TypedUtility;
@@ -127,7 +128,20 @@ public class FolderUtil implements RemoteAccess{
 				path = path + "/" + list.get(i);
 				QueryResult result = FolderHelper.service.findSubFolders(folder);
 				if (!checkFolderExits(result, list.get(i))){
-					subFolder = FolderHelper.service.createSubFolder(path, wtContainerRef);
+					Transaction tx = null;
+					try {
+						  tx=new Transaction();
+						  tx.start();
+						  subFolder = FolderHelper.service.createSubFolder(path, wtContainerRef);
+						  tx.commit();
+				    	  tx=null;
+					} catch (Exception e) {
+						e.printStackTrace();
+					}finally{
+						if(tx!=null){
+						    tx.rollback();
+						}
+					}
 				}
 			} catch(FolderNotFoundException e1){
 				  Debug.P(e1.getMessage());
@@ -198,7 +212,7 @@ public class FolderUtil implements RemoteAccess{
 	/**
 	 * 获取文件夹的对象
 	 * @param folderRoute			文件夹的路径
-	 * @param containerRef			容器的名称
+	 * @param containerName			容器的名称
 	 * @return						文件夹对象
 	 * @throws WTException
 	 */
@@ -238,7 +252,6 @@ public class FolderUtil implements RemoteAccess{
 		if(entry!=null&&purposeFolder!=null) {
 			Debug.P("--------->>>移动对象到文件:"+purposeFolder.getFolderPath());
 			entry=FolderHelper.service.changeFolder(entry, purposeFolder);
-			PersistenceHelper.manager.refresh(entry);
 		}
 		
 	}

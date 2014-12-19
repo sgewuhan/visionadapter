@@ -12,11 +12,17 @@
  */
 package ext.tmt.utils;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
@@ -295,7 +301,76 @@ public class LWCUtil {
         Persistable newP= PersistenceHelper.manager.modify(p);
         
         return newP;
+    }
+    
+    
 
+    /**
+     * 根据Key,Value获得对象信息
+     * @param key IBA键
+     * @param value IBA值
+     * @param type 对象类型
+     * @return
+     */
+    public static List<Persistable> getObjectByIBA(Map<String,String> ibaValues,String type){
+    	  Debug.P("---getObjectByIBA: ibaValues:" +ibaValues);
+    	  List<Persistable>  result=null;
+    	  String sql=null;
+    	  if(ibaValues!=null&&ibaValues.size()>0){
+    		      StringBuffer bf=new StringBuffer();
+    		      List<String> paramList=new ArrayList<String>();
+    		      bf.append("and  (");
+    		      //拼接IBA查询条件
+    		      for(Iterator<?> ite=ibaValues.keySet().iterator();ite.hasNext();){
+    		    	 String key=(String) ite.next();
+    		    	 bf.append("d1.name=?");
+    		    	 paramList.add(key);
+    		    	 String value=ibaValues.get(key);
+    		    	 if(StringUtils.isEmpty(value)){
+    		    		 bf.append("and  ").append("v1.value is Null");
+    		    	 }else{
+    		    		 bf.append("and  ").append("v1.value=?");
+    		    		 paramList.add(value);
+    		    	 }
+    		      }
+    		      bf.append(")");
+    		     //IBA查询条件
+    		      String queryIBACond=bf.toString();
+    		      Debug.P("--->>Query IBA Param:"+queryIBACond);
+    		    if("wt.part.WTPart".contains(type)){//部件类型
+    			   sql="select M1.NAME,M1.WTPARTNUMBER as OBJECTNUMBER  FROM  STRINGVALUE v1 ,STRINGDEFINITION d1,WTPART p1,WTPARTMASTER m1 where D1.IDA2A2=v1.ida3a6 and v1.IDA3A4=p1.IDA2A2 and p1.IDA3MASTERREFERENCE=M1.IDA2A2 and d1.name=?  and v1.value=?";
+    		    }else if("wt.epm.EPMDocument".contains(type)){
+    			   sql="select M1.NAME,M1.DOCUMENTNUMBER as OBJECTNUMBER  FROM  STRINGVALUE v1 ,STRINGDEFINITION d1,EPMDOCUMENT e1,EPMDOCUMENTMASTER m1 where D1.IDA2A2=v1.ida3a6 and v1.IDA3A4=e1.IDA2A2 and e1.IDA3MASTERREFERENCE=M1.IDA2A2 and d1.name=?  and v1.value=? ";
+    		   }else if("wt.doc.WTDocument".contains(type)){
+    			   sql="select M1.NAME,M1.WTDOCUMENTNUMBER as OBJECTNUMBER FROM  STRINGVALUE v1 ,STRINGDEFINITION d1,WTDOCUMENT t1,WTDOCUMENTMASTER m1 where D1.IDA2A2=v1.ida3a6 and v1.IDA3A4=t1.IDA2A2 and t1.IDA3MASTERREFERENCE=M1.IDA2A2 and d1.name=?  and v1.value=?";
+    		   }
+    		    String[] params=new String[paramList.size()];
+    		    params=paramList.toArray(params); 
+    		    Debug.P("---->>>SQL:"+sql);
+    		    try {
+					List<Hashtable<String,String>> datas   =UserDefQueryUtil.commonQuery(sql, params);
+				if(datas!=null&&datas.size()>0){
+				 	Debug.P("---->>getObjectIBA  Size:"+datas.size());
+					result=new ArrayList<Persistable>();	
+					for(int i=0;i<datas.size();i++){
+						    Hashtable<String, String> data_rows=datas.get(i);
+							for(Iterator<?> ite=data_rows.keySet().iterator();ite.hasNext();){
+								 String keyStr=(String) ite.next();
+								 if(keyStr.equalsIgnoreCase("OBJECTNUMBER")){
+									 String valueStr=data_rows.get("OBJECTNUMBER");
+									 Persistable object=GenericUtil.getObjectByNumber(valueStr);
+									 result.add(object);
+								 }
+							}
+						}
+				    }
+				} catch (SQLException e) {
+					e.printStackTrace();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}    		    
+    	  }
+    	       return result;
     }
 }
 
