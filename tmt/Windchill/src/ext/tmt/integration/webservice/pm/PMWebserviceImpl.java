@@ -188,7 +188,13 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			                  Debug.P("------Windchill Folder_OID:"+wc_oid);
 			                  pmfolder.setPLMId(wc_oid);
 			                  pmfolder.setPLMData(getObjectInfo(folderResult));
-			                  pmfolder.doUpdate();
+			                 try {
+			                	 pmfolder.setCommit(true); 
+			                	 pmfolder.doUpdate();
+							   } catch (Exception e) {
+								
+							}
+			                 
 			                  Debug.P("----->>>创建同步Windchill文件夹:("+folderName+")成功!");
 			    	    }
 			    	 }
