@@ -140,6 +140,6 @@ public final class PMDocument extends BasicDocument {
 		setValue(CONTENT, contents);
 		GridFSFileProvider gfs = new GridFSFileProvider(content);
 
-		return gfs.writeToGridFS(in, objectId, fileName, fileName, db, metaData);
+		return gfs.writeToGridFS(in, objectId, fileName, nameSpace, db, metaData);
 	}
 }
