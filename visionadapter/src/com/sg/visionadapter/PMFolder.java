@@ -27,6 +27,11 @@ public class PMFolder extends VisionObject {
 	private static final String CONTAINER_NAME = "containername";
 
 	public static final String F_IS_CONTAINER = "iscontainer";
+	
+	/**
+	 * 是否提交，为PLM两段式提交打标记
+	 */
+	private static final String F_IS_COMMIT = "iscommit";
 
 	/**
 	 * @return the projectId
@@ -143,5 +148,13 @@ public class PMFolder extends VisionObject {
 	
 	public Object getProjectWorkOrder() {
 		return get(PROJECT_WORK_ORDER);
+	}
+	
+	/**
+	 * 设置PLM提交的状态
+	 * @param iscommit true or false
+	 */
+	public void setCommit(boolean iscommit) {
+		setValue(F_IS_COMMIT, iscommit);
 	}
 }

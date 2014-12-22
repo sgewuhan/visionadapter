@@ -71,4 +71,8 @@ public final class PMProduct extends BasicPart  {
 		put(EDITOR, "editor.document.product");
 		return super.doInsert();
 	}
+	
+	public void setProductNumber(String productNumber) {
+		setValue(PRODUCT_NUMBER, productNumber);
+	} 
 }
