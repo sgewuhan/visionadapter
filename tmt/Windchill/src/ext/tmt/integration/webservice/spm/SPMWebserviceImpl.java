@@ -116,9 +116,9 @@ public class SPMWebserviceImpl{
                  String object_num=baseMap.get(SPMConsts.KEY_NUMBER);
                  WTPart object= hasExistObject(object_num);
                  String spm_fac=(String) ibaMap.get(SPMConsts.FACTORY);
-                 String part_fac=(String) LWCUtil.getValue(object, SPMConsts.FACTORY);
                  Debug.P("---SPM Factory:"+spm_fac);
                  if(object!=null){
+                	 String part_fac=(String) LWCUtil.getValue(object, SPMConsts.FACTORY);
                 	 //过滤重复添加的工厂
                 	 if(!part_fac.contains(spm_fac)){
                 		 StringBuffer bf=new StringBuffer(spm_fac);
