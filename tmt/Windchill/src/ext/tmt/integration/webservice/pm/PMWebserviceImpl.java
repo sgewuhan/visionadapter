@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
@@ -927,9 +928,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			 return null;
 		 }
 		 if(class1.equalsIgnoreCase("wtpart")){
-			 part= (WTPart)searchWCObject(WTPart.class,pmid,Contants.PROJECTNO);
-			 Debug.P(part);
+			 part= (WTPart)searchWCObject(WTPart.class,pmid,Contants.PMID);
+			 Debug.P("-searchWCObject-->>WTPart："+part);
 			 if(part!=null){
+				 Debug.P("----Search Part:"+part);
 				 part = PartUtil.getPartByNumber2(part.getNumber());
 				 Debug.P(part.getNumber()+"-------"+part.toString()+"-------"+pmid);
 				 //根据部件查部件
@@ -942,32 +944,46 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				 }
 				 //根据部件查询文档
 				 else if(class2.equalsIgnoreCase("wtdocument")){
+					 Debug.P("根据部件查询WTDocument文档----->"+class2);
 					 pmList=PartUtil.getDescriptDocPMIdBy(part);
+					 Debug.P("---GetDOC ByPart:"+pmList);
 				 }
 				 //根据部件查询EPM文档
 				 else if(class2.equalsIgnoreCase("epmdocument")){
 					 Debug.P("根据部件查询EPM文档----->"+class2);
 					 pmList=PartUtil.getEPMDocPMIDByPart(part);
+					 Debug.P("---->>GetEPM ByPart:"+pmList);
 				 }
 			 }
 		 }else if(class1.equalsIgnoreCase("wtdocument")){//根据文档查询该文档的说明部件
 			 WTDocument doc = (WTDocument)searchWCObject(WTDocument.class,pmid,Contants.PMID);
+			 Debug.P("-searchWCObject-->>WTDoc："+doc);
+			 Debug.P("----Search Part:"+doc);
 			 if(doc!=null){
 				 doc=DocUtils.getDocByNumber(doc.getNumber());
 				 if(class2.equalsIgnoreCase("wtpart")){
+					 Debug.P("根据WTDocument查询部件----->"+class2);
 					 pmList=DocUtils.getDescribePartsByDoc(doc);
+					 Debug.P("根据WTDocument查询部件----->Result:"+pmList.size());
 				 }if(class2.equalsIgnoreCase("wtdocument")){
+					 Debug.P("根据WTDocument查询WTDocument----->"+class2);
 					 pmList=DocUtils.getWTDocPMIDByWTDocument(doc);
+					 Debug.P("根据WTDocument查询WTDocument----->Result:"+pmList.size());
 				 }
 			 }
 		 }else if(class1.equalsIgnoreCase("epmdocument")){//根据EPM文档查询该EPM文档的说明部件
-			 EPMDocument epmdoc = (EPMDocument)searchWCObject(WTDocument.class,pmid,Contants.PMID);
-			 if(epmdoc!=null){
-				 epmdoc=EPMDocUtil.getEPMDocByNumber(epmdoc.getNumber());
-				 if(class2.equalsIgnoreCase("wtpart")){
-					 pmList=DocUtils.getDescribePartsByEPMDoc(epmdoc);
-				 }
-			 }
+			 EPMDocument epmdoc = (EPMDocument)searchWCObject(EPMDocument.class,pmid,Contants.PMID);
+			 Debug.P("-searchWCObject-->>EPmDoc："+epmdoc);
+				 if(epmdoc!=null){
+					 epmdoc=EPMUtil.getEPMDocument(epmdoc.getNumber(),null);
+					 Debug.P("----->>>EPM:"+epmdoc+"  Version:"+getObjectVersion(epmdoc));
+					 if(class2.equalsIgnoreCase("wtpart")){
+						 Debug.P("--GetPart ByEPM:"+class2);
+						 pmList=DocUtils.getDescribePartsByEPMDoc(epmdoc);
+						 Debug.P("--getPartDescEPM->>>pmList:"+pmList.size());
+					 }
+				 } 
+	
 		 }
 		 return pmList;
 	 } 
@@ -989,11 +1005,12 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		 int pmSDIndex = 0;
 		 int pmSVIndex = 0;
 		 
+		 Debug.P("--->>>IBA Key："+ibakey+"  IBA Value:"+ibavalue);
 		 if(StringUtils.isNotEmpty(ibavalue)){
 			 pmSVIndex = qs.appendClassList(StringValue.class, false);
 			 pmSDIndex = qs.appendClassList(StringDefinition.class, false);
 			 ClassAttribute caValue = new ClassAttribute(StringValue.class,
-						StringValue.VALUE2);
+						StringValue.VALUE);
 				WhereExpression we = new SearchCondition(
 						SQLFunction.newSQLFunction(SQLFunction.UPPER, caValue),
 						SearchCondition.EQUAL,
@@ -1016,7 +1033,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 						WTAttributeNameIfc.ID_NAME);
 				qs.appendAnd();
 				qs.appendWhere(we, new int[] { pmSVIndex, objindex });
-				Debug.P(qs);
+				Debug.P("---->>SQL:"+qs);
 				QueryResult qr = PersistenceHelper.manager.find((StatementSpec)qs);
 				while (qr.hasMoreElements()) {
 					Object[] objects = (Object[])qr.nextElement();
@@ -1057,17 +1074,17 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 }
 	 
 	 public static void main(String[] args) throws Exception {
-		 RemoteMethodServer  rms = RemoteMethodServer.getDefault();
-		 rms.setUserName("wcadmin");
-		 rms.setPassword("wcadmin");
-		 
-		 String pid="VR:wt.epm.EPMDocument:174627";
-		 String cid="VR:wt.epm.EPMDocument:96452";
-		 String str="Project_NO";
-		List<String> list=queryWCObjectByPM(args[0],args[1],args[2],true);
-		for(String strs:list){
-			Debug.P("strs---------->"+strs);
-		}
+//		 RemoteMethodServer  rms = RemoteMethodServer.getDefault();
+//		 rms.setUserName("wcadmin");
+//		 rms.setPassword("wcadmin");
+//		 
+//		 String pid="VR:wt.epm.EPMDocument:174627";
+//		 String cid="VR:wt.epm.EPMDocument:96452";
+//		 String str="Project_NO";
+//		List<String> list=queryWCObjectByPM(args[0],args[1],args[2],true);
+//		for(String strs:list){
+//			Debug.P("strs---------->"+strs);
+//		}
 //		Object obj= searchWCObject(WTDocument.class,args[0],Contants.PMID);
 //		Debug.P(obj);
 //		if(obj instanceof WTPart){
@@ -1094,6 +1111,11 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	      return doc;
 	 }
 	 
+	 
+	 
+	 
+	 
+
 	 
 	 
 }

@@ -141,7 +141,8 @@ public class EPMDocUtil {
     	Debug.P("----->>>>>IbaKey:"+IbaKey+"  IbaValue:"+IbaValue);
     	if(StringUtils.isNotEmpty(IbaValue)&&StringUtils.isNotEmpty(IbaKey)){
     		String sql="select M1.NAME,M1.DOCUMENTNUMBER  FROM  STRINGVALUE v1 ,STRINGDEFINITION d1,EPMDOCUMENT e1,EPMDOCUMENTMASTER m1 where D1.IDA2A2=v1.ida3a6 and v1.IDA3A4=e1.IDA2A2 and e1.IDA3MASTERREFERENCE=M1.IDA2A2 and d1.name=?  and v1.value=? ";
-    		String [] params={IbaKey,IbaValue};
+    		String [] params={IbaKey,IbaValue.trim()};
+    		Debug.P(">>>>>sql:"+sql);
     		List<Hashtable<String,String>> result   =UserDefQueryUtil.commonQuery(sql, params);
     	    if(result!=null&&result.size()>0){
     	    	Debug.P("------>>>Get EpmDocument Result Size:"+result.size());
