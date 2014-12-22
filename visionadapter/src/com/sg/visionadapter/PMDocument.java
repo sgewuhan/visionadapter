@@ -136,7 +136,9 @@ public final class PMDocument extends BasicDocument {
 				.append(DB, db.toString());
 		DBObject metaData = new BasicDBObject().append("fvid", 0).append("caid", "PM-RW")
 				.append("caname", "PM-RW");
-		setValue(CONTENT, content);
+		BasicBSONList contents = new BasicBSONList();
+		contents.add(content);
+		setValue(CONTENT, contents);
 		GridFSFileProvider gfs = new GridFSFileProvider(content);
 
 		return gfs.writeToGridFS(in, objectId, fileName, fileName, db, metaData);
