@@ -12,6 +12,8 @@ import wt.csm.navigation.ClassificationNode;
 import wt.doc.WTDocument;
 import wt.doc.WTDocumentMaster;
 import wt.epm.EPMDocument;
+import wt.epm.EPMDocumentHelper;
+import wt.epm.util.EPMHelper;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
 import wt.fc.ObjectVector;
@@ -41,8 +43,10 @@ import wt.part.WTPartHelper;
 import wt.part.WTPartMaster;
 import wt.part.WTPartMasterIdentity;
 import wt.part.WTPartReferenceLink;
+import wt.query.ConstantExpression;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
+import wt.query.TableColumn;
 import wt.type.TypeDefinitionReference;
 import wt.type.TypedUtility;
 import wt.util.WTException;
@@ -544,6 +548,22 @@ public class PartUtil implements RemoteAccess {
 	}
 	
 	
+	public static List<String> getPartLinkByEPM(EPMDocument epm)throws Exception{
+		QuerySpec qs = new QuerySpec();
+		qs.setAdvancedQueryEnabled(true);
+		qs.addClassList(WTPartDescribeLink.class, true);
+		TableColumn column1 = new TableColumn("A0","IDA3B5");
+		SearchCondition sc2 = new SearchCondition(column1,SearchCondition.EQUAL,new ConstantExpression(new Long(epm.getPersistInfo().getObjectIdentifier().getId())));
+		qs.appendWhere(sc2);
+		QueryResult qr1 = PersistenceHelper.manager.find(qs);
+		while(qr1.hasMoreElements()){
+			Object obj[] = (Object[]) qr1.nextElement();
+			Debug.P("----->>>>get Result："+obj[0]);
+		}
+		return null;
+	}
+	
+	
 	
 	
 	/**
@@ -567,7 +587,7 @@ public class PartUtil implements RemoteAccess {
 				doc=(WTDocument)obj;
 				Debug.P("部件："+part.getNumber()+"关联的说明方文档---》"+doc.getNumber());
 				IBAUtils iba = new IBAUtils(doc);
-				docList.add(iba.getIBAValue(Contants.PROJECTNO));
+				docList.add(iba.getIBAValue(Contants.PMID));
 			}
 		}
 		
@@ -742,7 +762,7 @@ public class PartUtil implements RemoteAccess {
 	    		   EPMDocument doc =(EPMDocument)obj;
 	    			   Debug.P("EPMDocument---->"+doc.getCADName());
 	    			   IBAUtils iba = new IBAUtils(doc);
-	    			   list.add(iba.getIBAValue(Contants.PROJECTNO));
+	    			   list.add(iba.getIBAValue(Contants.PMID));
 	    		   }
 	       }
 		return list;

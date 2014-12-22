@@ -39,6 +39,7 @@ import wt.doc.WTDocumentMasterIdentity;
 import wt.enterprise.Master;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
+import wt.epm.build.EPMBuildHistory;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
 import wt.fc.ObjectNoLongerExistsException;
@@ -55,6 +56,7 @@ import wt.inf.container.WTContainer;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.org.WTUser;
+import wt.part.PartDocHelper;
 import wt.part.WTPart;
 import wt.part.WTPartDescribeLink;
 import wt.part.WTPartReferenceLink;
@@ -610,13 +612,13 @@ public class DocUtils implements RemoteAccess{
 	public static List getDescribePartsByEPMDoc(EPMDocument epmdoc){
 		List<String> partList = new ArrayList<String>();
 		try {
-			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc, WTPartDescribeLink.DESCRIBES_ROLE,
-					WTPartDescribeLink.class,true);
+			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc, EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true );
 			while(qr2.hasMoreElements()){
 				WTPart part = (WTPart)qr2.nextElement();
-				Debug.P("2--->"+part.getNumber());
 				IBAUtils iba = new IBAUtils(part);
-				partList.add(iba.getIBAValue(Contants.PMID));
+				String pmoid=iba.getIBAValue(Contants.PMID);
+			    if(partList.contains(pmoid)) continue;
+				 partList.add(pmoid);
 			}
 		
 		} catch (WTException e) {
