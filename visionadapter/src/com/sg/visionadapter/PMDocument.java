@@ -23,6 +23,12 @@ public final class PMDocument extends BasicDocument  {
 	private static final String CONTENT = "contentvault";
 
 	private static final String URL = "url";
+	
+	/**
+	 * 是否提交，为PLM两段式提交打标记
+	 */
+	private static final String F_IS_COMMIT = "iscommit";
+	
 
 	public PMDocument(){
 		
@@ -94,6 +100,14 @@ public final class PMDocument extends BasicDocument  {
 	public WriteResult doInsert() throws Exception {
 		throw new Exception("PM Document can not insert by adapter.");
 //		return super.doInsert();
+	}
+	
+	/**
+	 * 设置PLM提交的状态
+	 * @param iscommit true or false
+	 */
+	public void setCommit(boolean iscommit) {
+		setValue(F_IS_COMMIT, iscommit);
 	}
 
 }
