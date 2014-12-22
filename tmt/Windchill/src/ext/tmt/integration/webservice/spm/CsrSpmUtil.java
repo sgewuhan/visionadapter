@@ -21,6 +21,7 @@ import org.bson.types.ObjectId;
 
 import com.infoengine.util.UrlEncoder;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFS;
 import com.sg.visionadapter.BasicDocument;
@@ -86,7 +87,9 @@ import ext.tmt.utils.PartUtil;
 @SuppressWarnings("deprecation")
 public class CsrSpmUtil implements RemoteAccess, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final String PM2 = "pm2";
+
+	private static final long serialVersionUID = 1L;
     
     private static String CONTENTVAULT_FILE="contentvault_file";
 
@@ -398,7 +401,6 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     public static WTDocument createNewDocument(HashMap<String,String> baseMap,Map<String,Object> ibaMap) throws WTException {
         Debug.P("createNewDocument--> " + baseMap + " ibaMap is -> " + ibaMap);
         Transaction tx = null;
-        InputStream pins=null;
         String wtcontainer =  baseMap.get(SPMConsts.KEY_CONTAINERNAME);//容器
         String foldePath = baseMap.get(SPMConsts.KEY_FOLDER);//文件夹路径
         String documentType =baseMap.get(SPMConsts.KEY_DOCTYPE);//文档类型
@@ -452,10 +454,11 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             }
             
            String fileName = fileContent.substring(fileContent.lastIndexOf("/")+1);
-            pins=saveUrlAsLocation(fileContent);
+           InputStream pins=saveUrlAsLocation(fileContent);
             //添加主文档内容URL链接
             doc=DocUtils.linkDocument(doc, fileName, pins, "1", null);
             Debug.P("----->>>>Link Content URL Success!  =====>DocFolderpath:"+doc.getFolderPath());
+            
             //向PM系统创建文档对象
             createDoc2PM(doc);	
             tx.commit();
@@ -466,21 +469,41 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             throw new WTException(e.getMessage());
         } finally {
             SessionServerHelper.manager.setAccessEnforced(flagAccess);
-            if(pins!=null){
-            	try {
-					pins.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
             if (tx != null)
                 tx.rollback();
          }
        
     }
     
-    
-    
+    /**
+     * 向PM系统更新关联的主内容信息
+     * @throws Exception 
+     */
+    private  static  void updateDocContent2PM(WTDocument doc,PMDocument pmdoc,ModelServiceFactory factory) throws Exception{
+    	if(doc!=null){
+    		try {
+    	        InputStream ins=DocUtils.doc2is(doc);
+    	         if(ins!=null){
+    	            Debug.P("----Update PM Content:"+ins);
+    	            String fileName=DocUtils.getPrimaryFileNameByDoc(doc);
+    	             IFileProvider fileProvider=pmdoc.getContent();
+    	              if(fileProvider!=null){
+    	            	 DBObject object=fileProvider.getFileData();
+    	               if(object!=null){
+    	            	 Debug.P("IFileProvider  DBObject："+object);
+    	            	pmdoc.setContentVault((ObjectId)(pmdoc.getContent().getFileData().get("_id")), CONTENTVAULT_FILE, fileName, factory.getDB(PM2), ins);
+    	               }
+    	               }
+    	                ins.close();
+    	          }
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new Exception(e);
+			}
+   
+    	}
+    	
+    }
     
     
     
@@ -514,7 +537,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     			InputStream ins=DocUtils.doc2is(doc);
     			if(ins!=null){
     				String fileName=DocUtils.getPrimaryFileNameByDoc(doc);
-    				pmdoc.setContentVault(new ObjectId(), CONTENTVAULT_FILE, fileName, factory.getDB("pm2"), ins);
+    				pmdoc.setContentVault(new ObjectId(), CONTENTVAULT_FILE, fileName, factory.getDB(PM2), ins);
     			}
     			 ins.close();
     		     pmdoc.doInsert();
@@ -550,13 +573,18 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             Map<String,Object>  ibaMap) throws WTException {
         Debug.P("---reviseDocument-->>para hashmap is " + baseMap + " ibaMap is -> "+ ibaMap);
         Transaction tx=null;
-        InputStream pins=null;
         String fileContent = baseMap.get(SPMConsts.KEY_LOCATION_PATH);
         String docName=baseMap.get(SPMConsts.KEY_NAME);
         boolean flagAccess = SessionServerHelper.manager .setAccessEnforced(false);
         try {
         	tx = new Transaction();
             tx.start();
+            //获得PM文档对象
+            ModelServiceFactory factory= ModelServiceFactory.getInstance(CODEBASE_);
+    		DocumentPersistence docPersistence=factory.get(DocumentPersistence.class);
+    		String wcoid=doc.getPersistInfo().getObjectIdentifier().getStringValue();
+    		PMDocument pmdoc=docPersistence.getByPLMId(wcoid);
+            
             // 升大版本
             doc = (WTDocument) VersionControlHelper.service.newVersion(doc);
             // 设置IBA属性
@@ -568,14 +596,25 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
 				DocUtils.rename(doc, docName);
 			}
             
+        	
             doc = (WTDocument) PersistenceHelper.manager.save(doc);
-
             // 更新主内容
             String fileName = fileContent.substring(fileContent .lastIndexOf("/"));
             DocUtils.clearAllContent(doc);//清除原有的历史信息
             //添加主文档内容
-            pins=saveUrlAsLocation(fileContent);
+            InputStream pins=saveUrlAsLocation(fileContent);
             doc=DocUtils.linkDocument(doc, fileName, pins, "1", null);
+            
+            //更新PM对应的Windchill Doc信息
+            String updocId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
+            pmdoc.setPLMId(updocId);
+            pmdoc.setPLMData(getObjectInfo(doc));
+            pmdoc.setStatus(doc.getLifeCycleState().getDisplay());
+            pmdoc.setMajorVid(doc.getVersionIdentifier().getValue());
+            pmdoc.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
+            updateDocContent2PM(doc,pmdoc,factory);//更新主文档内容
+            pmdoc.doUpdate();
+            
             Debug.P("----->>>>Update Content URL Success!");
             tx.commit();
             tx = null;
@@ -584,18 +623,8 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             e.printStackTrace();
             throw new WTException(e.getMessage());
         } finally {
-            SessionServerHelper.manager.setAccessEnforced(flagAccess);
-            if(pins!=null){
-            	try {
-					pins.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
-            if (tx != null){
-            	 tx.rollback();
-            }
-               
+            if (tx != null)
+                tx.rollback();
         }
     }
     
