@@ -1,10 +1,15 @@
 package com.sg.visionadapter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.BasicBSONList;
+import org.bson.types.ObjectId;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 
@@ -14,7 +19,7 @@ import com.mongodb.WriteResult;
  * @author zhonghua
  *
  */
-public final class PMDocument extends BasicDocument  {
+public final class PMDocument extends BasicDocument {
 
 	private static final String PRODUCT_NUMBER = "productnumber";
 
@@ -23,17 +28,24 @@ public final class PMDocument extends BasicDocument  {
 	private static final String CONTENT = "contentvault";
 
 	private static final String URL = "url";
-	
+
+	private static final String F_ID = "_id";
+
+	private static final String NAME_SPACE = "namespace";
+
+	private static final String FILE_NAME = "filename";
+
+	private static final String DB = "db";
+
 	/**
 	 * 是否提交，为PLM两段式提交打标记
 	 */
 	private static final String F_IS_COMMIT = "iscommit";
-	
 
-	public PMDocument(){
-		
+	public PMDocument() {
+
 	}
-	
+
 	/**
 	 * @return 成品编码
 	 */
@@ -59,7 +71,7 @@ public final class PMDocument extends BasicDocument  {
 			for (int i = 0; i < ((BasicBSONList) list).size(); i++) {
 				IFileProvider item = getGridFSFileProvider((DBObject) ((BasicBSONList) list)
 						.get(i));
-				if(item!=null){
+				if (item != null) {
 					result.add(item);
 				}
 			}
@@ -72,16 +84,16 @@ public final class PMDocument extends BasicDocument  {
 	 */
 	public IFileProvider getContent() {
 		Object value = get(CONTENT);
-		if(value instanceof BasicBSONList ){
-			if(((BasicBSONList) value).size()>0){
-				return getGridFSFileProvider((DBObject) ((BasicBSONList) value).get(0));
+		if (value instanceof BasicBSONList) {
+			if (((BasicBSONList) value).size() > 0) {
+				return getGridFSFileProvider((DBObject) ((BasicBSONList) value)
+						.get(0));
 			}
-		}else if(value instanceof DBObject){
+		} else if (value instanceof DBObject) {
 			return getGridFSFileProvider((DBObject) value);
 		}
 		return null;
 	}
-
 
 	/**
 	 * 获得访问的url
@@ -99,15 +111,34 @@ public final class PMDocument extends BasicDocument  {
 	@Override
 	public WriteResult doInsert() throws Exception {
 		throw new Exception("PM Document can not insert by adapter.");
-//		return super.doInsert();
+		// return super.doInsert();
 	}
-	
+
 	/**
 	 * 设置PLM提交的状态
-	 * @param iscommit true or false
+	 * 
+	 * @param iscommit
+	 *            true or false
 	 */
 	public void setCommit(boolean iscommit) {
 		setValue(F_IS_COMMIT, iscommit);
 	}
 
+	/**
+	 * 设置主文档内容
+	 * 
+	 * @throws IOException
+	 */
+	public ObjectId setContentVault(ObjectId objectId, String nameSpace,
+			String fileName, DB db, InputStream in) throws IOException {
+		DBObject content = new BasicDBObject().append(F_ID, objectId)
+				.append(NAME_SPACE, nameSpace).append(FILE_NAME, fileName)
+				.append(DB, db.toString());
+		DBObject metaData = new BasicDBObject().append("fvid", 0).append("caid", "PM-RW")
+				.append("caname", "PM-RW");
+		setValue(CONTENT, content);
+		GridFSFileProvider gfs = new GridFSFileProvider(content);
+
+		return gfs.writeToGridFS(in, objectId, fileName, fileName, db, metaData);
+	}
 }
