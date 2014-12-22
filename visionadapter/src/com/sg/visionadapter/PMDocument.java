@@ -110,8 +110,7 @@ public final class PMDocument extends BasicDocument {
 
 	@Override
 	public WriteResult doInsert() throws Exception {
-		throw new Exception("PM Document can not insert by adapter.");
-		// return super.doInsert();
+		 return super.doInsert();
 	}
 
 	/**
