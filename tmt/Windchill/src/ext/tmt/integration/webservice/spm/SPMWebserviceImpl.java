@@ -741,6 +741,7 @@ public class SPMWebserviceImpl{
 					mappingMap.put(proName, value);
 				}
 			}
+			  fis.close();
 			  return mappingMap;
        }
 

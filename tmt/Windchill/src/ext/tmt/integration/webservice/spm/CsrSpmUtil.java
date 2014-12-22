@@ -3,8 +3,10 @@ package ext.tmt.integration.webservice.spm;
 
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -13,8 +15,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
@@ -506,7 +510,9 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     }
     
     
-    
+    /**
+     * 创建PM文档
+     */
     private static void createDoc2PM(WTDocument doc)throws Exception{
     	if(doc!=null){
     		Debug.P("----->>>DOC:"+doc.getName());
@@ -520,6 +526,12 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     		FolderPersistence folderPersistence=factory.get(FolderPersistence.class);
     		ObjectId foid=folderPersistence.getFolderIdByPLMId(doc_foid);
     		String state=doc.getLifeCycleState().getDisplay();
+    		//状态转换
+    		Map<String,String> mapState=getConvertStateMap();
+    		if(mapState.size()>0){
+    			state=mapState.get(state);
+    			Debug.P(">>>>PM state:"+state);
+    		}
     		Debug.P("----WCFID:"+doc_foid+" 对应的PMId:"+foid.toString()+"  State:"+state);
     		ObjectId pmdocId=new ObjectId();
     		pmdoc.set_id(pmdocId);
@@ -607,14 +619,20 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             
             //更新PM对应的Windchill Doc信息
             String updocId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
+            String state=doc.getLifeCycleState().getDisplay();
+    		//状态转换
+    		Map<String,String> mapState=getConvertStateMap();
+    		if(mapState.size()>0){
+    			state=mapState.get(state);
+    			Debug.P(">>>>PM state:"+state);
+    		}
             pmdoc.setPLMId(updocId);
             pmdoc.setPLMData(getObjectInfo(doc));
-            pmdoc.setStatus(doc.getLifeCycleState().getDisplay());
+            pmdoc.setStatus(state);
             pmdoc.setMajorVid(doc.getVersionIdentifier().getValue());
             pmdoc.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
             updateDocContent2PM(doc,pmdoc,factory);//更新主文档内容
             pmdoc.doUpdate();
-            
             Debug.P("----->>>>Update Content URL Success!");
             tx.commit();
             tx = null;
@@ -647,7 +665,6 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
 //            fileUrl = UrlEncoder.decode(fileUrl);
             fileURL = fileURL_sub1+fileURL_sub2;
             Debug.P("解析前fileUrl------------>"+fileUrl);
-            Debug.P("解析后fileURL------------>"+fileURL);
             URL url = new URL(fileURL);
             HttpURLConnection connection = (HttpURLConnection) url
                     .openConnection();
@@ -1453,30 +1470,36 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     	   }
      }
  	 
-    
- 	 public static String  testPM(String num) throws Exception{
- 		 
- 		 if(!RemoteMethodServer.ServerFlag){
- 			   String method = "testPM";
-	           String klass = CsrSpmUtil.class.getName();
-	           Class[] types = { String.class};
-	           Object[] vals = {num};
-	           return (String)RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
- 		 }else{
- 			WTDocument doc=DocUtils.getDocByNumber(num);
- 			Debug.P("---->>>>docNum:"+doc.getNumber());
- 			createDoc2PM(doc);
- 			System.out.println("---Success!!");
- 			return "111111";
- 		 }
- 	 }
- 	 
-
- 	 
-	 public static void main(String[] args) throws Exception {
-		 String num="0000087145";
-		 testPM(num);
-	}
+     
+    /**
+     *获得state.properties配置文件中的状态配置
+     * @param wcState
+     * @return
+     */
+     private static String STATE_PATH="codebase" + File.separator + "ext"
+ 			+ File.separator + "tmt" + File.separator + "integration"
+ 			+ File.separator + "webservice" + File.separator +"spm"+ File.separator+ "state.properties";
+     private static Map<String,String> getConvertStateMap()throws Exception{
+ 		Properties prop=new Properties();
+ 		Map<String,String> mappingMap=new HashMap<String,String>();
+ 	    String wthome = (String) (WTProperties.getLocalProperties()).getProperty("wt.home", "");
+			String tempPath = wthome + File.separator + STATE_PATH;
+			Debug.P("-------->>State Mapping FilePath:"+tempPath);
+			FileInputStream fis = new FileInputStream(tempPath);
+			prop.load(new InputStreamReader(fis, "UTF-8"));
+			prop.load(fis);
+			if(prop!=null){
+			   Iterator<?> ite=prop.entrySet().iterator();
+				while(ite.hasNext()){
+					Entry entry=(Entry) ite.next();
+					String proName = (String) entry.getKey();
+					String value = (String) entry.getValue();
+					mappingMap.put(proName, value);
+				}
+			}
+			   fis.close();
+			  return mappingMap;
+     }
 	 
 
 }
