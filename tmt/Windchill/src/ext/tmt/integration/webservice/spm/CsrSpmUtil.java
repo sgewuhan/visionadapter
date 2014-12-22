@@ -550,6 +550,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             Map<String,Object>  ibaMap) throws WTException {
         Debug.P("---reviseDocument-->>para hashmap is " + baseMap + " ibaMap is -> "+ ibaMap);
         Transaction tx=null;
+        InputStream pins=null;
         String fileContent = baseMap.get(SPMConsts.KEY_LOCATION_PATH);
         String docName=baseMap.get(SPMConsts.KEY_NAME);
         boolean flagAccess = SessionServerHelper.manager .setAccessEnforced(false);
@@ -573,7 +574,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             String fileName = fileContent.substring(fileContent .lastIndexOf("/"));
             DocUtils.clearAllContent(doc);//清除原有的历史信息
             //添加主文档内容
-            InputStream pins=saveUrlAsLocation(fileContent);
+            pins=saveUrlAsLocation(fileContent);
             doc=DocUtils.linkDocument(doc, fileName, pins, "1", null);
             Debug.P("----->>>>Update Content URL Success!");
             tx.commit();
@@ -584,8 +585,17 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             throw new WTException(e.getMessage());
         } finally {
             SessionServerHelper.manager.setAccessEnforced(flagAccess);
-            if (tx != null)
-                tx.rollback();
+            if(pins!=null){
+            	try {
+					pins.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+            }
+            if (tx != null){
+            	 tx.rollback();
+            }
+               
         }
     }
     
