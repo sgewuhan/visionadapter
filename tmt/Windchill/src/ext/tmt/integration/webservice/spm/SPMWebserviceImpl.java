@@ -152,7 +152,8 @@ public class SPMWebserviceImpl{
                     String att_key = resultSet.getString(SPMConsts.IBA_KEY);//软属性Name
                     if(StringUtils.isEmpty(att_key)) continue;
                     String att_value = resultSet.getString(SPMConsts.IBA_VALUE);//软属性Value
-    
+                    
+                    Debug.P("-->>IBA KEY:"+att_key+"  >>>IBA Value:"+att_value);
                     //设置软属性集合(综合等级,物料类型,型号规格)
                     //过滤掉Windchill系统不存在的软属性
                     String contain_key=mapDatas.get(att_key);

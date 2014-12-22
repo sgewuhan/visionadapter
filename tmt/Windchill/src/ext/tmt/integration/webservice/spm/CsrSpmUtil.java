@@ -23,6 +23,7 @@ import com.infoengine.util.UrlEncoder;
 import com.mongodb.BasicDBObject;
 import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFS;
+import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
 import com.sg.visionadapter.GridFSFileProvider;
@@ -42,6 +43,7 @@ import wt.fc.QueryResult;
 import wt.folder.Folder;
 import wt.folder.FolderHelper;
 import wt.inf.container.WTContainer;
+import wt.lifecycle.LifeCycleHelper;
 import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
@@ -85,6 +87,8 @@ import ext.tmt.utils.PartUtil;
 public class CsrSpmUtil implements RemoteAccess, Serializable {
 
     private static final long serialVersionUID = 1L;
+    
+    private static String CONTENTVAULT_FILE="contentvault_file";
 
 	private static String CODEBASE_=null;
 	 static {
@@ -394,6 +398,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     public static WTDocument createNewDocument(HashMap<String,String> baseMap,Map<String,Object> ibaMap) throws WTException {
         Debug.P("createNewDocument--> " + baseMap + " ibaMap is -> " + ibaMap);
         Transaction tx = null;
+        InputStream pins=null;
         String wtcontainer =  baseMap.get(SPMConsts.KEY_CONTAINERNAME);//容器
         String foldePath = baseMap.get(SPMConsts.KEY_FOLDER);//文件夹路径
         String documentType =baseMap.get(SPMConsts.KEY_DOCTYPE);//文档类型
@@ -447,14 +452,12 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             }
             
            String fileName = fileContent.substring(fileContent.lastIndexOf("/")+1);
-           InputStream pins=saveUrlAsLocation(fileContent);
+            pins=saveUrlAsLocation(fileContent);
             //添加主文档内容URL链接
             doc=DocUtils.linkDocument(doc, fileName, pins, "1", null);
             Debug.P("----->>>>Link Content URL Success!  =====>DocFolderpath:"+doc.getFolderPath());
-            
             //向PM系统创建文档对象
             createDoc2PM(doc);	
-            
             tx.commit();
             tx = null;
             return doc;
@@ -463,9 +466,16 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             throw new WTException(e.getMessage());
         } finally {
             SessionServerHelper.manager.setAccessEnforced(flagAccess);
+            if(pins!=null){
+            	try {
+					pins.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+            }
             if (tx != null)
                 tx.rollback();
-        }
+         }
        
     }
     
@@ -479,20 +489,21 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     		Debug.P("----->>>DOC:"+doc.getName());
     		ModelServiceFactory factory= ModelServiceFactory.getInstance(CODEBASE_);
     		DocumentPersistence docPersistence=factory.get(DocumentPersistence.class);
-    		PMDocument pmdoc=docPersistence.newInstance();
+    		PMDocument  pmdoc=docPersistence.newInstance();
     		String docId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
     		Folder folder=FolderHelper.getFolder(doc);
     		if(folder==null) throw new Exception("Windchill Doc"+docId+" 对应的文件夹为空不存在!");
     		String doc_foid=folder.getPersistInfo().getObjectIdentifier().getStringValue();
     		FolderPersistence folderPersistence=factory.get(FolderPersistence.class);
     		ObjectId foid=folderPersistence.getFolderIdByPLMId(doc_foid);
-    		Debug.P("----WCFID:"+doc_foid+" 对应的PMId:"+foid.toString());
+    		String state=doc.getLifeCycleState().getDisplay();
+    		Debug.P("----WCFID:"+doc_foid+" 对应的PMId:"+foid.toString()+"  State:"+state);
     		ObjectId pmdocId=new ObjectId();
     		pmdoc.set_id(pmdocId);
     		pmdoc.setObjectNumber(doc.getNumber());
     		pmdoc.setCommonName(doc.getName());
     		pmdoc.setPLMId(docId);
-    		pmdoc.setStatus(doc.getState().getState().getDisplay());
+    		pmdoc.setStatus(state);
     		pmdoc.setOwner(doc.getCreatorName());
     		pmdoc.setPLMData(getObjectInfo(doc));
     		pmdoc.setFolderId(foid);
@@ -502,12 +513,8 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
     		try {
     			InputStream ins=DocUtils.doc2is(doc);
     			if(ins!=null){
-    				Debug.P("----->>>InputStream:"+ins);
-    				IFileProvider fileProvider = new GridFSFileProvider(null);
     				String fileName=DocUtils.getPrimaryFileNameByDoc(doc);
-    	    		fileProvider.writeToGridFS(ins, null, fileName==null?"Default_123":fileName, "vault_file", factory.getDB("pm2"), null);
-    	    		pmdoc.setPLMContent(fileProvider);
-    	    		Debug.P("------>>>setPLMContent End");
+    				pmdoc.setContentVault(new ObjectId(), CONTENTVAULT_FILE, fileName, factory.getDB("pm2"), ins);
     			}
     			 ins.close();
     		     pmdoc.doInsert();
@@ -608,14 +615,6 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
              ins = new DataInputStream(connection .getInputStream());
         } catch (Exception e) {
             e.printStackTrace();
-        }finally{
-        	if(ins!=null){
-        		 try {
-					ins.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-        	}
         }
     	  return ins;
     }
@@ -1395,25 +1394,48 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
  		  }
  		        return result;
  	 }
+ 	 
+ 	 /**
+ 	  * 更新物料信息
+ 	  * @param part
+ 	  * @param ibaMap
+ 	  */
+     public static void updateWTPartIBA(WTPart part,Map<String ,Object> ibaMap)throws Exception{
+    	 Debug.P("---->>>IBA Map:"+ibaMap); 
+    	 if(ibaMap!=null){
+    		 IBAUtils iba=new IBAUtils(part);
+    		 for( Iterator<?> ite=ibaMap.keySet().iterator();ite.hasNext();){
+    			   String key=(String) ite.next();
+    			   String value=(String) ibaMap.get(key);
+    			   Debug.P("--->>>Key:"+key+"   Value:"+value);
+    			   iba.setIBAValue(key, value);
+    		 }
+    		    iba.updateIBAPart(part);
+    	   }
+     }
+ 	 
     
- 	 public static void testPM(String num) throws Exception{
+ 	 public static String  testPM(String num) throws Exception{
+ 		 
  		 if(!RemoteMethodServer.ServerFlag){
  			   String method = "testPM";
 	           String klass = CsrSpmUtil.class.getName();
 	           Class[] types = { String.class};
 	           Object[] vals = {num};
-	           RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+	           return (String)RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
  		 }else{
- 			WTDocument doc=(WTDocument) GenericUtil.getObjectByNumber(num);
+ 			WTDocument doc=DocUtils.getDocByNumber(num);
  			Debug.P("---->>>>docNum:"+doc.getNumber());
  			createDoc2PM(doc);
+ 			System.out.println("---Success!!");
+ 			return "111111";
  		 }
  	 }
  	 
 
  	 
 	 public static void main(String[] args) throws Exception {
-		 String num="WE00001";
+		 String num="0000087145";
 		 testPM(num);
 	}
 	 
