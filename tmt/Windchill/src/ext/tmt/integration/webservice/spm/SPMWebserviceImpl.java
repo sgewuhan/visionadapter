@@ -119,17 +119,20 @@ public class SPMWebserviceImpl{
                  String part_fac=(String) LWCUtil.getValue(object, SPMConsts.FACTORY);
                  Debug.P("---SPM Factory:"+spm_fac);
                  if(object!=null){
-                	 StringBuffer bf=new StringBuffer(spm_fac);
-                	 bf.append(",").append(part_fac);
-                	 ibaMap.put(SPMConsts.FACTORY, bf.toString());//扩建工厂属性
-                     CsrSpmUtil.updatePartInfo(object,baseMap, ibaMap);
+                	 //过滤重复添加的工厂
+                	 if(!part_fac.contains(spm_fac)){
+                		 StringBuffer bf=new StringBuffer(spm_fac);
+                    	 bf.append(",").append(part_fac);
+                    	 ibaMap.put(SPMConsts.FACTORY, bf.toString());//扩建工厂属性
+                	 }
+                    CsrSpmUtil.updatePartInfo(object,baseMap, ibaMap);
                     Debug.P("--->>Update Part Factory:"+part_fac);
                     boolean isTMT=matchFactory(part_fac);
                     if(!isTMT){//非新材工厂(状态设置成已废弃)
                       GenericUtil.changeState(object, SPMConsts.DESPOSED);
                     }
                     Debug.P("----->>>Update WTPart("+object.getPersistInfo().getObjectIdentifier().getStringValue()+")Success!!");
-                    result= "更新物料成功";
+                    result= "更新物料操作成功";
                  }else{
                 	boolean iscreateTMT=matchFactory(spm_fac); 
                 	Debug.P("---->>>创建的物料是否属于新材工厂:"+iscreateTMT);
@@ -204,7 +207,6 @@ public class SPMWebserviceImpl{
                             }
                                result = "删除工厂成功";
                         }
-                         
                 	}
                 }
             }
@@ -323,9 +325,12 @@ public class SPMWebserviceImpl{
                  	 //更新物料信息
                	     Debug.P("--Mark:更新-->>>UpdateIBA:"+ibaMap);
                	     String org_fac=(String) LWCUtil.getValue(part, SPMConsts.FACTORY);
-               	     StringBuffer sbf=new StringBuffer(spm_factory);
-               	     sbf.append(",").append(org_fac);
-               	     ibaMap.put(SPMConsts.FACTORY, sbf.toString());
+               	     //过滤重复添加的工厂
+               	     if(!org_fac.contains(spm_factory)){
+               	    	 StringBuffer sbf=new StringBuffer(spm_factory);
+                  	     sbf.append(",").append(org_fac);
+                  	     ibaMap.put(SPMConsts.FACTORY, sbf.toString());
+               	     }
                	     CsrSpmUtil.updateWTPartIBA(part,ibaMap);
             		 Debug.P("---Mark:更新-->>>UpdateIBA-->>>Success!");
                      
@@ -334,10 +339,8 @@ public class SPMWebserviceImpl{
               		boolean isDel=matchFactory(partFactory);//与PM系统匹配
               		if(!isDel){
               			part=(WTPart) GenericUtil.changeState(part, SPMConsts.DESPOSED);
-              			PersistenceHelper.manager.refresh(part);
               		}
               		     result="更新物料操作成功";
-              		     return result;
                  	}else {//扩建物料
                  		Debug.P("----->>>>>扩建TMT工厂物料:"+materNo);
                  		 String mater_factory=(String) ibaMap.get(SPMConsts.FACTORY);
@@ -359,7 +362,8 @@ public class SPMWebserviceImpl{
             }
             SessionServerHelper.manager.setAccessEnforced(true);
 		}
-    	     return "操作成功";
+             Debug.P("--->>>>>result11:"+result);
+    	      return result;
     }
 
     
