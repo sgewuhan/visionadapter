@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
+import ext.tmt.part.PartUtils;
 import ext.tmt.utils.Debug;
 import wt.session.SessionHelper;
 import wt.session.SessionServerHelper;
@@ -72,21 +73,19 @@ public class SPMWebserviceImpl{
         ResultSet resultSet = null;
         String containerName = SPMConsts.SPMCONTAINER_NAME;//容器类型
         String result = null;
-        ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
         try {
             SessionHelper.manager.setAdministrator();
             //首次接口发布
+            ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
             if (workflow != null && times == 1) {
                 String sql = "select * from CSR_WLSXSQ,CSR_JSTZSX where CSR_JSTZSX.WORKFLOW = CSR_WLSXSQ.WORKFLOW and CSR_JSTZSX.TIMES = '"
                         + 1 + "' AND CSR_WLSXSQ.WORKFLOW = '" + workflow + "'";
                 Debug.P("--->SQL:"+sql);
                 resultSet =connectionPool.getConnection().executeQuery(sql);
                 while (resultSet.next()) {
-                    
                     //基本属性
                     String material_num = resultSet.getString(SPMConsts.MATERIAL_NUM);//物料编码
                     String material_name = resultSet.getString(SPMConsts.MATERIAL_NAME);//物料名称 
-//                    Debug.P("---processorForSpm1-->>>>Material Number:"+material_num+"  MaterialName:"+material_name);
                     if(StringUtils.isEmpty(material_name)||StringUtils.isEmpty(material_num)) continue;//过滤物料名称和编号为空的数据
                 	String material_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//物料小类路径
                     if(StringUtils.isNotEmpty(material_category)){
@@ -112,45 +111,43 @@ public class SPMWebserviceImpl{
                     	}
                     }
                 }
-                    //判断物料的存在性
-                   if(!baseMap.isEmpty()){
-                       String object_num=baseMap.get(SPMConsts.KEY_NUMBER);
-                       Persistable object= hasExistObject(object_num);
-                       if (object!=null) {
-                           Debug.P("------->>>>this WTPart("+object_num+") has exist!");
-                           if(object instanceof WTPart){
-                          	   WTPart partObject=(WTPart)object;
-                               CsrSpmUtil.updatePartInfo(partObject,baseMap, ibaMap);
-                               Debug.P("----->>>Update WTPart("+partObject.getPersistInfo().getObjectIdentifier().getStringValue()+")Success!!");
-                               result= "更新物料成功";
-                           }
-                      } else {
-                        try {
-                            // 根据第一次发布找到基本信息创建part
-                        	//如果物料类型未做映射则不创建
-                        	String partType=baseMap.get(SPMConsts.PART_TYPE);
-                        	if(StringUtils.isNotEmpty(partType)){
-                        	   	Debug.P("---->>>Ready Create Part: Type="+partType);
-                        		CsrSpmUtil.createNewPart(baseMap, ibaMap,mapDatas);
-                        		result="创建物料成功";
-                        	}
-                        } catch (Exception e) {
-                            return e.getLocalizedMessage();// 直接将错误信息进行返回
-                        }
-                     }
-                   }
+                 
+                //判断物料的存在性 如果存在则更新新材物料,不存在则创建新材物料
+                 String object_num=baseMap.get(SPMConsts.KEY_NUMBER);
+                 WTPart object= hasExistObject(object_num);
+                 String spm_fac=(String) ibaMap.get(SPMConsts.FACTORY);
+                 Debug.P("---SPM Factory:"+spm_fac);
+                 if(object!=null){
+                    CsrSpmUtil.updatePartInfo(object,baseMap, ibaMap);
+                    String part_fac=(String) LWCUtil.getValue(object, SPMConsts.FACTORY);
+                    Debug.P("--->>Update Part Factory:"+part_fac);
+                    boolean isTMT=matchFactory(part_fac);
+                    if(!isTMT){//非新材工厂(状态设置成已废弃)
+                      GenericUtil.changeState(object, SPMConsts.DESPOSED);
+                    }
+                    Debug.P("----->>>Update WTPart("+object.getPersistInfo().getObjectIdentifier().getStringValue()+")Success!!");
+                    result= "更新物料成功";
+                 }else{
+                	boolean iscreateTMT=matchFactory(spm_fac); 
+                	Debug.P("---->>>创建的物料是否属于新材工厂:"+iscreateTMT);
+                	if(iscreateTMT){//创建新材工厂
+                	  String partType=baseMap.get(SPMConsts.PART_TYPE);
+                       if(StringUtils.isNotEmpty(partType)){
+                    	  Debug.P("---->>>Ready Create Part: Type="+partType);
+                    	  CsrSpmUtil.createNewPart(baseMap, ibaMap,mapDatas);
+                    	  result="创建物料成功";
+                    	}
+                	}
+                 }
               } else if (workflow != null && (times == 2 || times == 3)) {
                 String partNo = null;//需要更新的物料编号
                 String sql = "select * from CSR_JSTZSX where TIMES = '" + times + "' AND WORKFLOW = '" + workflow + "'";
+                Debug.P("--->>>SQL:"+sql);
                 resultSet =connectionPool.getConnection().executeQuery(sql);
                 while (resultSet.next()) {
                 	//软属性,基本属性
-//               String spm_workflow = resultSet.getString(SPMConsts.SPM_WORKFLOW);//发布流程ID
-//               String spm_creator = resultSet.getString(SPMConsts.SPM_CREATOR);//流程创建者
                     String spm_category = resultSet.getString(SPMConsts.MATERIAL_PATH);//物料小类全路径
                     partNo = resultSet.getString(SPMConsts.MATERIAL_NUM);//物料编码
-                    String spm_name=resultSet.getString(SPMConsts.MATERIAL_NAME);//物料名称
-                    baseMap.put(SPMConsts.KEY_NAME, spm_name);
                     
                     String att_key = resultSet.getString(SPMConsts.IBA_KEY);//软属性Name
                     if(StringUtils.isEmpty(att_key)) continue;
@@ -173,8 +170,10 @@ public class SPMWebserviceImpl{
                 if (!ibaMap.isEmpty()) {
                    CsrSpmUtil.updatePartForIba(partNo, ibaMap, "");
                 }
+                
+                  result="二次更新物料成功!";
 
-                // 物料删除 标识维护
+                // 物料删除 Factory标识维护
                 if (times == 3) {
                 	Debug.P("------------>>>Times:"+times+"  PartNo:"+partNo);
                 	if(StringUtils.isNotEmpty(partNo)){
@@ -191,31 +190,14 @@ public class SPMWebserviceImpl{
                         if (part != null) {
                         	 IBAUtils partIba=new IBAUtils(part);
                         	 String  _factory=partIba.getIBAValue(SPMConsts.FACTORY);//系统Factory软属性值
-                             Set<String> factory_set=splitStr2Set(_factory,",");
                             if (StringUtils.isEmpty(_factory)) {//如果物料不存在工厂,则设置为已废弃
                                 GenericUtil.changeState(part, SPMConsts.DESPOSED);
-                            } else {//存在工厂参数则删除指定参数信息
+                            } else {//存在新材工厂参数则删除指定参数信息
                             	Debug.P("------>>参数Factory:"+factory+"(用于删除)");
-                                String[] factories = factory.split(",");
-                                if (factories != null && factories.length > 0) {
-                                    for (int i = 0; i < factories.length; i++) {
-                                        String fac = factories[i];
-                                        if(factory_set.contains(fac)){//如果存在则删除???(是否与株洲所一致)
-                                        	factory_set.remove(fac);
-                                        }
-                                    }
+                            	boolean isTMT=matchFactory(_factory);
+                                if(!isTMT){//如果不存在新材的工厂则修改状态为 已作废
+                                  GenericUtil.changeState(part, SPMConsts.DESPOSED);
                                 }
-                                
-                                //将Set结果集转换成字符串
-                                String factory_iba=setCollection2Str(factory_set);
-                                List<String> fac_res=CsrSpmUtil.getAllPMFactory();
-                                if(!fac_res.contains(fac_res)){//如果不存在新材的工厂则修改状态为 已作废
-                                	  GenericUtil.changeState(part, SPMConsts.DESPOSED);
-                                }
-                               //更新所属工厂IBA属性
-                                IBAUtils iba=new IBAUtils(part);
-                                iba.setIBAValue(SPMConsts.FACTORY, factory_iba==null?"":factory_iba);
-                                iba.updateIBAPart(part);
                             }
                                result = "删除工厂成功";
                         }
@@ -699,13 +681,13 @@ public class SPMWebserviceImpl{
     
     
     /**
-     * 判断对象的存在性
+     * 判断物料对象的存在性
   * @throws WTException 
      */
-    private static Persistable hasExistObject(String num) throws Exception{
+    private static WTPart hasExistObject(String num) throws Exception{
  	    if(StringUtils.isEmpty(num)) throw new Exception("NUMBER属性字段参数值为空");
  	    try {
- 	        Persistable object=GenericUtil.getObjectByNumber(num);
+ 	    	 WTPart object=PartUtils.getPartByNumber(num);
  	         return object;
 			} catch (Exception e) {
 				e.printStackTrace();
