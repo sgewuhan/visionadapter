@@ -33,7 +33,7 @@ public final class PMDocument extends BasicDocument {
 
 	private static final String NAME_SPACE = "namespace";
 
-	private static final String FILE_NAME = "filename";
+	private static final String FILE_NAME = "fileName";
 
 	private static final String DB = "db";
 
