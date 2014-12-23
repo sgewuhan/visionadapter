@@ -22,17 +22,18 @@ public class PMProductItem extends BasicDBObject implements IPersistenceService 
 	private String userId;
 	private String userName;
 	protected DBCollection collection;
-	private Date date;
+	private String date;
+	private String productNumber;
+	private ObjectId projectId;
 
 	public PMProductItem() {
 	}
 
-	public WriteResult doInsertProductNumToProductItem(String prductNumber,
-			ObjectId projectId) {
+	public WriteResult doInsertProductNumToProductItem() {
 		WriteResult rs = collection.insert(new BasicDBObject()
 				.append(F_ID, new ObjectId())
-				.append(F_PROJECTID, projectId)
-				.append(F_DESC, prductNumber)
+				.append(F_PROJECTID, getProjectId())
+				.append(F_DESC, getProductNumber())
 				.append(F_CDATE, getDate().toString())
 				.append(F_CACCOUNT,
 						new BasicDBObject().append(USERID, getUserId()).append(
@@ -66,11 +67,27 @@ public class PMProductItem extends BasicDBObject implements IPersistenceService 
 		this.userName = userName;
 	}
 
-	public Date getDate() {
+	public String getDate() {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	public void setDate(String date) {
 		this.date = date;
+	}
+
+	public String getProductNumber() {
+		return productNumber;
+	}
+
+	public void setProductNumber(String productNumber) {
+		this.productNumber = productNumber;
+	}
+
+	public ObjectId getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(ObjectId projectId) {
+		this.projectId = projectId;
 	}
 }
