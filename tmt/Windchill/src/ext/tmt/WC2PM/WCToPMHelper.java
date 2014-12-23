@@ -214,7 +214,6 @@ public class WCToPMHelper {
 		Debug.P(wtPart.toString());
 		partOid = getObjectOid(wtPart);
 		Debug.P(wtPart.getPersistInfo().getObjectIdentifier().getId());
-		Debug.P(partOid);
         		
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
@@ -226,19 +225,18 @@ public class WCToPMHelper {
            Debug.P(partFolderString);
            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
            //partFolder=wtPart.getFolderingInfo().getFolder();
-           Debug.P(partFolder);
-           Debug.P(pFolderId);
            pFolderId=partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
-		   Debug.P(pFolderId);
+		   Debug.P(">>>WCFolderOid："+pFolderId);
 		   boolean flag = true;
 		   try{
+			   Debug.P("---->>>>partOid:"+partOid+"   productPersistence:"+productPersistence);
 			   pmProduct=productPersistence.getByPLMId(partOid);
            }catch (NullPointerException e) {
         	   pmProduct=null;
 		   } 
-           Debug.P("pmProduct-->"+pmProduct);
 		   try {
-			 PMFolder pmfolder =factory.get(FolderPersistence.class).getByPLMId(pFolderId);
+			 FolderPersistence folderPer=factory.get(FolderPersistence.class);
+			 PMFolder pmfolder =folderPer.getByPLMId(pFolderId);
 			 if(pmfolder==null){
 				 flag=false;
 			 }
@@ -292,7 +290,9 @@ public class WCToPMHelper {
         	   		}
         	   		
         	   		String projectNumber = partiba.getIBAValue(Contants.PROJECTNO);
-        	   		ObjectId pmProjectId =factory.get(PMProject.class).getProjectIdByProjectNum(projectNumber);;
+        	   		PMProject pmproject=factory.get(PMProject.class);
+        	   		Debug.P("----ProjectNo:"+projectNumber+"   PMProject:"+pmproject);
+        	   		ObjectId pmProjectId =factory.get(PMProject.class).getProjectIdByProjectNum(projectNumber);
 					Debug.P("--->>>>pmProjectId:"+pmProjectId);
 					if(pmProjectId != null) {
 						PMProductItem pmProductItem = factory.get(PMProductItem.class);
