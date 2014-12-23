@@ -36,6 +36,8 @@ import com.sg.visionadapter.PMMaterial;
 import com.sg.visionadapter.PMPackage;
 import com.sg.visionadapter.PMPart;
 import com.sg.visionadapter.PMProduct;
+import com.sg.visionadapter.PMProductItem;
+import com.sg.visionadapter.PMProject;
 import com.sg.visionadapter.PMSupplyment;
 import com.sg.visionadapter.PackagePersistence;
 import com.sg.visionadapter.PartPersistence;
@@ -263,6 +265,7 @@ public class WCToPMHelper {
         	   pmProduct.setPLMData(plmData);
         	   pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
         	   pmProduct.setObjectNumber(wtPart.getNumber());
+        	   pmProduct.setProductNumber(wtPart.getNumber());
         	   pmProduct.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
         	   pmProduct.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
         	   pmProduct.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
@@ -286,6 +289,18 @@ public class WCToPMHelper {
         	   			reloadDeliverable(objectId.toString());
         	   			Debug.P("create pmproduct success");
         	   		}
+        	   		PMProject pmProject = new PMProject();
+        	   		String projectNumber = partiba.getIBAValue(Contants.PROJECTNO);
+        	   		if(projectNumber == null) {
+        	   			projectNumber = "";
+        	   		}
+					ObjectId pmProjectId = pmProject.getProjectIdByProjectNum(projectNumber);
+					Debug.P("PM的Project ID为: " + pmProjectId.toString());
+					if(pmProjectId != null) {
+						PMProductItem pmProductItem = new PMProductItem();
+						WriteResult wr = pmProductItem.doInsertProductNumToProductItem(wtPart.getNumber(), pmProjectId);
+						Debug.P(wr.getField("_id").toString() +">>>>>>>>>写入物质编码库成功");
+					}
            }}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
