@@ -134,7 +134,7 @@ public final class PMDocument extends BasicDocument {
 				.append(NAME_SPACE, nameSpace).append(FILE_NAME, fileName)
 				.append(DB, db.toString());
 		DBObject metaData = new BasicDBObject().append("fvid", 0).append("caid", "PM-RW")
-				.append("caname", "PM-RW");
+				.append("caname", "PLMϵͳ");
 		BasicBSONList contents = new BasicBSONList();
 		contents.add(content);
 		setValue(CONTENT, contents);
