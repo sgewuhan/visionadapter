@@ -218,7 +218,8 @@ public class WCToPMHelper {
         		
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
-			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
+			ModelServiceFactory factory=ModelServiceFactory.getInstance(codebasePath);
+			productPersistence = factory.get(ProductPersistence.class);
 			
 			IBAUtils  partiba = new IBAUtils(wtPart);
            partFolderString = wtPart.getFolderPath();
@@ -237,7 +238,7 @@ public class WCToPMHelper {
 		   } 
            Debug.P("pmProduct-->"+pmProduct);
 		   try {
-			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 PMFolder pmfolder =factory.get(FolderPersistence.class).getByPLMId(pFolderId);
 			 if(pmfolder==null){
 				 flag=false;
 			 }
@@ -289,15 +290,12 @@ public class WCToPMHelper {
         	   			reloadDeliverable(objectId.toString());
         	   			Debug.P("create pmproduct success");
         	   		}
-        	   		PMProject pmProject = new PMProject();
+        	   		
         	   		String projectNumber = partiba.getIBAValue(Contants.PROJECTNO);
-        	   		if(projectNumber == null) {
-        	   			projectNumber = "";
-        	   		}
-					ObjectId pmProjectId = pmProject.getProjectIdByProjectNum(projectNumber);
-					Debug.P("PM的Project ID为: " + pmProjectId.toString());
+        	   		ObjectId pmProjectId =factory.get(PMProject.class).getProjectIdByProjectNum(projectNumber);;
+					Debug.P("--->>>>pmProjectId:"+pmProjectId);
 					if(pmProjectId != null) {
-						PMProductItem pmProductItem = new PMProductItem();
+						PMProductItem pmProductItem = factory.get(PMProductItem.class);
 						WriteResult wr = pmProductItem.doInsertProductNumToProductItem(wtPart.getNumber(), pmProjectId);
 						Debug.P(wr.getField("_id").toString() +">>>>>>>>>写入物质编码库成功");
 					}
