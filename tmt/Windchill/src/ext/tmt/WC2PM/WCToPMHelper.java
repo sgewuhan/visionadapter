@@ -36,15 +36,19 @@ import com.sg.visionadapter.PMMaterial;
 import com.sg.visionadapter.PMPackage;
 import com.sg.visionadapter.PMPart;
 import com.sg.visionadapter.PMProduct;
+import com.sg.visionadapter.PMProductItem;
+import com.sg.visionadapter.PMProject;
 import com.sg.visionadapter.PMSupplyment;
 import com.sg.visionadapter.PackagePersistence;
 import com.sg.visionadapter.PartPersistence;
 import com.sg.visionadapter.ProductPersistence;
 import com.sg.visionadapter.SupplymentPersistence;
 
+import ext.tmt.integration.webservice.pm.ConstanUtil;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.FolderUtil;
+import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.Utils;
 
@@ -111,7 +115,7 @@ public class WCToPMHelper {
  		    }
  		   Debug.P("pm中是否存在文件夹OID为--》"+pFolderId+"----->"+flag);
  		   if(flag){
- 			   Debug.P("pmMaterial-->"+pmPart);
+ 			   Debug.P("pmPart-->"+pmPart);
 			   if(pmPart!=null){
 					String pmoid =  partiba.getIBAValue(Contants.PMID);
 					if(StringUtils.isNotEmpty(pmoid)){
@@ -210,30 +214,29 @@ public class WCToPMHelper {
 		Debug.P(wtPart.toString());
 		partOid = getObjectOid(wtPart);
 		Debug.P(wtPart.getPersistInfo().getObjectIdentifier().getId());
-		Debug.P(partOid);
         		
 		try {
 			PMProduct pmProduct = null;//PM中的成品   
-			productPersistence = ModelServiceFactory.getInstance(codebasePath).get(ProductPersistence.class);
+			ModelServiceFactory factory=ModelServiceFactory.getInstance(codebasePath);
+			productPersistence = factory.get(ProductPersistence.class);
 			
 			IBAUtils  partiba = new IBAUtils(wtPart);
            partFolderString = wtPart.getFolderPath();
            Debug.P(partFolderString);
            partFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
            //partFolder=wtPart.getFolderingInfo().getFolder();
-           Debug.P(partFolder);
-           Debug.P(pFolderId);
            pFolderId=partFolder.getPersistInfo().getObjectIdentifier().getStringValue();
-		   Debug.P(pFolderId);
+		   Debug.P(">>>WCFolderOid："+pFolderId);
 		   boolean flag = true;
 		   try{
+			   Debug.P("---->>>>partOid:"+partOid+"   productPersistence:"+productPersistence);
 			   pmProduct=productPersistence.getByPLMId(partOid);
            }catch (NullPointerException e) {
         	   pmProduct=null;
 		   } 
-           Debug.P("pmProduct-->"+pmProduct);
 		   try {
-			 PMFolder pmfolder =ModelServiceFactory.getInstance(codebasePath).get(FolderPersistence.class).getByPLMId(pFolderId);
+			 FolderPersistence folderPer=factory.get(FolderPersistence.class);
+			 PMFolder pmfolder =folderPer.getByPLMId(pFolderId);
 			 if(pmfolder==null){
 				 flag=false;
 			 }
@@ -261,6 +264,7 @@ public class WCToPMHelper {
         	   pmProduct.setPLMData(plmData);
         	   pmProduct.setCommonName(wtPart.getName());                           //设置PM部件名称
         	   pmProduct.setObjectNumber(wtPart.getNumber());
+        	   pmProduct.setProductNumber(wtPart.getNumber());
         	   pmProduct.setStatus(wtPart.getState().toString().toLowerCase());                   //设置PM部件状态
         	   pmProduct.setCreateBy(wtPart.getCreatorName(), wtPart.getCreatorFullName());			  //设置PM部件创建者
         	   pmProduct.setMajorVid(wtPart.getVersionIdentifier().getValue());     //设置PM部件大版本
@@ -284,6 +288,17 @@ public class WCToPMHelper {
         	   			reloadDeliverable(objectId.toString());
         	   			Debug.P("create pmproduct success");
         	   		}
+        	   		
+        	   		String projectNumber = partiba.getIBAValue(Contants.PROJECTNO);
+        	   		PMProject pmproject=factory.get(PMProject.class);
+        	   		Debug.P("----ProjectNo:"+projectNumber+"   PMProject:"+pmproject);
+        	   		ObjectId pmProjectId =factory.get(PMProject.class).getProjectIdByProjectNum(projectNumber);
+					Debug.P("--->>>>pmProjectId:"+pmProjectId);
+					if(pmProjectId != null) {
+						PMProductItem pmProductItem = factory.get(PMProductItem.class);
+						WriteResult wr = pmProductItem.doInsertProductNumToProductItem(wtPart.getNumber(), pmProjectId);
+						Debug.P(wr.getField("_id").toString() +">>>>>>>>>写入物质编码库成功");
+					}
            }}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -583,6 +598,7 @@ public class WCToPMHelper {
            plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
            plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
            plmData.put(Contants.PLMMID, "wt.epm.EPMDocument:"+epmdoc.getIterationInfo().getBranchId());
+           plmData.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(epmdoc));
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM部件名称
 			pmcad.setObjectNumber(epmdoc.getNumber());
@@ -837,6 +853,7 @@ public class WCToPMHelper {
            plmData.put(Contants.AIRSPRINGCLASSIFICATION, cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION)==null?"":cadiba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION));
            plmData.put(Contants.PART_TYPE, cadiba.getIBAValue(Contants.PART_TYPE)==null?"":cadiba.getIBAValue(Contants.PART_TYPE));
            plmData.put(Contants.PLMMID, "wt.epm.EPMDocument:"+epmdoc.getIterationInfo().getBranchId());
+           plmData.put(ConstanUtil.DOWNLOAD_URL, GenericUtil.getPrimaryContentUrl(epmdoc));
            pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());                           //设置PM图纸名称
 			pmcad.setObjectNumber(epmdoc.getNumber());

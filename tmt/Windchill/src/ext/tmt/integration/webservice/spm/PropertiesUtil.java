@@ -46,9 +46,9 @@ public class PropertiesUtil {
 			}
 			fis.close();
 		} catch (FileNotFoundException ex) {
-			throw new WTException("璇诲彇閰嶇疆鏂囦欢鍑洪敊!");
+			throw new WTException("读取配置文件出错!");
 		} catch (IOException ex) {
-			throw new WTException("璇诲彇閰嶇疆鏂囦欢鍐呭鍑洪敊!");
+			throw new WTException("读取配置文件内容出错!");
 		}
 	}
 
