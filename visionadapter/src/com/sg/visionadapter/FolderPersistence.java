@@ -49,4 +49,18 @@ public class FolderPersistence extends PersistenceService<PMFolder> {
 		}
 		return ids;
 	}
+	
+	/**
+	 * 通过pmId查询文件夹是否存在
+	 * @param pmId
+	 * @return
+	 */
+	public Boolean getFolderById(String pmId) {
+		DBObject dbo = collection.findOne(new BasicDBObject().append(PMDocument._ID,
+				new ObjectId(pmId)));
+		if(dbo != null) {
+			return true;
+		}
+		return false;
+	}
 }
