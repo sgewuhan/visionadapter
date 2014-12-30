@@ -32,6 +32,8 @@ public class ModelServiceFactory {
 	private static ConcurrentHashMap<String, MongoClient> clients;
 
 	private static DB defaultDB;
+	
+	public static String URL_PRODUCTNUM;
 
 	public static String URL_REAUTH;
 	
@@ -47,6 +49,7 @@ public class ModelServiceFactory {
 		service.start(confFolder);
 		return service;
 	}
+
 
 	/**
 	 * 启动模型服务，传入配置文件所在的目录，start将读取配置文件中的[dbname].conf文件 并按照dbname获得数据库
@@ -77,6 +80,7 @@ public class ModelServiceFactory {
 			is = new FileInputStream(file);
 			Properties props = new Properties();
 			props.load(is);
+			URL_PRODUCTNUM = props.getProperty("pm.productnum");//$NON-NLS-1$
 			URL_REAUTH = props.getProperty("pm.reauth"); //$NON-NLS-1$
 			URL_LINKDELIVERY = props.getProperty("pm.linkdelivery"); //$NON-NLS-1$
 		} catch (Exception e) {
