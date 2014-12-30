@@ -56,7 +56,7 @@ public class FolderPersistence extends PersistenceService<PMFolder> {
 	 * @return
 	 */
 	public Boolean getFolderById(String pmId) {
-		DBObject dbo = collection.findOne(new BasicDBObject().append(PMDocument._ID,
+		DBObject dbo = collection.findOne(new BasicDBObject().append(PMFolder._ID,
 				new ObjectId(pmId)));
 		if(dbo != null) {
 			return true;
