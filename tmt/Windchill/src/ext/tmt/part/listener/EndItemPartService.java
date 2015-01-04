@@ -2,12 +2,17 @@ package ext.tmt.part.listener;
 
 import java.io.Serializable;
 
+import ext.tmt.part.PartUtils;
+import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 
 
 
+import ext.tmt.utils.IBAHelper;
+import ext.tmt.utils.PartUtil;
 import wt.events.KeyedEvent;
 import wt.events.KeyedEventListener;
+import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.part.WTPart;
 import wt.services.ManagerException;
@@ -44,7 +49,13 @@ public class EndItemPartService extends StandardManager implements PartService,
 			// 获取事件类型
 			String eventType = keyedEvent.getEventType();
 			if (target instanceof WTPart) {
-				Debug.P("eventType--->"+eventType);
+				WTPart part=(WTPart)target;
+				Debug.P("WTPart eventType--->"+eventType);
+			if(eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)){
+					Debug.P( IBAHelper.getIBAStringValue((WTPart)target,Contants.PHASE));
+				
+			}
+			    part=PartUtils.getPartByNumber(part.getNumber());
 				PartHelper.listenerWTPart((WTPart) target, eventType);
 			}
 
@@ -86,10 +97,10 @@ public class EndItemPartService extends StandardManager implements PartService,
 		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
 		getManagerService().addEventListener( listener, DELETE);
 		
-//		String PRE_CHECKIN = WorkInProgressServiceEvent
-//		        .generateEventKey(WorkInProgressServiceEvent.PRE_CHECKIN);
-//        getManagerService().addEventListener(listener, PRE_CHECKIN);
-//        
+		String PRE_CHECKIN = WorkInProgressServiceEvent
+		        .generateEventKey(WorkInProgressServiceEvent.PRE_CHECKIN);
+        getManagerService().addEventListener(listener, PRE_CHECKIN);
+       
         String POST_CHECKIN =WorkInProgressServiceEvent
 		        .generateEventKey(WorkInProgressServiceEvent.POST_CHECKIN);
         getManagerService().addEventListener(listener, POST_CHECKIN);

@@ -138,11 +138,16 @@ public class SPMWebserviceImpl{
                 	Debug.P("---->>>创建的物料是否属于新材工厂:"+iscreateTMT);
                 	if(iscreateTMT){//创建新材工厂
                 	  String partType=baseMap.get(SPMConsts.PART_TYPE);
+                	  Debug.P(">>>>partType:"+partType);
                        if(StringUtils.isNotEmpty(partType)){
                     	  Debug.P("---->>>Ready Create Part: Type="+partType);
                     	  CsrSpmUtil.createNewPart(baseMap, ibaMap,mapDatas);
                     	  result="创建物料成功";
+                    	}else{
+                    		result="创建物料(成品,半成品)成功";
                     	}
+                	}else{
+                		 result="非新材物料无法创建成功";
                 	}
                  }
               } else if (workflow != null && (times == 2 || times == 3)) {
@@ -219,6 +224,7 @@ public class SPMWebserviceImpl{
             }
             SessionHelper.manager.setAuthenticatedPrincipal("PM-RW");
         }
+            Debug.P(">>>>Result:"+result);
             return result;
     }
     
@@ -234,7 +240,7 @@ public class SPMWebserviceImpl{
      */
     public static String processorForSpm2(String partNumber, String workflow,String mark)throws Exception{
     	Debug.P("---processorForSpm2--->>>partNumber:"+partNumber+"  ;workflow:"+workflow+"  ;mark:"+mark );
-    	String result = null;
+    	String result = "操作不成功";
         ResultSet resultSet = null;
     	// IBA属性集合
         Map<String,Object>  ibaMap = new HashMap<String,Object>();
@@ -362,7 +368,7 @@ public class SPMWebserviceImpl{
             }
             SessionServerHelper.manager.setAccessEnforced(true);
 		}
-             Debug.P("--->>>>>result11:"+result);
+              Debug.P("--->>>>>result11:"+result);
     	      return result;
     }
 
@@ -393,54 +399,54 @@ public class SPMWebserviceImpl{
          return flag;
     }
     
-    
-    /**
-     * 获取创建该部件时的workflow
-     * 
-     * @return
-     * @throws SQLException
-     */
-    private static String getCreateWorkflow(String partNumber,ConnectionPool connectionPool)throws Exception {
-        String workflow = null;
-        if (StringUtils.isEmpty(partNumber)) {
-            return workflow;
-        }
-        try {
-            String sql = "select workflow from csr_wlsxsq where wlnumber='"+ partNumber + "' order by sqdate desc";
-            ResultSet resultSet = connectionPool.getConnection().executeQuery(sql);
-            while (resultSet.next()) {
-                workflow = resultSet.getString("workflow");
-                return workflow;
-            }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-        return workflow;
-    }
+//    
+//    /**
+//     * 获取创建该部件时的workflow
+//     * 
+//     * @return
+//     * @throws SQLException
+//     */
+//    private static String getCreateWorkflow(String partNumber,ConnectionPool connectionPool)throws Exception {
+//        String workflow = null;
+//        if (StringUtils.isEmpty(partNumber)) {
+//            return workflow;
+//        }
+//        try {
+//            String sql = "select workflow from csr_wlsxsq where wlnumber='"+ partNumber + "' order by sqdate desc";
+//            ResultSet resultSet = connectionPool.getConnection().executeQuery(sql);
+//            while (resultSet.next()) {
+//                workflow = resultSet.getString("workflow");
+//                return workflow;
+//            }
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//        return workflow;
+//    }
 
     
-    /**
-     * 获取更新历史记录
-     * 
-     * @param partNumber
-     * @param conn
-     * @return
-     * @throws SQLException
-     */
-
-    private static List<String> getUpdateHistry(String partNumber,ConnectionPool connectionPool) throws SQLException {
-        List<String> workflows = new ArrayList<String>();
-        if (StringUtils.isEmpty(partNumber)) {
-            return workflows;
-        }
-        String sql = "select workflow from CSR_SXWH where wlnumber = '"+ partNumber + "' order by cdate";
-        ResultSet resultSet = connectionPool.getConnection().executeQuery(sql);
-        while (resultSet.next()) {
-            String workflow = resultSet.getString("workflow");
-            workflows.add(workflow);
-        }
-           return workflows;
-    }
+//    /**
+//     * 获取更新历史记录
+//     * 
+//     * @param partNumber
+//     * @param conn
+//     * @return
+//     * @throws SQLException
+//     */
+//
+//    private static List<String> getUpdateHistry(String partNumber,ConnectionPool connectionPool) throws SQLException {
+//        List<String> workflows = new ArrayList<String>();
+//        if (StringUtils.isEmpty(partNumber)) {
+//            return workflows;
+//        }
+//        String sql = "select workflow from CSR_SXWH where wlnumber = '"+ partNumber + "' order by cdate";
+//        ResultSet resultSet = connectionPool.getConnection().executeQuery(sql);
+//        while (resultSet.next()) {
+//            String workflow = resultSet.getString("workflow");
+//            workflows.add(workflow);
+//        }
+//           return workflows;
+//    }
     
 
     /**

@@ -28,6 +28,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 import com.mongodb.gridfs.GridFS;
+import com.ptc.windchill.enterprise.note.commands.NoteServiceCommand;
 import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
@@ -1484,7 +1485,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
  		Map<String,String> mappingMap=new HashMap<String,String>();
  	    String wthome = (String) (WTProperties.getLocalProperties()).getProperty("wt.home", "");
 			String tempPath = wthome + File.separator + STATE_PATH;
-			Debug.P("-------->>State Mapping FilePath:"+tempPath);
+			Debug.P("-------->>Mapping FilePath:"+tempPath);
 			FileInputStream fis = new FileInputStream(tempPath);
 			prop.load(new InputStreamReader(fis, "UTF-8"));
 			prop.load(fis);
@@ -1502,4 +1503,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
      }
 	 
 
+     
+     
+     
 }

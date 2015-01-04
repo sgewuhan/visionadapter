@@ -7,12 +7,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
@@ -70,7 +67,6 @@ import ext.tmt.part.PartUtils;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
-import ext.tmt.utils.EPMDocUtil;
 import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
@@ -188,13 +184,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			                  Debug.P("------Windchill Folder_OID:"+wc_oid);
 			                  pmfolder.setPLMId(wc_oid);
 			                  pmfolder.setPLMData(getObjectInfo(folderResult));
-			                 try {
-			                	 pmfolder.setCommit(true); 
-			                	 pmfolder.doUpdate();
-							   } catch (Exception e) {
-								
-							}
-			                 
+			                  pmfolder.doUpdate();
 			                  Debug.P("----->>>创建同步Windchill文件夹:("+folderName+")成功!");
 			    	    }
 			    	 }
@@ -369,7 +359,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	        	boolean isContainer=pmfolder.isContainer();
 	        	boolean iscreate=pm_document.getPLMId()==null?true:false;
 	        	WTDocument doc=checkWTDocumentWrite2PM(pm_docId);
-		    	if(doc!=null){
+		    	Debug.P("----->>PM 是否存在WCDoc:"+doc);
+	        	if(doc!=null){
 		    		String plmId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
 		    		pm_document.setPLMData(getObjectInfo(doc));
 		    		pm_document.setPLMId(plmId);
@@ -765,7 +756,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 						 Persistable newobject= VersionControlHelper.service.newVersion((Versioned) object);
 						 FolderHelper.assignLocation((FolderEntry) newobject,folder);
 						 PersistenceHelper.manager.save(newobject);
-						 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);//閿熺潾璁规嫹鏃堕敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷烽敓鏂ゆ嫹鐘舵�閿熸枻鎷蜂负閿熸枻鎷烽敓鏂ゆ嫹閿熸枻鎷�
+						 GenericUtil.changeState((LifeCycleManaged) newobject, ConstanUtil.WC_INWORK);
 						 PersistenceHelper.manager.refresh(newobject);
 						 if(newobject instanceof EPMDocument){
 							 EPMDocument empdoc=(EPMDocument)newobject;
@@ -933,12 +924,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 		 if(StringUtils.isEmpty(class1)||StringUtils.isEmpty(class1)){
 			 return null;
 		 }
-		 if(class1.equalsIgnoreCase("wtpart")){
+		 
+		 
+		 if(class1.equalsIgnoreCase("wtpart")){  
 			 part= (WTPart)searchWCObject(WTPart.class,pmid,Contants.PMID);
-			 Debug.P("-searchWCObject-->>WTPart："+part);
+			 Debug.P("-searchWCObject-->>WTPart："+part+"   Num:"+part.getNumber());
 			 if(part!=null){
 				 Debug.P("----Search Part:"+part);
-				 part = PartUtil.getPartByNumber2(part.getNumber());
+				 part =PartUtils.getPartByNumber(part.getNumber());
 				 Debug.P(part.getNumber()+"-------"+part.toString()+"-------"+pmid);
 				 //根据部件查部件
 				 if(class2.equalsIgnoreCase("wtpart")){
@@ -985,6 +978,10 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 					 Debug.P("----->>>EPM:"+epmdoc+"  Version:"+getObjectVersion(epmdoc));
 					 if(class2.equalsIgnoreCase("wtpart")){
 						 Debug.P("--GetPart ByEPM:"+class2);
+						 String epmType=epmdoc.getCADName();
+				          if(epmType.endsWith(".drw")){
+				        	  epmdoc= (EPMDocument) DocUtils.getEPMReferences(epmdoc).get(0);
+				          }
 						 pmList=DocUtils.getDescribePartsByEPMDoc(epmdoc);
 						 Debug.P("--getPartDescEPM->>>pmList:"+pmList.size());
 					 }
@@ -1016,11 +1013,11 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 			 pmSVIndex = qs.appendClassList(StringValue.class, false);
 			 pmSDIndex = qs.appendClassList(StringDefinition.class, false);
 			 ClassAttribute caValue = new ClassAttribute(StringValue.class,
-						StringValue.VALUE);
+						StringValue.VALUE2);
 				WhereExpression we = new SearchCondition(
-						SQLFunction.newSQLFunction(SQLFunction.UPPER, caValue),
+						SQLFunction.newSQLFunction(SQLFunction.LOWER, caValue),
 						SearchCondition.EQUAL,
-						ConstantExpression.newExpression(ibavalue.toUpperCase()));
+						ConstantExpression.newExpression(ibavalue));
 				qs.appendWhere(we, new int[] { pmSVIndex });
 				
 				we = new SearchCondition(StringDefinition.class,
@@ -1116,6 +1113,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	    }
 	      return doc;
 	 }
+	 
+	 
 	 
 	 
 	 

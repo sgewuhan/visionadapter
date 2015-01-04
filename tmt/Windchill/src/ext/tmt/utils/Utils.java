@@ -1,6 +1,8 @@
 package ext.tmt.utils;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -265,8 +267,8 @@ public class Utils {
 	}
 
 	public static String getDate() {
-		Calendar calendar = Calendar.getInstance();
-		return String.valueOf(calendar.get(Calendar.YEAR)) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		return sdf.format(new Date());
 	}
 
 	public static String changeStrLowCase2UpperCase(String str) {
@@ -375,6 +377,23 @@ public class Utils {
 		Pattern pattern = Pattern.compile("[" + checkStr + "]");
 		Matcher m = pattern.matcher(str);
 		return m.matches();
+	}
+	
+	
+	/**
+	 * 判断字符串中只能是字母，数字，横杠
+	 * @param str
+	 * @return
+	 */
+	public static boolean checkNumberStr2(String str){
+		Pattern pattern = Pattern.compile("[A-Za-z0-9-]+");
+		Matcher m = pattern.matcher(str);
+		return m.matches();
+	}
+	
+	public static void main(String[] args) {
+		String str="12we-";
+		System.out.println(checkNumberStr2(str));
 	}
 	
 }

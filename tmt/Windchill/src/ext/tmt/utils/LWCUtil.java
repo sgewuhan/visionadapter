@@ -347,6 +347,7 @@ public class LWCUtil {
     		    String[] params=new String[paramList.size()];
     		    params=paramList.toArray(params); 
     		    Debug.P("---->>>SQL:"+sql);
+    		    Debug.P("------>>>>SQL param:"+paramList);
     		    try {
 					List<Hashtable<String,String>> datas   =UserDefQueryUtil.commonQuery(sql, params);
 				if(datas!=null&&datas.size()>0){

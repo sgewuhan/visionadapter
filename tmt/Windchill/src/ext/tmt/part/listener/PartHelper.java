@@ -1,8 +1,11 @@
 package ext.tmt.part.listener;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -15,16 +18,20 @@ import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMDocUtil;
+import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAHelper;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
 import ext.tmt.utils.StringUtil;
+import ext.tmt.utils.UserDefQueryUtil;
 import ext.tmt.utils.WindchillUtil;
 
 
 import wt.change2.WTChangeRequest2;
+import wt.content.ApplicationData;
+import wt.content.ContentServerHelper;
 import wt.csm.navigation.ClassificationNode;
 import wt.epm.EPMDocument;
 import wt.fc.Identified;
@@ -37,6 +44,8 @@ import wt.folder.Folder;
 import wt.iba.definition.StringDefinition;
 import wt.iba.value.ReferenceValue;
 import wt.iba.value.StringValue;
+import wt.method.RemoteAccess;
+import wt.method.RemoteMethodServer;
 import wt.org.WTOrganization;
 import wt.org.WTUser;
 import wt.part.PartType;
@@ -65,7 +74,7 @@ import wt.vc.VersionControlHelper;
 import wt.vc.wip.WorkInProgressHelper;
 import wt.vc.wip.WorkInProgressServiceEvent;
 
-public class PartHelper implements Serializable {
+public class PartHelper implements RemoteAccess,Serializable {
 	
 	private static final long serialVersionUID = 2304592616754675533L; 
 	
@@ -200,6 +209,11 @@ public class PartHelper implements Serializable {
 						int i=9000;
 						do{
 							partNumber=prefix+StringUtil.int2String(i,4);
+							if(PartUtil.getPartByNumber(partNumber)==null){
+								newNumber=partNumber;
+								break;
+							}
+							i++;
 						}while(i<9999);
 						changePartNumber(wtPart,newNumber);
 					}else{
@@ -489,9 +503,14 @@ public class PartHelper implements Serializable {
 			  }
 			
             }
-		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)) {
-			String pmoid = iba.getIBAValue(Contants.PMID);
-			wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+		}else  if (StringUtils.isNotEmpty(sync)&&(eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)
+				  ||eventType.equals(PersistenceManagerEvent.POST_MODIFY))) {
+			  String pmoid = (String) LWCUtil.getValue(wtPart, Contants.PMID);
+			  wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+			  EPMDocument epmdoc_rel=EPMDocUtil.getActiveEPMDocument(wtPart);
+			  if(epmdoc_rel!=null){//赋值最新属性
+				 setPartIBAValues(wtPart, epmdoc_rel);
+			 }
             Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.updatePMPart(pmoid, wtPart);
@@ -595,10 +614,14 @@ public class PartHelper implements Serializable {
 	 * PMRequest=null, STANDARDIZE_DATE=, PMId=null, Project_Name=null, AUDIT_DATE=, Product_NO=, APPROVER=, Material_NO=}
 	 */
 	public static void setPartIBAValues(WTPart part,EPMDocument cad) throws Exception{
-
+         Debug.P("----->>>>setPartIBAValues:"+cad);
+		 part=PartUtils.getPartByNumber(part.getNumber());
+		 cad=EPMUtil.getEPMDocument(cad.getNumber(), null);
 		 IBAUtils partIBA = new IBAUtils(part);
 		 IBAUtils cadIBA = new IBAUtils(cad);
 		 
+		 
+		 String ProjectNo=cadIBA.getIBAValue(Contants.PROJECTNO);
 		 String Part_Type=cadIBA.getIBAValue(Contants.PART_TYPE);
 		 String Material=cadIBA.getIBAValue(Contants.MATERIAL);
 		 String AirSpringClassification=cadIBA.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
@@ -607,6 +630,34 @@ public class PartHelper implements Serializable {
 		 String Product_NO=cadIBA.getIBAValue(Contants.PRODUCTNO);
 		 String Material_NO=cadIBA.getIBAValue(Contants.MATERIALNO);
 		 String Material_Classification=cadIBA.getIBAValue(Contants.MATERIALGROUP);
+		 String DRAWN_BY=cadIBA.getIBAValue(Contants.DRAWN_BY);
+		 String DRAWN_DATE=cadIBA.getIBAValue(Contants.DRAWN_DATE);
+		 String CORRECTOR=cadIBA.getIBAValue(Contants.CORRECTOR);
+		 String CORRECT_DATE=cadIBA.getIBAValue(Contants.CORRECT_DATE);
+		 String AUDITOR=cadIBA.getIBAValue(Contants.AUDITOR);
+		 String AUDIT_DATE=cadIBA.getIBAValue(Contants.AUDIT_DATE);
+		 String STANDARDIZE=cadIBA.getIBAValue(Contants.STANDARDIZE);
+		 String STANDARDIZE_DATE=cadIBA.getIBAValue(Contants.STANDARDIZE_DATE);
+		 String APPROVER=cadIBA.getIBAValue(Contants.APPROVER);
+		 String APPROVE_DATE=cadIBA.getIBAValue(Contants.APPROVE_DATE);
+		 String PROCESS_REVIEWER=cadIBA.getIBAValue(Contants.PROCESS_REVIEWER);
+		 String PROCESS_REVIEW_DATE=cadIBA.getIBAValue(Contants.PROCESS_REVIEW_DATE);
+		 
+		 //设置签审信息
+		 partIBA.setIBAValue(Contants.PROJECTNO, ProjectNo==null?"":ProjectNo);
+		 partIBA.setIBAValue(Contants.DRAWN_BY, DRAWN_BY==null?"":DRAWN_BY);
+		 partIBA.setIBAValue(Contants.DRAWN_DATE, DRAWN_DATE==null?"":DRAWN_DATE);
+		 partIBA.setIBAValue(Contants.CORRECTOR, CORRECTOR==null?"":CORRECTOR);
+		 partIBA.setIBAValue(Contants.CORRECT_DATE, CORRECT_DATE==null?"":CORRECT_DATE);
+		 partIBA.setIBAValue(Contants.AUDIT_DATE, AUDIT_DATE==null?"":AUDIT_DATE);
+		 partIBA.setIBAValue(Contants.AUDITOR, AUDITOR==null?"":AUDITOR);
+		 partIBA.setIBAValue(Contants.STANDARDIZE, STANDARDIZE==null?"":STANDARDIZE);
+		 partIBA.setIBAValue(Contants.STANDARDIZE_DATE, STANDARDIZE_DATE==null?"":STANDARDIZE_DATE);
+		 partIBA.setIBAValue(Contants.APPROVE_DATE, APPROVE_DATE==null?"":APPROVE_DATE);
+		 partIBA.setIBAValue(Contants.APPROVER, APPROVER==null?"":APPROVER);
+		 partIBA.setIBAValue(Contants.PROCESS_REVIEWER, PROCESS_REVIEWER==null?"":PROCESS_REVIEWER);
+		 partIBA.setIBAValue(Contants.PROCESS_REVIEW_DATE, PROCESS_REVIEW_DATE==null?"":PROCESS_REVIEW_DATE);
+         
 		 
 		 partIBA.setIBAValue(Contants.PART_TYPE, Part_Type);
 		 if(StringUtils.isEmpty(Material)){
@@ -650,11 +701,13 @@ public class PartHelper implements Serializable {
 				 Material_Classification="";
 			 }
 		 }
+		 
+
+		 
 		 partIBA.setIBAValue(Contants.MATERIALGROUP, Material_Classification);
 		 partIBA.updateIBAPart(part);
-		 Debug.P("----------updateIBAPart-------------------");
+		 Debug.P("----------updateIBAPart-Success!!------------------");
 	}
-	
 	
 	private static EPMDocument getLastModifierObject(List<Persistable> objects){
 		EPMDocument result=null;
@@ -678,5 +731,7 @@ public class PartHelper implements Serializable {
 	          	return result;
 	}
 	
+	   
+   
 
 }

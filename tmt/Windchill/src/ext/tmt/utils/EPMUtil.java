@@ -51,12 +51,16 @@ import wt.epm.EPMDocumentMasterIdentity;
 import wt.epm.EPMDocumentType;
 import wt.epm.structure.EPMMemberLink;
 import wt.epm.structure.EPMStructureHelper;
+import wt.epm.workspaces.EPMWorkspace;
+import wt.epm.workspaces.EPMWorkspaceHelper;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
 import wt.fc.ObjectReference;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.QueryResult;
+import wt.fc.collections.WTKeyedHashMap;
+import wt.fc.collections.WTKeyedMap;
 import wt.folder.Folder;
 import wt.folder.FolderHelper;
 import wt.folder.FolderNotFoundException;
@@ -80,6 +84,7 @@ import wt.query.OrderBy;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.representation.PublishedContentLink;
+import wt.session.SessionMgr;
 import wt.type.TypeDefinitionReference;
 import wt.type.TypedUtility;
 import wt.type.TypedUtilityServiceHelper;
@@ -93,9 +98,12 @@ import com.ptc.core.logging.Log;
 import com.ptc.core.logging.LogFactory;
 import com.ptc.core.meta.common.TypeIdentifier;
 import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinition;
+import com.ptc.windchill.enterprise.note.commands.NoteServiceCommand;
 import com.ptc.wvs.client.beans.PublishConfigSpec;
 import com.ptc.wvs.common.ui.Publisher;
 import com.ptc.core.foundation.type.server.impl.TypeHelper;
+import com.ptc.windchill.cadx.common.util.WorkspaceConfigSpecUtilities;
+import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
 
 
 /**
@@ -1474,7 +1482,36 @@ public class EPMUtil {
 			return doc;
 		}
 	}
+
 	
+
+
+	/**设置EPM工作区属性
+	 * @param ws
+	 * @param epm EPm
+	 * @param attr_value_map
+	 * @throws WTException
+	 */
+	public static void setStringAttributes(EPMWorkspace ws, EPMDocument epm,  Map<String, Object> attr_value_map)  throws WTException
+	{
+      
+      if(attr_value_map!=null&&attr_value_map.size()>0){
+    	  Debug.P(">>>>attr_value_map Size:"+attr_value_map.size()+"   info:"+attr_value_map);
+    	  WTKeyedMap keyed_map = new WTKeyedHashMap();
+    	  for(Iterator<?> ite=attr_value_map.keySet().iterator();ite.hasNext();){
+    		  String key=(String) ite.next();
+    		  String value=(String)attr_value_map.get(key);
+    		  keyed_map.put(key,value);
+    	  }
+    	  if(keyed_map.size()>0){
+    		  Debug.P(">>>>keyed_map:"+keyed_map.size());
+    		  EPMWorkspaceHelper.manager.setAttributes(ws, keyed_map);
+        	  Debug.P(">>>>Set attr_value_map to Workspace Success!");
+    	  }
+    	  
+      }
+	}
+		
 	
 	
 }

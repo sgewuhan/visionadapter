@@ -145,6 +145,24 @@ public class Contants {
 	public static final String PLMMID = "plmmid";
 	
 	
+	public static final String DRAWN_BY="DRAWN_BY";
+	public static final String DRAWN_DATE="DRAWN_DATE";
+	public static final String CORRECTOR="CORRECTOR";
+	public static final String CORRECT_DATE="CORRECT_DATE";
+	public static final String AUDITOR="AUDITOR";
+	public static final String AUDIT_DATE="AUDIT_DATE";
+	public static final String STANDARDIZE="STANDARDIZE";
+	public static final String STANDARDIZE_DATE="STANDARDIZE_DATE";
+	public static final String APPROVER="APPROVER";
+	public static final String APPROVE_DATE="APPROVE_DATE";
+	public static final String PROCESS_REVIEWER="PROCESS_REVIEWER";
+	public static final String PROCESS_REVIEW_DATE="PROCESS_REVIEW_DATE";
+	
+	
+	
+	
+	
+	
 //	/*
 //	 * 物料组
 //	 */

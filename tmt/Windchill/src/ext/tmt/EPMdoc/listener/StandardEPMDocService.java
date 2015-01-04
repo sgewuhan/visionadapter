@@ -2,16 +2,27 @@ package ext.tmt.EPMdoc.listener;
 
 import java.io.Serializable;
 
+import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
+
+import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 
 
 
+import ext.tmt.utils.EPMDocUtil;
+import ext.tmt.utils.EPMUtil;
+import ext.tmt.utils.GenericUtil;
+import ext.tmt.utils.IBAHelper;
+import ext.tmt.utils.IBAUtils;
 import wt.epm.EPMDocument;
+import wt.epm.workspaces.EPMWorkspace;
+import wt.epm.workspaces.EPMWorkspaceHelper;
 import wt.epm.workspaces.EPMWorkspaceManagerEvent;
 import wt.events.KeyedEvent;
 import wt.events.KeyedEventListener;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
+import wt.inf.container.WTContainer;
 import wt.part.WTPart;
 import wt.services.ManagerException;
 import wt.services.ServiceEventListenerAdapter;
@@ -48,9 +59,10 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 			String eventType = keyedEvent.getEventType();
 			if (target instanceof EPMDocument) {
 				EPMDocument epm=(EPMDocument)target;
-				Debug.P("EPM eventType--->"+eventType);
+				Debug.P("EPM eventType--->"+eventType+"---Object--->"+epm.getName());
+				epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
 				EPMDocHelper.listenerEPMDoc(epm, eventType);
-				PersistenceHelper.manager.store(epm);
+				//PersistenceHelper.manager.store(epm);
 			}
 		}
 
@@ -90,8 +102,10 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
         String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
 		getManagerService().addEventListener(listener, POST_UPDATE);
 		
+		 String POST_MODIFY=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_MODIFY);
+			getManagerService().addEventListener(listener, POST_MODIFY);
 		//add by qiaokai
-	    getManagerService().addEventListener(listener, EPMWorkspaceManagerEvent.generateEventKey(EPMWorkspaceManagerEvent.POST_WORKSPACE_CHECKIN));
+//	    getManagerService().addEventListener(listener, EPMWorkspaceManagerEvent.generateEventKey(EPMWorkspaceManagerEvent.POST_WORKSPACE_CHECKIN));
  
 //        String PER_POST = PersistenceManagerEvent
 //                .generateEventKey(PersistenceManagerEvent.PRE_STORE);

@@ -39,7 +39,9 @@ import wt.doc.WTDocumentMasterIdentity;
 import wt.enterprise.Master;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
+import wt.epm.EPMDocumentMaster;
 import wt.epm.build.EPMBuildHistory;
+import wt.epm.structure.EPMStructureHelper;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
 import wt.fc.ObjectNoLongerExistsException;
@@ -89,6 +91,7 @@ import com.ptc.core.meta.server.TypeIdentifierUtility;
 import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinitionMaster;
 import com.ptc.netmarkets.model.NmOid;
 import com.ptc.netmarkets.util.beans.NmCommandBean;
+import com.ptc.windchill.enterprise.note.commands.NoteServiceCommand;
 import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.URLFileProvider;
@@ -216,6 +219,8 @@ public class DocUtils implements RemoteAccess{
 		    			content.write(bout);
 		    			pins=new ByteArrayInputStream(bout.toByteArray());
 		    			linkDocument(document, pname, pins, "1", contentUrl);
+		    			bout.close();
+		    			pins.close();
 				}
 
 				
@@ -223,23 +228,23 @@ public class DocUtils implements RemoteAccess{
 				List<IFileProvider> attachments = pmdoc.getAttachments();
 				if(attachments!=null&&attachments.size()>0){
 					for (IFileProvider provider : attachments) {
-						ByteArrayOutputStream bsout=new ByteArrayOutputStream();
+						    ByteArrayOutputStream bsout=new ByteArrayOutputStream();
 							provider.write(bsout);
 							sins=new ByteArrayInputStream(bsout.toByteArray());
 							linkDocument(document, provider.getFileName(), sins, "0", null);
+							bsout.close();
+							sins.close();
 					}
 				}
-				
-				
-				
 			      }catch (IOException e) {
 				      e.printStackTrace();
 				      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
 			    }
 			
 			if (document != null) {
-			if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal()))
+			if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal())){
 				document = (WTDocument) WorkInProgressHelper.service.checkin(document, "add primary file");
+			 }
 		   }
 			//添加下载链接地址
 			if(document!=null){
@@ -289,7 +294,6 @@ public class DocUtils implements RemoteAccess{
 				app.setFileName(fileName);
 				app.setUploadedFromPath("");
 				app = ContentServerHelper.service.updateContent((ContentHolder) document, app, ins);
-				ins.close();
 			}else{//链接地址
 				if(!StringUtils.isEmpty(contentUrl)){
 					URLData urldata=URLData.newURLData(document);
@@ -309,6 +313,9 @@ public class DocUtils implements RemoteAccess{
 		} catch (Exception e) {
 			throw new WTException(e);
 		} finally {
+			if(ins!=null){
+				ins.close();
+			}
 			if (tx != null){
 				tx.rollback();
 			}
@@ -609,10 +616,10 @@ public class DocUtils implements RemoteAccess{
 	 * @return ArrayList
 	 * @Description
 	 */
-	public static List getDescribePartsByEPMDoc(EPMDocument epmdoc){
+	public static List  getDescribePartsByEPMDoc(EPMDocument epmdoc){
 		List<String> partList = new ArrayList<String>();
 		try {
-			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc, EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true );
+			QueryResult qr2 =PersistenceHelper.manager.navigate(epmdoc, EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true );
 			while(qr2.hasMoreElements()){
 				WTPart part = (WTPart)qr2.nextElement();
 				IBAUtils iba = new IBAUtils(part);
@@ -620,13 +627,55 @@ public class DocUtils implements RemoteAccess{
 			    if(partList.contains(pmoid)) continue;
 				 partList.add(pmoid);
 			}
-		
 		} catch (WTException e) {
 			e.printStackTrace();
 		}
         return partList;
 	}
-
+	
+	/**
+	 * 获得EPM参考关系
+	 */
+	public static List getEPMReferences(EPMDocument epmdoc) throws Exception {
+		List numbers = new ArrayList();
+		QueryResult qr = EPMStructureHelper.service.navigateReferences(epmdoc,
+				null, true);
+		while (qr.hasMoreElements()) {
+			EPMDocumentMaster master = (EPMDocumentMaster) qr.nextElement();
+			if (!numbers.contains(master.getNumber())) {
+				numbers.add(master.getNumber());
+			}
+		}
+		List references = new ArrayList();
+		for (int i = 0; i < numbers.size(); i++) {
+			EPMDocument doc=EPMUtil.getEPMDocument(numbers.get(i).toString(), "");
+			references.add(doc);
+		}
+		return references;
+	}
+	
+	/**
+	 * 获取文档关联的部件
+	 * @author Eilaiwang
+	 * @param doc
+	 * @return
+	 * @return ArrayList
+	 * @Description
+	 */
+	public static WTPart getDescribePartByEPMDoc(EPMDocument epmdoc){
+		WTPart part =null;
+		try {
+			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc, EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true );
+			while(qr2.hasMoreElements()){
+				 part = (WTPart)qr2.nextElement();
+			}
+		
+		} catch (WTException e) {
+			e.printStackTrace();
+		}
+        return part;
+	}
+	
 	/**
 	 * 获取对象的表示法
 	 * @param representable
@@ -1565,6 +1614,7 @@ public class DocUtils implements RemoteAccess{
     			content.write(bout);
     			pins=new ByteArrayInputStream(bout.toByteArray());
     			doc=linkDocument(doc, pname, pins, "1", contentUrl);
+    			pins.close();
 			}
 			//上传附件信息(目前未实现删除附件信息)
 			List<IFileProvider> attachments = pm_document.getAttachments();
@@ -1575,6 +1625,7 @@ public class DocUtils implements RemoteAccess{
 					provider.write(bsout);
 					sins=new ByteArrayInputStream(bsout.toByteArray());
 					doc=linkDocument(doc, provider.getFileName(), sins, "0", null);
+					sins.close();
 				}
 			}
 			
@@ -1727,7 +1778,5 @@ public class DocUtils implements RemoteAccess{
 		return wtm;
 	}
 
-	
 
-	
 }
