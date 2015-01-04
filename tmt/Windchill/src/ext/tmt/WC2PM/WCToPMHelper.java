@@ -631,10 +631,12 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					.getStringValue();
 			Debug.P(pFolderId);
 			boolean flag = true;
-			try {
-				pmcad = (PMCADDocument) cadDocPersistence.get(new ObjectId(pmid));
-			} catch (NullPointerException e) {
-				pmcad = null;
+			if(pmid != null) {				
+				try {
+					pmcad = (PMCADDocument) cadDocPersistence.get(new ObjectId(pmid));
+				} catch (NullPointerException e) {
+					pmcad = null;
+				}
 			}
 			Debug.P("pmcad-->" + pmcad);
 			try {
