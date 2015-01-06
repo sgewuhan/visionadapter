@@ -109,8 +109,9 @@ public class DefaultAutoAssociatePartFinderCreator implements
 		return wtpart;
 	}
 
-	public void initSearchSpecifiedParts(Map map, WTKeyedMap wtkeyedmap,
-			EPMWorkspace epmworkspace) throws WTException {
+	public void initSearchSpecifiedParts(Map<Persistable, String> map,
+			WTKeyedMap wtkeyedmap, EPMWorkspace epmworkspace)
+			throws WTException {
 		if (searchHelper != null) {
 			throw new IllegalStateException("Repeated initialization!");
 		} else {
@@ -138,7 +139,7 @@ public class DefaultAutoAssociatePartFinderCreator implements
 		}
 	}
 
-	public Map getFilteredPartsMessageMap() {
+	public Map<String, WTMessage> getFilteredPartsMessageMap() {
 		return searchHelper.getFilteredPartsMessageMap();
 	}
 
@@ -149,10 +150,10 @@ public class DefaultAutoAssociatePartFinderCreator implements
 			throw new IllegalStateException("Missing initialization!");
 		String s = associatepartdescriptor.getPartName();
 		String s1 = associatepartdescriptor.getPartNumber();
-		Debug.P("出现本图了 PartName:-------------------------》"+s1);
-		Debug.P("出现本图了 PartNumber:-------------------------》"+s1);
-		if(s1 !=null &&s1.replace(" ", "").trim().equals("本图")){
-			System.out.println("出现本图了-------------------------》"+s1);
+		Debug.P("出现本图了 PartName:-------------------------》" + s1);
+		Debug.P("出现本图了 PartNumber:-------------------------》" + s1);
+		if (s1 != null && s1.replace(" ", "").trim().equals("本图")) {
+			System.out.println("出现本图了-------------------------》" + s1);
 			return null;
 		}
 		if (s1 != null && searchHelper.isExistingPart(s1)
@@ -167,24 +168,28 @@ public class DefaultAutoAssociatePartFinderCreator implements
 						"com.ptc.windchill.uwgm.common.autoassociate.autoassociateResource",
 						"77", new Object[] { s1 });
 			throw new WTException(wtmessage);
-		} else if("本图".equals(s1)) {
+		} else if ("本图".equals(s1)) {
 			log.debug((new StringBuilder())
 					.append("Create number is 本图  part!---------------"));
 			return null;
-		}else{
+		} else {
 			Debug.P("------WTPartUtilities.createNewPart------>>>>Ready Create");
-			WTPart part=WTPartUtilities.createNewPart(associatepartdescriptor);
-			EPMDocument epm=EPMDocUtil.getActiveEPMDocument(part);
+			WTPart part = WTPartUtilities
+					.createNewPart(associatepartdescriptor);
+			EPMDocument epm = EPMDocUtil.getActiveEPMDocument(part);
 			System.out.println(epm.getName());
-			return part ;
+			return part;
 		}
 	}
 
-	private static final Log log = LogFactory.getLog(com.ptc.windchill.uwgm.common.autoassociate.DefaultAutoAssociatePartFinderCreator.class);
+	private static final Log log = LogFactory
+			.getLog(com.ptc.windchill.uwgm.common.autoassociate.DefaultAutoAssociatePartFinderCreator.class);
+	@SuppressWarnings("unused")
 	private static final String RESOURCE = "com.ptc.windchill.uwgm.common.autoassociate.autoassociateResource";
 	private boolean isNewPart;
 	private EPMWorkspace docWorkspace;
 	protected WTContainer wsContainer;
+	@SuppressWarnings("unused")
 	private ViewReference viewReference;
 	private WTPartSearchHelper searchHelper;
 
