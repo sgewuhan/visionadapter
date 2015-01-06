@@ -1,35 +1,32 @@
 package ext.tmt.EPMdoc.listener;
 
-import ext.tmt.WC2PM.WCToPMHelper;
-import ext.tmt.utils.Debug;
-import ext.tmt.utils.EPMUtil;
-import ext.tmt.utils.GenericUtil;
-import ext.tmt.utils.IBAUtils;
-
 import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 
 import wt.epm.EPMDocument;
 import wt.fc.PersistenceHelper;
-import wt.fc.PersistenceManager;
 import wt.fc.QueryResult;
 import wt.folder.Folder;
 import wt.folder.FolderHelper;
-import wt.folder.FolderService;
 import wt.part.WTPart;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.util.WTException;
 import wt.vc.VersionControlHelper;
 import wt.vc.wip.WorkInProgressHelper;
+import ext.tmt.WC2PM.WCToPMHelper;
+import ext.tmt.utils.Debug;
+import ext.tmt.utils.EPMUtil;
+import ext.tmt.utils.IBAUtils;
 
 public class EPMDocHelper
   implements Serializable
 {
   private static final long serialVersionUID = 2304592616754675533L;
 
-  public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
+  @SuppressWarnings("deprecation")
+public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
     throws Exception
   {
     Debug.P("事件类型---->" + eventType);
