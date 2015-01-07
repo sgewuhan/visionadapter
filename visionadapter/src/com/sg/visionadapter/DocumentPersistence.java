@@ -46,6 +46,20 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 		}
 		return false;
 	}
+	
+	/**
+	 * 通过PMId获取PMDocument
+	 * @param pmId
+	 * @return
+	 */
+	public PMDocument getDocumentByPMId(String pmId) {
+		 PMDocument pmDocuemnt = (PMDocument) collection.findOne(new BasicDBObject()
+				.append(PMDocument._ID, new ObjectId(pmId)));
+		if (pmDocuemnt != null) {
+			pmDocuemnt.setCollection(collection);
+		}
+		return pmDocuemnt;
+	}
 
 	/**
 	 * 获得预删除的document对象
