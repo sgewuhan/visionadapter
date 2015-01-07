@@ -52,7 +52,7 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 	 * 
 	 * @return document 对象ID集合
 	 */
-	public List<String> getDeltedDocumentList() {
+	public List<String> getDeletedDocumentList() {
 		List<String> result = new ArrayList<String>();
 		List<?> docIdList = collection.distinct(PMDocument._ID,
 				new BasicDBObject().append(PMDocument.F_DELETED, Boolean.TRUE));
