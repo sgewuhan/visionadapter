@@ -96,215 +96,224 @@ import com.sg.visionadapter.IFileProvider;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.URLFileProvider;
 
-
-
-
 /**
  * 本类用于处理文档的一些操作
  * 
  * @author Tony
  */
 @SuppressWarnings("deprecation")
-public class DocUtils implements RemoteAccess{
-	
-	
-	
+public class DocUtils implements RemoteAccess {
+
 	private static final String SET_MODIFIER = "setModifier";
 
+	private static final boolean SERVER = RemoteMethodServer.ServerFlag;
 
-
-	private static final boolean SERVER=RemoteMethodServer.ServerFlag;
-	
-	
-	
-	
-	
-
-	
-	
 	/**
 	 * 创建WTDocument
-	 * @param pmdoc  PM文档编号
-	 * @param docType 文档类型
-	 *@param  vmuser 虚拟用户
-	 *@param ibas 软属性集合
-	 *@param lifecycleName 生命周期状态模板名称
+	 * 
+	 * @param pmdoc
+	 *            PM文档编号
+	 * @param docType
+	 *            文档类型
+	 * @param vmuser
+	 *            虚拟用户
+	 * @param ibas
+	 *            软属性集合
+	 * @param lifecycleName
+	 *            生命周期状态模板名称
 	 * @return
 	 * @throws Exception
 	 * @throws WTException
 	 */
-	public static WTDocument createDocument(PMDocument pmdoc,String docType,String vmUserName,Map ibas,Folder folder) throws 	WTException,Exception
-		{
+	public static WTDocument createDocument(PMDocument pmdoc, String docType,
+			String vmUserName, Map ibas, Folder folder) throws WTException,
+			Exception {
 
-		
-		WTDocument document =null;
+		WTDocument document = null;
 		Transaction tx = null;
 		try {
-			  tx=new Transaction();
-			  tx.start();
-			  String doc_Number=getWTDocumentNumber();//默认排序编码
-			  document =WTDocument.newWTDocument();
-			//文档类型
+			tx = new Transaction();
+			tx.start();
+			String doc_Number = getWTDocumentNumber();// 默认排序编码
+			document = WTDocument.newWTDocument();
+			// 文档类型
 			if (!StringUtils.isEmpty(docType)) {
-			  String docTypeEnum = GenericUtil.getTypeByName(docType);//根据现实名称获取软类型
-		      if(StringUtils.isEmpty(docTypeEnum)){
-		         throw new WTException("--->>在windchill中无法找到"+docTypeEnum+"这个文档类型!");
-		      } 
-		      TypeDefinitionReference typeDefinitionRef   = TypedUtility.getTypeDefinitionReference(docTypeEnum);
-		       if (typeDefinitionRef == null) {
-					Debug.P("ERROR :typeDefinitionRef is null,docType="+ docType);
+				String docTypeEnum = GenericUtil.getTypeByName(docType);// 根据现实名称获取软类型
+				if (StringUtils.isEmpty(docTypeEnum)) {
+					throw new WTException("--->>在windchill中无法找到" + docTypeEnum
+							+ "这个文档类型!");
+				}
+				TypeDefinitionReference typeDefinitionRef = TypedUtility
+						.getTypeDefinitionReference(docTypeEnum);
+				if (typeDefinitionRef == null) {
+					Debug.P("ERROR :typeDefinitionRef is null,docType="
+							+ docType);
 					return null;
 				}
-		        document.setTypeDefinitionReference(typeDefinitionRef);
-			}else{//默认常规文档
-				 DocumentType type=wt.doc.DocumentType.toDocumentType("$$Document");
-				 document.setDocType(type);
+				document.setTypeDefinitionReference(typeDefinitionRef);
+			} else {// 默认常规文档
+				DocumentType type = wt.doc.DocumentType
+						.toDocumentType("$$Document");
+				document.setDocType(type);
 			}
-			
-			String doc_Name=pmdoc.getCommonName();
+
+			String doc_Name = pmdoc.getCommonName();
 			document.setName(doc_Name);
 			document.setNumber(doc_Number);
-			//容器对象
-		    String containerName=pmdoc.getContainerName();
-		    Debug.P("------>>>PM  ContainerName:"+containerName);
-			WTContainer container=GenericUtil.getWTContainerByName(containerName);
-			
-//			EnumeratedType type[] = DocumentType.getDocumentTypeDefault().getSelectableValueSet();
-//			document.setDocType((DocumentType) type[1]);
-//			EnumeratedType aenumeratedtype[] = DepartmentList.getDepartmentListSet();
-//			document.setDepartment((DepartmentList) aenumeratedtype[1]);
+			// 容器对象
+			String containerName = pmdoc.getContainerName();
+			Debug.P("------>>>PM  ContainerName:" + containerName);
+			WTContainer container = GenericUtil
+					.getWTContainerByName(containerName);
+
+			// EnumeratedType type[] =
+			// DocumentType.getDocumentTypeDefault().getSelectableValueSet();
+			// document.setDocType((DocumentType) type[1]);
+			// EnumeratedType aenumeratedtype[] =
+			// DepartmentList.getDepartmentListSet();
+			// document.setDepartment((DepartmentList) aenumeratedtype[1]);
 			document.setContainer(container);
 			document.setOrganization(container.getOrganization());
-			
-			//指定文件的位置
-			if(folder!=null){
+
+			// 指定文件的位置
+			if (folder != null) {
 				FolderHelper.assignLocation(document, folder);
 			}
-			String description=pmdoc.getDescription();
-			if (StringUtils.isEmpty(description)){
+			String description = pmdoc.getDescription();
+			if (StringUtils.isEmpty(description)) {
 				document.setDescription(description);
-			}	
-			
-//			WTUser wtuser=null;
-//			try {//获取用户信息
-//			    wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(username);
-//			} catch (WTException e) {//获取虚名用户
-//				 wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(vmUserName);
-//			}
-//		    Debug.P("---->VmUser:"+vmUserName+"   ;UserName="+wtuser);
-//			VersionControlHelper.assignIterationCreator(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//创建者
-//			VersionControlHelper.setIterationModifier(doc, WTPrincipalReference.newWTPrincipalReference(wtuser));//更新者
-//			OwnershipHelper.setOwner(doc, wtuser); //所有者
-			
-		     
-			if (ibas != null && !ibas.isEmpty()) {
-				LWCUtil.setValueBeforeStore(document,ibas);
 			}
-	     
-			 document = (WTDocument) PersistenceHelper.manager.save(document);
-			 Debug.P("---New--->>WTDoc:"+document.getFolderPath() +"(LifecycleState:"+document.getLifeCycleName()+")   Success!!!");
-		
+
+			// WTUser wtuser=null;
+			// try {//获取用户信息
+			// wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(username);
+			// } catch (WTException e) {//获取虚名用户
+			// wtuser=OrganizationServicesHelper.manager.getAuthenticatedUser(vmUserName);
+			// }
+			// Debug.P("---->VmUser:"+vmUserName+"   ;UserName="+wtuser);
+			// VersionControlHelper.assignIterationCreator(doc,
+			// WTPrincipalReference.newWTPrincipalReference(wtuser));//创建者
+			// VersionControlHelper.setIterationModifier(doc,
+			// WTPrincipalReference.newWTPrincipalReference(wtuser));//更新者
+			// OwnershipHelper.setOwner(doc, wtuser); //所有者
+
+			if (ibas != null && !ibas.isEmpty()) {
+				LWCUtil.setValueBeforeStore(document, ibas);
+			}
+
+			document = (WTDocument) PersistenceHelper.manager.save(document);
+			Debug.P("---New--->>WTDoc:" + document.getFolderPath()
+					+ "(LifecycleState:" + document.getLifeCycleName()
+					+ ")   Success!!!");
+
 			PersistenceHelper.manager.refresh(document);
-			
-			//文档
-			ByteArrayInputStream pins=null;
-			ByteArrayInputStream sins=null;
-			String contentUrl=pmdoc.getUrl();//PM主内容路径
+
+			// 文档
+			ByteArrayInputStream pins = null;
+			ByteArrayInputStream sins = null;
+			String contentUrl = pmdoc.getUrl();// PM主内容路径
 			try {
-				IFileProvider content = pmdoc.getContent();//PM主文档流
-				if(content!=null){
-					   String pname=content.getFileName();//PM主文件名称
-				    	//上传主文档信息
-						ByteArrayOutputStream bout=new ByteArrayOutputStream();
-		    			content.write(bout);
-		    			pins=new ByteArrayInputStream(bout.toByteArray());
-		    			linkDocument(document, pname, pins, "1", contentUrl);
-		    			bout.close();
-		    			pins.close();
+				IFileProvider content = pmdoc.getContent();// PM主文档流
+				if (content != null) {
+					String pname = content.getFileName();// PM主文件名称
+					// 上传主文档信息
+					ByteArrayOutputStream bout = new ByteArrayOutputStream();
+					content.write(bout);
+					pins = new ByteArrayInputStream(bout.toByteArray());
+					linkDocument(document, pname, pins, "1", contentUrl);
+					bout.close();
+					pins.close();
 				}
 
-				
-				//上传附件信息
+				// 上传附件信息
 				List<IFileProvider> attachments = pmdoc.getAttachments();
-				if(attachments!=null&&attachments.size()>0){
+				if (attachments != null && attachments.size() > 0) {
 					for (IFileProvider provider : attachments) {
-						    ByteArrayOutputStream bsout=new ByteArrayOutputStream();
-							provider.write(bsout);
-							sins=new ByteArrayInputStream(bsout.toByteArray());
-							linkDocument(document, provider.getFileName(), sins, "0", null);
-							bsout.close();
-							sins.close();
+						ByteArrayOutputStream bsout = new ByteArrayOutputStream();
+						provider.write(bsout);
+						sins = new ByteArrayInputStream(bsout.toByteArray());
+						linkDocument(document, provider.getFileName(), sins,
+								"0", null);
+						bsout.close();
+						sins.close();
 					}
 				}
-			      }catch (IOException e) {
-				      e.printStackTrace();
-				      throw new Exception("Windchill同步读取PM文档("+doc_Name+")文件流异常");
-			    }
-			
-			if (document != null) {
-			if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document, wt.session.SessionHelper.manager.getPrincipal())){
-				document = (WTDocument) WorkInProgressHelper.service.checkin(document, "add primary file");
-			 }
-		   }
-			//添加下载链接地址
-			if(document!=null){
-				addDownloadURL2PM(pmdoc,document);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new Exception("Windchill同步读取PM文档(" + doc_Name + ")文件流异常");
 			}
-			  tx.commit();
-	    	  tx=null;
+
+			if (document != null) {
+				if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(document,
+						wt.session.SessionHelper.manager.getPrincipal())) {
+					document = (WTDocument) WorkInProgressHelper.service
+							.checkin(document, "add primary file");
+				}
+			}
+			// 添加下载链接地址
+			if (document != null) {
+				addDownloadURL2PM(pmdoc, document);
+			}
+			tx.commit();
+			tx = null;
 		} catch (Exception e) {
-		     e.printStackTrace();
-		}finally{
-			if(tx!=null){
-			    tx.rollback();
+			e.printStackTrace();
+		} finally {
+			if (tx != null) {
+				tx.rollback();
 			}
 		}
-		 return document;
+		return document;
 	}
-	
 
-	
-	
-	
 	/**
 	 * 上传主文档或者是附件对象
-	 * @param document 文档对象
-	 * @param file 文件名
+	 * 
+	 * @param document
+	 *            文档对象
+	 * @param file
+	 *            文件名
 	 * @param 文件流
-	 * @param type 上传类型 (1：主文档对象 0:附件对象)
-	 * @param isCreated 是否已存在文档流
-	 * @return  
+	 * @param type
+	 *            上传类型 (1：主文档对象 0:附件对象)
+	 * @param isCreated
+	 *            是否已存在文档流
+	 * @return
 	 * @throws Exception
 	 */
-	public static WTDocument linkDocument(WTDocument document, String fileName,InputStream ins,String type,String contentUrl)
-			throws Exception {
+	public static WTDocument linkDocument(WTDocument document, String fileName,
+			InputStream ins, String type, String contentUrl) throws Exception {
 		if (document == null)
 			return null;
 		Transaction tx = null;
 		try {
 			tx = new Transaction();
 			tx.start();
-			if(ins!=null){//文件流
-				ApplicationData app = ApplicationData.newApplicationData(document);
-				if("1".equals(type)){
+			if (ins != null) {// 文件流
+				ApplicationData app = ApplicationData
+						.newApplicationData(document);
+				if ("1".equals(type)) {
 					app.setRole(ContentRoleType.PRIMARY);
-				}else if("0".equals(type)){
+				} else if ("0".equals(type)) {
 					app.setRole(ContentRoleType.SECONDARY);
 				}
 				app.setFileName(fileName);
 				app.setUploadedFromPath("");
-				app = ContentServerHelper.service.updateContent((ContentHolder) document, app, ins);
-			}else{//链接地址
-				if(!StringUtils.isEmpty(contentUrl)){
-					URLData urldata=URLData.newURLData(document);
+				app = ContentServerHelper.service.updateContent(
+						(ContentHolder) document, app, ins);
+			} else {// 链接地址
+				if (!StringUtils.isEmpty(contentUrl)) {
+					URLData urldata = URLData.newURLData(document);
 					urldata.setUrlLocation(contentUrl);
 					urldata.setRole(ContentRoleType.PRIMARY);
 					urldata.setDisplayName(fileName);
-					ContentServerHelper.service.updateContent((ContentHolder) document,urldata);
+					ContentServerHelper.service.updateContent(
+							(ContentHolder) document, urldata);
 				}
 			}
-			
-			document = (WTDocument) ContentServerHelper.service.updateHolderFormat((FormatContentHolder) document);
+
+			document = (WTDocument) ContentServerHelper.service
+					.updateHolderFormat((FormatContentHolder) document);
 			tx.commit();
 			tx = null;
 
@@ -313,74 +322,84 @@ public class DocUtils implements RemoteAccess{
 		} catch (Exception e) {
 			throw new WTException(e);
 		} finally {
-			if(ins!=null){
+			if (ins != null) {
 				ins.close();
 			}
-			if (tx != null){
+			if (tx != null) {
 				tx.rollback();
 			}
 		}
 		return document;
 	}
-	
-	
+
 	/**
 	 * 设置文档的IBA属性
-	 * @param doc						文档对象
-	 * @param table						文档的IBA属性
+	 * 
+	 * @param doc
+	 *            文档对象
+	 * @param table
+	 *            文档的IBA属性
 	 * @throws Exception
 	 */
-	public void setIbaAttribute(WTDocument doc, Hashtable<String, String> table) throws Exception{
+	public void setIbaAttribute(WTDocument doc, Hashtable<String, String> table)
+			throws Exception {
 		Enumeration<String> enum1 = table.keys();
-		IBAHolder ibaholder = IBAValueHelper.service.refreshAttributeContainer(doc, null, null, null);
-        IBAUtils ibaUtil = new IBAUtils(ibaholder);
-        
-		while(enum1.hasMoreElements()){
+		IBAHolder ibaholder = IBAValueHelper.service.refreshAttributeContainer(
+				doc, null, null, null);
+		IBAUtils ibaUtil = new IBAUtils(ibaholder);
+
+		while (enum1.hasMoreElements()) {
 			String ibaKey = enum1.nextElement();
 			String ibaValue = table.get(ibaKey);
 			ibaUtil.setIBAValue(ibaKey, ibaValue);
 		}
-		  ibaUtil.updateIBAPart(ibaholder);
+		ibaUtil.updateIBAPart(ibaholder);
 	}
-	
+
 	/**
-	 *获得文档对象的主文档文件名称
+	 * 获得文档对象的主文档文件名称
+	 * 
 	 * @param doc
 	 * @return
 	 */
-	public static String getPrimaryFileNameByDoc(WTDocument doc){
-		String fileName=null;
-		if(!SERVER){
+	public static String getPrimaryFileNameByDoc(WTDocument doc) {
+		String fileName = null;
+		if (!SERVER) {
 			try {
-				Class aclass[]={WTDocument.class};
-				Object obj[]={doc};
-				return (String)RemoteMethodServer.getDefault().invoke("getPrimaryFileNameByDoc", DocUtils.class.getName(), null, aclass, obj);
+				Class aclass[] = { WTDocument.class };
+				Object obj[] = { doc };
+				return (String) RemoteMethodServer.getDefault().invoke(
+						"getPrimaryFileNameByDoc", DocUtils.class.getName(),
+						null, aclass, obj);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Debug.P(e);
 			}
-		}else{
+		} else {
 			try {
-				//获取文档对象
-				ContentHolder contentHolder=ContentHelper.service.getContents((ContentHolder)doc);
-				ContentItem item=ContentHelper.getPrimary((FormatContentHolder)contentHolder);
-				ApplicationData appData=(ApplicationData)item;
-				fileName=appData.getFileName();
+				// 获取文档对象
+				ContentHolder contentHolder = ContentHelper.service
+						.getContents((ContentHolder) doc);
+				ContentItem item = ContentHelper
+						.getPrimary((FormatContentHolder) contentHolder);
+				ApplicationData appData = (ApplicationData) item;
+				fileName = appData.getFileName();
 			} catch (Exception e) {
 				e.printStackTrace();
 				Debug.P(e);
 			}
 		}
-		      return fileName;
+		return fileName;
 	}
-	
+
 	/**
 	 * 更新图样文档信息，包括编码，以及和编码相同的零部件进行关联
 	 * 
 	 * @param nmCommandBean
 	 * @throws WTPropertyVetoException
 	 */
-	public static void refreshDocument(NmCommandBean nmCommandBean) throws WTPropertyVetoException {
+	public static void refreshDocument(NmCommandBean nmCommandBean)
+			throws WTPropertyVetoException {
 		try {
 			NmOid nmOid = nmCommandBean.getPrimaryOid();
 			Object obj = nmOid.getRef();
@@ -397,98 +416,108 @@ public class DocUtils implements RemoteAccess{
 		}
 	}
 
-//	/**
-//	 * 根据解压的zip包中的文件，创建图纸对象
-//	 * 
-//	 * @param folderPath
-//	 * @param wtContainerRef
-//	 * @throws WTException
-//	 * @throws WTPropertyVetoException
-//	 */
-//	private static boolean createDocumentByZipFile(String targetPath, WTContainerRef wtContainerRef, WTDocument zipDocument) throws WTException, WTPropertyVetoException {
-//		File dir = new File(targetPath);
-//		File[] files = dir.listFiles();
-//		boolean result = false;
-//		Transaction tran =new Transaction();// 创建事务
-//		tran.start();
-//		try{
-//        Debug.P(files.length);
-//		if (files == null)
-//			return false;
-//		for (int i = 0; i < files.length; i++) {
-//			if (files[i].isDirectory()) {
-//				createDocumentByZipFile(files[i].getAbsolutePath(), wtContainerRef, zipDocument);
-//			} else {
-//				String strFileName = files[i].getAbsolutePath().toUpperCase();
-//				System.out.println("---" + files[i].getAbsolutePath());
-//				String drwNumber = strFileName.substring(strFileName.lastIndexOf("\\") + 1, strFileName.lastIndexOf("."));
-//				Debug.P(drwNumber);
-//				if ("DWG".equals(strFileName.substring(strFileName.lastIndexOf(".")+1, strFileName.length()))) {
-//					WTDocument document = getDocumentByNumber(drwNumber);
-//					Debug.P(document);
-//					if (document == null) {
-//						document = createDoc(drwNumber, strFileName, wtContainerRef, zipDocument);
-//						linkDocument2Part(document);
-//					}
-//				}
-//
-//			}
-//		}
-//		tran.commit();
-//		tran = null;
-//		result = true;
-//		}catch (Exception e){
-//			e.printStackTrace();
-//		}finally{
-//			if(tran !=null){
-//				result = false;
-//				tran.rollback();
-//			}
-//		}
-//		return result;
-//	}
+	// /**
+	// * 根据解压的zip包中的文件，创建图纸对象
+	// *
+	// * @param folderPath
+	// * @param wtContainerRef
+	// * @throws WTException
+	// * @throws WTPropertyVetoException
+	// */
+	// private static boolean createDocumentByZipFile(String targetPath,
+	// WTContainerRef wtContainerRef, WTDocument zipDocument) throws
+	// WTException, WTPropertyVetoException {
+	// File dir = new File(targetPath);
+	// File[] files = dir.listFiles();
+	// boolean result = false;
+	// Transaction tran =new Transaction();// 创建事务
+	// tran.start();
+	// try{
+	// Debug.P(files.length);
+	// if (files == null)
+	// return false;
+	// for (int i = 0; i < files.length; i++) {
+	// if (files[i].isDirectory()) {
+	// createDocumentByZipFile(files[i].getAbsolutePath(), wtContainerRef,
+	// zipDocument);
+	// } else {
+	// String strFileName = files[i].getAbsolutePath().toUpperCase();
+	// System.out.println("---" + files[i].getAbsolutePath());
+	// String drwNumber = strFileName.substring(strFileName.lastIndexOf("\\") +
+	// 1, strFileName.lastIndexOf("."));
+	// Debug.P(drwNumber);
+	// if ("DWG".equals(strFileName.substring(strFileName.lastIndexOf(".")+1,
+	// strFileName.length()))) {
+	// WTDocument document = getDocumentByNumber(drwNumber);
+	// Debug.P(document);
+	// if (document == null) {
+	// document = createDoc(drwNumber, strFileName, wtContainerRef,
+	// zipDocument);
+	// linkDocument2Part(document);
+	// }
+	// }
+	//
+	// }
+	// }
+	// tran.commit();
+	// tran = null;
+	// result = true;
+	// }catch (Exception e){
+	// e.printStackTrace();
+	// }finally{
+	// if(tran !=null){
+	// result = false;
+	// tran.rollback();
+	// }
+	// }
+	// return result;
+	// }
 
-//	/**
-//	 * 创建图纸文档对象
-//	 * 
-//	 * @param drwNumber
-//	 * @param strFileName
-//	 * @param wtContainerRef
-//	 * @return
-//	 * @throws WTException
-//	 */
-//	private static WTDocument createDoc(String drwNumber, String strFileName, WTContainerRef wtContainerRef, WTDocument zipDocument) {
-//		WTDocument document = null;
-//		try {
-//			// 图样文档类型
-//			String DrwDocType = "WCTYPE|wt.doc.WTDocument|com.SYFJ_windchill.DrawDoc";
-//			document = WTDocument.newWTDocument();
-//			String folderPath = zipDocument.getFolderPath();
-//			// Folder folder = FolderHelper.service.getFolder(strFolder,
-//			// WTContainerRef.newWTContainerRef(wtContainerRef));
-//			Folder folder = FolderHelper.service.getFolder(folderPath.substring(0, folderPath.lastIndexOf("/")), wtContainerRef);
-//
-//			document.setName(drwNumber);
-//			document.setNumber(drwNumber);
-//			document.setContainerReference(wtContainerRef);
-//			// 设置文件夹
-//			if (folder != null)
-//				FolderHelper.assignLocation((FolderEntry) document, folder);
-//			// 设置文档大类
-//			TypeIdentifier id = TypeHelper.getTypeIdentifier(DrwDocType);
-//			document = (WTDocument) CoreMetaUtility.setType(document, id);
-//			document = (WTDocument) PersistenceHelper.manager.save(document);
-//			// 设置文档类型为机械类
-//			IBAUtils.setIBAStringValue(document, Contants.DOCTYPE, Contants.MACHINERYDOC);
-//			IBAUtils.updateIBAHolder(document);
-//			updateDocContent(document, strFileName);
-//		} catch (WTException e) {
-//			e.printStackTrace();
-//		} catch (WTPropertyVetoException e) {
-//			e.printStackTrace();
-//		}
-//		return document;
-//	}
+	// /**
+	// * 创建图纸文档对象
+	// *
+	// * @param drwNumber
+	// * @param strFileName
+	// * @param wtContainerRef
+	// * @return
+	// * @throws WTException
+	// */
+	// private static WTDocument createDoc(String drwNumber, String strFileName,
+	// WTContainerRef wtContainerRef, WTDocument zipDocument) {
+	// WTDocument document = null;
+	// try {
+	// // 图样文档类型
+	// String DrwDocType =
+	// "WCTYPE|wt.doc.WTDocument|com.SYFJ_windchill.DrawDoc";
+	// document = WTDocument.newWTDocument();
+	// String folderPath = zipDocument.getFolderPath();
+	// // Folder folder = FolderHelper.service.getFolder(strFolder,
+	// // WTContainerRef.newWTContainerRef(wtContainerRef));
+	// Folder folder = FolderHelper.service.getFolder(folderPath.substring(0,
+	// folderPath.lastIndexOf("/")), wtContainerRef);
+	//
+	// document.setName(drwNumber);
+	// document.setNumber(drwNumber);
+	// document.setContainerReference(wtContainerRef);
+	// // 设置文件夹
+	// if (folder != null)
+	// FolderHelper.assignLocation((FolderEntry) document, folder);
+	// // 设置文档大类
+	// TypeIdentifier id = TypeHelper.getTypeIdentifier(DrwDocType);
+	// document = (WTDocument) CoreMetaUtility.setType(document, id);
+	// document = (WTDocument) PersistenceHelper.manager.save(document);
+	// // 设置文档类型为机械类
+	// IBAUtils.setIBAStringValue(document, Contants.DOCTYPE,
+	// Contants.MACHINERYDOC);
+	// IBAUtils.updateIBAHolder(document);
+	// updateDocContent(document, strFileName);
+	// } catch (WTException e) {
+	// e.printStackTrace();
+	// } catch (WTPropertyVetoException e) {
+	// e.printStackTrace();
+	// }
+	// return document;
+	// }
 
 	/**
 	 * 根据文档名称查找对应的WTDocument，如果文档对应的文件为DBF文件，则返回，否则返回空
@@ -498,10 +527,13 @@ public class DocUtils implements RemoteAccess{
 	 * @throws WTException
 	 * @throws PropertyVetoException
 	 */
-	public static WTDocument getDBFByName(String docName) throws WTException, PropertyVetoException {
+	public static WTDocument getDBFByName(String docName) throws WTException,
+			PropertyVetoException {
 		QuerySpec querySpec = new QuerySpec(WTDocument.class);
-		SearchCondition numberSC = new SearchCondition(WTDocument.class, WTDocument.NAME, SearchCondition.EQUAL, docName);
-		SearchCondition latestIteration = new SearchCondition(WTDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		SearchCondition numberSC = new SearchCondition(WTDocument.class,
+				WTDocument.NAME, SearchCondition.EQUAL, docName);
+		SearchCondition latestIteration = new SearchCondition(WTDocument.class,
+				"iterationInfo.latest", SearchCondition.IS_TRUE);
 		querySpec.appendWhere(numberSC);
 		querySpec.appendAnd();
 		querySpec.appendWhere(latestIteration);
@@ -510,8 +542,10 @@ public class DocUtils implements RemoteAccess{
 		WTDocument document = null;
 		while (queryResult.hasMoreElements()) {
 			document = (WTDocument) queryResult.nextElement();
-			FormatContentHolder formatContentHolder = (FormatContentHolder) ContentHelper.service.getContents(document);
-			ContentItem contentItem = ContentHelper.getPrimary(formatContentHolder);
+			FormatContentHolder formatContentHolder = (FormatContentHolder) ContentHelper.service
+					.getContents(document);
+			ContentItem contentItem = ContentHelper
+					.getPrimary(formatContentHolder);
 			ApplicationData applicationData = (ApplicationData) contentItem;
 			if (applicationData == null) {
 				continue;
@@ -533,7 +567,8 @@ public class DocUtils implements RemoteAccess{
 	 *            文档
 	 * @throws WTPropertyVetoException
 	 */
-	public static void linkDocument2Part(WTDocument document) throws WTPropertyVetoException {
+	public static void linkDocument2Part(WTDocument document)
+			throws WTPropertyVetoException {
 
 		try {
 			String partNumber = null;
@@ -544,13 +579,15 @@ public class DocUtils implements RemoteAccess{
 			partNumber = generatePartNumberByDocNumber(docNumber);
 			WTPart part = PartUtil.getPartByNumber(partNumber);
 			if (part == null && !docNumber.contains("-W")) {
-				//part = PartUtil.generateNewPartByDocument(document, partNumber);
+				// part = PartUtil.generateNewPartByDocument(document,
+				// partNumber);
 			}
 			if (part != null) {
 				String partName = part.getName();
 				updateDocumentName(document, partName);
 				document = getDocumentByNumber(docNumber);
-				WTPartDescribeLink describleLink = WTPartDescribeLink.newWTPartDescribeLink(part, document);
+				WTPartDescribeLink describleLink = WTPartDescribeLink
+						.newWTPartDescribeLink(part, document);
 				PersistenceServerHelper.manager.insert(describleLink);
 				PersistenceHelper.manager.refresh(describleLink);
 			}
@@ -581,58 +618,63 @@ public class DocUtils implements RemoteAccess{
 		}
 		return partNumber;
 	}
-	
+
 	/**
 	 * 获取文档关联的部件
+	 * 
 	 * @author Eilaiwang
 	 * @param doc
 	 * @return
 	 * @return ArrayList
 	 * @Description
 	 */
-	public static List getDescribePartsByDoc(WTDocument doc){
+	public static List getDescribePartsByDoc(WTDocument doc) {
 		List<String> partList = new ArrayList<String>();
 		try {
-			QueryResult qr2 = PersistenceHelper.manager.navigate(doc, WTPartDescribeLink.DESCRIBES_ROLE,
-					WTPartDescribeLink.class,true);
-			while(qr2.hasMoreElements()){
-				WTPart part = (WTPart)qr2.nextElement();
-				Debug.P("2--->"+part.getNumber());
+			QueryResult qr2 = PersistenceHelper.manager.navigate(doc,
+					WTPartDescribeLink.DESCRIBES_ROLE,
+					WTPartDescribeLink.class, true);
+			while (qr2.hasMoreElements()) {
+				WTPart part = (WTPart) qr2.nextElement();
+				Debug.P("2--->" + part.getNumber());
 				IBAUtils iba = new IBAUtils(part);
 				partList.add(iba.getIBAValue(Contants.PMID));
 			}
-		
+
 		} catch (WTException e) {
 			e.printStackTrace();
 		}
-        return partList;
+		return partList;
 	}
 
 	/**
 	 * 获取文档关联的部件
+	 * 
 	 * @author Eilaiwang
 	 * @param doc
 	 * @return
 	 * @return ArrayList
 	 * @Description
 	 */
-	public static List  getDescribePartsByEPMDoc(EPMDocument epmdoc){
+	public static List getDescribePartsByEPMDoc(EPMDocument epmdoc) {
 		List<String> partList = new ArrayList<String>();
 		try {
-			QueryResult qr2 =PersistenceHelper.manager.navigate(epmdoc, EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true );
-			while(qr2.hasMoreElements()){
-				WTPart part = (WTPart)qr2.nextElement();
+			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc,
+					EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true);
+			while (qr2.hasMoreElements()) {
+				WTPart part = (WTPart) qr2.nextElement();
 				IBAUtils iba = new IBAUtils(part);
-				String pmoid=iba.getIBAValue(Contants.PMID);
-			    if(partList.contains(pmoid)) continue;
-				 partList.add(pmoid);
+				String pmoid = iba.getIBAValue(Contants.PMID);
+				if (partList.contains(pmoid))
+					continue;
+				partList.add(pmoid);
 			}
 		} catch (WTException e) {
 			e.printStackTrace();
 		}
-        return partList;
+		return partList;
 	}
-	
+
 	/**
 	 * 获得EPM参考关系
 	 */
@@ -648,36 +690,40 @@ public class DocUtils implements RemoteAccess{
 		}
 		List references = new ArrayList();
 		for (int i = 0; i < numbers.size(); i++) {
-			EPMDocument doc=EPMUtil.getEPMDocument(numbers.get(i).toString(), "");
+			EPMDocument doc = EPMUtil.getEPMDocument(numbers.get(i).toString(),
+					"");
 			references.add(doc);
 		}
 		return references;
 	}
-	
+
 	/**
 	 * 获取文档关联的部件
+	 * 
 	 * @author Eilaiwang
 	 * @param doc
 	 * @return
 	 * @return ArrayList
 	 * @Description
 	 */
-	public static WTPart getDescribePartByEPMDoc(EPMDocument epmdoc){
-		WTPart part =null;
+	public static WTPart getDescribePartByEPMDoc(EPMDocument epmdoc) {
+		WTPart part = null;
 		try {
-			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc, EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true );
-			while(qr2.hasMoreElements()){
-				 part = (WTPart)qr2.nextElement();
+			QueryResult qr2 = PersistenceHelper.manager.navigate(epmdoc,
+					EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true);
+			while (qr2.hasMoreElements()) {
+				part = (WTPart) qr2.nextElement();
 			}
-		
+
 		} catch (WTException e) {
 			e.printStackTrace();
 		}
-        return part;
+		return part;
 	}
-	
+
 	/**
 	 * 获取对象的表示法
+	 * 
 	 * @param representable
 	 * @return
 	 */
@@ -685,34 +731,40 @@ public class DocUtils implements RemoteAccess{
 		ApplicationData ad = null;
 		Representation representation;
 		try {
-			representation = RepresentationHelper.service.getDefaultRepresentation(representable);// 得到表示法
-			Debug.P("representation-->"+representation);
+			representation = RepresentationHelper.service
+					.getDefaultRepresentation(representable);// 得到表示法
+			Debug.P("representation-->" + representation);
 			if (representation != null) {
-				representation = (Representation) ContentHelper.service.getContents(representation); // 得到表示法的ContentHolder（内容持有者）
+				representation = (Representation) ContentHelper.service
+						.getContents(representation); // 得到表示法的ContentHolder（内容持有者）
 				Vector vector1 = ContentHelper.getContentList(representation);// 得到内容列表
-				Debug.P("vector1  size  -->"+vector1.size());
+				Debug.P("vector1  size  -->" + vector1.size());
 				int l = 0;
 				boolean flag = false;
-				for(int i=0;i<vector1.size();i++){//先循环判断可视化列表中有没有PDF格式的文件，如果没有则获取DWG格式的文件
+				for (int i = 0; i < vector1.size(); i++) {// 先循环判断可视化列表中有没有PDF格式的文件，如果没有则获取DWG格式的文件
 					if (vector1.get(l) instanceof ApplicationData) {
 						ad = (ApplicationData) vector1.get(l);
-						if (StringUtil.getExtension(ad.getFileName()).equalsIgnoreCase("pdf")) // 取得是pdf文档的表示法
+						if (StringUtil.getExtension(ad.getFileName())
+								.equalsIgnoreCase("pdf")) // 取得是pdf文档的表示法
 						{
-							flag=true;
+							flag = true;
 						}
 					}
 				}
 				for (l = 0; l < vector1.size(); l++) {
 					if (vector1.get(l) instanceof ApplicationData) {
 						ad = (ApplicationData) vector1.get(l);
-							Debug.P("===>>>>>>>The representation is "+ ad.getFileName());
-						if(flag){
-							if (StringUtil.getExtension(ad.getFileName()).equalsIgnoreCase("pdf")) // 取得是pdf文档的表示法
+						Debug.P("===>>>>>>>The representation is "
+								+ ad.getFileName());
+						if (flag) {
+							if (StringUtil.getExtension(ad.getFileName())
+									.equalsIgnoreCase("pdf")) // 取得是pdf文档的表示法
 							{
 								return ad;
 							}
-						}else{
-							if (StringUtil.getExtension(ad.getFileName()).equalsIgnoreCase("dwg")) // 取得是dwg文档的表示法
+						} else {
+							if (StringUtil.getExtension(ad.getFileName())
+									.equalsIgnoreCase("dwg")) // 取得是dwg文档的表示法
 							{
 								return ad;
 							}
@@ -739,11 +791,14 @@ public class DocUtils implements RemoteAccess{
 	 * @return WTDocument 文档对象
 	 * @throws WTException
 	 */
-	public static WTDocument getDocumentByNumber(String docNumber) throws WTException {
+	public static WTDocument getDocumentByNumber(String docNumber)
+			throws WTException {
 		WTDocument document = null;
 		QuerySpec querySpec = new QuerySpec(WTDocument.class);
-		SearchCondition numberSC = new SearchCondition(WTDocument.class, WTDocument.NUMBER, SearchCondition.EQUAL, docNumber);
-		SearchCondition latestIteration = new SearchCondition(WTDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		SearchCondition numberSC = new SearchCondition(WTDocument.class,
+				WTDocument.NUMBER, SearchCondition.EQUAL, docNumber);
+		SearchCondition latestIteration = new SearchCondition(WTDocument.class,
+				"iterationInfo.latest", SearchCondition.IS_TRUE);
 		querySpec.appendWhere(numberSC);
 		querySpec.appendAnd();
 		querySpec.appendWhere(latestIteration);
@@ -751,20 +806,23 @@ public class DocUtils implements RemoteAccess{
 		// queryResult = (new LatestConfigSpec()).process(queryResult);
 		while (queryResult.hasMoreElements()) {
 			document = (WTDocument) queryResult.nextElement();
-			String fileName = getDocFileName(document);  
+			String fileName = getDocFileName(document);
 			Debug.P(fileName);
 			if (fileName != null) {
-				if ("DWG".equals(fileName.substring(fileName.lastIndexOf(".") + 1)) || "dwg".equals(fileName.substring(fileName.lastIndexOf(".") + 1))) {
+				if ("DWG"
+						.equals(fileName.substring(fileName.lastIndexOf(".") + 1))
+						|| "dwg".equals(fileName.substring(fileName
+								.lastIndexOf(".") + 1))) {
 					return document;
 				}
 			}
 		}
 		return null;
 	}
-	
-	
+
 	/**
 	 * get wtdocs by cadname,cadnumber
+	 * 
 	 * @param cadname
 	 * @param cadnumber
 	 * @return
@@ -779,17 +837,17 @@ public class DocUtils implements RemoteAccess{
 		}
 
 		QuerySpec qs = new QuerySpec(WTDocument.class);
-		
+
 		if (!StringUtil.isNullOrEmpty(cadnumber)) {
 			SearchCondition sc = new SearchCondition(WTDocument.class,
-					WTDocument.NUMBER, SearchCondition.LIKE, cadnumber+"%");
+					WTDocument.NUMBER, SearchCondition.LIKE, cadnumber + "%");
 			qs.appendWhere(sc);
 			qs.appendAnd();
 		}
 
 		if (!StringUtil.isNullOrEmpty(cadname)) {
 			SearchCondition sc = new SearchCondition(WTDocument.class,
-					WTDocument.NAME, SearchCondition.LIKE, cadname+"%");
+					WTDocument.NAME, SearchCondition.LIKE, cadname + "%");
 			qs.appendWhere(sc);
 			qs.appendAnd();
 		}
@@ -810,27 +868,26 @@ public class DocUtils implements RemoteAccess{
 		}
 		return list;
 	}
-	
-	
+
 	/**
 	 * 获取对象类型
+	 * 
 	 * @author Eilaiwang
 	 * @param object
 	 * @return
 	 * @return String
 	 * @Description
 	 */
-	public static String getType(WTObject object){
+	public static String getType(WTObject object) {
 		TypeIdentifier ti = TypeIdentifierUtility.getTypeIdentifier(object);
 		String type = ti.getTypename();
 		return type;
 
-		}
-	
+	}
 
 	/**
-	 *获得文档的参考文档的PMID
-	 * get all DependsOn wtdoc of this
+	 * 获得文档的参考文档的PMID get all DependsOn wtdoc of this
+	 * 
 	 * @param doc
 	 * @return
 	 * @throws Exception
@@ -855,11 +912,10 @@ public class DocUtils implements RemoteAccess{
 		}
 		return docList;
 	}
-	
-	
+
 	/**
-	 *获得 参考文档集合
-	 * get all DependsOn wtdoc of this
+	 * 获得 参考文档集合 get all DependsOn wtdoc of this
+	 * 
 	 * @param doc
 	 * @return
 	 * @throws Exception
@@ -882,10 +938,10 @@ public class DocUtils implements RemoteAccess{
 		}
 		return docList;
 	}
-	
-	
+
 	/**
 	 * get WTDoc by number and vesion
+	 * 
 	 * @param num
 	 * @param ver
 	 * @return
@@ -914,36 +970,41 @@ public class DocUtils implements RemoteAccess{
 			doc = (WTDocument) qr.nextElement();
 		return doc;
 	}
-	
+
 	/**
 	 * 根据文档编码查询文档对象
 	 * 
 	 * @param docNumber
 	 *            文档编码
-	 * @return WTDocument 文档对象   
+	 * @return WTDocument 文档对象
 	 * @throws WTException
 	 */
-	public static WTDocument getDocByNumber(String docNumber) throws WTException {
+	public static WTDocument getDocByNumber(String docNumber)
+			throws WTException {
 		Debug.P(docNumber);
 		WTDocument document = null;
 		QuerySpec querySpec = new QuerySpec(WTDocument.class);
-		SearchCondition numberSC = new SearchCondition(WTDocument.class, WTDocument.NUMBER, SearchCondition.EQUAL, docNumber);
-		SearchCondition latestIteration = new SearchCondition(WTDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		SearchCondition numberSC = new SearchCondition(WTDocument.class,
+				WTDocument.NUMBER, SearchCondition.EQUAL, docNumber);
+		SearchCondition latestIteration = new SearchCondition(WTDocument.class,
+				"iterationInfo.latest", SearchCondition.IS_TRUE);
 		querySpec.appendWhere(numberSC);
 		querySpec.appendAnd();
 		querySpec.appendWhere(latestIteration);
 		QueryResult queryResult = PersistenceHelper.manager.find(querySpec);
 		// queryResult = (new LatestConfigSpec()).process(queryResult);
-		Debug.P("Document----->"+queryResult.hasMoreElements());
+		Debug.P("Document----->" + queryResult.hasMoreElements());
 		while (queryResult.hasMoreElements()) {
 			document = (WTDocument) queryResult.nextElement();
 			Debug.P(document);
-			//String fileName = getDocFileName(document);  
-			//if (fileName != null) {
-				//if ("DWG".equals(fileName.substring(fileName.lastIndexOf(".") + 1)) || "dwg".equals(fileName.substring(fileName.lastIndexOf(".") + 1))) {
-					return document;
-				//}
-			//}
+			// String fileName = getDocFileName(document);
+			// if (fileName != null) {
+			// if ("DWG".equals(fileName.substring(fileName.lastIndexOf(".") +
+			// 1)) || "dwg".equals(fileName.substring(fileName.lastIndexOf(".")
+			// + 1))) {
+			return document;
+			// }
+			// }
 		}
 		return null;
 	}
@@ -953,10 +1014,11 @@ public class DocUtils implements RemoteAccess{
 	 * 
 	 * @param 待更待编码对象
 	 * @param 新编码
-	 * @throws WTException 
+	 * @throws WTException
 	 */
 
-	public static void changeDcouementNumber(WTDocument document, String newNumber) throws WTException {
+	public static void changeDcouementNumber(WTDocument document,
+			String newNumber) throws WTException {
 		boolean flag = SessionServerHelper.manager.setAccessEnforced(false);
 		WTUser currentuser = (WTUser) SessionHelper.manager.getPrincipal();
 		SessionHelper.manager.setAdministrator();
@@ -965,13 +1027,15 @@ public class DocUtils implements RemoteAccess{
 		try {
 			tx = new Transaction();
 			tx.start();
-			WTDocumentMasterIdentity documentMasterIdentity = (WTDocumentMasterIdentity) identified.getIdentificationObject();
+			WTDocumentMasterIdentity documentMasterIdentity = (WTDocumentMasterIdentity) identified
+					.getIdentificationObject();
 			if (newNumber != null)
 				documentMasterIdentity.setNumber(newNumber);
-			identified = IdentityHelper.service.changeIdentity(identified, documentMasterIdentity);
+			identified = IdentityHelper.service.changeIdentity(identified,
+					documentMasterIdentity);
 			document = (WTDocument) PersistenceHelper.manager.refresh(document);
-		   tx.commit();
-		   tx =null;
+			tx.commit();
+			tx = null;
 		} catch (WTException e) {
 			e.printStackTrace();
 		} catch (WTPropertyVetoException e) {
@@ -979,7 +1043,8 @@ public class DocUtils implements RemoteAccess{
 		} finally {
 			if (tx != null)
 				tx.rollback();
-			SessionHelper.manager.setPrincipal(currentuser.getAuthenticationName());
+			SessionHelper.manager.setPrincipal(currentuser
+					.getAuthenticationName());
 			SessionServerHelper.manager.setAccessEnforced(flag);
 		}
 	}
@@ -994,8 +1059,10 @@ public class DocUtils implements RemoteAccess{
 	public static String getDrwNumberByFileName(WTDocument document) {
 		String drwNumber = null;
 		try {
-			FormatContentHolder formatContentHolder = (FormatContentHolder) ContentHelper.service.getContents(document);
-			ContentItem contentItem = ContentHelper.getPrimary(formatContentHolder);
+			FormatContentHolder formatContentHolder = (FormatContentHolder) ContentHelper.service
+					.getContents(document);
+			ContentItem contentItem = ContentHelper
+					.getPrimary(formatContentHolder);
 			ApplicationData applicationData = (ApplicationData) contentItem;
 			if (applicationData == null) {
 				return null;
@@ -1010,49 +1077,61 @@ public class DocUtils implements RemoteAccess{
 		return drwNumber;
 	}
 
-	public static WTDocument updateDocumentName(WTDocument document, String docName) throws ObjectNoLongerExistsException, WTException, WTPropertyVetoException {
-		WTDocument doc = (WTDocument) PersistenceHelper.manager.refresh(document);
+	public static WTDocument updateDocumentName(WTDocument document,
+			String docName) throws ObjectNoLongerExistsException, WTException,
+			WTPropertyVetoException {
+		WTDocument doc = (WTDocument) PersistenceHelper.manager
+				.refresh(document);
 		WTDocumentMaster wtDocumentMaster = (WTDocumentMaster) doc.getMaster();
-		WTDocumentMasterIdentity wtDocumentmasterIdentity = (WTDocumentMasterIdentity) wtDocumentMaster.getIdentificationObject();
+		WTDocumentMasterIdentity wtDocumentmasterIdentity = (WTDocumentMasterIdentity) wtDocumentMaster
+				.getIdentificationObject();
 		if (!wtDocumentmasterIdentity.getName().equals(docName)) {
 			wtDocumentmasterIdentity.setName(docName);
-			IdentityHelper.service.changeIdentity(wtDocumentMaster, wtDocumentmasterIdentity);
+			IdentityHelper.service.changeIdentity(wtDocumentMaster,
+					wtDocumentmasterIdentity);
 			doc = (WTDocument) PersistenceHelper.manager.refresh(doc);
 		}
 		return doc;
 	}
 
-	
-	
 	/**
 	 * 获得主文档对象的下载地址
-	 * @param docNum 文档编码
+	 * 
+	 * @param docNum
+	 *            文档编码
 	 * @return Map<String,ApplicationData> key:下载地址 value:文档流
 	 * @throws WTException
 	 */
-	public static Map<String,InputStream>  getPrimaryContentDownloadInfo(String docNum) throws WTException{
+	public static Map<String, InputStream> getPrimaryContentDownloadInfo(
+			String docNum) throws WTException {
 
-		Map<String,InputStream> result=new HashMap<String,InputStream>();
-		 InputStream ins=null;
-		 String primaryContentUrl=null;
-		if(!StringUtils.isEmpty(docNum)){
-	    	 Debug.P("----------->>Download Object_Num:"+docNum);
-	    	 try {
-	    		 Persistable object=GenericUtil.getObjectByNumber(docNum);
-		    	 FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service	.getContents((ContentHolder) object);
-		    	 ContentItem contentitem = ContentHelper.getPrimary(formatcontentholder);  
-	    	  	 if (contentitem != null && contentitem instanceof ApplicationData) {
-						ApplicationData app = (ApplicationData) contentitem;
-						 primaryContentUrl=ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
-						 if(!StringUtils.isEmpty(primaryContentUrl)){
-							 primaryContentUrl = UrlEncoder.encode(primaryContentUrl);
-							 ins=ContentServerHelper.service.findContentStream(app);
-						 }
+		Map<String, InputStream> result = new HashMap<String, InputStream>();
+		InputStream ins = null;
+		String primaryContentUrl = null;
+		if (!StringUtils.isEmpty(docNum)) {
+			Debug.P("----------->>Download Object_Num:" + docNum);
+			try {
+				Persistable object = GenericUtil.getObjectByNumber(docNum);
+				FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service
+						.getContents((ContentHolder) object);
+				ContentItem contentitem = ContentHelper
+						.getPrimary(formatcontentholder);
+				if (contentitem != null
+						&& contentitem instanceof ApplicationData) {
+					ApplicationData app = (ApplicationData) contentitem;
+					primaryContentUrl = ContentHelper.service.getDownloadURL(
+							formatcontentholder, app).toExternalForm();
+					if (!StringUtils.isEmpty(primaryContentUrl)) {
+						primaryContentUrl = UrlEncoder
+								.encode(primaryContentUrl);
+						ins = ContentServerHelper.service
+								.findContentStream(app);
 					}
-			} catch(Exception e){
+				}
+			} catch (Exception e) {
 				e.printStackTrace();
-			}finally{
-				if(ins!=null){
+			} finally {
+				if (ins != null) {
 					try {
 						ins.close();
 					} catch (IOException e) {
@@ -1060,16 +1139,14 @@ public class DocUtils implements RemoteAccess{
 					}
 				}
 			}
-	     }
-		
-   	   if(StringUtils.isEmpty(primaryContentUrl)){
-   		    result.put(primaryContentUrl, ins);
-   	   }
-		     return result;
+		}
+
+		if (StringUtils.isEmpty(primaryContentUrl)) {
+			result.put(primaryContentUrl, ins);
+		}
+		return result;
 	}
 
-	
-	
 	/**
 	 * 根据对象获取文档附件的全名
 	 * 
@@ -1080,8 +1157,10 @@ public class DocUtils implements RemoteAccess{
 	public static String getDocFileName(WTDocument document) {
 		String fileName = null;
 		try {
-			FormatContentHolder formatContentHolder = (FormatContentHolder) ContentHelper.service.getContents(document);
-			ContentItem contentItem = ContentHelper.getPrimary(formatContentHolder);
+			FormatContentHolder formatContentHolder = (FormatContentHolder) ContentHelper.service
+					.getContents(document);
+			ContentItem contentItem = ContentHelper
+					.getPrimary(formatContentHolder);
 			ApplicationData applicationData = (ApplicationData) contentItem;
 			if (applicationData == null) {
 				return null;
@@ -1120,14 +1199,19 @@ public class DocUtils implements RemoteAccess{
 	 * @throws PropertyVetoException
 	 * @throws IOException
 	 */
-	public static void putDocTtoFolder(WTDocument doc, String path, String drwSize) throws WTException, PropertyVetoException, IOException {
-		FormatContentHolder contentHolder = (FormatContentHolder) ContentHelper.service.getContents(doc);
+	public static void putDocTtoFolder(WTDocument doc, String path,
+			String drwSize) throws WTException, PropertyVetoException,
+			IOException {
+		FormatContentHolder contentHolder = (FormatContentHolder) ContentHelper.service
+				.getContents(doc);
 		ContentItem contentItem = ContentHelper.getPrimary(contentHolder);
 		if (contentItem instanceof ApplicationData) {
 			ApplicationData applicationData = (ApplicationData) contentItem;
 			String fileName = applicationData.getFileName();
-			InputStream is = ContentServerHelper.service.findContentStream(applicationData);
-		//	File file = new File(path + File.separator + drwSize + File.separator + fileName);
+			InputStream is = ContentServerHelper.service
+					.findContentStream(applicationData);
+			// File file = new File(path + File.separator + drwSize +
+			// File.separator + fileName);
 			File file = new File(path + File.separator + fileName);
 			FileOutputStream fos = new FileOutputStream(file);
 			byte[] buffer = new byte[1024];
@@ -1139,50 +1223,56 @@ public class DocUtils implements RemoteAccess{
 			fos.close();
 		}
 	}
-	
+
 	/**
 	 * 获得文档对象的所有附件信息
+	 * 
 	 * @param holder
-	 * @throws WTException 
+	 * @throws WTException
 	 */
-	public static List<ApplicationData> getAttachmentAppicationData(ContentHolder holder) throws WTException{
-		List<ApplicationData> attacheList=new ArrayList<ApplicationData>();
-		if(holder==null) return attacheList;
-		QueryResult  result = ContentHelper.service.getContentsByRole(holder,ContentRoleType.SECONDARY);
-	     if(result!=null&&result.size()>0){
-	    	 Debug.P("------>>AttachementApp Size:"+result.size());
-	    	 wt.content.ApplicationData appData = (wt.content.ApplicationData) result.nextElement();
-	    	 attacheList.add(appData);
-	     }
-		
+	public static List<ApplicationData> getAttachmentAppicationData(
+			ContentHolder holder) throws WTException {
+		List<ApplicationData> attacheList = new ArrayList<ApplicationData>();
+		if (holder == null)
+			return attacheList;
+		QueryResult result = ContentHelper.service.getContentsByRole(holder,
+				ContentRoleType.SECONDARY);
+		if (result != null && result.size() > 0) {
+			Debug.P("------>>AttachementApp Size:" + result.size());
+			wt.content.ApplicationData appData = (wt.content.ApplicationData) result
+					.nextElement();
+			attacheList.add(appData);
+		}
+
 		return attacheList;
 	}
-	
-	
+
 	/**
 	 * 获得所有的附件的下载链接
+	 * 
 	 * @param holder
 	 * @return Map (key:附件的名称 ; value:附件的链接)
 	 * @throws Exception
 	 */
-	public static Map<String,String> getAllAttachementsDownloadURL(ContentHolder holder)throws Exception{
-		Map<String,String> map=new HashMap<String,String>();
-		if(holder!=null){
-			FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service.getContents(holder);
-			List<ApplicationData> attachements=getAttachmentAppicationData(holder);//获取文档对象的附件信息
-            for (ApplicationData app : attachements) {
-            	  String  fileName=app.getFileName();
-				 String app_url=ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
-			      if(!StringUtils.isEmpty(app_url)){
-			    	  app_url=UrlEncoder.encode(app_url);
-			    	  map.put(fileName, app_url);
-			      }
-            }
+	public static Map<String, String> getAllAttachementsDownloadURL(
+			ContentHolder holder) throws Exception {
+		Map<String, String> map = new HashMap<String, String>();
+		if (holder != null) {
+			FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service
+					.getContents(holder);
+			List<ApplicationData> attachements = getAttachmentAppicationData(holder);// 获取文档对象的附件信息
+			for (ApplicationData app : attachements) {
+				String fileName = app.getFileName();
+				String app_url = ContentHelper.service.getDownloadURL(
+						formatcontentholder, app).toExternalForm();
+				if (!StringUtils.isEmpty(app_url)) {
+					app_url = UrlEncoder.encode(app_url);
+					map.put(fileName, app_url);
+				}
+			}
 		}
-     		  return map;
+		return map;
 	}
-	
-	
 
 	/**
 	 * 下载dbf文档到指定路径,并返回文件名
@@ -1194,14 +1284,17 @@ public class DocUtils implements RemoteAccess{
 	 * @throws PropertyVetoException
 	 * @throws IOException
 	 */
-	public static String putDocTtoFolder(WTDocument doc, String path) throws WTException, PropertyVetoException, IOException {
-		FormatContentHolder contentHolder = (FormatContentHolder) ContentHelper.service.getContents(doc);
+	public static String putDocTtoFolder(WTDocument doc, String path)
+			throws WTException, PropertyVetoException, IOException {
+		FormatContentHolder contentHolder = (FormatContentHolder) ContentHelper.service
+				.getContents(doc);
 		ContentItem contentItem = ContentHelper.getPrimary(contentHolder);
 		String fileName = null;
 		if (contentItem instanceof ApplicationData) {
 			ApplicationData applicationData = (ApplicationData) contentItem;
 			fileName = applicationData.getFileName();
-			InputStream is = ContentServerHelper.service.findContentStream(applicationData);
+			InputStream is = ContentServerHelper.service
+					.findContentStream(applicationData);
 			File file = new File(path + File.separator + fileName);
 			FileOutputStream fos = new FileOutputStream(file);
 			byte[] buffer = new byte[1024];
@@ -1226,37 +1319,45 @@ public class DocUtils implements RemoteAccess{
 		try {
 			if (doc == null)
 				return null;
-			
+
 			doc = getWorkingCopyOfDoc(doc);
 
-			 //清除主文档内容
+			// 清除主文档内容
 			ContentHolder contentholder = (ContentHolder) doc;
 			contentholder = ContentHelper.service.getContents(contentholder);
-			List contentListForTarget = ContentHelper.getContentListAll(contentholder);
+			List contentListForTarget = ContentHelper
+					.getContentListAll(contentholder);
 			for (int i = 0; i < contentListForTarget.size(); i++) {
 				ContentItem contentItem = (ContentItem) contentListForTarget
 						.get(i);
 				if (contentItem.getRole().toString().equals("PRIMARY")) {
-					ContentServerHelper.service.deleteContent(contentholder,contentItem);
+					ContentServerHelper.service.deleteContent(contentholder,
+							contentItem);
 					break;
 				}
 			}
-			
+
 			String fileformat = getFileFormat(filepath);
-			ApplicationData applicationdata = ApplicationData.newApplicationData(doc);
+			ApplicationData applicationdata = ApplicationData
+					.newApplicationData(doc);
 			applicationdata.setRole(ContentRoleType.PRIMARY);
-			applicationdata = ContentServerHelper.service.updateContent(doc, applicationdata, filepath);
+			applicationdata = ContentServerHelper.service.updateContent(doc,
+					applicationdata, filepath);
 			doc = (WTDocument) PersistenceServerHelper.manager.restore(doc);
 
 			// set file format
 			if (fileformat != null && !"".equals(fileformat)) {
-				DataFormat df = ContentHelper.service.getFormatByName(fileformat);
-				DataFormatReference dfr = DataFormatReference.newDataFormatReference(df);
+				DataFormat df = ContentHelper.service
+						.getFormatByName(fileformat);
+				DataFormatReference dfr = DataFormatReference
+						.newDataFormatReference(df);
 				doc.setFormat(dfr);
 			}
 			if (doc != null) {
-				if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(doc, wt.session.SessionHelper.manager.getPrincipal()))
-					doc = (WTDocument) WorkInProgressHelper.service.checkin(doc, "add primary file");
+				if (wt.vc.wip.WorkInProgressHelper.isCheckedOut(doc,
+						wt.session.SessionHelper.manager.getPrincipal()))
+					doc = (WTDocument) WorkInProgressHelper.service.checkin(
+							doc, "add primary file");
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -1266,8 +1367,6 @@ public class DocUtils implements RemoteAccess{
 
 		return doc;
 	}
-	
-	
 
 	public static String getFileFormat(String filename) {
 		String format = "";
@@ -1287,105 +1386,116 @@ public class DocUtils implements RemoteAccess{
 		}
 		return format;
 	}
-	
+
 	/**
-	 *获取后台的编码序列号
+	 * 获取后台的编码序列号
+	 * 
 	 * @return
 	 * @throws NumberFormatException
 	 * @throws WTException
 	 */
-	public static String getWTDocumentNumber() throws NumberFormatException, WTException{
+	public static String getWTDocumentNumber() throws NumberFormatException,
+			WTException {
 		String bitFormat = "";
 		for (int i = 0; i < 8; i++) {
 			bitFormat = bitFormat + "0";
 		}
-		int seq = Integer.parseInt(wt.fc.PersistenceHelper.manager.getNextSequence("WTDOCUMENTID_seq"));
+		int seq = Integer.parseInt(wt.fc.PersistenceHelper.manager
+				.getNextSequence("WTDOCUMENTID_seq"));
 		java.text.DecimalFormat format = new java.text.DecimalFormat(bitFormat);
 		String number = format.format(seq);
 		return number;
 	}
-	
 
-	public static WTDocument getWorkingCopyOfDoc(WTDocument doc) throws Exception {
+	public static WTDocument getWorkingCopyOfDoc(WTDocument doc)
+			throws Exception {
 		WTDocument workingdoc = null;
 
 		if (!WorkInProgressHelper.isCheckedOut(doc)) {
-			wt.folder.Folder folder = WorkInProgressHelper.service.getCheckoutFolder();
-			CheckoutLink checkoutlink = WorkInProgressHelper.service.checkout(doc, folder, "");
+			wt.folder.Folder folder = WorkInProgressHelper.service
+					.getCheckoutFolder();
+			CheckoutLink checkoutlink = WorkInProgressHelper.service.checkout(
+					doc, folder, "");
 			workingdoc = (WTDocument) checkoutlink.getWorkingCopy();
 		} else {
 			if (!WorkInProgressHelper.isWorkingCopy(doc))
-				workingdoc = (WTDocument) WorkInProgressHelper.service.workingCopyOf(doc);
+				workingdoc = (WTDocument) WorkInProgressHelper.service
+						.workingCopyOf(doc);
 			else
 				workingdoc = doc;
 		}
 		return workingdoc;
 	}
-	
-	
-	
-	//------------------------------Add by qiaokaikai----------------------------------------//
-	
+
+	// ------------------------------Add by
+	// qiaokaikai----------------------------------------//
+
 	/**
 	 * 把文档对象转换文档流
+	 * 
 	 * @auth public759
 	 * @Date 2014-10-17
 	 */
-	public static InputStream doc2is(WTDocument doc){
-		InputStream ins=null;
-		if(!SERVER){
+	public static InputStream doc2is(WTDocument doc) {
+		InputStream ins = null;
+		if (!SERVER) {
 			try {
-				Class aclass[]={WTDocument.class};
-				Object obj[]={doc};
-				return (InputStream)RemoteMethodServer.getDefault().invoke("doc2is", DocUtils.class.getName(), null, aclass, obj);
+				Class aclass[] = { WTDocument.class };
+				Object obj[] = { doc };
+				return (InputStream) RemoteMethodServer.getDefault().invoke(
+						"doc2is", DocUtils.class.getName(), null, aclass, obj);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Debug.P(e);
 			}
-		}else{
+		} else {
 			try {
-				//获取文档对象
-				ContentHolder contentHolder=ContentHelper.service.getContents((ContentHolder)doc);
-				ContentItem item=ContentHelper.getPrimary((FormatContentHolder)contentHolder);
-				ApplicationData appData=(ApplicationData)item;
-		        ins=ContentServerHelper.service.findContentStream(appData);
+				// 获取文档对象
+				ContentHolder contentHolder = ContentHelper.service
+						.getContents((ContentHolder) doc);
+				ContentItem item = ContentHelper
+						.getPrimary((FormatContentHolder) contentHolder);
+				ApplicationData appData = (ApplicationData) item;
+				ins = ContentServerHelper.service.findContentStream(appData);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Debug.P(e);
 			}
 		}
-		      return ins;
+		return ins;
 	}
-	
-	
-	
+
 	/**
 	 * 删除部件、文档的关联关系
+	 * 
 	 * @param part
 	 * @param doc
 	 * @throws Exception
 	 */
-	public static void deleteRelationLink(WTPart part,WTDocument doc)throws Exception{
-		QueryResult qr=null;
-		qr=StructHelper.service.navigateReferences(part,false);
-		while(qr.hasMoreElements())
-		{
-			WTPartReferenceLink referenceLink=(WTPartReferenceLink)qr.nextElement();
-			if(referenceLink.getRoleBObject().equals(doc.getMaster())){
+	public static void deleteRelationLink(WTPart part, WTDocument doc)
+			throws Exception {
+		QueryResult qr = null;
+		qr = StructHelper.service.navigateReferences(part, false);
+		while (qr.hasMoreElements()) {
+			WTPartReferenceLink referenceLink = (WTPartReferenceLink) qr
+					.nextElement();
+			if (referenceLink.getRoleBObject().equals(doc.getMaster())) {
 				PersistenceServerHelper.manager.remove(referenceLink);
 			}
 		}
-		qr=StructHelper.service.navigateDescribedBy(part, false);
-		while(qr.hasMoreElements()){
-			WTPartDescribeLink describeLink=(WTPartDescribeLink)qr.nextElement();
-			if(describeLink.getRoleBObject().equals(doc)){
+		qr = StructHelper.service.navigateDescribedBy(part, false);
+		while (qr.hasMoreElements()) {
+			WTPartDescribeLink describeLink = (WTPartDescribeLink) qr
+					.nextElement();
+			if (describeLink.getRoleBObject().equals(doc)) {
 				PersistenceServerHelper.manager.remove(describeLink);
 			}
 		}
 	}
-	
+
 	/**
 	 * 根据文档编号查询文档信息
+	 * 
 	 * @param documentnumber
 	 * @return
 	 * @throws WTException
@@ -1395,27 +1505,26 @@ public class DocUtils implements RemoteAccess{
 	 */
 	public static WTDocument getWTDocumentByNumber(String documentnumber)
 			throws WTException {
-	   return  (WTDocument) DocUtils.getDocByNumber(documentnumber);
+		return (WTDocument) DocUtils.getDocByNumber(documentnumber);
 	}
-	
+
 	/**
 	 * 获得最新版本
+	 * 
 	 * @param master
 	 * @return
 	 * @throws WTException
 	 */
 	public static RevisionControlled getLatestObject(Master master)
 			throws WTException {
-		QueryResult queryResult = VersionControlHelper.service.allVersionsOf(master);
+		QueryResult queryResult = VersionControlHelper.service
+				.allVersionsOf(master);
 		return (RevisionControlled) queryResult.nextElement();
 	}
-	
 
-	
-	
-	
 	/**
 	 * 文档重命名
+	 * 
 	 * @param newDocName
 	 * @param doc
 	 * @return
@@ -1431,7 +1540,7 @@ public class DocUtils implements RemoteAccess{
 			docmaster = (WTDocumentMaster) IdentityHelper.service
 					.changeIdentity(docmaster, docmasteridentity);
 			String newName = docmaster.getName();
-			if (newName.equals(newDocName)){
+			if (newName.equals(newDocName)) {
 				result = true;
 			}
 		} catch (WTException e) {
@@ -1441,14 +1550,12 @@ public class DocUtils implements RemoteAccess{
 			e.printStackTrace();
 			Debug.P(e.toString());
 		}
-		     return result;
+		return result;
 	}
 
-
-	
-	
 	/**
 	 * 更新内容
+	 * 
 	 * @param ch
 	 * @param applicationdata
 	 * @param fileName
@@ -1457,98 +1564,109 @@ public class DocUtils implements RemoteAccess{
 	 * @throws java.beans.PropertyVetoException
 	 * @throws java.io.IOException
 	 */
-	private static ApplicationData updateContent(ContentHolder ch, ApplicationData applicationdata, String fileName)
-    		throws WTException, java.beans.PropertyVetoException, java.io.IOException {
-        applicationdata = ContentServerHelper.service.updateContent(ch, applicationdata, fileName);
-        return applicationdata;
-    }
-	
-	
+	private static ApplicationData updateContent(ContentHolder ch,
+			ApplicationData applicationdata, String fileName)
+			throws WTException, java.beans.PropertyVetoException,
+			java.io.IOException {
+		applicationdata = ContentServerHelper.service.updateContent(ch,
+				applicationdata, fileName);
+		return applicationdata;
+	}
+
 	/**
 	 * 删除内容
+	 * 
 	 * @param appDataPDF
 	 * @throws WTException
 	 */
-	private static void deleteApplicationData(ApplicationData appDataPDF) throws WTException {
-        PersistenceHelper.manager.delete(appDataPDF);
-        return;
-    }
-	
+	private static void deleteApplicationData(ApplicationData appDataPDF)
+			throws WTException {
+		PersistenceHelper.manager.delete(appDataPDF);
+		return;
+	}
 
-
-
-	
 	/**
 	 * 删除文档以及和部件的参考关系
-	 * @param doc				文档对象
+	 * 
+	 * @param doc
+	 *            文档对象
 	 * @throws WTException
 	 */
-	public static void deleteDependencyLink(WTDocument doc) throws WTException{
+	public static void deleteDependencyLink(WTDocument doc) throws WTException {
 		QuerySpec qs = new QuerySpec();
 		qs.setAdvancedQueryEnabled(true);
 		qs.addClassList(WTDocumentDependencyLink.class, true);
-		TableColumn column1 = new TableColumn("A0","IDA3B5");
-		SearchCondition sc2 = new SearchCondition(column1,SearchCondition.EQUAL,new ConstantExpression(new Long(doc.getPersistInfo().getObjectIdentifier().getId())));
+		TableColumn column1 = new TableColumn("A0", "IDA3B5");
+		SearchCondition sc2 = new SearchCondition(column1,
+				SearchCondition.EQUAL, new ConstantExpression(new Long(doc
+						.getPersistInfo().getObjectIdentifier().getId())));
 		qs.appendWhere(sc2);
 		QueryResult qr1 = PersistenceHelper.manager.find(qs);
-		while(qr1.hasMoreElements()){
+		while (qr1.hasMoreElements()) {
 			Object obj[] = (Object[]) qr1.nextElement();
 			WTDocumentDependencyLink link = (WTDocumentDependencyLink) obj[0];
-			WTDocument parentDoc = (WTDocument)link.getRoleAObject();
+			WTDocument parentDoc = (WTDocument) link.getRoleAObject();
 			PersistenceServerHelper.manager.remove(link);
 			deleteDescribeLink(parentDoc);
 			PersistenceHelper.manager.delete(parentDoc);
 		}
 		PersistenceHelper.manager.delete(doc);
 	}
-	
+
 	/**
 	 * 删除文档以及和部件描述的关系
-	 * @param doc				文档对象
+	 * 
+	 * @param doc
+	 *            文档对象
 	 * @throws WTException
 	 */
-	public static void deleteDescribeLink(WTDocument doc) throws WTException{
+	public static void deleteDescribeLink(WTDocument doc) throws WTException {
 		QuerySpec qs = new QuerySpec();
 		qs.setAdvancedQueryEnabled(true);
 		qs.addClassList(WTPartDescribeLink.class, true);
-		TableColumn column1 = new TableColumn("A0","IDA3B5");
-		SearchCondition sc2 = new SearchCondition(column1,SearchCondition.EQUAL,new ConstantExpression(new Long(doc.getPersistInfo().getObjectIdentifier().getId())));
+		TableColumn column1 = new TableColumn("A0", "IDA3B5");
+		SearchCondition sc2 = new SearchCondition(column1,
+				SearchCondition.EQUAL, new ConstantExpression(new Long(doc
+						.getPersistInfo().getObjectIdentifier().getId())));
 		qs.appendWhere(sc2);
 		QueryResult qr1 = PersistenceHelper.manager.find(qs);
-		while(qr1.hasMoreElements()){
+		while (qr1.hasMoreElements()) {
 			Object obj[] = (Object[]) qr1.nextElement();
 			WTPartDescribeLink link = (WTPartDescribeLink) obj[0];
 			PersistenceServerHelper.manager.remove(link);
 		}
 	}
-	
-	
-	
+
 	/**
 	 * 给文档关联相关附件
-	 * @param doc				WTDocument对象
-	 * @param fileRoute			物理文档路径
+	 * 
+	 * @param doc
+	 *            WTDocument对象
+	 * @param fileRoute
+	 *            物理文档路径
 	 * @throws Exception
 	 */
-	public void associateFile(WTDocument doc, String fileRoute) throws Exception{
+	public void associateFile(WTDocument doc, String fileRoute)
+			throws Exception {
 		ContentHolder ch = (ContentHolder) doc;
-		FormatContentHolder holder = (FormatContentHolder)ContentHelper.service.getContents(doc);
+		FormatContentHolder holder = (FormatContentHolder) ContentHelper.service
+				.getContents(doc);
 		ContentItem item = ContentHelper.getPrimary(holder);
-		if(item!=null && item instanceof ApplicationData){
-            ContentServerHelper.service.deleteContent(holder, item);
-            holder = (WTDocument)ContentServerHelper.service.updateHolderFormat(holder);
-        }
-        ApplicationData ap = ApplicationData.newApplicationData(ch);
-        ap.setRole(ContentRoleType.PRIMARY);
-        ap = ContentServerHelper.service.updateContent(ch, ap, fileRoute);
-        ap = (ApplicationData) PersistenceHelper.manager.save(ap);
-        
+		if (item != null && item instanceof ApplicationData) {
+			ContentServerHelper.service.deleteContent(holder, item);
+			holder = (WTDocument) ContentServerHelper.service
+					.updateHolderFormat(holder);
+		}
+		ApplicationData ap = ApplicationData.newApplicationData(ch);
+		ap.setRole(ContentRoleType.PRIMARY);
+		ap = ContentServerHelper.service.updateContent(ch, ap, fileRoute);
+		ap = (ApplicationData) PersistenceHelper.manager.save(ap);
+
 	}
-	
-	
+
 	/**
-	 * 文档重命名
-	 * rename a wtdoc
+	 * 文档重命名 rename a wtdoc
+	 * 
 	 * @param wtdoc
 	 * @param newName
 	 * @return
@@ -1572,177 +1690,193 @@ public class DocUtils implements RemoteAccess{
 		return wtdoc;
 	}
 
-
 	/**
-	 *  更新文档对象属性
-	 * @param doc  文档对象
-	 * @param  pmdoc PM文档对象
-	 * @param ibas 软属性集合
-	 * @param lifecycleName 生命周期模板名称
+	 * 更新文档对象属性
+	 * 
+	 * @param doc
+	 *            文档对象
+	 * @param pmdoc
+	 *            PM文档对象
+	 * @param ibas
+	 *            软属性集合
+	 * @param lifecycleName
+	 *            生命周期模板名称
 	 * @return WTDocumnet
 	 * @throws WTException
 	 */
-	public static WTDocument updateWTDocument(WTDocument doc,PMDocument pm_document,Map ibas) throws Exception{
-		
+	public static WTDocument updateWTDocument(WTDocument doc,
+			PMDocument pm_document, Map ibas) throws Exception {
+
 		Transaction trans = null;
-		String docName=pm_document.getCommonName();
+		String docName = pm_document.getCommonName();
 		try {
-			
+
 			trans = new Transaction();
 			trans.start();
-			clearAllContent(doc);//清除历史文档信息
-			if (!doc.getName().equals(docName)) {//如果名称不一致则改名称
+			clearAllContent(doc);// 清除历史文档信息
+			if (!doc.getName().equals(docName)) {// 如果名称不一致则改名称
 				rename(doc, docName);
 			}
-			
+
 			if (ibas != null && !ibas.isEmpty()) {
-				LWCUtil.setValue( doc,ibas);
+				LWCUtil.setValue(doc, ibas);
 			}
 
-			//修改对象修改人字段
-          //GenericUtil.changeWTPrincipalField(modifyUser, doc, SET_MODIFIER);
-		    PersistenceHelper.manager.refresh(doc);
-			//上传主文档或附件信息
-		    String contentUrl=pm_document.getUrl();
-			IFileProvider content = pm_document.getContent();//PM主文档流
-			ByteArrayInputStream pins=null;
-			ByteArrayInputStream sins=null;
-			if(content!=null){
-			String pname=content.getFileName();//PM主文件名称
-			//上传主文档信息(实现先清除主文档内容)
-				ByteArrayOutputStream bout=new ByteArrayOutputStream();
-    			content.write(bout);
-    			pins=new ByteArrayInputStream(bout.toByteArray());
-    			doc=linkDocument(doc, pname, pins, "1", contentUrl);
-    			pins.close();
+			// 修改对象修改人字段
+			// GenericUtil.changeWTPrincipalField(modifyUser, doc,
+			// SET_MODIFIER);
+			PersistenceHelper.manager.refresh(doc);
+			// 上传主文档或附件信息
+			String contentUrl = pm_document.getUrl();
+			IFileProvider content = pm_document.getContent();// PM主文档流
+			ByteArrayInputStream pins = null;
+			ByteArrayInputStream sins = null;
+			if (content != null) {
+				String pname = content.getFileName();// PM主文件名称
+				// 上传主文档信息(实现先清除主文档内容)
+				ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				content.write(bout);
+				pins = new ByteArrayInputStream(bout.toByteArray());
+				doc = linkDocument(doc, pname, pins, "1", contentUrl);
+				pins.close();
 			}
-			//上传附件信息(目前未实现删除附件信息)
+			// 上传附件信息(目前未实现删除附件信息)
 			List<IFileProvider> attachments = pm_document.getAttachments();
-			Debug.P("---->>>Attachement:"+attachments==null?"0":attachments.size());
-			if(attachments!=null&&attachments.size()>0){
+			Debug.P("---->>>Attachement:" + attachments == null ? "0"
+					: attachments.size());
+			if (attachments != null && attachments.size() > 0) {
 				for (IFileProvider provider : attachments) {
-					ByteArrayOutputStream bsout=new ByteArrayOutputStream();
+					ByteArrayOutputStream bsout = new ByteArrayOutputStream();
 					provider.write(bsout);
-					sins=new ByteArrayInputStream(bsout.toByteArray());
-					doc=linkDocument(doc, provider.getFileName(), sins, "0", null);
+					sins = new ByteArrayInputStream(bsout.toByteArray());
+					doc = linkDocument(doc, provider.getFileName(), sins, "0",
+							null);
 					sins.close();
 				}
 			}
-			
-			
-			   
-           //添加下载链接
-			addDownloadURL2PM(pm_document,doc);
+
+			// 添加下载链接
+			addDownloadURL2PM(pm_document, doc);
 			trans.commit();
-			trans=null;
+			trans = null;
 			return doc;
-		}catch(IOException e){
+		} catch (IOException e) {
 			e.printStackTrace();
-			throw new Exception("Windchill读取PM系统文档("+docName+")文件流异常!");
+			throw new Exception("Windchill读取PM系统文档(" + docName + ")文件流异常!");
 		} catch (Exception e) {
 			e.printStackTrace();
-		}finally{
-			if (trans != null){
+		} finally {
+			if (trans != null) {
 				trans.rollback();
 			}
 		}
-		     return doc;
+		return doc;
 	}
-	   
-	
+
 	/**
 	 * 添加主内容和附件的下载链接地址
-	 * @param pm_document PM文档对象
-	 * @param doc Windchill文档对象
+	 * 
+	 * @param pm_document
+	 *            PM文档对象
+	 * @param doc
+	 *            Windchill文档对象
 	 * @throws Exception
 	 */
-	  private static void addDownloadURL2PM(PMDocument pm_document, WTDocument doc)
-				throws Exception {
-			if(pm_document!=null&&doc!=null){
-				Debug.P("------->>>>Add Dwn_URL2PM>>>>>>PM Doc:"+pm_document.get_id()+"   ;WC_DOCNum:"+doc.getNumber());
-				IFileProvider content = pm_document.getContent();
-				URLFileProvider fp = new URLFileProvider();
-				if(content!=null){
-					//写内容文件链接
-					String fileName  =pm_document.getContent().getFileName();
-					String url = GenericUtil.getPrimaryContentUrl(doc);
-					fp.setFileName(fileName);
-					fp.setUrl(url);
-					pm_document.setPLMContent(fp);
-				}
-					//写附件
-					List<IFileProvider> attachement = new ArrayList<IFileProvider>();
-					Map<String, String> map = DocUtils.getAllAttachementsDownloadURL(doc);
-					Iterator<Entry<String, String>> iterator = map.entrySet().iterator();
-					while(iterator.hasNext()){
-						Entry<String, String> entry = iterator.next();
-						String file_Name = entry.getKey();
-						String url = entry.getValue();
-						fp = new URLFileProvider();
-						fp.setFileName(file_Name);
-						fp.setUrl(url);
-						attachement.add(fp);
-					}
-					pm_document.setPLMAttachments(attachement);
-					Debug.P("----->>>>>Add DownLoadURL End");
-				}
-
+	private static void addDownloadURL2PM(PMDocument pm_document, WTDocument doc)
+			throws Exception {
+		if (pm_document != null && doc != null) {
+			Debug.P("------->>>>Add Dwn_URL2PM>>>>>>PM Doc:"
+					+ pm_document.get_id() + "   ;WC_DOCNum:" + doc.getNumber());
+			IFileProvider content = pm_document.getContent();
+			URLFileProvider fp = new URLFileProvider();
+			if (content != null) {
+				// 写内容文件链接
+				String fileName = pm_document.getContent().getFileName();
+				String url = GenericUtil.getPrimaryContentUrl(doc);
+				fp.setFileName(fileName);
+				fp.setUrl(url);
+				pm_document.setPLMContent(fp);
+			}
+			// 写附件
+			List<IFileProvider> attachement = new ArrayList<IFileProvider>();
+			Map<String, String> map = DocUtils
+					.getAllAttachementsDownloadURL(doc);
+			Iterator<Entry<String, String>> iterator = map.entrySet()
+					.iterator();
+			while (iterator.hasNext()) {
+				Entry<String, String> entry = iterator.next();
+				String file_Name = entry.getKey();
+				String url = entry.getValue();
+				fp = new URLFileProvider();
+				fp.setFileName(file_Name);
+				fp.setUrl(url);
+				attachement.add(fp);
+			}
+			pm_document.setPLMAttachments(attachement);
+			Debug.P("----->>>>>Add DownLoadURL End");
 		}
-	
-	
-	
+
+	}
+
 	/**
 	 * 如果存在主文档内容则清除主文档内容
+	 * 
 	 * @param doc
-	 * @throws PropertyVetoException 
+	 * @throws PropertyVetoException
 	 */
-	public static void clearContent(WTDocument doc)throws PropertyVetoException,WTException {
-		 //清除主文档内容
+	public static void clearContent(WTDocument doc)
+			throws PropertyVetoException, WTException {
+		// 清除主文档内容
 		ContentHolder contentholder = (ContentHolder) doc;
 		contentholder = ContentHelper.service.getContents(contentholder);
-       if(contentholder!=null){
-   		List contentListForTarget = ContentHelper.getContentListAll(contentholder);
-   		if(contentListForTarget!=null){
-   	   		for (int i = 0; i < contentListForTarget.size(); i++) {
-   	   			ContentItem contentItem = (ContentItem) contentListForTarget.get(i);
-   	   			if (contentItem.getRole().toString().equals("PRIMARY")) {
-   	   				ContentServerHelper.service.deleteContent(contentholder,contentItem);
-   	   				break;
-   	   			}
-   	   		 }
-   		 }
-       }
+		if (contentholder != null) {
+			List contentListForTarget = ContentHelper
+					.getContentListAll(contentholder);
+			if (contentListForTarget != null) {
+				for (int i = 0; i < contentListForTarget.size(); i++) {
+					ContentItem contentItem = (ContentItem) contentListForTarget
+							.get(i);
+					if (contentItem.getRole().toString().equals("PRIMARY")) {
+						ContentServerHelper.service.deleteContent(
+								contentholder, contentItem);
+						break;
+					}
+				}
+			}
+		}
 	}
-	
 
 	/**
 	 * 清除主文档包括附件信息
+	 * 
 	 * @param doc
 	 * @throws Exception
 	 */
-	public static void clearAllContent(WTDocument doc)throws Exception{
-		//清除内容(包含附件)
-		FormatContentHolder holder = (FormatContentHolder) ContentHelper.service.getContents(doc);
-		if(holder!=null){
-	        //首先清除已有的
-	        Vector items = ContentHelper.getContentListAll(holder);
-	        if(items!=null && items.size()>0) {
-	        	Debug.P("-------->>>>Vector-Contents:"+items.size());
-	            for (int i = 0; i < items.size(); i++) {
-	                ContentItem item = (ContentItem) items.get(i);
-	                if(item==null) continue;
-//	                ApplicationData appData = (ApplicationData) item;
-//					ContentServerHelper.service.deleteContent(holder, appData);
-	                  ContentServerHelper.service.deleteContent(holder,item);
-	            }
-	        }
+	public static void clearAllContent(WTDocument doc) throws Exception {
+		// 清除内容(包含附件)
+		FormatContentHolder holder = (FormatContentHolder) ContentHelper.service
+				.getContents(doc);
+		if (holder != null) {
+			// 首先清除已有的
+			Vector items = ContentHelper.getContentListAll(holder);
+			if (items != null && items.size() > 0) {
+				Debug.P("-------->>>>Vector-Contents:" + items.size());
+				for (int i = 0; i < items.size(); i++) {
+					ContentItem item = (ContentItem) items.get(i);
+					if (item == null)
+						continue;
+					// ApplicationData appData = (ApplicationData) item;
+					// ContentServerHelper.service.deleteContent(holder,
+					// appData);
+					ContentServerHelper.service.deleteContent(holder, item);
+				}
+			}
 		}
 	}
-	
-	
-	
+
 	/**
 	 * 根据类型名称查询类型对象
+	 * 
 	 * @author blueswang
 	 * @param objType
 	 * @return
@@ -1750,33 +1884,38 @@ public class DocUtils implements RemoteAccess{
 	 * @return WTTypeDefinitionMaster
 	 * @Description
 	 */
-	public static WTTypeDefinitionMaster getDfmDocumentType(String objType) throws QueryException {	
+	public static WTTypeDefinitionMaster getDfmDocumentType(String objType)
+			throws QueryException {
 		QueryResult qr = new QueryResult();
 		QuerySpec queryspec = new QuerySpec(WTTypeDefinitionMaster.class);
-		SearchCondition sc = new SearchCondition(WTTypeDefinitionMaster.class,WTTypeDefinitionMaster.DISPLAY_NAME_KEY,SearchCondition.NOT_EQUAL, " ");
-		SearchCondition sc1 = new SearchCondition(WTTypeDefinitionMaster.class,WTTypeDefinitionMaster.DELETED_ID,SearchCondition.IS_NULL, true);
-		WTTypeDefinitionMaster wtm =null;
+		SearchCondition sc = new SearchCondition(WTTypeDefinitionMaster.class,
+				WTTypeDefinitionMaster.DISPLAY_NAME_KEY,
+				SearchCondition.NOT_EQUAL, " ");
+		SearchCondition sc1 = new SearchCondition(WTTypeDefinitionMaster.class,
+				WTTypeDefinitionMaster.DELETED_ID, SearchCondition.IS_NULL,
+				true);
+		WTTypeDefinitionMaster wtm = null;
 		try {
 			queryspec.appendSearchCondition(sc);
 			queryspec.appendAnd();
 			queryspec.appendSearchCondition(sc1);
 			qr = PersistenceHelper.manager.find(queryspec);
-			while (qr.hasMoreElements()){
-				wtm= (WTTypeDefinitionMaster) qr.nextElement();//查出的是所有文档类型
-				//System.out.println(wtm.getHierarchyDisplayNameKey());
-				//System.out.println(wtm.getDisplayNameKey());
-				if (objType.equals(wtm.getHierarchyDisplayNameKey())){//过滤得到我们想要的文档类型DFM
-					Debug.P(wtm.getDescriptionKey() + "   ---    "+ wtm.getIntHid());
+			while (qr.hasMoreElements()) {
+				wtm = (WTTypeDefinitionMaster) qr.nextElement();// 查出的是所有文档类型
+				// System.out.println(wtm.getHierarchyDisplayNameKey());
+				// System.out.println(wtm.getDisplayNameKey());
+				if (objType.equals(wtm.getHierarchyDisplayNameKey())) {// 过滤得到我们想要的文档类型DFM
+					Debug.P(wtm.getDescriptionKey() + "   ---    "
+							+ wtm.getIntHid());
 					return wtm;
 				}
 			}
-		}catch(QueryException e) {
+		} catch (QueryException e) {
 			e.printStackTrace();
-		}catch (WTException e){
+		} catch (WTException e) {
 			e.printStackTrace();
 		}
 		return wtm;
 	}
-
 
 }
