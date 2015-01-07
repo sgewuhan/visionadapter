@@ -45,4 +45,13 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 		}
 		return false;
 	}
+	
+	public PMDocument getDocumentByPMId(String pmId) {
+		 PMDocument pmDocuemnt = (PMDocument) collection.findOne(new BasicDBObject()
+				.append(PMDocument._ID, new ObjectId(pmId)));
+		if (pmDocuemnt != null) {
+			pmDocuemnt.setCollection(collection);
+		}
+		return pmDocuemnt;
+	}
 }
