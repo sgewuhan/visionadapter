@@ -37,6 +37,28 @@ public final class PMDocument extends BasicDocument {
 
 	private static final String DB = "db";
 
+	public static final String PM_TYPE_DOCUMENT = "pmdocument";
+
+	public static final String PM_TYPE_CAD = "pmcaddocument";
+
+	public static final String PM_TYPE_PART = "pmpart";
+
+	public static final String PM_TYPE_PRODUCT = "pmproduct";
+
+	public static final String PM_TYPE_MATERIAL = "pmmaterial";
+
+	public static final String PM_TYPE_SUPPLYMENT = "pmsupplyment";
+
+	public static final String PM_TYPE_JIGTOOL = "pmjigtools";
+
+	public static final String PM_TYPE_PACKAGE = "pmpackage";
+
+	public static final String PLM_TYPE_DOCUMENT = "wtdocument";
+
+	public static final String PLM_TYPE_EPMDOCUMENT = "epmdocument";
+
+	public static final String PLM_TYPE_PART = "wtpart";
+
 	/**
 	 * 是否提交，为PLM两段式提交打标记
 	 */

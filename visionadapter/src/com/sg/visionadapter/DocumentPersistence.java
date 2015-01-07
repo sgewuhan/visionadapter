@@ -52,13 +52,32 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 	 * 
 	 * @return document 对象ID集合
 	 */
-	public List<String> getDeletedDocumentList() {
+	public List<String> getDeletedDocumentList(String type) {
 		List<String> result = new ArrayList<String>();
-		List<?> docIdList = collection.distinct(PMDocument._ID,
-				new BasicDBObject().append(PMDocument.F_DELETED, Boolean.TRUE));
-		for (Object obj : docIdList) {
-			if (obj instanceof ObjectId) {
-				result.add(obj.toString());
+		if (type != null) {
+			String[] pmtype = null;
+			if (PMDocument.PLM_TYPE_EPMDOCUMENT.equals(type)) {
+				pmtype = new String[] { PMDocument.PM_TYPE_CAD };
+			} else if (PMDocument.PLM_TYPE_DOCUMENT.equals(type)) {
+				pmtype = new String[] { PMDocument.PM_TYPE_DOCUMENT };
+			} else if (PMDocument.PLM_TYPE_PART.equals(type)) {
+				pmtype = new String[] { PMDocument.PM_TYPE_JIGTOOL,
+						PMDocument.PM_TYPE_MATERIAL,
+						PMDocument.PM_TYPE_PACKAGE, PMDocument.PM_TYPE_PART,
+						PMDocument.PM_TYPE_PRODUCT,
+						PMDocument.PM_TYPE_SUPPLYMENT };
+			}
+			if (pmtype != null) {
+				List<?> docIdList = collection.distinct(
+						PMDocument._ID,
+						new BasicDBObject().append(PMDocument.F_DELETED,
+								Boolean.TRUE).append(PMDocument.PLM_TYPE,
+								new BasicDBObject().append("$in", pmtype)));
+				for (Object obj : docIdList) {
+					if (obj instanceof ObjectId) {
+						result.add(obj.toString());
+					}
+				}
 			}
 		}
 		return result;
