@@ -20,11 +20,15 @@ import ext.tmt.utils.Debug;
 import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.IBAUtils;
 
-public class EPMDocHelper
-  implements Serializable
-{
+public class EPMDocHelper implements Serializable {
   private static final long serialVersionUID = 2304592616754675533L;
 
+  /**
+	 * 监听EPMDocument创建事件
+	 * @param target
+	 * @param eventType
+	 * @throws Exception
+	 */
   @SuppressWarnings("deprecation")
 public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
     throws Exception
