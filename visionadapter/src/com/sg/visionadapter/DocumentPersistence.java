@@ -34,15 +34,33 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 
 	/**
 	 * 通过pmId查询文档是否存在
+	 * 
 	 * @param pmId
 	 * @return
 	 */
 	public Boolean getDocumentById(String pmId) {
-		DBObject dbo = collection.findOne(new BasicDBObject().append(PMDocument._ID,
-				new ObjectId(pmId)));
-		if(dbo != null) {
+		DBObject dbo = collection.findOne(new BasicDBObject().append(
+				PMDocument._ID, new ObjectId(pmId)));
+		if (dbo != null) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * 获得预删除的document对象
+	 * 
+	 * @return document 对象ID集合
+	 */
+	public List<String> getDeltedDocumentList() {
+		List<String> result = new ArrayList<String>();
+		List<?> docIdList = collection.distinct(PMDocument._ID,
+				new BasicDBObject().append(PMDocument.F_DELETED, Boolean.TRUE));
+		for (Object obj : docIdList) {
+			if (obj instanceof ObjectId) {
+				result.add(obj.toString());
+			}
+		}
+		return result;
 	}
 }
