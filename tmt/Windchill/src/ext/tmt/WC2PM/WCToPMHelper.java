@@ -11,6 +11,7 @@ import com.sg.visionadapter.JigToolsPersistence;
 import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
+import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
 import com.sg.visionadapter.PMJigTools;
 import com.sg.visionadapter.PMMaterial;
@@ -926,6 +927,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		}
 	}
 
+	public static void updatePMDocument(String pmoid,WTObject object) throws InstantiationException, IllegalAccessException{
+		PMDocument pmdoc = null;
+		DocumentPersistence docper=null;
+		docper=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
+		
+	}
+	
+	
+	
 	public static void updatePMCADDoc(String pmoid, EPMDocument epmdoc) {
 		String docOid = "";
 		CADDocumentPersistence cadDocPersistence = null;

@@ -37,10 +37,34 @@ public final class PMDocument extends BasicDocument {
 
 	private static final String DB = "db";
 
+	public static final String PM_TYPE_DOCUMENT = "pmdocument";
+
+	public static final String PM_TYPE_CAD = "pmcaddocument";
+
+	public static final String PM_TYPE_PART = "pmpart";
+
+	public static final String PM_TYPE_PRODUCT = "pmproduct";
+
+	public static final String PM_TYPE_MATERIAL = "pmmaterial";
+
+	public static final String PM_TYPE_SUPPLYMENT = "pmsupplyment";
+
+	public static final String PM_TYPE_JIGTOOL = "pmjigtools";
+
+	public static final String PM_TYPE_PACKAGE = "pmpackage";
+
+	public static final String PLM_TYPE_DOCUMENT = "wtdocument";
+
+	public static final String PLM_TYPE_EPMDOCUMENT = "epmdocument";
+
+	public static final String PLM_TYPE_PART = "wtpart";
+
 	/**
 	 * 是否提交，为PLM两段式提交打标记
 	 */
 	private static final String F_IS_COMMIT = "iscommit";
+
+	public static final String F_DELETED = "deleted";
 
 	public PMDocument() {
 
@@ -110,7 +134,7 @@ public final class PMDocument extends BasicDocument {
 
 	@Override
 	public WriteResult doInsert() throws Exception {
-		 return super.doInsert();
+		return super.doInsert();
 	}
 
 	/**
@@ -133,13 +157,14 @@ public final class PMDocument extends BasicDocument {
 		DBObject content = new BasicDBObject().append(F_ID, objectId)
 				.append(NAME_SPACE, nameSpace).append(FILE_NAME, fileName)
 				.append(DB, db.toString());
-		DBObject metaData = new BasicDBObject().append("fvid", 0).append("caid", "PM-RW")
-				.append("caname", "PLM系统");
+		DBObject metaData = new BasicDBObject().append("fvid", 0)
+				.append("caid", "PM-RW").append("caname", "PLM系统");
 		BasicBSONList contents = new BasicBSONList();
 		contents.add(content);
 		setValue(CONTENT, contents);
 		GridFSFileProvider gfs = new GridFSFileProvider(content);
 
-		return gfs.writeToGridFS(in, objectId, fileName, nameSpace, db, metaData);
+		return gfs.writeToGridFS(in, objectId, fileName, nameSpace, db,
+				metaData);
 	}
 }

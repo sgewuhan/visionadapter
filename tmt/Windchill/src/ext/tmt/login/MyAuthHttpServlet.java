@@ -6,17 +6,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import wt.auth.AuthenticationServer;
+import wt.httpgw.HTTPGatewayServlet;
+
 import com.infoengine.util.Base64;
 
 import ext.tmt.utils.Debug;
-
-import wt.auth.AuthenticationServer;
-import wt.httpgw.HTTPGatewayServlet;
-import com.ptc.mvc.components.support.ComponentXmlWebApplicationContext;
-import com.ptc.mvc.components.support.ComponentBeanDefinitionDocumentReader;
-import com.ptc.mvc.components.support.DefaultComponentBuilderResolver;
-import com.ptc.mvc.components.support.ComponentBuilderBeanNameGenerator;
-import com.ptc.mvc.components.support.ComponentBuilderBeanPostProcessor;
 
 public class MyAuthHttpServlet extends HTTPGatewayServlet {
 	

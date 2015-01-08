@@ -453,7 +453,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	         			if(StringUtils.isEmpty(doc_id)) return 0;
 	         			 Persistable object=GenericUtil.getPersistableByOid(doc_id);
 	         			if(object!=null&&object instanceof WTDocument){
-	         				WTDocument doc=(WTDocument)getLastObjectByNum(object);
+	         				WTDocument doc = (WTDocument)object;
+						//	WTDocument doc=(WTDocument)getLastObjectByNum(object);
 	         				Map ibas=LWCUtil.getAllAttribute(doc);
 	         			    setDocIBAValuesMap(ibas, pm_document);
 	         				doc=(WTDocument) GenericUtil.checkout(doc);
