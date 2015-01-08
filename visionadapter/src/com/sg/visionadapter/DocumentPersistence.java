@@ -29,6 +29,7 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 			String strId = id.toString();
 			ids.add(strId);
 		}
+		find.close();
 		return ids;
 	}
 
