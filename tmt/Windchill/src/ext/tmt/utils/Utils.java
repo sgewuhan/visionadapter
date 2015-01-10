@@ -267,7 +267,7 @@ public class Utils {
 	}
 
 	public static String getDate() {
-		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		return sdf.format(new Date());
 	}
 

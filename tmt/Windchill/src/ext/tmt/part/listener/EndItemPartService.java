@@ -61,8 +61,8 @@ public class EndItemPartService extends StandardManager implements PartService,
 			//}
 				 Debug.P("part2---->"+part);
 				// Debug.P(part.getNumber()+" ------------- version1s---->"+part.getVersionIdentifier().getValue()+"    version1---->"+part.getIterationIdentifier().getValue());
-//				PartHelper.listenerWTPart((WTPart) target, eventType);
-				PartHelper.listenerWTPart1((WTPart) target, eventType);
+				PartHelper.listenerWTPart((WTPart) target, eventType);
+//				PartHelper.listenerWTPart1((WTPart) target, eventType);
 			}
 
 		}

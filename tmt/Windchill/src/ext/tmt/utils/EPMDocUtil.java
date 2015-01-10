@@ -63,6 +63,29 @@ public class EPMDocUtil {
 	}
 	
 	  /**
+	   * 获取系统内所有的最新版本(最新大版本+最新小版本)的的EPMDocument
+	   * @return
+	   * @throws WTException
+	   */
+	public static List<WTDocument> getAllDocument()throws WTException{
+		List<WTDocument> docList = new ArrayList<WTDocument>();
+		QuerySpec qs = new QuerySpec(WTDocument.class);
+		SearchCondition latestIteration = new SearchCondition(WTDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		qs.appendWhere(latestIteration);
+		Debug.P("sql---->"+qs);
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		Debug.P("All WTDocument size-------1------>"+qr.size());
+		qr = new LatestConfigSpec().process(qr);
+		Debug.P("All WTDocument size-------2------>"+qr.size());
+		while(qr.hasMoreElements()){
+			Object object = (Object)qr.nextElement();
+			WTDocument doc = (WTDocument)object;
+			docList.add(doc);
+		}
+		return docList;
+	}
+	
+	  /**
 	   * 获取系统内所有的最新版本(最新大版本+最新小版本)的的WTPart
 	   * @return
 	   * @throws WTException

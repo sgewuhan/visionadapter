@@ -1,46 +1,9 @@
 package ext.tmt.WC2PM;
 
-import com.mongodb.WriteResult;
-import com.ptc.core.meta.common.TypeIdentifier;
-import com.ptc.core.meta.server.TypeIdentifierUtility;
-import com.ptc.windchill.enterprise.object.util.TypeHelper;
-import com.sg.visionadapter.CADDocumentPersistence;
-import com.sg.visionadapter.DocumentPersistence;
-import com.sg.visionadapter.FolderPersistence;
-import com.sg.visionadapter.JigToolsPersistence;
-import com.sg.visionadapter.MaterialPersistence;
-import com.sg.visionadapter.ModelServiceFactory;
-import com.sg.visionadapter.PMCADDocument;
-import com.sg.visionadapter.PMDocument;
-import com.sg.visionadapter.PMFolder;
-import com.sg.visionadapter.PMJigTools;
-import com.sg.visionadapter.PMMaterial;
-import com.sg.visionadapter.PMPackage;
-import com.sg.visionadapter.PMPart;
-import com.sg.visionadapter.PMProduct;
-import com.sg.visionadapter.PMProductItem;
-import com.sg.visionadapter.PMProject;
-import com.sg.visionadapter.PMSupplyment;
-import com.sg.visionadapter.PackagePersistence;
-import com.sg.visionadapter.PartPersistence;
-import com.sg.visionadapter.ProductPersistence;
-import com.sg.visionadapter.SupplymentPersistence;
-
-import ext.tmt.integration.webservice.pm.PMWebserviceImpl;
-import ext.tmt.part.listener.PartHelper;
-import ext.tmt.utils.Contants;
-import ext.tmt.utils.Debug;
-import ext.tmt.utils.EPMDocUtil;
-import ext.tmt.utils.GenericUtil;
-import ext.tmt.utils.IBAUtils;
-import ext.tmt.utils.UserDefQueryUtil;
-import ext.tmt.utils.Utils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -60,25 +23,54 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
+import wt.doc.WTDocument;
 import wt.enterprise.Master;
 import wt.epm.EPMDocument;
-import wt.fc.ObjectIdentifier;
-import wt.fc.PersistInfo;
 import wt.fc.Persistable;
 import wt.fc.ReferenceFactory;
 import wt.fc.WTObject;
 import wt.folder.Folder;
 import wt.folder.FolderHelper;
-import wt.folder.FolderService;
-import wt.lifecycle.LifeCycleState;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.part.WTPart;
+import wt.util.WTException;
 import wt.util.WTProperties;
-import wt.vc.IterationIdentifier;
-import wt.vc.IterationInfo;
-import wt.vc.VersionIdentifier;
 
+import com.mongodb.WriteResult;
+import com.ptc.core.meta.common.TypeIdentifier;
+import com.ptc.core.meta.server.TypeIdentifierUtility;
+import com.sg.visionadapter.CADDocumentPersistence;
+import com.sg.visionadapter.DocumentPersistence;
+import com.sg.visionadapter.FolderPersistence;
+import com.sg.visionadapter.JigToolsPersistence;
+import com.sg.visionadapter.MaterialPersistence;
+import com.sg.visionadapter.ModelServiceFactory;
+import com.sg.visionadapter.PMCADDocument;
+import com.sg.visionadapter.PMDocument;
+import com.sg.visionadapter.PMFolder;
+import com.sg.visionadapter.PMJigTools;
+import com.sg.visionadapter.PMMaterial;
+import com.sg.visionadapter.PMPackage;
+import com.sg.visionadapter.PMPart;
+import com.sg.visionadapter.PMProduct;
+import com.sg.visionadapter.PMSupplyment;
+import com.sg.visionadapter.PackagePersistence;
+import com.sg.visionadapter.PartPersistence;
+import com.sg.visionadapter.ProductPersistence;
+import com.sg.visionadapter.SupplymentPersistence;
+
+import ext.tmt.integration.webservice.pm.PMWebserviceImpl;
+import ext.tmt.utils.Contants;
+import ext.tmt.utils.Debug;
+import ext.tmt.utils.DocUtils;
+import ext.tmt.utils.EPMDocUtil;
+import ext.tmt.utils.GenericUtil;
+import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.UserDefQueryUtil;
+import ext.tmt.utils.Utils;
+
+@SuppressWarnings("all")
 public class WCToPMHelper implements RemoteAccess, Serializable {
 	private static String codebasePath = null;
 
@@ -122,7 +114,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			} catch (NullPointerException e) {
 				pmPart = null;
 			}
-			Debug.P("pmPart-->" + pmPart);
+			Debug.P("pmPart-->" + pmPart!=null);
 			try {
 				PMFolder pmfolder = (PMFolder) ((FolderPersistence) ModelServiceFactory
 						.getInstance(codebasePath).get(FolderPersistence.class))
@@ -175,6 +167,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPart.setOwner(wtPart.getCreatorName());
 					pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
 							: partiba.getIBAValue("Material"));
+					pmPart.setValue("IsSync", true);
 					WriteResult wresult = pmPart.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -260,7 +253,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			} catch (NullPointerException e) {
 				pmProduct = null;
 			}
-			Debug.P("pmProduct-->" + pmProduct);
+			Debug.P("pmProduct-->" + pmProduct!=null);
 			try {
 				PMFolder pmfolder = (PMFolder) ((FolderPersistence) factory
 						.get(FolderPersistence.class)).getByPLMId(pFolderId);
@@ -271,7 +264,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			if (flag) {
-				Debug.P("pmProduct-->" + pmProduct);
+				Debug.P("pmProduct-->" + pmProduct!=null);
 				if (pmProduct != null) {
 					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
@@ -318,6 +311,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.setMaterial(partiba.getIBAValue("Material") == null ? ""
 									: partiba.getIBAValue("Material"));
 					pmProduct.setOwner(wtPart.getCreatorName());
+					pmProduct.setValue("IsSync", true);
 					WriteResult wresult = pmProduct.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -409,7 +403,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			} catch (NullPointerException e) {
 				pmMaterial = null;
 			}
-			Debug.P("pmMaterial-->" + pmMaterial);
+			Debug.P("pmMaterial-->" + pmMaterial!=null);
 			try {
 				PMFolder pmfolder = (PMFolder) ((FolderPersistence) ModelServiceFactory
 						.getInstance(codebasePath).get(FolderPersistence.class))
@@ -421,7 +415,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			if (flag) {
-				Debug.P("pmMaterial-->" + pmMaterial);
+				Debug.P("pmMaterial-->" + pmMaterial!=null);
 				if (pmMaterial != null) {
 					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
@@ -465,6 +459,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmMaterial
 							.setMaterial(partiba.getIBAValue("Material") == null ? ""
 									: partiba.getIBAValue("Material"));
+					pmMaterial.setValue("IsSync", true);
 					WriteResult wresult = pmMaterial.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -533,7 +528,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			if (flag) {
-				Debug.P("pmSupplyment-->" + pmSupplyment);
+				Debug.P("pmSupplyment-->" + pmSupplyment!=null);
 				if (pmSupplyment != null) {
 					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
@@ -581,6 +576,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.setMaterial(partiba.getIBAValue("Material") == null ? ""
 									: partiba.getIBAValue("Material"));
 					pmSupplyment.setOwner(wtPart.getCreatorName());
+					pmSupplyment.setValue("IsSync", true);
 					WriteResult wresult = pmSupplyment.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -642,7 +638,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmcad = null;
 				}
 			}
-			Debug.P("pmcad-->" + pmcad);
+		//	Debug.P("pmcad-->" + pmcad);
 			try {
 				PMFolder pmfolder = (PMFolder) ((FolderPersistence) ModelServiceFactory
 						.getInstance(codebasePath).get(FolderPersistence.class))
@@ -654,7 +650,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			if (flag) {
-				Debug.P("pmcad-->" + pmcad);
+				Debug.P("pmcad-->" + pmcad!=null);
 				if (pmcad != null) {
 					String pmoid = cadiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
@@ -691,6 +687,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmcad.setPartType0(part_type == null ? "" : part_type);
 					ObjectId objectId = new ObjectId();
 					pmcad.set_id(objectId);
+					pmcad.setValue("IsSync", true);
 					pmcad.setOwner(epmdoc.getCreatorName());
 					WriteResult wresult = pmcad.doInsert();
 					String error = wresult.getError();
@@ -752,7 +749,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			if (flag) {
-				Debug.P("pmPackage-->" + pmPackage);
+				Debug.P("pmPackage-->" + pmPackage != null);
 				if (pmPackage != null) {
 					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
@@ -796,6 +793,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPackage
 							.setMaterial(partiba.getIBAValue("Material") == null ? ""
 									: partiba.getIBAValue("Material"));
+					pmPackage.setValue("IsSync", true);
 					WriteResult wresult = pmPackage.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -862,7 +860,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			if (flag) {
-				Debug.P("pmJigTools-->" + pmJigTools);
+				Debug.P("pmJigTools-->" + pmJigTools!=null);
 				if (pmJigTools != null) {
 					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
@@ -902,6 +900,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material_Group"));
 					ObjectId objectId = new ObjectId();
 					pmJigTools.set_id(objectId);
+					pmJigTools.setValue("IsSync", true);
 					pmJigTools.setOwner(wtPart.getCreatorName());
 					pmJigTools
 							.setMaterial(partiba.getIBAValue("Material") == null ? ""
@@ -965,7 +964,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmcad.setPLMData(plmData);
 			pmcad.setCommonName(epmdoc.getName());
 			pmcad.setObjectNumber(epmdoc.getNumber());
-			pmcad.setStatus(epmdoc.getState().toString().toLowerCase());
+			//pmcad.setStatus(epmdoc.getState().toString().toLowerCase());
 			pmcad.setCreateBy(epmdoc.getCreatorName(),
 					epmdoc.getCreatorFullName());
 			Debug.P("version1--->"+epmdoc.getVersionIdentifier().getValue()+"   version2----->"+epmdoc.getIterationIdentifier()
@@ -980,6 +979,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
 					: cadiba.getIBAValue("Material_NO"));
 			pmcad.setPartType0(part_type == null ? "" : part_type);
+			pmcad.setValue("IsSync", true);
 			WriteResult wresult = pmcad.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -1016,7 +1016,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			Debug.P("partiba----->" + partiba);
 			Debug.P(partOid);
 			pmPart.setCommonName(wtPart.getName());
-			pmPart.setStatus(wtPart.getState().toString().toLowerCase());
+			//pmPart.setStatus(wtPart.getState().toString().toLowerCase());
 			pmPart.setMajorVid(wtPart.getVersionIdentifier().getValue());
 			pmPart.setSecondVid(Integer.parseInt(wtPart
 					.getIterationIdentifier().getValue()));
@@ -1042,6 +1042,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
 			pmPart.setOwner(wtPart.getCreatorName());
+			pmPart.setValue("IsSync", true);
 			WriteResult wresult = pmPart.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -1089,7 +1090,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmProduct.setPLMData(plmData);
 			pmProduct.setCommonName(wtPart.getName());
 			pmProduct.setObjectNumber(wtPart.getNumber());
-			pmProduct.setStatus(wtPart.getState().toString().toLowerCase());
+			//pmProduct.setStatus(wtPart.getState().toString().toLowerCase());
 			pmProduct.setCreateBy(wtPart.getCreatorName(),
 					wtPart.getCreatorFullName());
 			pmProduct.setMajorVid(wtPart.getVersionIdentifier().getValue());
@@ -1111,6 +1112,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmProduct.setOwner(wtPart.getCreatorName());
 			pmProduct.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
+			pmProduct.setValue("IsSync", true);
 			WriteResult wresult = pmProduct.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -1154,7 +1156,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmMaterial.setPLMData(plmData);
 			pmMaterial.setCommonName(wtPart.getName());
 			pmMaterial.setObjectNumber(wtPart.getNumber());
-			pmMaterial.setStatus(wtPart.getState().toString().toLowerCase());
+			//pmMaterial.setStatus(wtPart.getState().toString().toLowerCase());
 			pmMaterial.setCreateBy(wtPart.getCreatorName(),
 					wtPart.getCreatorFullName());
 			pmMaterial.setMajorVid(wtPart.getVersionIdentifier().getValue());
@@ -1176,6 +1178,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					.setMaterialGroup(partiba.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
 			pmMaterial.setOwner(wtPart.getCreatorName());
+			pmMaterial.setValue("IsSync", true);
 			WriteResult wresult = pmMaterial.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -1218,7 +1221,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmPackage.setPLMData(plmData);
 			pmPackage.setCommonName(wtPart.getName());
 			pmPackage.setObjectNumber(wtPart.getNumber());
-			pmPackage.setStatus(wtPart.getState().toString().toLowerCase());
+			//pmPackage.setStatus(wtPart.getState().toString().toLowerCase());
 			pmPackage.setCreateBy(wtPart.getCreatorName(),
 					wtPart.getCreatorFullName());
 			pmPackage.setMajorVid(wtPart.getVersionIdentifier().getValue());
@@ -1240,6 +1243,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					.setMaterialGroup(partiba.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
 			pmPackage.setOwner(wtPart.getCreatorName());
+			pmPackage.setValue("IsSync", true);
 			WriteResult wresult = pmPackage.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -1297,7 +1301,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmJigTools.setPLMData(plmData);
 			pmJigTools.setCommonName(wtPart.getName());
 			pmJigTools.setObjectNumber(wtPart.getNumber());
-			pmJigTools.setStatus(wtPart.getState().toString().toLowerCase());
+			//pmJigTools.setStatus(wtPart.getState().toString().toLowerCase());
 			pmJigTools.setCreateBy(wtPart.getCreatorName(),
 					wtPart.getCreatorFullName());
 			pmJigTools.setMajorVid(wtPart.getVersionIdentifier().getValue());
@@ -1318,6 +1322,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmJigTools.setOwner(wtPart.getCreatorName());
 			pmJigTools.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
+			pmJigTools.setValue("IsSync", true);
 			WriteResult wresult = pmJigTools.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -1357,7 +1362,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					+ wtPart.getIterationInfo().getBranchId());
 			pmSupplyment.setPLMData(plmData);
 			pmSupplyment.setCommonName(wtPart.getName());
-			pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());
+		//	pmSupplyment.setStatus(wtPart.getState().toString().toLowerCase());
 			pmSupplyment.setCreateBy(wtPart.getCreatorName(),
 					wtPart.getCreatorFullName());
 			pmSupplyment.setMajorVid(wtPart.getVersionIdentifier().getValue());
@@ -1383,6 +1388,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmSupplyment
 					.setMaterial(partiba.getIBAValue("Material") == null ? ""
 							: partiba.getIBAValue("Material"));
+			pmSupplyment.setValue("IsSync", true);
 			pmSupplyment.setOwner(wtPart.getCreatorName());
 			WriteResult wresult = pmSupplyment.doUpdate();
 			String error = wresult.getError();
@@ -1768,28 +1774,94 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 	}
 
 	
-	public static void SynchEPMDocumentPLM2PM() throws Exception{
-		List<EPMDocument> epmList = new ArrayList<EPMDocument>();
-		String branchId="";//PM中的_plm_plmmid
-		String oid="";
-		CADDocumentPersistence cadDocPersistence = null;
-		PMCADDocument pmcad = null;
-		cadDocPersistence = (CADDocumentPersistence) ModelServiceFactory
-				.getInstance(codebasePath)
-				.get(CADDocumentPersistence.class);
-		epmList=EPMDocUtil.getAllEPMDocument();
-		for(EPMDocument epmdoc:epmList){
-			branchId = "wt.epm.EPMDocument:"+String.valueOf(epmdoc.getBranchIdentifier());
-			oid=getObjectOid(epmdoc);
-			//根据_plm_plmmid去PM系统中查找对象
-			pmcad=cadDocPersistence.getByPLMId(oid);
+	
+	/**
+	 * 同步WC中的EPMDocument对象，如果已同步则更新
+	 * @throws Exception
+	 */
+	public static void SynchEPMDocument2PM(String startTime) throws Exception{
+		Debug.P("---------->>>>SynchEPMDocument2PM:startTime=" + startTime);
+		if (!RemoteMethodServer.ServerFlag) {
+			try {
+				Class aclass[] = { String.class };
+				Object aobj[] = { startTime };
+				RemoteMethodServer.getDefault().invoke("SynchEPMDocument2PM",
+						WCToPMHelper.class.getName(), null, aclass, aobj);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else {
+			List<EPMDocument> epmList = new ArrayList<EPMDocument>();
+			epmList = EPMDocUtil.getAllEPMDocument();
+			for(EPMDocument epmdoc:epmList){
+				CreateEPMDocToPM(epmdoc);
+			}
+			Debug.P("-----------------同步EPMDocument完毕！--------------");
+		}
+	}
+	/**
+	 * 同步WC中的WTPart对象，如果已同步则更新
+	 * @throws Exception
+	 */
+	public static void SynchWTPart2PM(String startTime) throws Exception{
+		Debug.P("---------->>>>SynchWTPart2PM:startTime=" + startTime);
+		if (!RemoteMethodServer.ServerFlag) {
+			try {
+				Class aclass[] = { String.class };
+				Object aobj[] = { startTime };
+				RemoteMethodServer.getDefault().invoke("SynchWTPart2PM",
+						WCToPMHelper.class.getName(), null, aclass, aobj);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else {
+			List<WTPart> partList = new ArrayList<WTPart>();
+			String partType="";
+			partList=EPMDocUtil.getAllWTPart();
+			int i=0;  
+			for(WTPart wtPart:partList){
+				i++;
+				partType=DocUtils.getType(wtPart);
+				Debug.P(wtPart.getNumber()+"--------->"+partType+"----------->"+i);
+				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+					WCToPMHelper.CreatePartToPM( wtPart);
+				}else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
+					WCToPMHelper.CreatePMProductToPM( wtPart);
+				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+					WCToPMHelper.CreatePMaterialToPM(wtPart);
+				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+					WCToPMHelper.CreateSupplyToPM(wtPart);
+				}else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+					WCToPMHelper.CreatePMPackageToPM(wtPart);
+				}else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+					WCToPMHelper.CreateJigToolPartToPM( wtPart);
+				}
+			}
+		}
+		Debug.P("-----------------同步WTPart完毕！--------------");
+	}
+	
+	
+	public static void SynchDocument2PM(String startTime ) throws WTException{
+		Debug.P("---------->>>>SynchDocument2PM:startTime=" + startTime);
+		if (!RemoteMethodServer.ServerFlag) {
+			try {
+				Class aclass[] = { String.class };
+				Object aobj[] = { startTime };
+				RemoteMethodServer.getDefault().invoke("SynchDocument2PM",
+						WCToPMHelper.class.getName(), null, aclass, aobj);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else {
+			List<WTDocument> docList = new ArrayList<WTDocument>();
+			docList=EPMDocUtil.getAllDocument();
 			
 			
 		}
-	 
-		
-		
-		
+	}
+	
+	public static void getPMDocument(WTDocument doc){
 		
 	}
 	
@@ -1840,14 +1912,16 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			  }
 		  }
 		}
-		
 	}
+	
+	
+	
 
 	public static void main(String[] args) throws Exception {
 		Debug.P("------>>>>Start Sysnch>>>>>>>>");
-		autoSynchPLM2PM("1111");
+		//SynchEPMDocument2PM(Utils.getDate());//同步图纸
+		SynchWTPart2PM(Utils.getDate());//同步部件
 		Debug.P("------>>>>End Sysnch>>>>>>>>");
-
 	}
 
 }
