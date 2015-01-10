@@ -28,6 +28,7 @@ import wt.services.ManagerException;
 import wt.services.ServiceEventListenerAdapter;
 import wt.services.StandardManager;
 import wt.util.WTException;
+import wt.vc.VersionControlServiceEvent;
 import wt.vc.wip.WorkInProgressServiceEvent;
 
 
@@ -57,13 +58,19 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 			Object target = keyedEvent.getEventTarget();
 			// 获取事件类型
 			String eventType = keyedEvent.getEventType();
+			if(eventType.equals("POST_MULTI_DELETE")){
+				return;
+			}
 			if (target instanceof EPMDocument) {
 				EPMDocument epm=(EPMDocument)target;
-				Debug.P("EPM eventType--->"+eventType+"---Object--->"+epm.getName());
-				epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
+				Debug.P("EPM eventType--->"+eventType+"---Object--->"+epm);
+				if(!eventType.equals("POST_DELETE")){
+					epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
+				}
 				EPMDocHelper.listenerEPMDoc(epm, eventType);
+//				EPMDocHelper.listenerEPMDoc1(epm, eventType);
 				//PersistenceHelper.manager.store(epm);
-			}
+			} 
 		}
 
 		public EPMDocListener(String manager_name) {
@@ -92,8 +99,14 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 				.generateEventKey(PersistenceManagerEvent.POST_STORE);
 		getManagerService().addEventListener(listener, POST_STORE);
 		
-		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
-		getManagerService().addEventListener( listener, DELETE);
+		String PRE_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
+		getManagerService().addEventListener( listener, PRE_DELETE);
+		
+		String POST_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_DELETE);
+		getManagerService().addEventListener( listener, POST_DELETE);
+		
+		String POST_MULTI_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_MULTI_DELETE);
+		getManagerService().addEventListener( listener, POST_MULTI_DELETE);
 		
         String POST_CHECKIN =WorkInProgressServiceEvent
 		        .generateEventKey(WorkInProgressServiceEvent.POST_CHECKIN);
@@ -110,13 +123,13 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 //        String PER_POST = PersistenceManagerEvent
 //                .generateEventKey(PersistenceManagerEvent.PRE_STORE);
 //         getManagerService().addEventListener(listener, PER_POST);
-//		String NEW_ITERATION = VersionControlServiceEvent
-//				.generateEventKey(VersionControlServiceEvent.NEW_ITERATION);
-//		getManagerService().addEventListener(listener, NEW_ITERATION);
-//
-//		// 监听PersistenceManagerEvent
-//		String PRE_MODIFY = PersistenceManagerEvent
-//				.generateEventKey(PersistenceManagerEvent.PRE_MODIFY);
-//		getManagerService().addEventListener(listener, PRE_MODIFY);
+		String NEW_ITERATION = VersionControlServiceEvent
+				.generateEventKey(VersionControlServiceEvent.NEW_ITERATION);
+		getManagerService().addEventListener(listener, NEW_ITERATION);
+		
+		String NEW_VERSION = VersionControlServiceEvent
+				.generateEventKey(VersionControlServiceEvent.NEW_VERSION);
+		getManagerService().addEventListener(listener, NEW_VERSION);
+
 	}
 }

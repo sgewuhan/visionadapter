@@ -48,15 +48,21 @@ public class EndItemPartService extends StandardManager implements PartService,
 			Object target = keyedEvent.getEventTarget();
 			// 获取事件类型
 			String eventType = keyedEvent.getEventType();
+			if(eventType.equals("POST_MULTI_DELETE")){
+				return;
+			}
 			if (target instanceof WTPart) {
 				WTPart part=(WTPart)target;
 				Debug.P("WTPart eventType--->"+eventType);
-			if(eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)){
-					Debug.P( IBAHelper.getIBAStringValue((WTPart)target,Contants.PHASE));
-				
-			}
-			    part=PartUtils.getPartByNumber(part.getNumber());
-				PartHelper.listenerWTPart((WTPart) target, eventType);
+			//if(!eventType.equals("POST_DELETE")){
+				Debug.P("part1---->"+part);
+				 Debug.P(part.getNumber()+" -------------version1s---->"+part.getVersionIdentifier().getValue()+"    version1---->"+part.getIterationIdentifier().getValue());
+				 part=PartUtils.getPartByNumber(part.getNumber());
+			//}
+				 Debug.P("part2---->"+part);
+				// Debug.P(part.getNumber()+" ------------- version1s---->"+part.getVersionIdentifier().getValue()+"    version1---->"+part.getIterationIdentifier().getValue());
+//				PartHelper.listenerWTPart((WTPart) target, eventType);
+				PartHelper.listenerWTPart1((WTPart) target, eventType);
 			}
 
 		}
@@ -90,12 +96,17 @@ public class EndItemPartService extends StandardManager implements PartService,
 //		String INSERT = PersistenceManagerEvent
 //				.generateEventKey(PersistenceManagerEvent.INSERT); 
 //		getManagerService().addEventListener(listener, INSERT);
-		
 		String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
 		getManagerService().addEventListener(listener, POST_UPDATE);
 		
 		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
 		getManagerService().addEventListener( listener, DELETE);
+		
+		String POST_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_DELETE);
+		getManagerService().addEventListener( listener, POST_DELETE);
+		
+		String POST_MULTI_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_MULTI_DELETE);
+		getManagerService().addEventListener( listener, POST_MULTI_DELETE);
 		
 		String PRE_CHECKIN = WorkInProgressServiceEvent
 		        .generateEventKey(WorkInProgressServiceEvent.PRE_CHECKIN);

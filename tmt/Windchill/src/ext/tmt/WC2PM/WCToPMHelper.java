@@ -26,9 +26,11 @@ import com.sg.visionadapter.PartPersistence;
 import com.sg.visionadapter.ProductPersistence;
 import com.sg.visionadapter.SupplymentPersistence;
 
+import ext.tmt.integration.webservice.pm.PMWebserviceImpl;
 import ext.tmt.part.listener.PartHelper;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
+import ext.tmt.utils.EPMDocUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.UserDefQueryUtil;
@@ -45,6 +47,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -927,14 +930,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		}
 	}
 
-	public static void updatePMDocument(String pmoid,WTObject object) throws InstantiationException, IllegalAccessException{
-		PMDocument pmdoc = null;
-		DocumentPersistence docper=null;
-		docper=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
-		
-	}
-	
-	
+
 	
 	public static void updatePMCADDoc(String pmoid, EPMDocument epmdoc) {
 		String docOid = "";
@@ -1769,6 +1765,82 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				}
 			}
 		}
+	}
+
+	
+	public static void SynchEPMDocumentPLM2PM() throws Exception{
+		List<EPMDocument> epmList = new ArrayList<EPMDocument>();
+		String branchId="";//PM中的_plm_plmmid
+		String oid="";
+		CADDocumentPersistence cadDocPersistence = null;
+		PMCADDocument pmcad = null;
+		cadDocPersistence = (CADDocumentPersistence) ModelServiceFactory
+				.getInstance(codebasePath)
+				.get(CADDocumentPersistence.class);
+		epmList=EPMDocUtil.getAllEPMDocument();
+		for(EPMDocument epmdoc:epmList){
+			branchId = "wt.epm.EPMDocument:"+String.valueOf(epmdoc.getBranchIdentifier());
+			oid=getObjectOid(epmdoc);
+			//根据_plm_plmmid去PM系统中查找对象
+			pmcad=cadDocPersistence.getByPLMId(oid);
+			
+			
+		}
+	 
+		
+		
+		
+		
+	}
+	
+	
+	
+	/**
+	 * WC端删除前事件中调用，在PM端的对象上设置预删除标记，再在WC端删除后事件中执行删除PM中的该对象
+	 * @param pmoid
+	 * @param object
+	 * @throws Exception
+	 */
+	public static void updatePMDocument(String pmoid) throws Exception{
+		PMDocument pmdoc = null;
+		DocumentPersistence docper=null;
+		docper=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
+		if(StringUtils.isNotEmpty(pmoid)){
+			pmdoc=docper.getDocumentByPMId(pmoid);
+			Debug.P(">>>>pmdoc: "+pmdoc);
+			if(pmdoc!=null){
+				pmdoc.setValue("deleted", true);
+				pmdoc.doUpdate();
+			}
+		}
+	}
+	
+	
+	/**
+	 * 删除PM端预删除标记为ture的对象
+	 * @throws Exception 
+	 * @throws InstantiationException 
+	 */
+	public static void delatePMDoc(String type,Class class1) throws InstantiationException, Exception{
+		List<String> result = new ArrayList<String>();
+		PMDocument pmdoc = null;
+		DocumentPersistence docper=null;
+		docper=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
+		result=  docper.getDeletedDocumentList(type);
+		Debug.P("result.size ---->"+result.size()+"   class--->"+class1+"  type----->"+type);
+		
+		for(String pmid:result){
+		  Debug.P("需要删除的PM对象OID--------》"+pmid);
+		  if(StringUtils.isNotEmpty(pmid)){
+			  Object object = PMWebserviceImpl.searchWCObject(class1,pmid,Contants.PMID);
+			  Debug.P(" object----->"+object);
+			  if(object ==null){
+				  pmdoc=docper.getDocumentByPMId(pmid); 
+				  pmdoc.doRemove();
+			  }
+		  }
+		}
+		
 	}
 
 	public static void main(String[] args) throws Exception {

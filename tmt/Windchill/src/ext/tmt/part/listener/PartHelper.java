@@ -94,6 +94,11 @@ public class PartHelper implements RemoteAccess,Serializable {
 		String partNumber="";
 		String partType="";
 		String types="";
+//		 if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
+//			 //IBAUtils iba = new IBAUtils(wtPart);
+//				Debug.P("Post_DELETE--------------wtPart----------->" +wtPart+"---iba---->");
+//					WCToPMHelper.delatePMDoc("wtpart", WTPart.class);
+//			}else{
 		boolean flag = true;
 		flag = SessionServerHelper.manager.setAccessEnforced(false);
 		try {
@@ -129,7 +134,7 @@ public class PartHelper implements RemoteAccess,Serializable {
 			    		List<Persistable> persistables=EPMDocUtil.getEPMDocumentByIBA(MATER_NO, wtPart.getNumber());
 			    		//查找里面最后更新时间最晚的一条数据
 			    		epmdoc=getLastModifierObject(persistables);
-//			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+			    		//epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
 			    	}
 			    	Debug.P("211-->"+epmdoc);
 			    	if(epmdoc!=null){
@@ -530,6 +535,18 @@ public class PartHelper implements RemoteAccess,Serializable {
 			String pmoid = iba.getIBAValue(Contants.PMID);
 			 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
 			   Debug.P("--2004--PRE_DELETE-----------------pmoid----------->"+pmoid);
+               List bomList =new ArrayList();
+               List docList =new ArrayList();
+               List epmList =new ArrayList();
+               bomList = PartUtil.queryPrentPartsByParts(wtPart);
+               epmList=PartUtil.getEPMDocByPart(wtPart);
+               if(bomList.size()>0){
+            	   throw new Exception("部件："+wtPart.getNumber()+"存在关联部件，不允许删除！");
+               }
+               if(epmList.size()>0){
+            	   throw new Exception("部件："+wtPart.getNumber()+"存在关联图纸，不允许删除！");
+               }
+//			   WCToPMHelper.updatePMDocument(pmoid);
 			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
 				   WCToPMHelper.deletePMPart(pmoid, wtPart);
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
@@ -543,7 +560,543 @@ public class PartHelper implements RemoteAccess,Serializable {
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
 					WCToPMHelper.deletePMJigTools(pmoid, wtPart);
 			  }
-		}    
+		}   
+		}catch(Exception e){
+			throw new Exception("部件创建/同步出错，请联系管理员"+e.getMessage());
+		}finally {
+			SessionServerHelper.manager.setAccessEnforced(flag);
+		}
+//	}
+	}
+	
+	public static void listenerWTPart1(WTPart wtPart, String eventType)
+			throws Exception {
+		Debug.P("事件类型---->" + eventType);
+		Debug.P("wtPart----->"+wtPart.getNumber());
+		String newNumber="";
+		String partNumber="";
+		String partType="";
+		String types="";
+		boolean flag = true;
+		flag = SessionServerHelper.manager.setAccessEnforced(false);
+		try {
+		partType=DocUtils.getType(wtPart);
+		Folder docFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+		Debug.P("partFolder---->"+docFolder);
+		Debug.P("partType---->"+partType);
+		Debug.P("partVersion---->"+PartUtil.getVersion(wtPart));
+		if (eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+			IBAUtils iba = new IBAUtils(wtPart);
+			IBAUtils epmIba = null;
+			Debug.P("ibautils--->"+iba);
+			String sync=iba.getIBAValue(Contants.CYNCDATA);
+			String pmoids = iba.getIBAValue(Contants.PMID);
+			Debug.P("sync--->"+sync);
+			Debug.P("pmoids--->"+pmoids);
+			Debug.P("eventType---------------->"+eventType);
+			
+		}else  if (eventType.equals(PersistenceManagerEvent.POST_MODIFY)) {
+			IBAUtils iba = new IBAUtils(wtPart);
+			IBAUtils epmIba = null;
+			Debug.P("ibautils--->"+iba);
+			String sync=iba.getIBAValue(Contants.CYNCDATA);
+			String pmoids = iba.getIBAValue(Contants.PMID);
+			Debug.P("sync--->"+sync);
+			Debug.P("pmoids--->"+pmoids);
+			Debug.P("eventType---------------->"+eventType);
+		}else  if (eventType.equals(PersistenceManagerEvent.UPDATE)) {
+			
+//			Debug.P("sync--->"+IBAHelper.getIBAValue(wtPart, Contants.MATERIALGROUP));
+//			Debug.P("pmoids--->"+IBAHelper.getIBAValue(wtPart, Contants.PHASE));
+			Debug.P("eventType---------------->"+eventType);
+		}else  if (eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+			IBAUtils iba = new IBAUtils(wtPart);
+			IBAUtils epmIba = null;
+			Debug.P("ibautils--->"+iba);
+			String sync=iba.getIBAValue(Contants.CYNCDATA);
+			String pmoids = iba.getIBAValue(Contants.PMID);
+			Debug.P("sync--->"+sync);
+			Debug.P("pmoids--->"+pmoids);
+			Debug.P("eventType---------------->"+eventType);
+		}else  if ((eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)
+				  ||eventType.equals(PersistenceManagerEvent.POST_MODIFY))) {
+			IBAUtils iba = new IBAUtils(wtPart);
+			IBAUtils epmIba = null;
+			Debug.P("ibautils--->"+iba);
+			String sync=iba.getIBAValue(Contants.CYNCDATA);
+			String pmoids = iba.getIBAValue(Contants.PMID);
+			Debug.P("sync--->"+sync);
+			Debug.P("pmoids--->"+pmoids);
+			Debug.P("eventType---------------->"+eventType);
+		}else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
+			IBAUtils iba = new IBAUtils(wtPart);
+			IBAUtils epmIba = null;
+			Debug.P("ibautils--->"+iba);
+			String sync=iba.getIBAValue(Contants.CYNCDATA);
+			String pmoids = iba.getIBAValue(Contants.PMID);
+			Debug.P("sync--->"+sync);
+			Debug.P("pmoids--->"+pmoids);
+			WCToPMHelper.updatePMDocument(pmoids);
+			Debug.P("eventType---------------->"+eventType);
+		}else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
+			IBAUtils iba = new IBAUtils(wtPart);
+			IBAUtils epmIba = null;
+			Debug.P("ibautils--->"+iba);
+			String sync=iba.getIBAValue(Contants.CYNCDATA);
+			String pmoids = iba.getIBAValue(Contants.PMID);
+			WCToPMHelper.delatePMDoc("wtpart", WTPart.class);
+			Debug.P("sync--->"+sync);
+			Debug.P("pmoids--->"+pmoids);
+			Debug.P("eventType---------------->"+eventType);
+		}
+		
+		
+//		IBAUtils iba = new IBAUtils(wtPart);
+//		IBAUtils epmIba = null;
+//		Debug.P("ibautils--->"+iba);
+//		String sync=iba.getIBAValue(Contants.CYNCDATA);
+//		String pmoids = iba.getIBAValue(Contants.PMID);
+//		Debug.P("sync--->"+sync);
+//		Debug.P("pmoids--->"+pmoids);
+//		Debug.P("eventType---------------->"+eventType);
+//		Folder docFolder=  wt.folder.FolderHelper.service.getFolder(wtPart);
+//		Debug.P("partFolder---->"+docFolder);
+//        if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+//        	if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+//        		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
+//        	}
+//			   EPMDocument epmdoc = null;
+//			   String productName="";	
+//			   String prefix="";
+//			   partNumber=wtPart.getNumber();
+//			   if(StringUtils.isNotEmpty(partType)){
+//				   partType=partType.replaceAll(" ", "").trim();
+//			   }
+//			   Debug.P(partNumber+"------------------->"+partType+" event--->"+eventType);
+//			    String epmPartType="";
+//			    if(partType.equals("wt.part.WTPart")){
+//			    	Debug.P("--888--->wt.part.WTPart-->>>PartType:"+partType);
+//			    	epmdoc=EPMDocUtil.getActiveEPMDocument(wtPart);
+//			    	Debug.P("1-->"+epmdoc);
+//			    	if(epmdoc==null){
+//			    		List<Persistable> persistables=EPMDocUtil.getEPMDocumentByIBA(MATER_NO, wtPart.getNumber());
+//			    		//查找里面最后更新时间最晚的一条数据
+//			    		epmdoc=getLastModifierObject(persistables);
+////			    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+//			    	}
+//			    	Debug.P("211-->"+epmdoc);
+//			    	if(epmdoc!=null){
+//			    		 epmIba = new IBAUtils(epmdoc);
+//			    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+//			    	}
+//			    	if(StringUtils.isNotEmpty(epmPartType)){
+//			    		epmPartType=epmPartType.replaceAll(" ", "").trim();
+//			    	}
+//			    	Debug.P(epmPartType);
+//			    	if(StringUtils.isNotEmpty(epmPartType)){
+//						if(epmPartType.equals("半成品")){
+//							types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
+//						}
+//						else if(epmPartType.equals("成品")){
+//							//wtPart.setEndItem(true);
+//							types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//						}
+//						else{
+//							throw new Exception("检入图纸时，只允许创建成品和半成品");
+//						}
+//						if(types.contains("Product")){
+//							Debug.P(types);
+//							TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
+//							wtPart.setPartType(PartType.getPartTypeDefault());
+//							wtPart.setTypeDefinitionReference(typeDefinitionRef);
+//							
+//							if (!PersistenceHelper.isPersistent(wtPart)) {
+//								wtPart = (WTPart) PersistenceHelper.manager.store(wtPart);
+//								wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+//							}
+//						}
+//						setPartIBAValues(wtPart,epmdoc);
+//						if(types.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+//							WCToPMHelper.CreatePartToPM( wtPart);
+//						  }else if(types.contains(Contants.PRODUCTPART)){ //如果是成品
+//							  WCToPMHelper.CreatePMProductToPM( wtPart);
+//						  }
+//					}else{
+//						throw new Exception("检入失败！图纸上："+wtPart.getNumber()+" 的“部件类型”值为空");
+//					}
+//			    	partType=DocUtils.getType(wtPart);
+//			    	Debug.P(partNumber+"------------------->"+partType);
+//			    	if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+//						WCToPMHelper.CreatePartToPM( wtPart);
+//					  }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
+//						  WCToPMHelper.CreatePMProductToPM( wtPart);
+//					  }else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+//							WCToPMHelper.CreatePMaterialToPM(wtPart);
+//					  }else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//							WCToPMHelper.CreateSupplyToPM(wtPart);
+//					  }else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//							WCToPMHelper.CreatePMPackageToPM(wtPart);
+//					  }else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+//							WCToPMHelper.CreateJigToolPartToPM( wtPart);
+//					  }
+//			    }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
+//				//成品编码=TX+三位分类码+四位流水码。其中分类码为成品所在产品库容器名称的前三个字符，自动根据成品所在产品库获取。
+//					productName=wtPart.getContainerName();
+//					Debug.P("---999---Contants.PRODUCTPART-->>>PartType:"+partType+"   PartNum:"+wtPart.getNumber()+"   productName:"+productName);
+//					//批量导入部件时如果导入的部件编码含有TX则不修改部件编码
+//					if(wtPart.getNumber().toUpperCase().contains("TX")){
+//						WCToPMHelper.CreatePMProductToPM(wtPart);
+//						return;
+//					}
+//					if(!productName.toUpperCase().contains("TX")){
+//						throw new Exception("产品:"+productName+"  未添加  TX 前缀！");
+//					}
+//					prefix=productName.substring(0, productName.indexOf("-"));
+//					if(prefix.toUpperCase().trim().contains("TX48")||prefix.toUpperCase().trim().contains("TX49")||prefix.toUpperCase().trim().contains("TX426")
+//							||prefix.toUpperCase().trim().contains("TX113")||prefix.toUpperCase().trim().contains("TX114")||prefix.toUpperCase().trim().contains("TX115")){
+//						WCToPMHelper.CreatePMProductToPM(wtPart);
+//						return;
+//					}
+//					Debug.P("产品前缀----》"+prefix);
+//					if(prefix.toUpperCase().trim().contains("TX111")){
+//						int i=9000;
+//						do{
+//							partNumber=prefix+StringUtil.int2String(i,4);
+//							if(PartUtil.getPartByNumber(partNumber)==null){
+//								newNumber=partNumber;
+//								break;
+//							}
+//							i++;
+//						}while(i<9999);
+//						changePartNumber(wtPart,newNumber);
+//					}else{
+//						int i= 0;
+//						do {  
+//							if(prefix.toUpperCase().trim().equals("TXA6")||prefix.toUpperCase().trim().equals("TXA7")||prefix.toUpperCase().trim().equals("TXA8")){
+//								partNumber=prefix+StringUtil.int2String(i,5);
+//							}else {
+//								partNumber=prefix+StringUtil.int2String(i,4);
+//							}
+//							if(PartUtil.getPartByNumber(partNumber)==null){
+//								newNumber=partNumber;
+//								break;
+//							}
+//							i++;
+//						} while (i < 100000);
+//						changePartNumber(wtPart,newNumber);
+//					}
+//					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					Debug.P("----999------>>part:"+wtPart.getName()+"  partNum"+wtPart.getNumber());
+//					WCToPMHelper.CreatePMProductToPM(wtPart);
+//					Debug.P("---999-->>>>CreatePMProductToPM  Success!!");
+//					
+//				} else //如果是半成品
+//				if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+//					Debug.P("--1000--Contants.SEMIFINISHEDPRODUCT-->>>PartType:"+partType);
+//					if(wtPart.isEndItem()){
+//						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
+//					} 
+//					String isKHpart="";//空簧部件分类
+//					isKHpart=iba.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
+//					Debug.P("WTPart -->"+isKHpart);
+//					//如果部件上的 空簧部件分类 值为空，则从部件关联的EPMDocument上获取
+//					if(StringUtils.isEmpty(isKHpart)&&epmdoc!=null){
+//						IBAUtils epmIBA = new IBAUtils(epmdoc);
+//						isKHpart=epmIBA.getIBAValue(Contants.AIRSPRINGCLASSIFICATION);
+//						Debug.P("EPMDocument -->"+isKHpart);
+//					 }
+//					if(StringUtils.isNotEmpty(isKHpart)){
+//						int i= 0;
+//						do {
+//							partNumber=isKHpart+StringUtil.int2String(i,4);
+//							if(PartUtil.getPartByNumber(partNumber)==null){
+//								newNumber=partNumber;
+//								break;
+//							}
+//							i++;
+//						} while (i < 100000);
+//						changePartNumber(wtPart,newNumber);
+//						wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					}
+//				     Debug.P("CreatePartToPM-->");	
+//					WCToPMHelper.CreatePartToPM(wtPart);
+//				}else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+//					 Debug.P("CreatePMaterialToPM-->");	
+//					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					WCToPMHelper.CreatePMaterialToPM(wtPart);
+//				}else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					 Debug.P("CreateSupplyToPM-->");	
+//					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					WCToPMHelper.CreateSupplyToPM(wtPart);
+//				}else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//					 Debug.P("CreatePMPackageToPM-->");	
+//					 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					WCToPMHelper.CreatePMPackageToPM(wtPart);
+//				}else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+//					Debug.P("CreateJigToolPartToPM--->");
+//					wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//					WCToPMHelper.CreateJigToolPartToPM(wtPart);
+//				}
+//			 
+//		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_MODIFY)) {
+//			Debug.P("partType----->"+partType); 
+//			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+//        		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
+//        	}
+//			if(partType.equals("wt.part.WTPart")){
+//			EPMDocument epmdoc = EPMDocUtil.getActiveEPMDocument(wtPart);
+//			String epmPartType="";
+//	    	Debug.P("1-->"+epmdoc);
+//	    	if(epmdoc==null){
+//	    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+//	    	}
+//	    	Debug.P("2-->"+epmdoc);
+//			if(epmdoc!=null){
+//	    		 epmIba = new IBAUtils(epmdoc);
+//	    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+//	    	}
+//	    	if(StringUtils.isNotEmpty(epmPartType)){
+//	    		epmPartType=epmPartType.replaceAll(" ", "").trim();
+//	    	}
+//	    	Debug.P(epmPartType);
+//	    	Debug.P(StringUtils.isNotEmpty(epmPartType));
+//	    	if(StringUtils.isNotEmpty(epmPartType)){
+//				if(epmPartType.equals("半成品")){
+//					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
+//				}
+//				else if(epmPartType.equals("成品")){
+//					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//				}
+//				else{
+//					throw new Exception("检入图纸时，只允许自动创建半成品！");
+//				}
+//				Debug.P(types);
+//				if(types.contains("Product")){
+//					TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
+//					wtPart.setPartType(PartType.getPartTypeDefault());
+//					wtPart.setTypeDefinitionReference(typeDefinitionRef);
+//					if (!PersistenceHelper.isPersistent(wtPart)) {
+//						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+//						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+//					}
+//				}
+//				setPartIBAValues(wtPart,epmdoc);
+//				
+//			}
+//	    	
+//	    	if(types.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+//				WCToPMHelper.CreatePartToPM( wtPart);
+//			  }else if(types.contains(Contants.PRODUCTPART)){ //如果是成品
+//				  WCToPMHelper.CreatePMProductToPM( wtPart);
+//			  }
+//			 }
+////	    	else{
+////				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+////			}
+//			partType=DocUtils.getType(wtPart);
+//	    	Debug.P(types);
+//	    	Debug.P(partType);
+//			if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+//				WCToPMHelper.CreatePartToPM( wtPart);
+//			  }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
+//				  WCToPMHelper.CreatePMProductToPM( wtPart);
+//			  }else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+//					WCToPMHelper.CreatePMaterialToPM(wtPart);
+//			  }else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					WCToPMHelper.CreateSupplyToPM(wtPart);
+//			  }else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//					WCToPMHelper.CreatePMPackageToPM(wtPart);
+//			  }else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+//					WCToPMHelper.CreateJigToolPartToPM( wtPart);
+//			  }
+//			if(types.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+//				WCToPMHelper.CreatePartToPM( wtPart);
+//			  }else if(types.contains(Contants.PRODUCTPART)){ //如果是成品
+//				  WCToPMHelper.CreatePMProductToPM( wtPart);
+//			  }else if(types.contains(Contants.MATERIAL)){ //如果是原材料
+//					WCToPMHelper.CreatePMaterialToPM(wtPart);
+//			  }else if(types.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					WCToPMHelper.CreateSupplyToPM(wtPart);
+//			  }else if(types.contains(Contants.PACKINGPART)){//如果是包装材料
+//					WCToPMHelper.CreatePMPackageToPM(wtPart);
+//			  }else if(types.contains(Contants.TOOLPART)){//如果是备品备料
+//					WCToPMHelper.CreateJigToolPartToPM( wtPart);
+//			  }
+//			
+//		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+//			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
+//        		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
+//        	}
+//			Debug.P("StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)------------------");
+//			Debug.P("partType----->"+partType); 
+//			if(partType.equals("wt.part.WTPart")){
+//			EPMDocument epmdoc = EPMDocUtil.getActiveEPMDocument(wtPart);
+//			String epmPartType="";
+//	    	Debug.P("1-->"+epmdoc);
+//	    	if(epmdoc==null){
+//	    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+//	    	}
+//	    	Debug.P("2-->"+epmdoc);
+//			if(epmdoc!=null){
+//	    		 epmIba = new IBAUtils(epmdoc);
+//	    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+//	    	}
+//	    	if(StringUtils.isNotEmpty(epmPartType)){
+//	    		epmPartType=epmPartType.replaceAll(" ", "").trim();
+//	    	}
+//	    	Debug.P(epmPartType);
+//	    	Debug.P(StringUtils.isNotEmpty(epmPartType));
+//	    	if(StringUtils.isNotEmpty(epmPartType)){
+//				if(epmPartType.equals("半成品")){
+//					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
+//				}
+//				else if(epmPartType.equals("成品")){
+//					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//				}
+//				else{
+//					throw new Exception("检入图纸时，只允许自动创建半成品！");
+//				}
+//				Debug.P(types);
+//				if(types.contains("Product")){
+//					TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
+//					wtPart.setPartType(PartType.getPartTypeDefault());
+//					wtPart.setTypeDefinitionReference(typeDefinitionRef);
+//					if (!PersistenceHelper.isPersistent(wtPart)) {
+//						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+//						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+//					}
+//				}
+//				setPartIBAValues(wtPart,epmdoc);
+//			}
+//			 }
+////	    	else{
+////				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+////			}
+//			partType=DocUtils.getType(wtPart);
+//	    	Debug.P(partType);
+//			if(partType.contains(Contants.SEMIFINISHEDPRODUCT)){//如果半是成品
+//				WCToPMHelper.CreatePartToPM( wtPart);
+//			  }else if(partType.contains(Contants.PRODUCTPART)){ //如果是成品
+//				  WCToPMHelper.CreatePMProductToPM( wtPart);
+//			  }else if(partType.contains(Contants.MATERIAL)){ //如果是原材料
+//					WCToPMHelper.CreatePMaterialToPM(wtPart);
+//			  }else if(partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					WCToPMHelper.CreateSupplyToPM(wtPart);
+//			  }else if(partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//					WCToPMHelper.CreatePMPackageToPM(wtPart);
+//			  }else if(partType.contains(Contants.TOOLPART)){//如果是备品备料
+//					WCToPMHelper.CreateJigToolPartToPM( wtPart);
+//			  }
+//		} if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+//			if(partType.equals("wt.part.WTPart")){
+//			EPMDocument epmdoc = EPMDocUtil.getActiveEPMDocument(wtPart);
+//			String epmPartType="";
+//	    	Debug.P("1-->"+epmdoc);
+//	    	if(epmdoc==null){
+//	    		epmdoc=EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
+//	    	}
+//	    	Debug.P("2-->"+epmdoc);
+//			if(epmdoc!=null){
+//	    		 epmIba = new IBAUtils(epmdoc);
+//	    		epmPartType=epmIba.getIBAValue(Contants.PART_TYPE);
+//	    	}
+//	    	if(StringUtils.isNotEmpty(epmPartType)){
+//	    		epmPartType=epmPartType.replaceAll(" ", "").trim();
+//	    	}
+//	    	Debug.P(epmPartType);
+//	    	if(StringUtils.isNotEmpty(epmPartType)){
+//				if(epmPartType.equals("半成品")){
+//					types="wt.part.WTPart|"+Contants.SEMIFINISHEDPRODUCT;
+//				}
+//				else if(epmPartType.equals("成品")){
+//					//wtPart.setEndItem(true);
+//					types="wt.part.WTPart|"+Contants.PRODUCTPART;
+//				}
+//				else{
+//					throw new Exception("检入图纸时，只允许自动创建半成品！");
+//				}
+//				Debug.P(types);
+//				if(types.contains("Product")){
+//					partType=DocUtils.getDfmDocumentType(types).getIntHid();
+//					Debug.P(partType);
+//					TypeDefinitionReference typeDefinitionRef = TypedUtility.getTypeDefinitionReference(types);
+//					wtPart.setPartType(PartType.getPartTypeDefault());
+//					wtPart.setTypeDefinitionReference(typeDefinitionRef);
+//					if (!PersistenceHelper.isPersistent(wtPart)) {
+//						wtPart = (WTPart) PersistenceHelper.manager.save(wtPart);
+//						wtPart = (WTPart) PersistenceHelper.manager.refresh(wtPart);
+//					}
+//				}
+//				setPartIBAValues(wtPart,epmdoc);
+//			}
+//			}
+////	    	else{
+////				throw new Exception("检入失败！找不到部件："+wtPart.getNumber()+" 对应的EPM文档");
+////			}
+//	    	
+//		}else  if (StringUtils.isNotEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_STORE)) {
+//			String pmoid = iba.getIBAValue(Contants.PMID);
+//            Debug.P("POST_STORE-------------pmoid----------->"+pmoid);
+////            Object object =GenericUtil.getObjectByNumber(wtPart.getNumber());
+//            wtPart=   PartUtils.getPartByNumber(wtPart.getNumber());
+//            if(WorkInProgressHelper.isCheckedOut(wtPart)){
+//            	
+//			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+//				   WCToPMHelper.updatePMPart(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
+//					WCToPMHelper.updatePMProductToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.MATERIAL)){ //如果是原材料
+//					WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//					WCToPMHelper.updatePMPackageToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+//					WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
+//			  }
+//			
+//            }
+//		}else  if (StringUtils.isNotEmpty(sync)&&(eventType.equals(WorkInProgressServiceEvent.POST_CHECKIN)
+//				  ||eventType.equals(PersistenceManagerEvent.POST_MODIFY))) {
+//			  String pmoid = (String) LWCUtil.getValue(wtPart, Contants.PMID);
+//			  wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//			  EPMDocument epmdoc_rel=EPMDocUtil.getActiveEPMDocument(wtPart);
+//			  if(epmdoc_rel!=null){//赋值最新属性
+//				 setPartIBAValues(wtPart, epmdoc_rel);
+//			 }
+//            Debug.P("POST_CHECKIN-----------pmoid----------->"+pmoid);
+//			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+//				   WCToPMHelper.updatePMPart(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
+//					WCToPMHelper.updatePMProductToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.MATERIAL)){ //如果是原材料
+//					WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//					WCToPMHelper.updatePMPackageToPM(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+//					WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
+//			  }
+//		}
+//		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
+//			String pmoid = iba.getIBAValue(Contants.PMID);
+//			 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+//			   Debug.P("--2004--PRE_DELETE-----------------pmoid----------->"+pmoid);
+//			  if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+//				   WCToPMHelper.deletePMPart(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
+//					WCToPMHelper.deletePMProduct(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.MATERIAL)){ //如果是原材料
+//					WCToPMHelper.deletePMMaterial(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+//					WCToPMHelper.deleteSupplyment(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+//					WCToPMHelper.deletePMPackage(pmoid, wtPart);
+//			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+//					WCToPMHelper.deletePMJigTools(pmoid, wtPart);
+//			  }
+//		}    
 		}catch(Exception e){
 			throw new Exception("部件创建/同步出错，请联系管理员"+e.getMessage());
 		}finally {
