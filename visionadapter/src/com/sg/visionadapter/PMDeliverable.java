@@ -1,7 +1,6 @@
 package com.sg.visionadapter;
 
 import org.bson.types.ObjectId;
-import org.omg.CORBA._IDLTypeStub;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
