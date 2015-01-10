@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +45,7 @@ import wt.query.SearchCondition;
 import wt.query.WhereExpression;
 import wt.representation.Representable;
 import wt.session.SessionHelper;
+import wt.session.SessionServerHelper;
 import wt.util.WTAttributeNameIfc;
 import wt.util.WTException;
 import wt.util.WTProperties;
@@ -999,9 +1002,14 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	  * @param ibavalue
 	  * @param ibakey
 	  * @throws WTException
+	 * @throws InvocationTargetException 
+	 * @throws RemoteException 
+	 * @throws InterruptedException 
 	  */
-	 public static Object searchWCObject(Class class1,String ibavalue,String ibakey)throws  WTException {
+	 public static Object searchWCObject(Class class1,String ibavalue,String ibakey)throws  WTException, RemoteException, InvocationTargetException, InterruptedException {
 		 Object object = null;
+		 boolean flag =SessionServerHelper.manager.setAccessEnforced(false);
+         try{
 		 QuerySpec qs = new QuerySpec();
 		 qs.setAdvancedQueryEnabled(true);
 		 int objindex = qs.appendClassList(class1, true);
@@ -1038,16 +1046,38 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 				qs.appendAnd();
 				qs.appendWhere(we, new int[] { pmSVIndex, objindex });
 				Debug.P("---->>SQL:"+qs);
+				Thread.sleep(2000);
+				Debug.P("sleep 10s");
 				QueryResult qr = PersistenceHelper.manager.find((StatementSpec)qs);
-				while (qr.hasMoreElements()) {
+				Debug.P("qr----->"+qr.size());
+				if (qr.hasMoreElements()) {
 					Object[] objects = (Object[])qr.nextElement();
+					Debug.P("---->>SQL:"+objects[0]);
 					object=objects[0];
 				}
+		     }
+		 }finally{
+					SessionServerHelper.manager.setAccessEnforced(flag);
 		 }
 		 return object;
 	 }
-	 
-	 public static ObjectInputStream getRepresentationByPM(String pmid) throws WTException, IOException{
+         public static Object doSearch(Class class1,String ibavalue,String ibakey) {
+        	 Object obj = null;
+     		 String method = "searchWCObject";
+	            String klass = PMWebserviceImpl.class.getName();
+	            Class[] types = { Class.class,String.class,String.class};
+	            Object[] vals = {class1,ibavalue,ibakey};
+
+     		try {
+     			obj = (Object)RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
+     		} catch (RemoteException e) {
+     			e.printStackTrace();
+     		} catch (InvocationTargetException e) {
+     			e.printStackTrace();
+     		}
+     		return obj;
+     	}
+	 public static ObjectInputStream getRepresentationByPM(String pmid) throws WTException, IOException, InvocationTargetException, InterruptedException{
 		 ObjectInputStream ois = null;
 		 InputStream is = null;
 		 Object object = searchWCObject(EPMDocument.class,pmid,Contants.PMID);
@@ -1089,8 +1119,8 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 //		for(String strs:list){
 //			Debug.P("strs---------->"+strs);
 //		}
-//		Object obj= searchWCObject(WTDocument.class,args[0],Contants.PMID);
-//		Debug.P(obj);
+		Object obj= doSearch(EPMDocument.class,"54ae5a978a8775297f95150a",Contants.PMID);
+		Debug.P(obj);
 //		if(obj instanceof WTPart){
 //			WTPart part =(WTPart)obj;
 //			Debug.P(part.getNumber());

@@ -30,8 +30,61 @@ import wt.part.WTPartHelper;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.util.WTException;
-
+import wt.vc.config.LatestConfigSpec;
+@SuppressWarnings("all")
 public class EPMDocUtil {
+	
+	  public static void main(String[] args) throws WTException {
+		  getAllEPMDocument();
+	}
+	
+	  
+	  /**
+	   * 获取系统内所有的最新版本(最新大版本+最新小版本)的的EPMDocument
+	   * @return
+	   * @throws WTException
+	   */
+	public static List<EPMDocument> getAllEPMDocument()throws WTException{
+		List<EPMDocument> epmList = new ArrayList<EPMDocument>();
+		QuerySpec qs = new QuerySpec(EPMDocument.class);
+		SearchCondition latestIteration = new SearchCondition(EPMDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		qs.appendWhere(latestIteration);
+		Debug.P("sql---->"+qs);
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		Debug.P("All EPMDocument size-------1------>"+qr.size());
+		qr = new LatestConfigSpec().process(qr);
+		Debug.P("All EPMDocument size-------2------>"+qr.size());
+		while(qr.hasMoreElements()){
+			Object object = (Object)qr.nextElement();
+			EPMDocument epmdoc = (EPMDocument)object;
+			epmList.add(epmdoc);
+		}
+		return epmList;
+	}
+	
+	  /**
+	   * 获取系统内所有的最新版本(最新大版本+最新小版本)的的WTPart
+	   * @return
+	   * @throws WTException
+	   */
+	public static List<WTPart> getAllWTPart()throws WTException{
+		List<WTPart> partList = new ArrayList<WTPart>();
+		QuerySpec qs = new QuerySpec(WTPart.class);
+		SearchCondition latestIteration = new SearchCondition(WTPart.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+		qs.appendWhere(latestIteration);
+		Debug.P("sql---->"+qs);
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		Debug.P("All WTPart size-------1------>"+qr.size());
+		qr = new LatestConfigSpec().process(qr);
+		Debug.P("All WTPart size-------2------>"+qr.size());
+		while(qr.hasMoreElements()){
+			Object object = (Object)qr.nextElement();
+			WTPart part = (WTPart)object;
+			partList.add(part);
+		}
+		return partList;
+	}
+	
 	
 	
 	  //根据编号得到EPMmaster
