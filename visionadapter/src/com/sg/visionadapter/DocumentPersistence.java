@@ -29,7 +29,26 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 			String strId = id.toString();
 			ids.add(strId);
 		}
+		find.close();
 		return ids;
+	}
+
+	/**
+	 * 通过PLMId在PM中查询PMDocument对象
+	 * @param PLMId
+	 * @return
+	 */
+	public List<PMDocument> getPMObjectByPLMId(String PLMId) {
+		List<PMDocument> dbos = new ArrayList<PMDocument>();
+		DBCursor find = collection.find(new BasicDBObject().append(
+				PMDocument.PLM_ID, PLMId));
+		while(find.hasNext()) {
+			PMDocument doc = (PMDocument)find.next();
+			doc.setCollection(collection);
+			dbos.add(doc);
+		}
+		return dbos;
+
 	}
 
 	/**
@@ -46,15 +65,17 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 通过PMId获取PMDocument
+	 * 
 	 * @param pmId
 	 * @return
 	 */
 	public PMDocument getDocumentByPMId(String pmId) {
-		 PMDocument pmDocuemnt = (PMDocument) collection.findOne(new BasicDBObject()
-				.append(PMDocument._ID, new ObjectId(pmId)));
+		PMDocument pmDocuemnt = (PMDocument) collection
+				.findOne(new BasicDBObject().append(PMDocument._ID,
+						new ObjectId(pmId)));
 		if (pmDocuemnt != null) {
 			pmDocuemnt.setCollection(collection);
 		}
@@ -96,4 +117,5 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 		}
 		return result;
 	}
+
 }
