@@ -47,6 +47,7 @@ public class FolderPersistence extends PersistenceService<PMFolder> {
 			String strId = id.toString();
 			ids.add(strId);
 		}
+		find.close();
 		return ids;
 	}
 	
