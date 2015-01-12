@@ -2114,12 +2114,14 @@ public class GenericUtil implements RemoteAccess {
 		State state = State.toState(stateName);
 		wt.lifecycle.LifeCycleManaged lifeCycleManaged = (wt.lifecycle.LifeCycleManaged) lm;
 		try {
-		     
-			lifeCycleManaged = wt.lifecycle.LifeCycleHelper.service.setLifeCycleState(lm,state);
-			String str = lifeCycleManaged.getLifeCycleState().getDisplay();
-			Debug.P(str);
-			if (str.equals(stateName)) {
-				Debug.P("change succeed!!");
+			if(state!=null){
+				Debug.P(state.getDisplay());
+				lifeCycleManaged = wt.lifecycle.LifeCycleHelper.service.setLifeCycleState(lm,state);
+				String str = lifeCycleManaged.getLifeCycleState().getStringValue();
+				Debug.P(str);
+				if (str.equals(stateName)) {
+					Debug.P("change succeed!!");
+				}
 			}
 		} catch (WTException el) {
 			 el.printStackTrace();

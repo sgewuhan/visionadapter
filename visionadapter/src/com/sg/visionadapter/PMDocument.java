@@ -3,13 +3,16 @@ package com.sg.visionadapter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bson.types.BasicBSONList;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
+import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 
@@ -167,4 +170,5 @@ public final class PMDocument extends BasicDocument {
 		return gfs.writeToGridFS(in, objectId, fileName, nameSpace, db,
 				metaData);
 	}
+
 }

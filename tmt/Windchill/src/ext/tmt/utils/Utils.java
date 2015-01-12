@@ -26,8 +26,10 @@ import wt.fc.Identified;
 import wt.fc.IdentityHelper;
 import wt.fc.PersistenceHelper;
 import wt.fc.QueryResult;
+import wt.fc.WTObject;
 import wt.part.WTPart;
 import wt.part.WTPartUsageLink;
+import wt.query.QueryException;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.util.WTException;
@@ -206,6 +208,31 @@ public class Utils {
 //
 //		return epmDocList;
 //	}
+	
+	/**
+	 * 查询最新版本的对象
+	 * @param class1
+	 * @param number
+	 * @return
+	 * @throws WTException
+	 */
+	public static WTObject getWCObject(Class class1,String number) throws WTException{
+		WTObject object = null;
+		QuerySpec qs = new QuerySpec(class1);
+		int index = 0;
+		// 条件: 指定编号
+		qs.appendWhere(new SearchCondition(class1, "master>number",
+				SearchCondition.EQUAL, number),
+				new int[] { index });
+		qs = new LatestConfigSpec().appendSearchCriteria(qs);
+		// 执行查询
+		QueryResult qr = PersistenceHelper.manager.find(qs);
+		qr = new LatestConfigSpec().process(qr);
+		if (qr.hasMoreElements()) {
+			object =(WTObject)qr.nextElement();
+		}
+		return object;
+	}
 
 
 	/**
