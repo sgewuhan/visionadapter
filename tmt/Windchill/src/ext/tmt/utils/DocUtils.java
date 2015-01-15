@@ -991,6 +991,7 @@ public class DocUtils implements RemoteAccess {
 		querySpec.appendWhere(numberSC);
 		querySpec.appendAnd();
 		querySpec.appendWhere(latestIteration);
+		Debug.P(querySpec);
 		QueryResult queryResult = PersistenceHelper.manager.find(querySpec);
 		// queryResult = (new LatestConfigSpec()).process(queryResult);
 		Debug.P("Document----->" + queryResult.hasMoreElements());
@@ -1916,6 +1917,11 @@ public class DocUtils implements RemoteAccess {
 			e.printStackTrace();
 		}
 		return wtm;
+	}
+	
+	private void mian() throws WTException {
+		// TODO Auto-generated method stub
+           getDocByNumber("00073235");
 	}
 
 }

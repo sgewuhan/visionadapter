@@ -121,6 +121,8 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				pmPart = (PMPart) partPersistence.getByPLMId(partOid);
 			} catch (NullPointerException e) {
 				pmPart = null;
+			}catch(ClassCastException e){
+				pmPart=null;
 			}
 			Debug.P("pmPart-->" + pmPart != null);
 			try {
@@ -1634,39 +1636,39 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 	}
 
 	public static void reloadPermission(String objectId) throws Exception {
-//		String urls = ModelServiceFactory.URL_REAUTH + "?id=" + objectId;
-//		Debug.P(urls);
-//		URL url = new URL(urls);
-//		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//		connection.connect();
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(
-//				connection.getInputStream()));
-//		String line;
-//		System.out.println("Reload Permission---------start---- ");
-//		while ((line = reader.readLine()) != null) {
-//			System.out.println(line);
-//		}
-//		System.out.println(" Reload Permission--------ends ");
-//		reader.close();
-//		connection.disconnect();
+		String urls = ModelServiceFactory.URL_REAUTH + "?id=" + objectId;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.connect();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String line;
+		System.out.println("Reload Permission---------start---- ");
+		while ((line = reader.readLine()) != null) {
+			System.out.println(line);
+		}
+		System.out.println(" Reload Permission--------ends ");
+		reader.close();
+		connection.disconnect();
 	}
 
 	public static void reloadDeliverable(String objectId) throws Exception {
-//		String urls = ModelServiceFactory.URL_LINKDELIVERY + "?id=" + objectId;
-//		Debug.P(urls);
-//		URL url = new URL(urls);
-//		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//		connection.connect();
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(
-//				connection.getInputStream()));
-//		String line;
-//		System.out.println("Reload Deliverable----------start--- ");
-//		while ((line = reader.readLine()) != null) {
-//			System.out.println(line);
-//		}
-//		System.out.println(" Reload Deliverable--------ends ");
-//		reader.close();
-//		connection.disconnect();
+		String urls = ModelServiceFactory.URL_LINKDELIVERY + "?id=" + objectId;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.connect();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String line;
+		System.out.println("Reload Deliverable----------start--- ");
+		while ((line = reader.readLine()) != null) {
+			System.out.println(line);
+		}
+		System.out.println(" Reload Deliverable--------ends ");
+		reader.close();
+		connection.disconnect();
 	}
 
 	public static void productNumToProductItem(String objectId)
@@ -2212,11 +2214,11 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 	public static void main(String[] args) throws Exception {
 		Debug.P("------>>>>Start Sysnch>>>>>>>>");
-//		 SynchEPMDocument2PM(Utils.getDate());//同步图纸
-//		 SynchWTPart2PM(Utils.getDate());//同步部件
-		
-		 initPMDocument(Utils.getDate());
-		 SynchDocument2PM(Utils.getDate());// 同步文档
+		 SynchEPMDocument2PM(Utils.getDate());//同步图纸
+		 SynchWTPart2PM(Utils.getDate());//同步部件
+	
+//		 initPMDocument(Utils.getDate());
+//		 SynchDocument2PM(Utils.getDate());// 同步文档
 		Debug.P("------>>>>End Sysnch>>>>>>>>");
 	}
 

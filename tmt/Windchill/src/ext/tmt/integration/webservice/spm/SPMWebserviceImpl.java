@@ -33,6 +33,7 @@ import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.QueryResult;
 import wt.folder.FolderHelper;
+import wt.lifecycle.LifeCycleManaged;
 import wt.part.WTPart;
 import wt.part.WTPartHelper;
 import ext.tmt.utils.Contants;
@@ -40,6 +41,7 @@ import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
+import ext.tmt.utils.Utils;
 
 
 public class SPMWebserviceImpl{
@@ -186,28 +188,30 @@ public class SPMWebserviceImpl{
                   
                 // 物料删除 Factory标识维护
                 if (times == 3) {
-                	Debug.P("------------>>>Times:"+times+"  PartNo:"+partNo);
+                	Debug.P("------------>>>Times:"+times+"  PartNo: "+partNo);
                 	if(StringUtils.isNotEmpty(partNo)){
-                        WTPart part = PartUtil.getLastPartbyNumViwe(partNo,Contants.DESIGN);
+//                        WTPart part = PartUtil.getLastPartbyNumViwe(partNo,Contants.DESIGN);
+                        WTPart part = (WTPart)Utils.getWCObject(WTPart.class, partNo.toUpperCase().trim());
+                       Debug.P("partNo-->"+part+"---factory--->"+factory);
                         if (part == null) {
-                            result = "PLM不存在编号为(" + partNo + ")Design视图的部件。";
+                            result = "PLM不存在编号为(" + partNo + ")的部件。";
                             return result;
                         }
-                        if (StringUtils.isEmpty(factory)) {
-                            result = "工厂(factory)参数为空";
-                            return result;
-                        }
+//                        if (StringUtils.isEmpty(factory)) {
+//                            result = "工厂(factory)参数为空";
+//                            return result;
+//                        }
 
                         if (part != null) {
                         	 IBAUtils partIba=new IBAUtils(part);
                         	 String  _factory=partIba.getIBAValue(SPMConsts.FACTORY);//系统Factory软属性值
                             if (StringUtils.isEmpty(_factory)) {//如果物料不存在工厂,则设置为已废弃
-                                GenericUtil.changeState(part, SPMConsts.DESPOSED);
+                                GenericUtil.changeState((LifeCycleManaged)part, SPMConsts.DESPOSED);
                             } else {//存在新材工厂参数则删除指定参数信息
                             	Debug.P("------>>参数Factory:"+factory+"(用于删除)");
                             	boolean isTMT=matchFactory(_factory);
                                 if(!isTMT){//如果不存在新材的工厂则修改状态为 已作废
-                                  GenericUtil.changeState(part, SPMConsts.DESPOSED);
+                                  GenericUtil.changeState((LifeCycleManaged)part, SPMConsts.DESPOSED);
                                 }
                             }
                                result = "删除工厂成功";
@@ -332,7 +336,7 @@ public class SPMWebserviceImpl{
                	     Debug.P("--Mark:更新-->>>UpdateIBA:"+ibaMap);
                	     String org_fac=(String) LWCUtil.getValue(part, SPMConsts.FACTORY);
                	     //过滤重复添加的工厂
-               	     if(!org_fac.contains(spm_factory)){
+               	     if(StringUtils.isNotEmpty(org_fac)&&StringUtils.isNotEmpty(spm_factory)&&!org_fac.contains(spm_factory)){
                	    	 StringBuffer sbf=new StringBuffer(spm_factory);
                   	     sbf.append(",").append(org_fac);
                   	     ibaMap.put(SPMConsts.FACTORY, sbf.toString());

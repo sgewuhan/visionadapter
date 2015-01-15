@@ -10,11 +10,13 @@ import ext.tmt.utils.Debug;
 
 import ext.tmt.utils.IBAHelper;
 import ext.tmt.utils.PartUtil;
+import ext.tmt.utils.Utils;
 import wt.events.KeyedEvent;
 import wt.events.KeyedEventListener;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceManagerEvent;
 import wt.part.WTPart;
+import wt.part.WTPartMaster;
 import wt.services.ManagerException;
 import wt.services.ServiceEventListenerAdapter;
 import wt.services.StandardManager;
@@ -61,9 +63,19 @@ public class EndItemPartService extends StandardManager implements PartService,
 			//}
 				 Debug.P("part2---->"+part);
 				// Debug.P(part.getNumber()+" ------------- version1s---->"+part.getVersionIdentifier().getValue()+"    version1---->"+part.getIterationIdentifier().getValue());
-				PartHelper.listenerWTPart((WTPart) target, eventType);
+				 part=(WTPart)Utils.getWCObject(WTPart.class, part.getNumber());
+				 PartHelper.listenerWTPart(part, eventType);
 //				PartHelper.listenerWTPart1((WTPart) target, eventType);
+			}else if(target instanceof WTPartMaster){
+				Debug.P("wtpartMaster eventType--->"+eventType);				
+				WTPartMaster wtpartMaster = (WTPartMaster)target;
+				Debug.P("wtpartMaster---->"+wtpartMaster);
+				Debug.P("wtpartMaster---->"+wtpartMaster.getName());
+				Debug.P("wtpartMaster---->"+wtpartMaster.getNumber());
+				Debug.P("wtpartMaster---->"+wtpartMaster.getDefaultUnit().getDisplay());
+				PartHelper.listenerWTPartMaster(wtpartMaster,eventType);
 			}
+			
 
 		}
 
@@ -96,8 +108,8 @@ public class EndItemPartService extends StandardManager implements PartService,
 //		String INSERT = PersistenceManagerEvent
 //				.generateEventKey(PersistenceManagerEvent.INSERT); 
 //		getManagerService().addEventListener(listener, INSERT);
-		String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
-		getManagerService().addEventListener(listener, POST_UPDATE);
+//		String POST_UPDATE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.UPDATE);
+//		getManagerService().addEventListener(listener, POST_UPDATE);
 		
 		String DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
 		getManagerService().addEventListener( listener, DELETE);

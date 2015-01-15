@@ -25,6 +25,7 @@ import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.Utils;
 
 public class EPMDocHelper implements Serializable {
   private static final long serialVersionUID = 2304592616754675533L;
@@ -97,11 +98,17 @@ public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
     }
     else if (eventType.equals("PRE_DELETE")) {
       String pmoid = iba.getIBAValue("PMId");
-      epmdoc= EPMUtil.getEPMDocument(epmdoc.getNumber(), null);
-      Debug.P("PRE_DELETE-----------------pmoid----------->" + pmoid);
+      Debug.P("PRE_DELETE---------1--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
+      //epmdoc= EPMUtil.getEPMDocument(epmdoc.getNumber(), null); 
+     // Debug.P("PRE_DELETE---------2--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
+      epmdoc=(EPMDocument)Utils.getWCObject(EPMDocument.class, epmdoc.getNumber());
+      Debug.P("PRE_DELETE---------3--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
       if (docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")) {
           return;
         }
+      if(WorkInProgressHelper.isCheckedOut(epmdoc)){
+    	  return;
+      }
       if (!WorkInProgressHelper.isCheckedOut(epmdoc)){
     	  List partList =new ArrayList();
           String epmType=epmdoc.getCADName();
@@ -109,6 +116,7 @@ public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
         	  epmdoc= (EPMDocument) DocUtils.getEPMReferences(epmdoc).get(0);
           }
           partList=DocUtils.getDescribePartsByEPMDoc(epmdoc);
+          Debug.P("图纸："+epmdoc.getNumber()+"存在关联部件"+partList.size());
           if(partList.size()>0){
        	   throw new Exception("图纸："+epmdoc.getNumber()+"存在关联部件，不允许删除！");
           }

@@ -61,6 +61,7 @@ import wt.part.WTPartDescribeLink;
 import wt.part.WTPartHelper;
 import wt.part.WTPartMaster;
 import wt.pom.Transaction;
+import wt.session.SessionHelper;
 import wt.session.SessionServerHelper;
 import wt.type.TypeDefinitionReference;
 import wt.type.TypedUtilityServiceHelper;
@@ -361,19 +362,20 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
 	public static String changePartName(WTPart wtpart, String name)
             throws Exception {
     	Debug.P("-changePartName-->>wtpart:"+wtpart+"  ;name:"+name);
-        if (!RemoteMethodServer.ServerFlag) {
-            String method = "changePartName";
-            String klass = CsrSpmUtil.class.getName();
-            Class[] types = { WTPart.class, String.class };
-            Object[] values = { wtpart, name };
-            return (String) RemoteMethodServer.getDefault().invoke(method,klass, null, types, values);
-        }
+//        if (!RemoteMethodServer.ServerFlag) {
+//            String method = "changePartName";
+//            String klass = CsrSpmUtil.class.getName();
+//            Class[] types = { WTPart.class, String.class };
+//            Object[] values = { wtpart, name };
+//            return (String) RemoteMethodServer.getDefault().invoke(method,klass, null, types, values);
+//        }
         SessionServerHelper.manager.setAccessEnforced(false);
+        SessionHelper.manager.setAdministrator();
         Transaction tx = null;
         try {
-        	tx = new Transaction();
-            tx.start();
             if(wtpart!=null&&!StringUtils.equals(wtpart.getName(), name)){//名称不一致才修改
+            	tx = new Transaction();
+            	tx.start();
             	Debug.P("---->>>changePartName OldName:"+wtpart.getName()+" ;NewName:"+name);
                 Identified identified = (Identified) wtpart.getMaster();
                 WTOrganization org = wtpart.getOrganization();
@@ -381,10 +383,11 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
                 WTPartHelper.service .changeWTPartMasterIdentity((WTPartMaster) identified,
                                 name, number, org);
                 tx.commit();
-                Debug.P("--->>ChangePartName:("+wtpart.getPersistInfo().getObjectIdentifier().getStringValue()+")名称为("+name+")Success!");
                 tx = null;
+                Debug.P("--->>ChangePartName:("+wtpart.getPersistInfo().getObjectIdentifier().getStringValue()+")名称为("+name+")Success!");
             }
         } catch (Exception e) {
+        	e.printStackTrace();
             throw new Exception(e.getMessage());
         } finally {
             if (tx != null)

@@ -2110,8 +2110,9 @@ public class GenericUtil implements RemoteAccess {
 	 * @return 修改后的对象
 	 */
 	public static LifeCycleManaged changeState(LifeCycleManaged lm, String stateName) {
-		
+		 Debug.P("chage lifecycle state---->"+stateName);
 		State state = State.toState(stateName);
+		Debug.P(state);
 		wt.lifecycle.LifeCycleManaged lifeCycleManaged = (wt.lifecycle.LifeCycleManaged) lm;
 		try {
 			if(state!=null){

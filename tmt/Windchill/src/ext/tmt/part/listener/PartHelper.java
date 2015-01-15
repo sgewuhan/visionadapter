@@ -26,6 +26,7 @@ import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
 import ext.tmt.utils.StringUtil;
 import ext.tmt.utils.UserDefQueryUtil;
+import ext.tmt.utils.Utils;
 import ext.tmt.utils.WindchillUtil;
 
 
@@ -121,6 +122,9 @@ public class PartHelper implements RemoteAccess,Serializable {
 			   String productName="";	
 			   String prefix="";
 			   partNumber=wtPart.getNumber();
+			   if(!Utils.checkNumberStr2(partNumber)){
+	        		throw new Exception("部件编码只能包含字母，数字，-；请改正！");
+	        	}
 			   if(StringUtils.isNotEmpty(partType)){
 				   partType=partType.replaceAll(" ", "").trim();
 			   }
@@ -195,6 +199,7 @@ public class PartHelper implements RemoteAccess,Serializable {
 				//成品编码=TX+三位分类码+四位流水码。其中分类码为成品所在产品库容器名称的前三个字符，自动根据成品所在产品库获取。
 					productName=wtPart.getContainerName();
 					Debug.P("---999---Contants.PRODUCTPART-->>>PartType:"+partType+"   PartNum:"+wtPart.getNumber()+"   productName:"+productName);
+					
 					//批量导入部件时如果导入的部件编码含有TX则不修改部件编码
 					if(wtPart.getNumber().toUpperCase().contains("TX")){
 						WCToPMHelper.CreatePMProductToPM(wtPart);
@@ -290,7 +295,8 @@ public class PartHelper implements RemoteAccess,Serializable {
 					WCToPMHelper.CreateJigToolPartToPM(wtPart);
 				}
 			 
-		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_MODIFY)) {
+		}
+		else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.POST_MODIFY)) {
 			Debug.P("partType----->"+partType); 
 			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
         		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
@@ -375,7 +381,8 @@ public class PartHelper implements RemoteAccess,Serializable {
 					WCToPMHelper.CreateJigToolPartToPM( wtPart);
 			  }
 			
-		}else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
+		}
+		else  if (StringUtils.isEmpty(sync)&&eventType.equals(PersistenceManagerEvent.UPDATE)) {
 			if(docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")){
         		throw new Exception("不允许将零部件创建/移动到容器根文件夹下！请重新指定文件夹");
         	}
@@ -533,8 +540,14 @@ public class PartHelper implements RemoteAccess,Serializable {
 		}
 		else  if (eventType.equals(PersistenceManagerEvent.PRE_DELETE)) {
 			String pmoid = iba.getIBAValue(Contants.PMID);
-			 wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
-			   Debug.P("--2004--PRE_DELETE-----------------pmoid----------->"+pmoid);
+			Debug.P("-1-PRE_DELETE-----pmoid------>"+pmoid+"--WTPart--->"+wtPart.getNumber()+"-isCheckOut--->"+WorkInProgressHelper.isCheckedOut(wtPart));
+			// wtPart =PartUtil.getPartByNumber(wtPart.getNumber());
+			  // Debug.P("-2-PRE_DELETE-----pmoid------>"+pmoid+"--WTPart--->"+wtPart.getNumber()+"-isCheckOut--->"+WorkInProgressHelper.isCheckedOut(wtPart));
+			  wtPart =(WTPart)Utils.getWCObject(WTPart.class,wtPart.getNumber());
+			  Debug.P("-3-PRE_DELETE-----pmoid------>"+pmoid+"--WTPart--->"+wtPart.getNumber()+"-isCheckOut--->"+WorkInProgressHelper.isCheckedOut(wtPart));
+			   if(WorkInProgressHelper.isCheckedOut(wtPart)){
+				   return;
+			   }
                List bomList =new ArrayList();
                List docList =new ArrayList();
                List epmList =new ArrayList();
@@ -569,6 +582,41 @@ public class PartHelper implements RemoteAccess,Serializable {
 //	}
 	}
 	
+	
+	public static void listenerWTPartMaster(WTPartMaster partMaster,String eventType) throws Exception{
+		boolean flag = true;
+		flag = SessionServerHelper.manager.setAccessEnforced(false);
+		WTPart part = (WTPart)Utils.getWCObject(WTPart.class, partMaster.getNumber());
+		IBAUtils iba = new IBAUtils(part);
+		String sync=iba.getIBAValue(Contants.CYNCDATA);
+		String pmoid = iba.getIBAValue(Contants.PMID);
+		String partType=DocUtils.getType(part);
+		Debug.P("sync--->"+sync);
+		Debug.P("pmoids--->"+pmoid);
+		Debug.P("eventType--------------->"+eventType);
+		Debug.P("partType---------------->"+partType);
+		try {
+			if(StringUtils.isNotEmpty(pmoid)&&eventType.equals(PersistenceManagerEvent.POST_MODIFY)){
+				 if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+					   WCToPMHelper.updatePMPart(pmoid, part);
+				  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PRODUCTPART)){ //如果是原材料
+						WCToPMHelper.updatePMProductToPM(pmoid, part);
+				  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.MATERIAL)){ //如果是原材料
+						WCToPMHelper.updatePMaterialToPM(pmoid, part);
+				  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SUPPLYMENT)){//如果是客供件
+						WCToPMHelper.updateSupplyToPM(pmoid, part);
+				  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.PACKINGPART)){//如果是包装材料
+						WCToPMHelper.updatePMPackageToPM(pmoid, part);
+				  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
+						WCToPMHelper.UpdateJigToolPartToPM(pmoid, part);
+				  }
+			}
+		}catch(Exception e){
+			throw new Exception("部件创建/同步出错，请联系管理员"+e.getMessage());
+		}finally {
+			SessionServerHelper.manager.setAccessEnforced(flag);
+		}
+	}
 	public static void listenerWTPart1(WTPart wtPart, String eventType)
 			throws Exception {
 		Debug.P("事件类型---->" + eventType);
@@ -1168,8 +1216,10 @@ public class PartHelper implements RemoteAccess,Serializable {
 	 */
 	public static void setPartIBAValues(WTPart part,EPMDocument cad) throws Exception{
          Debug.P("----->>>>setPartIBAValues:"+cad);
-		 part=PartUtils.getPartByNumber(part.getNumber());
-		 cad=EPMUtil.getEPMDocument(cad.getNumber(), null);
+//		 part=PartUtils.getPartByNumber(part.getNumber());
+		 part=(WTPart)Utils.getWCObject(WTPart.class, part.getNumber());
+//		 cad=EPMUtil.getEPMDocument(cad.getNumber(), null);
+		 cad=(EPMDocument)Utils.getWCObject(EPMDocument.class, cad.getNumber());
 		 IBAUtils partIBA = new IBAUtils(part);
 		 IBAUtils cadIBA = new IBAUtils(cad);
 		 

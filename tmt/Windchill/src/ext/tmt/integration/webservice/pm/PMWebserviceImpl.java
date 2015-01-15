@@ -76,6 +76,7 @@ import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
+import ext.tmt.utils.Utils;
 
 
 
@@ -609,16 +610,20 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
     private static Persistable getLastObjectByNum(Persistable object)throws Exception{
     	if(object instanceof WTPart){
     		WTPart part=(WTPart)object;
-    		object=PartUtils.getPartByNumber(part.getNumber());
+    		//object=PartUtils.getPartByNumber(part.getNumber());
+    		object=Utils.getWCObject(WTPart.class,part.getNumber());
     		Debug.P("---->>>getLastObjectByNum:WTPartNumber="+part.getNumber());
     	}else if(object instanceof EPMDocument){
     		EPMDocument epm=(EPMDocument)object;
-    		object=EPMUtil.getEPMDocument(epm.getNumber(),null);
+//    		object=EPMUtil.getEPMDocument(epm.getNumber(),null);
+    		object=Utils.getWCObject(EPMDocument.class,epm.getNumber());
     		Debug.P("---->>>getLastObjectByNum:EPMDocument="+epm.getNumber());
     	}else if(object instanceof WTDocument){
     		WTDocument doc=(WTDocument)object;
-    		object=DocUtils.getDocByNumber(doc.getNumber());
-    		Debug.P("---->>>getLastObjectByNum:WTDocument="+doc.getNumber());
+//    		object=DocUtils.getDocByNumber(doc.getNumber());
+    		object=Utils.getWCObject(WTDocument.class,doc.getNumber());
+    		doc=(WTDocument)Utils.getWCObject(WTDocument.class,doc.getNumber());
+    		Debug.P("---->>>getLastObjectByNum:WTDocument="+doc.getNumber()+"---version-->"+doc.getVersionInfo().getIdentifier()+"-----oid----->"+doc.getIterationInfo().getIdentifier().getValue());
     	}
     	  return object;
     }
@@ -764,19 +769,25 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 						 PersistenceHelper.manager.refresh(newobject);
 						 if(newobject instanceof EPMDocument){
 							 EPMDocument empdoc=(EPMDocument)newobject;
+							 Debug.P("EPMDocument ---->"+empdoc.getNumber()+"  new version--->"+empdoc.getVersionIdentifier().getValue());
 							 basic_object.setPLMId(empdoc.getPersistInfo().getObjectIdentifier().getStringValue());
 							 basic_object.setMajorVid(empdoc.getVersionIdentifier().getValue());
 							 basic_object.setSecondVid(Integer.valueOf(empdoc.getIterationIdentifier().getValue()));
+							 basic_object.setValue("syncdate", Utils.getDate());
 						 }else if(newobject instanceof WTPart){
 							 WTPart part=(WTPart)newobject;
+							 Debug.P("WTPart ---->"+part.getNumber()+"  new version--->"+part.getVersionIdentifier().getValue());
 							 basic_object.setPLMId(part.getPersistInfo().getObjectIdentifier().getStringValue());
 							 basic_object.setMajorVid(part.getVersionIdentifier().getValue());
 							 basic_object.setSecondVid(Integer.valueOf(part.getIterationIdentifier().getValue()));
+							 basic_object.setValue("syncdate", Utils.getDate());
 						 }else if(newobject instanceof WTDocument){
 							 WTDocument doc=(WTDocument)newobject;
+							 Debug.P("WTDocument ---->"+doc.getNumber()+"  new version--->"+doc.getVersionIdentifier().getValue());
 							 basic_object.setPLMId(doc.getPersistInfo().getObjectIdentifier().getStringValue());
 							 basic_object.setMajorVid(doc.getVersionIdentifier().getValue());
 							 basic_object.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
+							 basic_object.setValue("syncdate", Utils.getDate());
 						 }
 						     basic_object.doUpdate();
 					     }

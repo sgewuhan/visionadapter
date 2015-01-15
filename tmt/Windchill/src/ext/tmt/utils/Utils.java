@@ -225,8 +225,10 @@ public class Utils {
 				SearchCondition.EQUAL, number),
 				new int[] { index });
 		qs = new LatestConfigSpec().appendSearchCriteria(qs);
+		Debug.P("sql----->"+qs);
 		// 执行查询
 		QueryResult qr = PersistenceHelper.manager.find(qs);
+		
 		qr = new LatestConfigSpec().process(qr);
 		if (qr.hasMoreElements()) {
 			object =(WTObject)qr.nextElement();
@@ -295,7 +297,7 @@ public class Utils {
 
 	public static String getDate() {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-		return sdf.format(new Date());
+		return sdf.format(new Date()).toString();
 	}
 
 	public static String changeStrLowCase2UpperCase(String str) {
