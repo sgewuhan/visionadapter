@@ -37,7 +37,7 @@ public class CADDocumentPersistence extends PersistenceService<PMCADDocument> {
 	public Map<String, String> getInitDocumentList() {
 		Map<String, String> result = new HashMap<String, String>();
 		DBCursor dbCursor = collection
-				.find(new BasicDBObject().append("IsSync", null).append(
+				.find(new BasicDBObject().append(
 						"plmtype",
 						new BasicDBObject().append("$ne",
 								PMDocument.PM_TYPE_DOCUMENT)));
