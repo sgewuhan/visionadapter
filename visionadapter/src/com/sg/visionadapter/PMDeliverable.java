@@ -19,9 +19,9 @@ public class PMDeliverable extends BasicDBObject implements IPersistenceService 
 
 	public WriteResult doUpdateDeliverable(String oldDocumentId,
 			String newDocumentId) {
-		WriteResult result = collection.update(new BasicDBObject().append(F_DOCUMENT_ID,
-				oldDocumentId), new BasicDBObject().append("$set",
-				new BasicDBObject().append(F_DOCUMENT_ID, new ObjectId(
+		WriteResult result = collection.update(new BasicDBObject().append(
+				F_DOCUMENT_ID, oldDocumentId), new BasicDBObject().append(
+				"$set", new BasicDBObject().append(F_DOCUMENT_ID, new ObjectId(
 						newDocumentId))));
 		return result;
 	}
@@ -36,4 +36,12 @@ public class PMDeliverable extends BasicDBObject implements IPersistenceService 
 		return DELIVERY_NAME;
 	}
 
+	public void initDeli(String codebasePath) {
+		DBCollection col = ModelServiceFactory.getInstance(codebasePath)
+				.getCollection("document");
+		col.find(new BasicDBObject().append(
+				"IsSync",
+				new BasicDBObject().append("$nin", new Boolean[] {
+						Boolean.TRUE, Boolean.FALSE, null })));
+	}
 }
