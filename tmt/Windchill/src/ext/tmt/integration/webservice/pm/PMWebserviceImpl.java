@@ -496,15 +496,15 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
      * @return
      * @throws Exception
      */
-    public static int deleteWTDocumentEntry(String pm_docId)throws Exception{
+    public static int deleteWTDocumentEntry(String pm_docId,String deletAction)throws Exception{
     	
     	   Debug.P("------>>>Delete PM_DocumentID："+pm_docId);
        
   	   if (!RemoteMethodServer.ServerFlag) {
            String method = "deleteWTDocumentEntry";
            String klass = PMWebserviceImpl.class.getName();
-           Class[] types = { String.class,};
-           Object[] vals = {pm_docId};
+           Class[] types = { String.class,String.class};
+           Object[] vals = {pm_docId,deletAction};
            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
        }else{
     	checkNull(pm_docId);

@@ -113,11 +113,11 @@ public class Contants {
 	/*
 	 * PMid
 	 */
-	public static final String PMID="PMId";
+	public static final String PMID ="PMId";
 	
 	/*
 	 * PM同步时间
-	 */
+	 */ 
 	public static final String CYNCDATA="CyncData";
 	
 	/*
@@ -158,7 +158,9 @@ public class Contants {
 	public static final String PROCESS_REVIEWER="PROCESS_REVIEWER";
 	public static final String PROCESS_REVIEW_DATE="PROCESS_REVIEW_DATE";
 	
-	
+	public static final String DELETE_ALL="all";
+	public static final String DELETE_MV="mv";
+	public static final String DELETE_SV="sv";
 	
 	
 	

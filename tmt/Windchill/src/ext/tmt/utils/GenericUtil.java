@@ -2280,10 +2280,36 @@ public class GenericUtil implements RemoteAccess {
 	    	}
 
 	    }
-
-
-
 	    
+	    /**
+	     * 删除Windchill中的WTPart，EPMDocument
+	     * @param obj 
+	     * @param deleteAction 删除动作，all【删除全部版本】，mv[删除最新大版本]，sv[删除最新小版本]
+	     * @throws Exception
+	     */
+       public static void deleteWTObject(RevisionControlled obj,String deleteAction) throws Exception{
+    	   HashSet linkSet = new HashSet();//存储对象件的Link关系
+           QueryResult qrIter;  
+    	   try{
+    		   if(deleteAction.equalsIgnoreCase(Contants.DELETE_ALL)){//删除所有版本
+    			   qrIter = VersionControlHelper.service.allIterationsOf(obj.getMaster());
+    		   
+    		   }else if(deleteAction.equalsIgnoreCase(Contants.DELETE_MV)){//删除最新大版本
+//    			   qrIter = VersionControlHelper.service.get
+    			   
+    			   
+    			   
+    		   }else if(deleteAction.equalsIgnoreCase(Contants.DELETE_SV)){//删除最新小版本
+    			   linkSet.addAll((PersistenceServerHelper.manager.expand(obj,
+	                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
+	                        false)).getObjectVectorIfc().getVector());
+    		   }
+    		   
+    		   
+    	   }catch(Exception e){
+    		   e.printStackTrace();
+    	   }
+       }
 	    
 	    /**
 	     * 删除对象(文档对象,部件对象,图档对象)

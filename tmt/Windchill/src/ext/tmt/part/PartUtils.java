@@ -20,6 +20,7 @@ import wt.util.WTException;
 import wt.util.WTPropertyVetoException;
 import wt.util.WTRuntimeException;
 import wt.vc.VersionControlHelper;
+import wt.vc.config.LatestConfigSpec;
 
 public class PartUtils {
 	
@@ -68,7 +69,8 @@ public class PartUtils {
 		qs.appendWhere(sc);
 		Debug.P("qs------>"+qs);
 		QueryResult qr = PersistenceHelper.manager.find(qs);
-		if (qr.size() > 0) {
+		qr = new LatestConfigSpec().process(qr);
+		if (qr.hasMoreElements()) {
 			Part = (WTPart) qr.nextElement();
     			Part = (WTPart) VersionControlHelper.getLatestIteration(Part);
 		}
@@ -153,8 +155,10 @@ public class PartUtils {
 			sc = new SearchCondition(masterClass,"number", SearchCondition.EQUAL, number);
 		}
 		qs.appendWhere(sc, new int[] { 0 });
+		Debug.P(qs);
 		QueryResult qr = PersistenceHelper.manager.find( qs);
-		while(qr.hasMoreElements()){
+		qr = new LatestConfigSpec().process(qr);
+		if(qr.hasMoreElements()){
 			obj=qr.nextElement();	
 		}
 		return  (Object) obj;
