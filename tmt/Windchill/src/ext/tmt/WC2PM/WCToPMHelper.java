@@ -52,6 +52,7 @@ import com.sg.visionadapter.JigToolsPersistence;
 import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
+import com.sg.visionadapter.PMDeliverable;
 import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
 import com.sg.visionadapter.PMJigTools;
@@ -121,8 +122,6 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				pmPart = (PMPart) partPersistence.getByPLMId(partOid);
 			} catch (NullPointerException e) {
 				pmPart = null;
-			}catch(ClassCastException e){
-				pmPart=null;
 			}
 			Debug.P("pmPart-->" + pmPart != null);
 			try {
@@ -137,16 +136,23 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = "";
+			pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 //				Debug.P("pmPart-->" + pmPart);
 				if (pmPart != null) {
-					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						updatePMPart(pmoid, wtPart);
 				} else {
 					pmPart = (PMPart) partPersistence.newInstance();
 					pmPart.setFolderIdByPLMId(pFolderId);
-					ObjectId objectId = new ObjectId();
+					ObjectId objectId = null;
+					Debug.P("半成品--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					pmPart.set_id(objectId);
 					pmPart.setPLMId(partOid);
 					pmPart.setCommonName(wtPart.getName());
@@ -206,6 +212,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		}
 	}
 
+	
 	private static String getObjectOid(WTObject object) {
 		return object.getPersistInfo().getObjectIdentifier().getStringValue();
 	}
@@ -273,10 +280,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmProduct-->" + pmProduct != null);
 				if (pmProduct != null) {
-					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						updatePMProductToPM(pmoid, wtPart);
 				} else {
@@ -288,7 +295,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					plmData.put("plmmid", "wt.part.WTPart:"
 							+ wtPart.getIterationInfo().getBranchId());
 					Debug.P(plmData);
-					ObjectId objectId = new ObjectId();
+					
+					ObjectId objectId = null;
+					Debug.P("成品--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					pmProduct.set_id(objectId);
 					pmProduct.setPLMId(wtPart.getPersistInfo()
 							.getObjectIdentifier().getStringValue());
@@ -423,16 +437,23 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmMaterial-->" + pmMaterial != null);
 				if (pmMaterial != null) {
-					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						updatePMaterialToPM(pmoid, wtPart);
 				} else {
 					pmMaterial = (PMMaterial) materialPersistence.newInstance();
 					pmMaterial.setFolderIdByPLMId(pFolderId);
 					pmMaterial.setPLMId(partOid);
+					ObjectId objectId = null;
+					Debug.P("pmMaterial--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					Map plmData = new HashMap();
 					plmData.put("number", wtPart.getNumber());
 					plmData.put("plmmid", "wt.part.WTPart:"
@@ -462,7 +483,6 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmMaterial.setMaterialGroup(partiba
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = new ObjectId();
 					pmMaterial.set_id(objectId);
 					pmMaterial.setOwner(wtPart.getCreatorName());
 					pmMaterial
@@ -536,10 +556,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmSupplyment-->" + pmSupplyment != null);
 				if (pmSupplyment != null) {
-					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						updateSupplyToPM(pmoid, wtPart);
 				} else {
@@ -579,7 +599,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmSupplyment.setMaterialGroup(partiba
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = new ObjectId();
+					ObjectId objectId = null;
+					Debug.P("PMSupplyment--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					pmSupplyment.set_id(objectId);
 					pmSupplyment
 							.setMaterial(partiba.getIBAValue("Material") == null ? ""
@@ -659,10 +685,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = cadiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmcad-->" + pmcad != null);
 				if (pmcad != null) {
-					String pmoid = cadiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						updatePMCADDoc(pmoid, epmdoc);
 				} else {
@@ -695,10 +721,17 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
 							: cadiba.getIBAValue("Material_NO"));
 					pmcad.setPartType0(part_type == null ? "" : part_type);
-					ObjectId objectId = new ObjectId();
+					ObjectId objectId = null;
+					Debug.P("PMCADDocument--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					pmcad.set_id(objectId);
 					pmcad.setValue("IsSync", true);
 					pmcad.setOwner(epmdoc.getCreatorName());
+					pmcad.setValue("cadName", epmdoc.getCADName());
 					WriteResult wresult = pmcad.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -758,10 +791,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmPackage-->" + pmPackage != null);
 				if (pmPackage != null) {
-					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						updatePMPackageToPM(pmoid, wtPart);
 				} else {
@@ -797,7 +830,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPackage.setMaterialGroup(partiba
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = new ObjectId();
+					ObjectId objectId = null;
+					Debug.P("pmPackage--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					pmPackage.set_id(objectId);
 					pmPackage.setOwner(wtPart.getCreatorName());
 					pmPackage
@@ -869,10 +908,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
+			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmJigTools-->" + pmJigTools != null);
 				if (pmJigTools != null) {
-					String pmoid = partiba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid))
 						UpdateJigToolPartToPM(pmoid, wtPart);
 				} else {
@@ -908,7 +947,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmJigTools.setMaterialGroup(partiba
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = new ObjectId();
+					ObjectId objectId = null;
+					Debug.P("pmJigTools--》pmoid----->"+pmoid);
+					if(StringUtils.isNotEmpty(pmoid)){
+						objectId= new ObjectId(pmoid);
+					}else{
+						objectId = new ObjectId();
+					}
 					pmJigTools.set_id(objectId);
 					pmJigTools.setValue("IsSync", true);
 					pmJigTools.setOwner(wtPart.getCreatorName());
@@ -989,6 +1034,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					: cadiba.getIBAValue("Material_NO"));
 			pmcad.setPartType0(part_type == null ? "" : part_type);
 			pmcad.setValue("IsSync", true);
+			pmcad.setValue("cadName", epmdoc.getCADName());
 			WriteResult wresult = pmcad.doUpdate();
 			String error = wresult.getError();
 			if (StringUtils.isEmpty(error)) {
@@ -2215,10 +2261,12 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 	public static void main(String[] args) throws Exception {
 		Debug.P("------>>>>Start Sysnch>>>>>>>>");
 		 SynchEPMDocument2PM(Utils.getDate());//同步图纸
-		 SynchWTPart2PM(Utils.getDate());//同步部件
-	
+//		 SynchWTPart2PM(Utils.getDate());//同步部件
+//		
 //		 initPMDocument(Utils.getDate());
-//		 SynchDocument2PM(Utils.getDate());// 同步文档
+		 SynchDocument2PM(Utils.getDate());// 同步文档
+		 PMDeliverable pmd = new PMDeliverable();
+		 pmd.initDeli(codebasePath);
 		Debug.P("------>>>>End Sysnch>>>>>>>>");
 	}
 

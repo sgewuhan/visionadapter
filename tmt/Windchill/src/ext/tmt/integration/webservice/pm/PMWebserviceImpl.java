@@ -606,7 +606,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
      *  获取对象最新版本
      * @param object
      * @throws Exception
-     */
+     */ 	 		
     private static Persistable getLastObjectByNum(Persistable object)throws Exception{
     	if(object instanceof WTPart){
     		WTPart part=(WTPart)object;

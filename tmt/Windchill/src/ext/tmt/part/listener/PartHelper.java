@@ -103,6 +103,7 @@ public class PartHelper implements RemoteAccess,Serializable {
 		boolean flag = true;
 		flag = SessionServerHelper.manager.setAccessEnforced(false);
 		try {
+			wtPart=(WTPart)Utils.getWCObject(WTPart.class, wtPart.getNumber());
 		partType=DocUtils.getType(wtPart);
 		IBAUtils iba = new IBAUtils(wtPart);
 		IBAUtils epmIba = null;
@@ -573,7 +574,16 @@ public class PartHelper implements RemoteAccess,Serializable {
 			  }else if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.TOOLPART)){//如果是备品备料
 					WCToPMHelper.deletePMJigTools(pmoid, wtPart);
 			  }
-		}   
+		} 
+		else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
+			if(wtPart !=null){
+				String pmoid = iba.getIBAValue(Contants.PMID);
+				if(StringUtils.isNotEmpty(pmoid)&&partType.contains(Contants.SEMIFINISHEDPRODUCT)){
+					Debug.P("删除部件 "+wtPart.getNumber()+" 的最新小版本，重新以 -》"+pmoid+" 创建-------------");  
+					WCToPMHelper.CreatePartToPM(wtPart);;
+				  }
+			}
+		}
 		}catch(Exception e){
 			throw new Exception("部件创建/同步出错，请联系管理员"+e.getMessage());
 		}finally {
@@ -587,6 +597,9 @@ public class PartHelper implements RemoteAccess,Serializable {
 		boolean flag = true;
 		flag = SessionServerHelper.manager.setAccessEnforced(false);
 		WTPart part = (WTPart)Utils.getWCObject(WTPart.class, partMaster.getNumber());
+		if(part==null){
+			return;
+		}
 		IBAUtils iba = new IBAUtils(part);
 		String sync=iba.getIBAValue(Contants.CYNCDATA);
 		String pmoid = iba.getIBAValue(Contants.PMID);
@@ -1216,10 +1229,14 @@ public class PartHelper implements RemoteAccess,Serializable {
 	 */
 	public static void setPartIBAValues(WTPart part,EPMDocument cad) throws Exception{
          Debug.P("----->>>>setPartIBAValues:"+cad);
-//		 part=PartUtils.getPartByNumber(part.getNumber());
-		 part=(WTPart)Utils.getWCObject(WTPart.class, part.getNumber());
-//		 cad=EPMUtil.getEPMDocument(cad.getNumber(), null);
-		 cad=(EPMDocument)Utils.getWCObject(EPMDocument.class, cad.getNumber());
+		 part=PartUtils.getPartByNumber(part.getNumber());
+//		 part=(WTPart)Utils.getWCObject(WTPart.class, part.getNumber());
+		 cad=EPMUtil.getEPMDocument(cad.getNumber(), null);
+//		 cad=(EPMDocument)Utils.getWCObject(EPMDocument.class, cad.getNumber());
+		 cad=(EPMDocument)PartUtils.getObj(cad.getNumber(), EPMDocument.class);
+		 if(part==null||cad==null){
+			 return;
+		 }
 		 IBAUtils partIBA = new IBAUtils(part);
 		 IBAUtils cadIBA = new IBAUtils(cad);
 		 
@@ -1304,9 +1321,6 @@ public class PartHelper implements RemoteAccess,Serializable {
 				 Material_Classification="";
 			 }
 		 }
-		 
-
-		 
 		 partIBA.setIBAValue(Contants.MATERIALGROUP, Material_Classification);
 		 partIBA.updateIBAPart(part);
 		 Debug.P("----------updateIBAPart-Success!!------------------");

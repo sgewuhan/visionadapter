@@ -106,6 +106,9 @@ public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
       if (docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")) {
           return;
         }
+      if (docFolder.getFolderPath().contains("工作区")){
+    	  return;
+      }
       if(WorkInProgressHelper.isCheckedOut(epmdoc)){
     	  return;
       }

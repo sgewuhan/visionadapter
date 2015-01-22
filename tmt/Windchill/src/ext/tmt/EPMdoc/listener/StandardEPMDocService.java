@@ -14,6 +14,7 @@ import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAHelper;
 import ext.tmt.utils.IBAUtils;
+import ext.tmt.utils.Utils;
 import wt.epm.EPMDocument;
 import wt.epm.workspaces.EPMWorkspace;
 import wt.epm.workspaces.EPMWorkspaceHelper;
@@ -58,14 +59,12 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 			Object target = keyedEvent.getEventTarget();
 			// 获取事件类型
 			String eventType = keyedEvent.getEventType();
-			if(eventType.equals("POST_MULTI_DELETE")){
-				return;
-			}
 			if (target instanceof EPMDocument) {
 				EPMDocument epm=(EPMDocument)target;
 				Debug.P("EPM eventType--->"+eventType+"---Object--->"+epm);
 				if(!eventType.equals("POST_DELETE")){
-					epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
+//					epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
+					epm=(EPMDocument)Utils.getWCObject(EPMDocument.class, epm.getNumber());
 				}
 				EPMDocHelper.listenerEPMDoc(epm, eventType);
 //				EPMDocHelper.listenerEPMDoc1(epm, eventType);

@@ -2287,28 +2287,86 @@ public class GenericUtil implements RemoteAccess {
 	     * @param deleteAction 删除动作，all【删除全部版本】，mv[删除最新大版本]，sv[删除最新小版本]
 	     * @throws Exception
 	     */
-       public static void deleteWTObject(RevisionControlled obj,String deleteAction) throws Exception{
+       public static int deleteWTObject(RevisionControlled obj,String deleteAction) throws Exception{
     	   HashSet linkSet = new HashSet();//存储对象件的Link关系
            QueryResult qrIter;  
     	   try{
     		   if(deleteAction.equalsIgnoreCase(Contants.DELETE_ALL)){//删除所有版本
     			   qrIter = VersionControlHelper.service.allIterationsOf(obj.getMaster());
-    		   
+    			   while (qrIter.hasMoreElements()) {//获取当前对象所有的版本对象和各个版本的说明Link关系
+		                Iterated ddd = (Iterated) qrIter.nextElement();
+		                linkSet.addAll((PersistenceServerHelper.manager.expand(ddd,
+		                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
+		                        false)).getObjectVectorIfc().getVector());
+		            }
+//    			      // 删除关联Link
+//		             Debug.P("deleting relations: " + linkSet.size());
+//		            for (Iterator it = linkSet.iterator(); it.hasNext();) {
+//		                BinaryLink link = (BinaryLink) it.next();
+//		                PersistenceServerHelper.manager.remove(link);
+//		            }
+    			    //挨个删除所有的版本对象
+//    			   QueryResult rs=VersionControlHelper.service.allVersionsOf(obj.getMaster());
+//		           Debug.P("----->>Version Size:"+rs==null?"0":rs.size());
+//		           while(rs.hasMoreElements()){
+//		        	   Object object = rs.nextElement();
+//		        	   PersistenceHelper.manager.delete((Persistable) object);
+//		           }
+    			   return 1;
     		   }else if(deleteAction.equalsIgnoreCase(Contants.DELETE_MV)){//删除最新大版本
-//    			   qrIter = VersionControlHelper.service.get
+    			   String mainVersion="";
+    			   String secondVersion="";
+    			   mainVersion=obj.getVersionIdentifier().getValue();
+    			   Debug.P("当前对象的大版本号----》"+mainVersion);
+    			   qrIter = VersionControlHelper.service.allIterationsOf(obj.getMaster());
+    			   Debug.P("当前对象的所有版本数量---->"+qrIter.size());
+    			   while (qrIter.hasMoreElements()) {//获取当前对象所有的版本对象和各个版本的说明Link关系
+    				   RevisionControlled ddd = (RevisionControlled) qrIter.nextElement();
+    				   secondVersion=ddd.getVersionIdentifier().getValue();
+    				   Debug.P("secondVersion---->"+secondVersion);
+    				   linkSet.addAll((PersistenceServerHelper.manager.expand(ddd,
+		                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
+		                        false)).getObjectVectorIfc().getVector());
+		            }
+    			      // 删除关联Link
+//		             Debug.P("deleting relations: " + linkSet.size());
+//		            for (Iterator it = linkSet.iterator(); it.hasNext();) {
+//		                BinaryLink link = (BinaryLink) it.next();
+//		                PersistenceServerHelper.manager.remove(link);
+//		            }
+//    			    //挨个删除所有的版本对象
+//    			   QueryResult rs=VersionControlHelper.service.allVersionsOf(obj.getMaster());
+//		           Debug.P("----->>Version Size:"+rs==null?"0":rs.size());
+//		           while(rs.hasMoreElements()){
+//		        	   Object object = rs.nextElement();
+//		        	   PersistenceHelper.manager.delete((Persistable) object);
+//		           }
     			   
     			   
     			   
+    			   
+    			   return 1;
     		   }else if(deleteAction.equalsIgnoreCase(Contants.DELETE_SV)){//删除最新小版本
     			   linkSet.addAll((PersistenceServerHelper.manager.expand(obj,
 	                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
 	                        false)).getObjectVectorIfc().getVector());
+    			 
+//    			// 删除关联Link
+//  	             Debug.P("deleting relations: " + linkSet.size());
+//  	            for (Iterator it = linkSet.iterator(); it.hasNext();) {
+//  	                BinaryLink link = (BinaryLink) it.next();
+//  	                // Debug.P("removing: ", link.getRoleAObjectRef(), ", "
+//  	                PersistenceServerHelper.manager.remove(link);
+//  	            }
+//  	              //删除当前最新小版本对象
+//  	             PersistenceHelper.manager.delete((Persistable) obj);
+  	             return 1;
     		   }
-    		   
-    		   
     	   }catch(Exception e){
     		   e.printStackTrace();
+    		   return 0;
     	   }
+    	   return 0;
        }
 	    
 	    /**
@@ -2819,7 +2877,13 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 	     return result;
     }
 
- 
+ public static void main(String[] args) throws Exception {
+	 
+	 EPMDocument epm =(EPMDocument)Utils.getWCObject(EPMDocument.class,args[0]);
+	 Debug.P("EPMDocument---->"+epm.getNumber()+"  version--->"+epm.getVersionIdentifier().getValue()+"  iteration----->"+epm.getIterationIdentifier().getValue());
+	 deleteWTObject(epm, args[1]);
+	 
+}
  
  
 }
