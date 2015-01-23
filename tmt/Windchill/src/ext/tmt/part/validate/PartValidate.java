@@ -15,6 +15,11 @@ import com.ptc.core.ui.validation.UIValidationResult;
 import com.ptc.core.ui.validation.UIValidationResultSet;
 import com.ptc.core.ui.validation.UIValidationStatus;
 
+/**
+ * 废弃
+ * @author Administrator
+ *
+ */
 @SuppressWarnings("all")
 public class PartValidate extends DefaultUIComponentValidator{
 	/**

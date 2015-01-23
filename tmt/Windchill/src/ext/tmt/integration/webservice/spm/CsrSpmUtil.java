@@ -89,7 +89,12 @@ import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
 
 
-
+/**
+ * 读取SPM的中间表的数据后，根据时代新材的业务需求，
+ * 在时代新材WC中创建，更新部件和文档并同步到时代新材的PM系统中
+ * @author Administrator
+ *
+ */
 @SuppressWarnings("deprecation")
 public class CsrSpmUtil implements RemoteAccess, Serializable {
 

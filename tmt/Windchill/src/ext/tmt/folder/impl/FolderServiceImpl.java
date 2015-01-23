@@ -29,7 +29,7 @@ import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 
 /**
- * 文件夹服务
+ * 文件夹接口（ext.tmt.folder.api.FolderService）的实现类
  * @author public759
  * @date 2014-10-20
  * @version V1.0

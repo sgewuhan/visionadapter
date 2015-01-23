@@ -46,9 +46,9 @@ public class PropertiesUtil {
 			}
 			fis.close();
 		} catch (FileNotFoundException ex) {
-			throw new WTException("¶ÁÈ¡ÅäÖÃÎÄ¼ş³ö´í!");
+			throw new WTException("æ‰¾ä¸åˆ°è¯¥é…ç½®æ–‡ä»¶"+configFilePath);
 		} catch (IOException ex) {
-			throw new WTException("¶ÁÈ¡ÅäÖÃÎÄ¼şÄÚÈİ³ö´í!");
+			throw new WTException("æ–‡ä»¶è¯»å–å‡ºé”™ï¼");
 		}
 	}
 

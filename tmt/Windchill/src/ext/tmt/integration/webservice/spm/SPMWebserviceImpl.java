@@ -43,7 +43,11 @@ import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
 import ext.tmt.utils.Utils;
 
-
+/**
+ * SPM接口(ext.tmt.integration.webservice.spm.SPMWebservice)实现类
+ * @author Administrator
+ *
+ */
 public class SPMWebserviceImpl{
 	
 
@@ -80,8 +84,8 @@ public class SPMWebserviceImpl{
             //首次接口发布
             ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
             if (workflow != null && times == 1) {
-                String sql = "select * from CSR_WLSXSQ,CSR_JSTZSX where CSR_JSTZSX.WORKFLOW = CSR_WLSXSQ.WORKFLOW and CSR_JSTZSX.TIMES = '"
-                        + 1 + "' AND CSR_WLSXSQ.WORKFLOW = '" + workflow + "'";
+                String sql = "select * from PLM.CSR_WLSXSQ WL ,PLM.CSR_JSTZSX JS where JS.WORKFLOW = WL.WORKFLOW and JS.TIMES = '"
+                        + 1 + "' AND WL.WORKFLOW = '" + workflow + "'";
                 Debug.P("--->SQL:"+sql);
                 resultSet =connectionPool.getConnection().executeQuery(sql);
                 while (resultSet.next()) {
@@ -154,7 +158,7 @@ public class SPMWebserviceImpl{
                  }
               } else if (workflow != null && (times == 2 || times == 3)) {
                 String partNo = null;//需要更新的物料编号
-                String sql = "select * from CSR_JSTZSX where TIMES = '" + times + "' AND WORKFLOW = '" + workflow + "'";
+                String sql = "select * from PLM.CSR_JSTZSX where TIMES = '" + times + "' AND WORKFLOW = '" + workflow + "'";
                 Debug.P("--->>>SQL:"+sql);
                 resultSet =connectionPool.getConnection().executeQuery(sql);
                 while (resultSet.next()) {
@@ -258,7 +262,7 @@ public class SPMWebserviceImpl{
         	  SessionServerHelper.manager.setAccessEnforced(false);
         	  //先查询所属工厂是否为时代新材
                 if(StringUtils.isNotEmpty(workflow)){
-                    String sql = "select * from CSR_SXWH where WORKFLOW = '" + workflow + "'";
+                    String sql = "select * from PLM.CSR_SXWH SX where SX.WORKFLOW = '" + workflow + "'";
                     Debug.P("--->>SQL:"+sql);
                     resultSet = connectionPool.getConnection().executeQuery( sql);
                     while (resultSet.next()) {//获取最新维护属性
@@ -469,7 +473,7 @@ public class SPMWebserviceImpl{
     	   SessionServerHelper.manager.setAccessEnforced(false);
     	   if (partNumber != null) {
     		   ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
-    		   String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from CSR_FJJL where WLNUMBER = '"+ partNumber + "'";
+    		   String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from PLM.CSR_FJJL where WLNUMBER = '"+ partNumber + "'";
     		   Debug.P("--->SQL:"+sql);
     		   resultSet = connectionPool.getConnection().executeQuery(sql);
     		   while (resultSet.next()) {
@@ -548,7 +552,7 @@ public class SPMWebserviceImpl{
         	 SessionServerHelper.manager.setAccessEnforced(false);
         	 if (partNumber != null) {
         		 ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
-        		 String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from CSR_FJJL where WLNUMBER = '" + partNumber + "'";
+        		 String sql = "select WLNUMBER,DOCNAME,DOCTYPE,LOCATION,DOCNUMBER from PLM.CSR_FJJL where WLNUMBER = '" + partNumber + "'";
                  Debug.P("--->>SQL:"+sql);
                  resultSet = connectionPool.getConnection().executeQuery(sql);
                  while (resultSet.next()) {

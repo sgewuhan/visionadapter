@@ -75,6 +75,11 @@ import wt.vc.VersionControlHelper;
 import wt.vc.wip.WorkInProgressHelper;
 import wt.vc.wip.WorkInProgressServiceEvent;
 
+/**
+ * 监听部件的创建，更新并同步到PM系统中
+ * @author Administrator
+ *
+ */
 public class PartHelper implements RemoteAccess,Serializable {
 	
 	private static final long serialVersionUID = 2304592616754675533L; 

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
@@ -1090,6 +1091,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
      	}
 	 public static ObjectInputStream getRepresentationByPM(String pmid) throws WTException, IOException, InvocationTargetException, InterruptedException{
 		 ObjectInputStream ois = null;
+		 ObjectOutputStream oos=null;
 		 InputStream is = null;
 		 Object object = searchWCObject(EPMDocument.class,pmid,Contants.PMID);
 		 if(object instanceof EPMDocument){

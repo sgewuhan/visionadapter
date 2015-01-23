@@ -79,6 +79,11 @@ import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.UserDefQueryUtil;
 import ext.tmt.utils.Utils;
 
+/**
+ * WC同步EPMDocument,wtpart到PM系统
+ * @author Administrator
+ *
+ */
 @SuppressWarnings("all")
 public class WCToPMHelper implements RemoteAccess, Serializable {
 	private static String codebasePath = null;
@@ -2264,9 +2269,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 //		 SynchWTPart2PM(Utils.getDate());//同步部件
 //		
 //		 initPMDocument(Utils.getDate());
-		 SynchDocument2PM(Utils.getDate());// 同步文档
-		 PMDeliverable pmd = new PMDeliverable();
-		 pmd.initDeli(codebasePath);
+//		 SynchDocument2PM(Utils.getDate());// 同步文档
+//		 PMDeliverable pmd = new PMDeliverable();
+//		 pmd.initDeli(codebasePath);
 		Debug.P("------>>>>End Sysnch>>>>>>>>");
 	}
 

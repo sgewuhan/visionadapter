@@ -1,7 +1,11 @@
 package ext.tmt.integration.webservice.spm;
 
 import java.io.Serializable;
-
+/**
+ * spm常量类
+ * @author Administrator
+ *
+ */
 public class SPMConsts implements Serializable{
 
 

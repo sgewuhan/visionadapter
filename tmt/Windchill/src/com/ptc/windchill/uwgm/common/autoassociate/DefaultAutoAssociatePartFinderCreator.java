@@ -26,7 +26,11 @@ import wt.vc.views.ViewReference;
 
 // Referenced classes of package com.ptc.windchill.uwgm.common.autoassociate:
 //            WTPartSearchHelper, AutoAssociatePartFinderCreator, AutoAssociateHelper, WTPartUtilities
-
+/**
+ * 检入图纸时，如果图纸的明细栏中含有物资编码为“本图”的物料，则不创建编码为“本图”的部件
+ * @author Eilaiwang
+ *
+ */
 public class DefaultAutoAssociatePartFinderCreator implements
 		AutoAssociatePartFinderCreator {
 

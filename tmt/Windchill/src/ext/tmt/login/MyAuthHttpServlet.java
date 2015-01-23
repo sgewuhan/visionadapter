@@ -13,6 +13,12 @@ import com.infoengine.util.Base64;
 
 import ext.tmt.utils.Debug;
 
+/**
+ * 废弃
+ * @author Administrator
+ *
+ */
+@Deprecated
 public class MyAuthHttpServlet extends HTTPGatewayServlet {
 	
 	/**

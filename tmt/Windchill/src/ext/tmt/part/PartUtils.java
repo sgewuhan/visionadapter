@@ -22,6 +22,11 @@ import wt.util.WTRuntimeException;
 import wt.vc.VersionControlHelper;
 import wt.vc.config.LatestConfigSpec;
 
+/**
+ * 操作部件的工具类
+ * @author Administrator
+ *
+ */
 public class PartUtils {
 	
 	public static void main(String[] args) throws WTPropertyVetoException {

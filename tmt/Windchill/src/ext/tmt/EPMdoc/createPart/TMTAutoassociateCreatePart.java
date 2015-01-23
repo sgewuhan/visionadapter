@@ -17,6 +17,12 @@ import com.ptc.windchill.uwgm.common.autoassociate.DefaultAutoAssociatePartFinde
 
 import ext.tmt.utils.Debug;
 
+/**
+ * 无用的程序
+ * @author Administrator
+ *
+ */
+@Deprecated
 public class TMTAutoassociateCreatePart extends DefaultAutoAssociatePartFinderCreator{
 	
 	TMTAutoassociateCreatePart(){

@@ -11,6 +11,13 @@ import java.util.Vector;
 import ext.tmt.utils.Debug;
 import wt.util.WTException;
 
+
+/**
+ * 废弃类
+ * @author Administrator
+ *
+ */
+@Deprecated
 public class DBUtils {
 
 

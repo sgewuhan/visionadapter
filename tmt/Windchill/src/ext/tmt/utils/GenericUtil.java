@@ -62,12 +62,15 @@ import wt.epm.EPMDocument;
 import wt.epm.EPMDocumentMaster;
 import wt.epm.EPMDocumentMasterIdentity;
 import wt.epm.EPMDocumentType;
+import wt.epm.build.EPMBuildHistory;
+import wt.epm.build.EPMBuildLinksDelegate;
 import wt.epm.structure.EPMMemberLink;
 import wt.epm.structure.EPMStructureHelper;
 import wt.epm.util.EPMHelper;
 import wt.epm.workspaces.EPMPopulateRule;
 import wt.epm.workspaces.EPMWorkspace;
 import wt.epm.workspaces.EPMWorkspaceHelper;
+import wt.facade.dataops.DeleteHelper;
 import wt.fc.BinaryLink;
 import wt.fc.Identified;
 import wt.fc.IdentityHelper;
@@ -128,6 +131,7 @@ import wt.part.Quantity;
 import wt.part.QuantityUnit;
 import wt.part.WTPart;
 import wt.part.WTPartConfigSpec;
+import wt.part.WTPartHelper;
 import wt.part.WTPartMaster;
 import wt.part.WTPartUsageLink;
 import wt.pdmlink.PDMLinkProduct;
@@ -189,8 +193,12 @@ import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinitionMaster;
 import com.ptc.windchill.cadx.common.preference.EpdParams;
 import com.ptc.windchill.cadx.common.util.WorkspaceConfigSpecUtilities;
 import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
+import com.ptc.windchill.enterprise.note.commands.NoteServiceCommand;
+import com.ptc.windchill.wp.delivery.export.EPMBuildHistoryParentLinksDependencyProcessor;
 import com.ptc.wvs.common.ui.VisualizationHelper;
 import com.ptc.wvs.server.util.WVSContentHelper;
+
+import ext.tmt.WC2PM.WCToPMHelper;
 
 public class GenericUtil implements RemoteAccess {
 
@@ -2281,6 +2289,23 @@ public class GenericUtil implements RemoteAccess {
 
 	    }
 	    
+	    public static void RemDeleteWTObject(RevisionControlled obj,String deleteAction) throws Exception{
+	    	if(!RemoteMethodServer.ServerFlag){
+	    	try {
+   				Class aclass[] = {RevisionControlled.class, String.class };
+   				Object aobj[] = { obj, deleteAction};
+   				RemoteMethodServer.getDefault().invoke("RemDeleteWTObject",
+   						GenericUtil.class.getName(), null, aclass, aobj);
+   			} catch (Exception e) {
+   				e.printStackTrace();
+   			}
+	    	}else{  
+	    		deleteWTObject(obj,deleteAction);
+	    	}
+	    }
+	    
+	    
+	    
 	    /**
 	     * 删除Windchill中的WTPart，EPMDocument
 	     * @param obj 
@@ -2288,10 +2313,13 @@ public class GenericUtil implements RemoteAccess {
 	     * @throws Exception
 	     */
        public static int deleteWTObject(RevisionControlled obj,String deleteAction) throws Exception{
+    	   Debug.P("deleteAction--->"+deleteAction);
     	   HashSet linkSet = new HashSet();//存储对象件的Link关系
+    	   List deleteList = new ArrayList();
+    	   List linkList = new ArrayList();
            QueryResult qrIter;  
     	   try{
-    		   if(deleteAction.equalsIgnoreCase(Contants.DELETE_ALL)){//删除所有版本
+    		   if(deleteAction.equals(Contants.DELETE_ALL)){//删除所有版本
     			   qrIter = VersionControlHelper.service.allIterationsOf(obj.getMaster());
     			   while (qrIter.hasMoreElements()) {//获取当前对象所有的版本对象和各个版本的说明Link关系
 		                Iterated ddd = (Iterated) qrIter.nextElement();
@@ -2299,21 +2327,21 @@ public class GenericUtil implements RemoteAccess {
 		                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
 		                        false)).getObjectVectorIfc().getVector());
 		            }
-//    			      // 删除关联Link
-//		             Debug.P("deleting relations: " + linkSet.size());
-//		            for (Iterator it = linkSet.iterator(); it.hasNext();) {
-//		                BinaryLink link = (BinaryLink) it.next();
-//		                PersistenceServerHelper.manager.remove(link);
-//		            }
-    			    //挨个删除所有的版本对象
-//    			   QueryResult rs=VersionControlHelper.service.allVersionsOf(obj.getMaster());
-//		           Debug.P("----->>Version Size:"+rs==null?"0":rs.size());
-//		           while(rs.hasMoreElements()){
-//		        	   Object object = rs.nextElement();
-//		        	   PersistenceHelper.manager.delete((Persistable) object);
-//		           }
+    			      // 删除关联Link
+		             Debug.P("deleting relations: " + linkSet.size());
+		            for (Iterator it = linkSet.iterator(); it.hasNext();) {
+		                BinaryLink link = (BinaryLink) it.next();
+		                PersistenceServerHelper.manager.remove(link);
+		            }
+//    			    挨个删除所有的版本对象
+    			   QueryResult rs=VersionControlHelper.service.allVersionsOf(obj.getMaster());
+		           Debug.P("----->>Version Size:"+rs==null?"0":rs.size());
+		           while(rs.hasMoreElements()){
+		        	   Object object = rs.nextElement();
+		        	   PersistenceHelper.manager.delete((Persistable) object);
+		           }
     			   return 1;
-    		   }else if(deleteAction.equalsIgnoreCase(Contants.DELETE_MV)){//删除最新大版本
+    		   }else if(deleteAction.equals(Contants.DELETE_MV)){//删除最新大版本
     			   String mainVersion="";
     			   String secondVersion="";
     			   mainVersion=obj.getVersionIdentifier().getValue();
@@ -2324,33 +2352,43 @@ public class GenericUtil implements RemoteAccess {
     				   RevisionControlled ddd = (RevisionControlled) qrIter.nextElement();
     				   secondVersion=ddd.getVersionIdentifier().getValue();
     				   Debug.P("secondVersion---->"+secondVersion);
-    				   linkSet.addAll((PersistenceServerHelper.manager.expand(ddd,
-		                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
-		                        false)).getObjectVectorIfc().getVector());
+    				   if(secondVersion.equals(mainVersion)){
+    					   if(ddd instanceof EPMDocument){
+    						   QueryResult qr=PersistenceHelper.manager.navigate(ddd,
+   									EPMBuildHistory.BUILT_ROLE, EPMBuildHistory.class, true);
+    						   while(qr.hasMoreElements()){
+    							   Object object =(Object)qr.nextElement();
+    							   Debug.P("object--->"+object);
+    							   if(object instanceof EPMBuildHistory){
+    								   EPMBuildHistory part = (EPMBuildHistory)object;
+    								   linkList.add(part);
+    							   }
+    						   }  
+    					   }else if(ddd instanceof WTPart){
+    						   linkSet.addAll((WTPartHelper.service.getDescribedByDocuments((WTPart)ddd)).getObjectVectorIfc().getVector());
+    					   }
+                            deleteList.add(ddd);    					   
+    				   }
 		            }
+    			   
     			      // 删除关联Link
-//		             Debug.P("deleting relations: " + linkSet.size());
-//		            for (Iterator it = linkSet.iterator(); it.hasNext();) {
+		             Debug.P("deleting relations: " + linkList.size());
+		            for (int i=0;i<linkList.size();i++) {
+		            	 Debug.P("it--->"+linkList.get(i));
 //		                BinaryLink link = (BinaryLink) it.next();
-//		                PersistenceServerHelper.manager.remove(link);
-//		            }
+		                //PersistenceServerHelper.manager.remove(link);
+		            }
 //    			    //挨个删除所有的版本对象
-//    			   QueryResult rs=VersionControlHelper.service.allVersionsOf(obj.getMaster());
-//		           Debug.P("----->>Version Size:"+rs==null?"0":rs.size());
-//		           while(rs.hasMoreElements()){
-//		        	   Object object = rs.nextElement();
-//		        	   PersistenceHelper.manager.delete((Persistable) object);
-//		           }
-    			   
-    			   
-    			   
-    			   
+		            Debug.P("deleting wtobject: " + deleteList.size());
+                     for(int i=0;i<deleteList.size();i++){
+                    	 WTObject object =(WTObject)deleteList.get(i);
+//                    	 PersistenceHelper.manager.delete((Persistable) object);
+                     }    			  
     			   return 1;
-    		   }else if(deleteAction.equalsIgnoreCase(Contants.DELETE_SV)){//删除最新小版本
+    		   }else if(deleteAction.equals(Contants.DELETE_SV)){//删除最新小版本
     			   linkSet.addAll((PersistenceServerHelper.manager.expand(obj,
 	                        IteratedDescribeLink.DESCRIBES_ROLE, IteratedDescribeLink.class,
 	                        false)).getObjectVectorIfc().getVector());
-    			 
 //    			// 删除关联Link
 //  	             Debug.P("deleting relations: " + linkSet.size());
 //  	            for (Iterator it = linkSet.iterator(); it.hasNext();) {
@@ -2881,7 +2919,8 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 	 
 	 EPMDocument epm =(EPMDocument)Utils.getWCObject(EPMDocument.class,args[0]);
 	 Debug.P("EPMDocument---->"+epm.getNumber()+"  version--->"+epm.getVersionIdentifier().getValue()+"  iteration----->"+epm.getIterationIdentifier().getValue());
-	 deleteWTObject(epm, args[1]);
+	Debug.P("args[0]--->"+args[0]+" args[1]--->"+args[1]);
+	 RemDeleteWTObject(epm, args[1]);
 	 
 }
  

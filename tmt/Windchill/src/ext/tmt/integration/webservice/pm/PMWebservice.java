@@ -10,7 +10,11 @@ import javax.jws.WebService;
 import com.ptc.jws.servlet.JaxWsWebService;
 
 import ext.tmt.integration.webservice.spm.SPMWebserviceImpl;
-
+/**
+ * PM系统的调用的Webservices接口
+ * @author Administrator
+ *
+ */
 @WebService()
 public class PMWebservice extends JaxWsWebService
 {

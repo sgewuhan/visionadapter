@@ -19,6 +19,7 @@ import wt.epm.EPMDocument;
 import wt.epm.EPMDocumentMaster;
 import wt.epm.build.EPMBuildHistory;
 import wt.epm.build.EPMBuildRule;
+import wt.epm.structure.EPMDescribeLink;
 import wt.epm.workspaces.EPMWorkspaceHelper;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
@@ -30,6 +31,7 @@ import wt.part.WTPartHelper;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.util.WTException;
+import wt.dataops.delete.processors.DeleteValidator;
 import wt.vc.config.LatestConfigSpec;
 @SuppressWarnings("all")
 public class EPMDocUtil {
@@ -371,7 +373,107 @@ public class EPMDocUtil {
 			}
 	   }
     
-
+    /**
+	 * 根据WTPart和EPMDocument得到EPMDescribeLink
+	 * 
+	 * @param part
+	 * @param epmDoc
+	 * @return EPMDescribeLink
+	 * @throws WTException
+	 */
+	public static EPMDescribeLink getEPMDescribeLink(WTPart part,
+			EPMDocument epmDoc) throws WTException {
+		QueryResult qr = PersistenceHelper.manager.find(
+				wt.epm.structure.EPMDescribeLink.class, part,
+				EPMDescribeLink.DESCRIBES_ROLE, epmDoc);
+		Debug.P(qr.size());
+		if (qr == null || qr.size() == 0) {
+			return null;
+		} else {
+			EPMDescribeLink epmdescribelink = (EPMDescribeLink) qr
+					.nextElement();
+			return epmdescribelink;
+		}
+	}
     
+	/**
+	 * 判断WTPart和EPMDocument是否存在EPMDescribeLink关系
+	 * 
+	 * @param part
+	 * @param epmDoc
+	 * @return EPMDescribeLink
+	 * @throws WTException
+	 */
+	public static boolean isDescribeLink(WTPart part, EPMDocument epmDoc)
+			throws WTException {
+		boolean isLink = true;
+		QueryResult qr = PersistenceHelper.manager.find(
+				wt.epm.structure.EPMDescribeLink.class, part,
+				EPMDescribeLink.DESCRIBES_ROLE, epmDoc);
+		if (qr == null || qr.size() == 0) {
+			isLink = false;
+		}
+		return isLink;
+	}
+
+	/**
+	 * 判断EPMDocument和EPMDocument是否存在EPMReferenceLink关系
+	 * 
+	 * @param epmDoc1
+	 * @param epmDoc2
+	 * @return EPMReferenceLink
+	 * @throws WTException
+	 */
+	public static boolean isReferenceLink(EPMDocument epmdoc1,
+			EPMDocument epmdoc2) throws Exception {
+		if (epmdoc1 == null || epmdoc2 == null) {
+			return false;
+		}
+		wt.fc.QueryResult qr = wt.epm.structure.EPMStructureHelper.service
+				.navigateReferences(epmdoc1, null, true);
+		while (qr.hasMoreElements()) {
+			Object obj = qr.nextElement();
+			if (obj instanceof EPMDocumentMaster) {
+				EPMDocumentMaster epmdoc = (EPMDocumentMaster) obj;
+				if (epmdoc2.getNumber().equals(epmdoc.getNumber())) {
+					return true;
+				}
+			}
+
+		}
+		return false;
+	}
+	/**
+	 * 根据WTPart和EPMDocument,创建EPMDescribeLink
+	 * 
+	 * @param part
+	 * @param epmDoc
+	 * @return EPMDescribeLink
+	 * @throws WTException
+	 */
+	public static EPMDescribeLink createEPMDescribeLink(WTPart part,
+			EPMDocument epmDoc) throws WTException {
+		// Judge EPMDescribeLink has exist.
+		EPMDescribeLink link_old = getEPMDescribeLink(part, epmDoc);
+		if (link_old != null) {
+			return link_old;
+		} else {
+			EPMDescribeLink link_new;
+			try {
+				link_new = EPMDescribeLink.newEPMDescribeLink(part, epmDoc);
+				PersistenceServerHelper.manager.insert(link_new);
+				link_new = (EPMDescribeLink) PersistenceHelper.manager
+						.refresh(link_new);
+			} catch (WTException e) {
+				throw e;
+			}
+			Debug.P("Successfully created EPMDescribeLink with WTPart:"
+					+ part.getNumber() + "and EPMDocument:"
+					+ epmDoc.getNumber() + " .");
+			return link_new;
+		}
+	}
+
+
 
 }

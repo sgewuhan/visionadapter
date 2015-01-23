@@ -4,7 +4,7 @@ import wt.folder.Folder;
 import wt.util.WTException;
 
 /**
- * 针对文件夹操作
+ * 在PM中对PLM文件夹的操作接口
  * 创建、编辑、添加、删除、搜索
  * @author public759
  * @date 2014-10-17

@@ -31,7 +31,7 @@ public class EPMDocHelper implements Serializable {
   private static final long serialVersionUID = 2304592616754675533L;
 
   /**
-	 * 监听EPMDocument创建事件
+	 * 监听EPMDocument的创建，更新，同步到PM系统
 	 * @param target
 	 * @param eventType
 	 * @throws Exception
