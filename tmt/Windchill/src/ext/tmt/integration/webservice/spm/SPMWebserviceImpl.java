@@ -78,7 +78,7 @@ public class SPMWebserviceImpl{
         
         ResultSet resultSet = null;
         String containerName = SPMConsts.SPMCONTAINER_NAME;//容器类型
-        String result = null;
+        String result = "操作不成功";
         try {
             SessionHelper.manager.setAdministrator();
             //首次接口发布
@@ -617,6 +617,7 @@ public class SPMWebserviceImpl{
     
     
     /**
+     * （暫時未使用）
      * SPM调用接口判断物料在PLM系统是否存在技术规格书
      * @return 0. 表示不存在技术规格书 1.表示存在技术规格书
      * @throws Exception 
@@ -651,6 +652,7 @@ public class SPMWebserviceImpl{
     }
 
     /**
+     * （暫時未使用）
      * SPM调用接口判断物料在PLM系统是否存在产品手册
      * @return 0. 表示不存在产品手册 1.表示存在产品手册
      */
@@ -683,6 +685,7 @@ public class SPMWebserviceImpl{
     
 	
     /**
+     * （暫時未使用）
      * 检查物料是否在存储库中存在
      * 0. 表示不存在存储库 1.表示存在存储库
      */

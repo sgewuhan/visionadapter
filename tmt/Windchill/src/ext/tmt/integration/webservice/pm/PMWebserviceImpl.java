@@ -126,6 +126,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	 /**
+	  *创建多层文件夹
 	  * @param result
 	  * @throws Exception
 	  */
@@ -206,9 +207,9 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 }
 	 
 	 /**
-	  * 修改文件夹名称
-	  * @param objectId 
-	  * @param newFolderName 
+	  * 修改文件夹名称（容器名称不允许修改）
+	  * @param objectId
+	  * @param newFolderName
 	  * @return
 	  */
 	 public static int modifyFolderEntry(String objectId,String newFolderName)throws Exception{
@@ -343,7 +344,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 } 
 	
 	/**
-	 * 閿熸枻鎷烽敓鏂ゆ嫹WTDocument閿熶茎纰夋嫹
+	 * 创建文档对象
 	 * @param pm_docId
 	 */
     public static int  createWTDocumentEntry(String pm_docId) throws Exception{
@@ -447,7 +448,6 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	     	PMDocument pm_document=docPersistance.get(new ObjectId(pm_id));
 	     	checkNull(pm_document);
 	     	String pm_docName=pm_document.getCommonName();
-	     	//閿熷彨璁规嫹閿熻鍑ゆ嫹閿熺獤鎾呮嫹鍚岄敓鏂ゆ嫹閿熸枻鎷稺indchill
      		boolean isCreated=pm_document.getPLMId()==null?false:true;
      		String doc_id=pm_document.getPLMId();
      		Debug.P("------>>>>Windchill中是否已经创建("+pm_docName+"):"+isCreated+"  Doc_Windchill:"+doc_id);
@@ -716,7 +716,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	
 	
 	 /**
-	  * 閿熸枻鎷锋灇閿熸枻鎷烽敓渚ョ増鏈�A.3)
+	  * 获取Windchill对象的版本（如：A.2）
 	  * @param object
 	  * @return
 	  */
@@ -737,7 +737,7 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 	 
 	 
 	 /**
-	  *获得对象的版本(A.3)
+	  *修订对象的版本
 	  * @param pm_oid
 	  * @throws Exception
 	  */

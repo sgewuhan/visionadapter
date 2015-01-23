@@ -117,7 +117,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
 	 }
 
 /**
- * 
+ * 創建Windchil部件信息
  * @param hashmap 基础属性集合
  * @param ibaMap 软属性集合 
  * @return
@@ -736,7 +736,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
      
      
      /**
-      * 获得PM的扩建工厂
+      * 获得PM所有的扩建工厂
       * @return
       * @throws Exception
       */
