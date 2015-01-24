@@ -89,12 +89,10 @@ public class PMWebservice extends JaxWsWebService
     }
    
     @WebMethod(operationName="getRepresentationByPM")
-    public ObjectInputStream getRepresentationByPM(String pmid)throws Exception
+    public String getRepresentationByPM(String pmid)throws Exception
     {
          return PMWebserviceImpl.getRepresentationByPM(pmid);
     }
-    
-    
     
     
     
