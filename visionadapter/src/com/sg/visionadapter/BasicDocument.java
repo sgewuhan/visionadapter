@@ -38,6 +38,8 @@ public abstract class BasicDocument extends VisionObject {
 
 	protected static final String PLM_CONTENT = "plmcontentvault";
 
+	protected static final String PLM_MASTER_ID = "plmmasterid";
+
 	/**
 	 * 获得所在的目录id
 	 * 
@@ -90,8 +92,8 @@ public abstract class BasicDocument extends VisionObject {
 		folder.setCollection(folderColletion);
 		return folder;
 	}
-	
-	public PMFolder getParentFolder(){
+
+	public PMFolder getParentFolder() {
 		return getFolder();
 	}
 
@@ -183,6 +185,20 @@ public abstract class BasicDocument extends VisionObject {
 	public void setStatus(String status) {
 		setValue(STATUS, status);
 		put(STATUS, status);
+	}
+
+	/**
+	 * 设置主对象id
+	 *
+	 * @param masterid
+	 */
+	public void SetMasterId(String masterid) {
+		setValue(PLM_MASTER_ID, masterid);
+		put(PLM_MASTER_ID, masterid);
+	}
+	
+	public String getMasterId() {
+		return (String) get(PLM_MASTER_ID);
 	}
 
 	/**
@@ -294,12 +310,12 @@ public abstract class BasicDocument extends VisionObject {
 	void setCollection(DBCollection collection) {
 		super.setCollection(collection);
 	}
-	
+
 	public String getProjectWorkOrder() {
 		Object object = get(PROJECT_WORK_ORDER);
-		if(object instanceof List<?>){
+		if (object instanceof List<?>) {
 			List<?> list = (List<?>) object;
-			if(list.size()>0){
+			if (list.size() > 0) {
 				return (String) list.get(0);
 			}
 		}
