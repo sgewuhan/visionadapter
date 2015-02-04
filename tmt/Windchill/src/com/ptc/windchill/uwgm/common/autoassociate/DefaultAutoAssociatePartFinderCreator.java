@@ -154,8 +154,6 @@ public class DefaultAutoAssociatePartFinderCreator implements
 			throw new IllegalStateException("Missing initialization!");
 		String s = associatepartdescriptor.getPartName();
 		String s1 = associatepartdescriptor.getPartNumber();
-		Debug.P("出现本图了 PartName:-------------------------》" + s1);
-		Debug.P("出现本图了 PartNumber:-------------------------》" + s1);
 		if (s1 != null && s1.replace(" ", "").trim().equals("本图")) {
 			System.out.println("出现本图了-------------------------》" + s1);
 			return null;
@@ -180,8 +178,6 @@ public class DefaultAutoAssociatePartFinderCreator implements
 			Debug.P("------WTPartUtilities.createNewPart------>>>>Ready Create");
 			WTPart part = WTPartUtilities
 					.createNewPart(associatepartdescriptor);
-			EPMDocument epm = EPMDocUtil.getActiveEPMDocument(part);
-			System.out.println(epm.getName());
 			return part;
 		}
 	}

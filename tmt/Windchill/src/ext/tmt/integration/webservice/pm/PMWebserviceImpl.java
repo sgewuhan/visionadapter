@@ -18,7 +18,11 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
 import wt.content.ApplicationData;
+import wt.content.ContentHelper;
+import wt.content.ContentHolder;
+import wt.content.ContentItem;
 import wt.content.ContentServerHelper;
+import wt.content.FormatContentHolder;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
@@ -56,6 +60,10 @@ import wt.vc.Versioned;
 import wt.vc.wip.WorkInProgressHelper;
 
 import com.mongodb.WriteResult;
+import com.ptc.windchill.cadx.ws.WorkspaceHelper;
+import com.ptc.windchill.uwgm.common.workspace.WorkspaceUtilities;
+import com.ptc.windchill.uwgm.proesrv.action.WorkspaceDeleteAction;
+import com.ptc.windchill.uwgm.soap.uwgmsvc.WorkspaceDelete;
 import com.sg.visionadapter.BasicDocument;
 import com.sg.visionadapter.DocumentPersistence;
 import com.sg.visionadapter.FolderPersistence;
@@ -497,38 +505,62 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
      * @return
      * @throws Exception
      */
-    public static int deleteWTDocumentEntry(String pm_docId,String deletAction)throws Exception{
+    public static int deleteWTDocumentEntry(String objectType,String pm_docId,String deletAction)throws Exception{
     	
     	   Debug.P("------>>>Delete PM_DocumentID："+pm_docId);
        
   	   if (!RemoteMethodServer.ServerFlag) {
            String method = "deleteWTDocumentEntry";
            String klass = PMWebserviceImpl.class.getName();
-           Class[] types = { String.class,String.class};
-           Object[] vals = {pm_docId,deletAction};
+           Class[] types = { String.class,String.class,String.class};
+           Object[] vals = {objectType,pm_docId,deletAction};
            return (Integer) RemoteMethodServer.getDefault().invoke(method, klass, null, types, vals);
        }else{
     	checkNull(pm_docId);
-       	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
-       	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
-       	checkNull(pm_document);
-       	String wc_oid=pm_document.getPLMId();
-       	Debug.P("------>>>PM("+pm_docId+")<--->Windchill("+wc_oid+")");
+//       	DocumentPersistence docPersistance=ModelServiceFactory.getInstance(codebasePath).get(DocumentPersistence.class);
+//       	PMDocument pm_document=docPersistance.get(new ObjectId(pm_docId));
+//       	checkNull(pm_document);
+//       	String wc_oid=pm_document.getPLMId();
+       	Debug.P("------>>>PM("+pm_docId+")<--->Windchill("+pm_docId+")");
        	try {
        		SessionHelper.manager.setAdministrator();
-       		if(!StringUtils.isEmpty(wc_oid)){
-       			Persistable object=GenericUtil.getPersistableByOid(wc_oid);
-       			if(object!=null){
-       				WTDocument doc=(WTDocument)getLastObjectByNum(object);
-            		 if(doc!=null){
-               			 GenericUtil.deleteDoc(doc, null);
-               			 return 1;
-               		 }
-       			 }
+       		if(!StringUtils.isEmpty(pm_docId)){
+//       			Persistable object=GenericUtil.getPersistableByOid(wc_oid);
+       				if(objectType.equals("WTDocument")){
+       					WTDocument doc=(WTDocument)searchWCObject(WTDocument.class, pm_docId, Contants.PMID);
+       					if(doc!=null){
+       						if(GenericUtil.isCheckOut(doc)){
+                            	return -1;
+                            }
+       						GenericUtil.deleteDoc(doc, null);
+       						return 1;
+       					}
+       				}else if(objectType.equals("WTPart")){
+       					WTPart part =(WTPart)searchWCObject(WTPart.class, pm_docId, Contants.PMID);
+       					if(part !=null){
+       						part=(WTPart)getLastObjectByNum(part);
+       						if(GenericUtil.isCheckOut(part)){
+                            	return -1;
+                            }
+       						GenericUtil.RemDeleteWTObject(part, deletAction);
+       						return 1;
+       					}
+       				}
+       				else if(objectType.equals("EPMDocument")){
+       					EPMDocument epmdoc =(EPMDocument)searchWCObject(EPMDocument.class, pm_docId, Contants.PMID);
+       					if(epmdoc !=null){
+       						epmdoc=(EPMDocument)getLastObjectByNum(epmdoc);
+                        if(GenericUtil.isCheckOut(epmdoc)){
+                        	return -1;
+                        }
+       						GenericUtil.RemDeleteWTObject(epmdoc, deletAction);
+       						return 1;
+       					}
+       				}
            	  }
    	    	} catch(Exception e){
-   	    		e.printStackTrace();
-   	    	   throw new Exception("Windchill删除文档对象("+wc_oid+")失败!");
+   	    		Debug.P(e.getMessage());
+   	    	   throw new Exception("Windchill删除文档对象("+pm_docId+")失败!");
    		   }finally{
    			   SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
    		   }
@@ -1089,37 +1121,38 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
      		}
      		return obj;
      	}
-	 public static ObjectInputStream getRepresentationByPM(String pmid) throws WTException, IOException, InvocationTargetException, InterruptedException{
-		 ObjectInputStream ois = null;
-		 ObjectOutputStream oos=null;
-		 InputStream is = null;
-		 Object object = searchWCObject(EPMDocument.class,pmid,Contants.PMID);
-		 if(object instanceof EPMDocument){
-			 EPMDocument epm =(EPMDocument)object;
-				ApplicationData ad = DocUtils.getPdfRep((Representable)epm); // 如果是表示法，则进行getPdfRep（）的取值
-				Debug.P(ad);
-				if (ad == null)
-					return null;
-				if (!RemoteMethodServer.ServerFlag) {
-					try {
-						Class aclass[] = { ApplicationData.class };
-						Object aobj[] = { ad };
-						RemoteMethodServer.getDefault().invoke("findContentStream",
-								ContentServerHelper.service.getClass().getName(),
-								ContentServerHelper.service, aclass, aobj);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-				} else{
-					is= ContentServerHelper.service.findContentStream(ad);
-					ois= new ObjectInputStream(is);
-					return ois;
+	 
+     
+	 public static String getRepresentationByPM(String pmid) throws Exception{
+		   String dataHandler=null;
+			if (!RemoteMethodServer.ServerFlag) {
+				try {
+					Class aclass[] = { String.class };
+					Object aobj[] = { pmid };
+				return	(String) RemoteMethodServer.getDefault().invoke("getRepresentationByPM",
+							PMWebserviceImpl.class.getName(),
+							null, aclass, aobj);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-		 }
-		 return null;
+			} else{
+				 Object object = searchWCObject(EPMDocument.class,pmid,Contants.PMID);
+				 if(object instanceof EPMDocument){
+						FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service.getContents((ContentHolder) object);
+//						ApplicationData app = DocUtils.getPdfRep((Representable)epm); // 如果是表示法，则进行getPdfRep（）的取值
+						ContentItem item = ContentHelper.getPrimary( formatcontentholder);
+						ApplicationData app=(ApplicationData) item;
+						Debug.P(app);
+						if (app == null)
+						return null;
+						dataHandler = ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
+				 }
+			}
+			      Debug.P(">>>dataHandler:"+dataHandler);
+			      return dataHandler;
 	 }
 	 
+
 	 public static void main(String[] args) throws Exception {
 //		 RemoteMethodServer  rms = RemoteMethodServer.getDefault();
 //		 rms.setUserName("wcadmin");

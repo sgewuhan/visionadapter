@@ -9,6 +9,8 @@ import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.ptc.core.meta.type.mgmt.server.impl.WTTypeDefinitionMaster;
+
 import wt.content.ApplicationData;
 import wt.content.ContentHelper;
 import wt.content.ContentItem;
@@ -20,19 +22,29 @@ import wt.epm.EPMDocumentMaster;
 import wt.epm.build.EPMBuildHistory;
 import wt.epm.build.EPMBuildRule;
 import wt.epm.structure.EPMDescribeLink;
+import wt.epm.structure.EPMReferenceLink;
 import wt.epm.workspaces.EPMWorkspaceHelper;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.PersistenceServerHelper;
 import wt.fc.QueryResult;
 import wt.iba.definition.StringDefinition;
+import wt.iba.value.StringValue;
 import wt.part.WTPart;
 import wt.part.WTPartHelper;
+import wt.pds.StatementSpec;
+import wt.query.ConstantExpression;
+import wt.query.QueryException;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
+import wt.query.TableColumn;
+import wt.query.WhereExpression;
+import wt.util.WTAttributeNameIfc;
 import wt.util.WTException;
 import wt.dataops.delete.processors.DeleteValidator;
+import wt.vc.VersionControlHelper;
 import wt.vc.config.LatestConfigSpec;
+import wt.dataops.delete.DeleteTask;
 @SuppressWarnings("all")
 public class EPMDocUtil {
 	
@@ -395,6 +407,36 @@ public class EPMDocUtil {
 			return epmdescribelink;
 		}
 	}
+	
+	public static EPMDescribeLink getAllEPMDescribeLink(WTPart part,
+			EPMDocument epmDoc) throws WTException {
+		QueryResult qr = PersistenceHelper.manager.find(
+				wt.epm.structure.EPMDescribeLink.class, part,
+				EPMDescribeLink.ALL_ROLES, epmDoc);
+		Debug.P(qr.size());
+		if (qr == null || qr.size() == 0) {
+			return null;
+		} else {
+			EPMDescribeLink epmdescribelink = (EPMDescribeLink) qr
+					.nextElement();
+			return epmdescribelink;
+		}
+	}
+	
+	public static EPMReferenceLink getEPMReferenceLink(WTPart part,
+			EPMDocument epmDoc) throws WTException {
+		QueryResult qr = PersistenceHelper.manager.find(
+				wt.epm.structure.EPMReferenceLink.class, part,
+				EPMReferenceLink.REFERENCES_ROLE, epmDoc);
+		Debug.P(qr.size());
+		if (qr == null || qr.size() == 0) {
+			return null;
+		} else {
+			EPMReferenceLink epmReferencelink = (EPMReferenceLink) qr
+					.nextElement();
+			return epmReferencelink;
+		}
+	}
     
 	/**
 	 * 判断WTPart和EPMDocument是否存在EPMDescribeLink关系
@@ -471,13 +513,85 @@ public class EPMDocUtil {
 					+ part.getNumber() + "and EPMDocument:"
 					+ epmDoc.getNumber() + " .");
 			return link_new;
+			
 		}
 	}
     
-	public static EPMBuildHistory getEPMBuildHistory(String epmoid,String partoid){
-		return null;
+	public static EPMBuildHistory getEPMBuildHistory(String epmoid,String partoid) throws WTException{
+		EPMBuildHistory object=null;
+		QuerySpec qs = new QuerySpec();
+		 qs.setAdvancedQueryEnabled(true);
+		 qs.appendClassList(EPMBuildHistory.class, true);
+		 TableColumn column1 = new TableColumn("A0","idA3A5");
+			SearchCondition sc1 = new SearchCondition(column1,SearchCondition.EQUAL,new ConstantExpression(epmoid));
+			qs.appendWhere(sc1);
+			qs.appendAnd();
+			TableColumn column2 = new TableColumn("A0","idA3B5");
+			SearchCondition sc2 = new SearchCondition(column2,SearchCondition.EQUAL,new ConstantExpression(partoid));
+			qs.appendWhere(sc2);
+		 
+		//Debug.P("sql----->"+qs);
+		QueryResult qr = PersistenceHelper.manager.find((StatementSpec)qs);
+		Debug.P("qr----->"+qr.size());
+		if (qr.hasMoreElements()) {
+			Object[] objects = (Object[])qr.nextElement();
+			object=(EPMBuildHistory)objects[0];
+		}
+		return object;
 		
 	}
+
+	
+	/**
+	 *根据图纸获取CAD图纸与部件的关联关系
+	 * @param epm
+	 * @return
+	 */
+	public static ArrayList searchAllEPMBuildRule(EPMDocument epm) {
+		ArrayList list = new ArrayList();
+		try {
+			QuerySpec qs = new QuerySpec(EPMBuildRule.class);
+			qs.appendWhere(
+					new SearchCondition(EPMBuildRule.class,
+							"roleAObjectRef.key.branchId", "=",
+							VersionControlHelper.getBranchIdentifier(epm)),
+					new int[1]);
+
+			qs.setAdvancedQueryEnabled(true);
+			QueryResult qr = PersistenceHelper.manager.find((StatementSpec) qs);
+			if (qr.size() > 0)
+				list.addAll(qr.getObjectVectorIfc().getVector());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	/**
+	 *根据获取CAD图纸与部件的关联关系
+	 * @param epm
+	 * @return
+	 */
+	public static ArrayList searchAllEPMBuildRuleByPart(WTPart part) {
+		ArrayList list = new ArrayList();
+		try {
+			QuerySpec qs = new QuerySpec(EPMBuildRule.class);
+			qs.appendWhere(
+					new SearchCondition(EPMBuildRule.class,
+							"roleBObjectRef.key.branchId", "=",
+							VersionControlHelper.getBranchIdentifier(part)),
+					new int[1]);
+
+			qs.setAdvancedQueryEnabled(true);
+			QueryResult qr = PersistenceHelper.manager.find((StatementSpec) qs);
+			if (qr.size() > 0)
+				list.addAll(qr.getObjectVectorIfc().getVector());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
 
 
 }

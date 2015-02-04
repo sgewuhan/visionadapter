@@ -21,6 +21,7 @@ import wt.vc.VersionControlHelper;
 import wt.vc.VersionControlServiceEvent;
 import wt.vc.wip.WorkInProgressHelper;
 import ext.tmt.WC2PM.WCToPMHelper;
+import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMUtil;
@@ -50,7 +51,9 @@ public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
 //    }else{
 //    Debug.P("事件对象---->" + epmdoc.getNumber());
     IBAUtils iba =null;
-    if(epmdoc!=null)
+    if(epmdoc==null){
+    	return;
+    }
       iba=new IBAUtils(epmdoc);
     Debug.P("ibautils--->" + iba);
     String sync = iba.getIBAValue("CyncData");
@@ -96,37 +99,46 @@ public static void listenerEPMDoc(EPMDocument epmdoc, String eventType)
 
       WCToPMHelper.updatePMCADDoc(pmoid, epmdoc);
     }
-    else if (eventType.equals("PRE_DELETE")) {
-      String pmoid = iba.getIBAValue("PMId");
-      Debug.P("PRE_DELETE---------1--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
-      //epmdoc= EPMUtil.getEPMDocument(epmdoc.getNumber(), null); 
-     // Debug.P("PRE_DELETE---------2--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
-      epmdoc=(EPMDocument)Utils.getWCObject(EPMDocument.class, epmdoc.getNumber());
-      Debug.P("PRE_DELETE---------3--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
-      if (docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")) {
-          return;
-        }
-      if (docFolder.getFolderPath().contains("工作区")){
-    	  return;
-      }
-      if(WorkInProgressHelper.isCheckedOut(epmdoc)){
-    	  return;
-      }
-      if (!WorkInProgressHelper.isCheckedOut(epmdoc)){
-    	  List partList =new ArrayList();
-          String epmType=epmdoc.getCADName();
-          if(epmType.endsWith(".drw")){
-        	  epmdoc= (EPMDocument) DocUtils.getEPMReferences(epmdoc).get(0);
-          }
-          partList=DocUtils.getDescribePartsByEPMDoc(epmdoc);
-          Debug.P("图纸："+epmdoc.getNumber()+"存在关联部件"+partList.size());
-          if(partList.size()>0){
-       	   throw new Exception("图纸："+epmdoc.getNumber()+"存在关联部件，不允许删除！");
-          }
-            WCToPMHelper.deletePMCADDoc(pmoid, epmdoc);
-//    	  WCToPMHelper.updatePMDocument(pmoid);
-      }
-    }
+    else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
+		if(epmdoc !=null){
+			String pmoid = iba.getIBAValue(Contants.PMID);
+			if(StringUtils.isNotEmpty(pmoid)){
+				Debug.P("删除部件 "+epmdoc.getNumber()+" 的最新小版本，重新以 -》"+pmoid+" 创建-------------");  
+				WCToPMHelper.CreateEPMDocToPM(epmdoc);
+			  }
+		}
+	}
+//    else if (eventType.equals("PRE_DELETE")) {
+//      String pmoid = iba.getIBAValue("PMId");
+//      Debug.P("PRE_DELETE---------1--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
+//      //epmdoc= EPMUtil.getEPMDocument(epmdoc.getNumber(), null); 
+//     // Debug.P("PRE_DELETE---------2--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
+//      epmdoc=(EPMDocument)Utils.getWCObject(EPMDocument.class, epmdoc.getNumber());
+//      Debug.P("PRE_DELETE---------3--------pmoid----------->" + pmoid+"   EPMDocument---->"+WorkInProgressHelper.isCheckedOut(epmdoc));
+//      if (docFolder.getFolderPath().toUpperCase().trim().endsWith("/DEFAULT")) {
+//          return;
+//        }
+//      if (docFolder.getFolderPath().contains("工作区")){
+//    	  return;
+//      }
+//      if(WorkInProgressHelper.isCheckedOut(epmdoc)){
+//    	  return;
+//      }
+//      if (!WorkInProgressHelper.isCheckedOut(epmdoc)){
+//    	  List partList =new ArrayList();
+//          String epmType=epmdoc.getCADName();
+//          if(epmType.endsWith(".drw")){
+//        	  epmdoc= (EPMDocument) DocUtils.getEPMReferences(epmdoc).get(0);
+//          }
+//          partList=DocUtils.getDescribePartsByEPMDoc(epmdoc);
+//          Debug.P("图纸："+epmdoc.getNumber()+"存在关联部件"+partList.size());
+//          if(partList.size()>0){
+//       	   throw new Exception("图纸："+epmdoc.getNumber()+"存在关联部件，不允许删除！");
+//          }
+//            WCToPMHelper.deletePMCADDoc(pmoid, epmdoc);
+////    	  WCToPMHelper.updatePMDocument(pmoid);
+//      }
+//    }
 	}catch(Exception e){
 		throw new Exception("图纸创建/同步出错，请联系管理员"+e.getMessage());
 	}finally {

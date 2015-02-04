@@ -62,7 +62,7 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 			if (target instanceof EPMDocument) {
 				EPMDocument epm=(EPMDocument)target;
 				Debug.P("EPM eventType--->"+eventType+"---Object--->"+epm);
-				if(!eventType.equals("POST_DELETE")){
+				if(epm!=null){
 //					epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
 					epm=(EPMDocument)Utils.getWCObject(EPMDocument.class, epm.getNumber());
 				}
@@ -98,8 +98,8 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 				.generateEventKey(PersistenceManagerEvent.POST_STORE);
 		getManagerService().addEventListener(listener, POST_STORE);
 		
-		String PRE_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
-		getManagerService().addEventListener( listener, PRE_DELETE);
+//		String PRE_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.PRE_DELETE);
+//		getManagerService().addEventListener( listener, PRE_DELETE);
 		
 		String POST_DELETE=PersistenceManagerEvent.generateEventKey(PersistenceManagerEvent.POST_DELETE);
 		getManagerService().addEventListener( listener, POST_DELETE);
