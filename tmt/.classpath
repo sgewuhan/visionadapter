@@ -7,6 +7,5 @@
 	<classpathentry kind="lib" path="D:/Develop/eclipse/myPlugins/windchill10.2.jar"/>
 	<classpathentry kind="lib" path="D:/Develop/eclipse/myPlugins/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry kind="lib" path="D:/Develop/eclipse/myPlugins/wnc.jar"/>
-	<classpathentry kind="lib" path="D:/ptc/visionadapter.jar"/>
 	<classpathentry kind="output" path="codebase"/>
 </classpath>

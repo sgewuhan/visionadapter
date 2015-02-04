@@ -96,6 +96,4 @@ public class PMWebservice extends JaxWsWebService
     
     
     
-    
-    
 }
