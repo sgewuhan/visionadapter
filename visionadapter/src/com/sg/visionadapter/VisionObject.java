@@ -14,6 +14,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
+import com.mongodb.util.JSON;
 
 /**
  * vision系统的可持久化对象
@@ -285,7 +286,7 @@ public abstract class VisionObject extends BasicDBObject implements
 		WriteResult wr = collection.insert(this);
 		return wr;
 	}
-	
+
 	public WriteResult doInsertSimple() throws Exception {
 		WriteResult wr = collection.insert(this);
 		return wr;
@@ -293,7 +294,7 @@ public abstract class VisionObject extends BasicDBObject implements
 
 	private void extendProjectData() throws Exception {
 		PMFolder folder = getParentFolder();
-		if(folder == null){
+		if (folder == null) {
 			throw new Exception("缺少父目录");
 		}
 		setProjectId(folder.getProjectId());
@@ -457,8 +458,11 @@ public abstract class VisionObject extends BasicDBObject implements
 		setValue(PROJECT_NUMBER, projectNumber);
 	}
 
-
 	public void setProjectWorkOrder(Object projectWorkOrder) {
 		setValue(PROJECT_WORK_ORDER, projectWorkOrder);
+	}
+
+	public String serialize() {
+		return JSON.serialize(this);
 	}
 }
