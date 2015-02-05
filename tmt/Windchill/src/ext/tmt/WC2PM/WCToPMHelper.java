@@ -128,27 +128,27 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			} catch (NullPointerException e) {
 				pmPart = null;
 			}
-			Debug.P("pmPart-->" + pmPart != null);
+			Debug.P("pmPart是否存在-->" + pmPart != null);
 			try {
 				PMFolder pmfolder = (PMFolder) ((FolderPersistence) ModelServiceFactory
 						.getInstance(codebasePath).get(FolderPersistence.class))
 						.getByPLMId(pFolderId);
 				if (pmfolder == null)
 					flag = false;
-			}
-
-			catch (NullPointerException e) {
+			}catch (NullPointerException e) {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
 			String pmoid = "";
 			pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
-//				Debug.P("pmPart-->" + pmPart);
+				Debug.P("pmPart-->" + pmoid);
 				if (pmPart != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						updatePMPart(pmoid, wtPart);
-				} else {
+					Debug.P("update pmpart --->"+pmoid);
+					if (StringUtils.isNotEmpty(pmoid)){
+			    	    updatePMPart(pmoid, wtPart);
+					}
+				}else{
 					pmPart = (PMPart) partPersistence.newInstance();
 					pmPart.setFolderIdByPLMId(pFolderId);
 					ObjectId objectId = null;
@@ -1724,21 +1724,21 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 	public static void productNumToProductItem(String objectId)
 			throws Exception {
-//		String urls = ModelServiceFactory.URL_PRODUCTNUM + "?id=" + objectId;
-//		Debug.P(urls);
-//		URL url = new URL(urls);
-//		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//		connection.connect();
-//		BufferedReader reader = new BufferedReader(new InputStreamReader(
-//				connection.getInputStream()));
-//		String line;
-//		Debug.P("Product Number To ProductItem----------start--- ");
-//		while ((line = reader.readLine()) != null) {
-//			System.out.println(line);
-//		}
-//		Debug.P("Product Number To ProductItem--------ends ");
-//		reader.close();
-//		connection.disconnect();
+		String urls = ModelServiceFactory.URL_PRODUCTNUM + "?id=" + objectId;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.connect();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String line;
+		Debug.P("Product Number To ProductItem----------start--- ");
+		while ((line = reader.readLine()) != null) {
+			System.out.println(line);
+		}
+		Debug.P("Product Number To ProductItem--------ends ");
+		reader.close();
+		connection.disconnect();
 	}
 
 	/**

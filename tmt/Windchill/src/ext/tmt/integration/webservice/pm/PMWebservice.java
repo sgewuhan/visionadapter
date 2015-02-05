@@ -58,15 +58,15 @@ public class PMWebservice extends JaxWsWebService
     }
     
     @WebMethod(operationName="deleteDocument")
-    public int deleteDocument (String objectId,String deletAction)throws Exception
+    public int deleteDocument (String objectType,String objectId,String deletAction)throws Exception
     {
-       return PMWebserviceImpl.deleteWTDocumentEntry(objectId,deletAction);
+       return PMWebserviceImpl.deleteWTDocumentEntry(objectType,objectId,deletAction);
     }
     
     @WebMethod(operationName="changeRevision")
     public void changeRevision (String objectId)throws Exception
     {
-         PMWebserviceImpl.changeRevision(objectId);
+         PMWebserviceImpl.changeRevision(objectId); 
     }
     
     

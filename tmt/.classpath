@@ -4,6 +4,12 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Windchill"/>
 	<classpathentry kind="lib" path="codebase"/>
+<<<<<<< HEAD
 	<classpathentry combineaccessrules="false" kind="src" path="/visionadapter"/>
+=======
+	<classpathentry kind="lib" path="D:/Develop/eclipse/myPlugins/windchill10.2.jar"/>
+	<classpathentry kind="lib" path="D:/Develop/eclipse/myPlugins/mongo-java-driver-2.11.3.jar"/>
+	<classpathentry kind="lib" path="D:/Develop/eclipse/myPlugins/wnc.jar"/>
+>>>>>>> branch 'master' of https://github.com/sgewuhan/visionadapter.git
 	<classpathentry kind="output" path="codebase"/>
 </classpath>
