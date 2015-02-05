@@ -529,6 +529,8 @@ public class GenericUtil implements RemoteAccess {
 		}
 		f.close();
 	}
+	
+	
 
 	/**
 	 * 通过容器名查询容器对象(存储库对象,产品库对象)
@@ -3257,18 +3259,29 @@ private static void setStringAttribute(EPMWorkspace ws, EPMDocument epm, String 
 	     return result;
     }
  
+ 
     /**
      * 获取文件的MD5码
      * @param file
      * @return
      * @throws FileNotFoundException
+     * @throws WTException 
+     * @throws PropertyVetoException 
      */
-	public static String getMd5ByFile(File file) throws FileNotFoundException {
+	public static String getMd5ByFile(EPMDocument epm) throws FileNotFoundException, WTException, PropertyVetoException {
 		String value = null;
-		FileInputStream in = new FileInputStream(file);
+		ContentHolder holder = ContentHelper.service.getContents(epm);
+		ContentItem item = ContentHelper
+				.getPrimary((FormatContentHolder) holder);
+		// ContentServerHelper.service.findContentStream((ApplicationData)item);
+		ApplicationData appData = (ApplicationData) item;
+		if(appData==null){
+			return null;
+		}
+		FileInputStream in = (FileInputStream) ContentServerHelper.service.findContentStream(appData);
 		try {
 			MappedByteBuffer byteBuffer = in.getChannel().map(
-					FileChannel.MapMode.READ_ONLY, 0, file.length());
+					FileChannel.MapMode.READ_ONLY, 0, in.read());
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
 			md5.update(byteBuffer);
 			BigInteger bi = new BigInteger(1, md5.digest());
