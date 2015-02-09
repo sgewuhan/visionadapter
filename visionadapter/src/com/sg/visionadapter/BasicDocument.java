@@ -18,7 +18,7 @@ import com.mongodb.DBObject;
  */
 public abstract class BasicDocument extends VisionObject {
 
-	protected static final String CONTENTMD52 = "contentmd5";
+	protected static final String CONTENTMD5 = "contentmd5";
 
 	protected static final String FOLDER_ID = "folder_id";
 
@@ -325,11 +325,11 @@ public abstract class BasicDocument extends VisionObject {
 	}
 
 	public void setContentMD5(String contentMD5) {
-		put(CONTENTMD52, contentMD5);
+		put(CONTENTMD5, contentMD5);
 	}
 
 	public String getContentMD5() {
-		return (String) get(CONTENTMD52);
+		return (String) get(CONTENTMD5);
 
 	}
 }
