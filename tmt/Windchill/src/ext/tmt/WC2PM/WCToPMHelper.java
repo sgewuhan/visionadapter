@@ -158,7 +158,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					}else{
 						objectId = new ObjectId();
 					}
-					pmPart.set_id(objectId);
+				//	pmPart.set_id(objectId);
 					pmPart.setPLMId(partOid);
 					pmPart.setCommonName(wtPart.getName());
 					pmPart.setObjectNumber(wtPart.getNumber());
@@ -179,8 +179,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 								weight));
 					pmPart.setProductNumber(partiba.getIBAValue("Product_NO") == null ? ""
 							: partiba.getIBAValue("Product_NO"));
+					String masterid=wtPart.getMaster().getPersistInfo().toString();
+					Debug.P("masterid------>"+masterid);
 					Map plmData = new HashMap();
-					plmData.put("number", wtPart.getNumber());
+					pmPart.SetMasterId(masterid);
 					plmData.put("number", wtPart.getNumber());
 					plmData.put("plmmid", "wt.part.WTPart:"
 							+ wtPart.getIterationInfo().getBranchId());
@@ -189,10 +191,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
 							: partiba.getIBAValue("Material"));
 					pmPart.setValue("IsSync", true);
+					
+					
+					  String docInfo=pmPart.serialize();
+					  pmoid=InsterOrUpdatePMDoc(docInfo);					
 					WriteResult wresult = pmPart.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
-						partiba.setIBAValue("PMId", objectId.toString());
+						partiba.setIBAValue("PMId", pmoid);
 						String data = Utils.getDate();
 						Debug.P(data);
 						partiba.setIBAValue("CyncData", data);
@@ -722,7 +728,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.getIterationIdentifier().getValue()));
 					pmcad.setPhase(cadiba.getIBAValue("PHASE") == null ? ""
 							: cadiba.getIBAValue("PHASE"));
-
+                    String contentMD5=GenericUtil.getMd5ByFile(epmdoc);
+                    Debug.P("contentMD5----->"+contentMD5);
+					pmcad.setContentMD5(contentMD5);
 					pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
 							: cadiba.getIBAValue("Material_NO"));
 					pmcad.setPartType0(part_type == null ? "" : part_type);
@@ -733,14 +741,18 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					}else{
 						objectId = new ObjectId();
 					}
-					pmcad.set_id(objectId);
+//					pmcad.set_id(objectId);
 					pmcad.setValue("IsSync", true);
 					pmcad.setOwner(epmdoc.getCreatorName());
 					pmcad.setValue("cadName", epmdoc.getCADName());
-					WriteResult wresult = pmcad.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						cadiba.setIBAValue("PMId", objectId.toString());
+					String masterid=epmdoc.getMaster().getPersistInfo().toString();
+					pmcad.SetMasterId(masterid);
+					 String docInfo=pmcad.serialize();
+					  pmoid=InsterOrUpdatePMDoc(docInfo);	
+//					WriteResult wresult = pmcad.doInsert();
+//					String error = wresult.getError();
+					if (StringUtils.isEmpty(pmoid)) {
+						cadiba.setIBAValue("PMId", pmoid);
 						cadiba.setIBAValue("CyncData", Utils.getDate());
 						cadiba.setIBAValue("PMRequest", "create");
 						cadiba.updateIBAPart(epmdoc);
@@ -1702,6 +1714,31 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		System.out.println(" Reload Permission--------ends ");
 		reader.close();
 		connection.disconnect();
+	}
+	
+	/**
+	 * 调用PM的sevlet进行插入和更新PM对象
+	 * @param docInfo
+	 * @return
+	 * @throws Exception
+	 */
+	public static String InsterOrUpdatePMDoc(String docInfo)throws Exception{
+		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE + "?id=" + docInfo;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.connect();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String result;
+		System.out.println("InsterOrUpdatePMDoc----------start--- ");
+		result = reader.readLine();
+			Debug.P("result----->"+result);
+		
+		System.out.println(" InsterOrUpdatePMDoc--------ends ");
+		reader.close();
+		connection.disconnect();
+		return result;
 	}
 
 	public static void reloadDeliverable(String objectId) throws Exception {

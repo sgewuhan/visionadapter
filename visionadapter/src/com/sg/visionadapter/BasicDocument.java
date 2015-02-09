@@ -18,6 +18,8 @@ import com.mongodb.DBObject;
  */
 public abstract class BasicDocument extends VisionObject {
 
+	protected static final String CONTENTMD52 = "contentmd5";
+
 	protected static final String FOLDER_ID = "folder_id";
 
 	protected static final String DOCUMENTNUMBER = "documentnumber";
@@ -196,7 +198,7 @@ public abstract class BasicDocument extends VisionObject {
 		setValue(PLM_MASTER_ID, masterid);
 		put(PLM_MASTER_ID, masterid);
 	}
-	
+
 	public String getMasterId() {
 		return (String) get(PLM_MASTER_ID);
 	}
@@ -320,5 +322,14 @@ public abstract class BasicDocument extends VisionObject {
 			}
 		}
 		return "";
+	}
+
+	public void setContentMD5(String contentMD5) {
+		put(CONTENTMD52, contentMD5);
+	}
+
+	public String getContentMD5() {
+		return (String) get(CONTENTMD52);
+
 	}
 }
