@@ -741,14 +741,18 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					}else{
 						objectId = new ObjectId();
 					}
-					pmcad.set_id(objectId);
+//					pmcad.set_id(objectId);
 					pmcad.setValue("IsSync", true);
 					pmcad.setOwner(epmdoc.getCreatorName());
 					pmcad.setValue("cadName", epmdoc.getCADName());
-					WriteResult wresult = pmcad.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						cadiba.setIBAValue("PMId", objectId.toString());
+					String masterid=epmdoc.getMaster().getPersistInfo().toString();
+					pmcad.SetMasterId(masterid);
+					 String docInfo=pmcad.serialize();
+					  pmoid=InsterOrUpdatePMDoc(docInfo);	
+//					WriteResult wresult = pmcad.doInsert();
+//					String error = wresult.getError();
+					if (StringUtils.isEmpty(pmoid)) {
+						cadiba.setIBAValue("PMId", pmoid);
 						cadiba.setIBAValue("CyncData", Utils.getDate());
 						cadiba.setIBAValue("PMRequest", "create");
 						cadiba.updateIBAPart(epmdoc);
