@@ -271,22 +271,6 @@ public abstract class VisionObject extends BasicDBObject implements
 		this.collection = collection;
 	}
 
-	/**
-	 * 插入到数据库
-	 * 
-	 * @return 结果
-	 * @throws Exception
-	 */
-	public WriteResult doInsert() throws Exception {
-		checkInsert();
-		setPLMType();
-		setSync();
-		extendPLMData();
-		extendProjectData();
-		WriteResult wr = collection.insert(this);
-		return wr;
-	}
-
 	public WriteResult doInsertSimple() throws Exception {
 		WriteResult wr = collection.insert(this);
 		return wr;
@@ -359,6 +343,31 @@ public abstract class VisionObject extends BasicDBObject implements
 		}
 		return collection.update(new BasicDBObject().append(_ID, get_id()),
 				new BasicDBObject("$set", set));
+	}
+
+	public void initPlmData() {
+		setEditor();
+		setPLMType();
+		setSync();
+		extendPLMData();
+	}
+
+	protected abstract void setEditor();
+
+	/**
+	 * 插入到数据库
+	 * 
+	 * @return 结果
+	 * @throws Exception
+	 */
+	public WriteResult doInsert() throws Exception {
+		checkInsert();
+		setPLMType();
+		setSync();
+		extendPLMData();
+		extendProjectData();
+		WriteResult wr = collection.insert(this);
+		return wr;
 	}
 
 	/**

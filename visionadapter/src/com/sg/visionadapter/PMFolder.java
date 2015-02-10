@@ -27,7 +27,7 @@ public class PMFolder extends VisionObject {
 	private static final String CONTAINER_NAME = "containername";
 
 	public static final String F_IS_CONTAINER = "iscontainer";
-	
+
 	/**
 	 * 是否提交，为PLM两段式提交打标记
 	 */
@@ -107,12 +107,12 @@ public class PMFolder extends VisionObject {
 	 */
 	public PMFolder getRoot() {
 		ObjectId rootId = getRootId();
-		rootId = rootId==null?get_id():rootId;
+		rootId = rootId == null ? get_id() : rootId;
 		DBCollection folderColletion = ModelServiceFactory.service
 				.getCollection("folder");
 		folderColletion.setObjectClass(PMFolder.class);
-		return (PMFolder) folderColletion.findOne(new BasicDBObject().append(_ID,
-				rootId));
+		return (PMFolder) folderColletion.findOne(new BasicDBObject().append(
+				_ID, rootId));
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class PMFolder extends VisionObject {
 	 * @return
 	 */
 	public String getContainerName() {
-		
+
 		PMFolder root = getRoot();
 		return root.getString(CONTAINER_NAME);
 	}
@@ -138,21 +138,30 @@ public class PMFolder extends VisionObject {
 	public WriteResult doInsert() throws Exception {
 		throw new Exception("PM Document can not insert by adapter.");
 	}
+
+	@Override
+	protected void setEditor() {
+
+	}
+
 	/**
 	 * 是否为容器
+	 * 
 	 * @return
 	 */
 	public boolean isContainer() {
-		return Boolean.TRUE.equals(get(F_IS_CONTAINER ));
+		return Boolean.TRUE.equals(get(F_IS_CONTAINER));
 	}
-	
+
 	public Object getProjectWorkOrder() {
 		return get(PROJECT_WORK_ORDER);
 	}
-	
+
 	/**
 	 * 设置PLM提交的状态
-	 * @param iscommit true or false
+	 * 
+	 * @param iscommit
+	 *            true or false
 	 */
 	public void setCommit(boolean iscommit) {
 		setValue(F_IS_COMMIT, iscommit);

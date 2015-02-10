@@ -137,6 +137,11 @@ public final class PMDocument extends BasicDocument {
 		return super.doInsert();
 	}
 
+	@Override
+	protected void setEditor() {
+
+	}
+
 	/**
 	 * 设置PLM提交的状态
 	 * 

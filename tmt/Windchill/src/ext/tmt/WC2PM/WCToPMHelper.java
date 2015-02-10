@@ -81,6 +81,7 @@ import ext.tmt.utils.Utils;
 
 /**
  * WC同步EPMDocument,wtpart到PM系统
+ * 
  * @author Administrator
  *
  */
@@ -135,7 +136,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 						.getByPLMId(pFolderId);
 				if (pmfolder == null)
 					flag = false;
-			}catch (NullPointerException e) {
+			} catch (NullPointerException e) {
 				flag = false;
 			}
 			Debug.P("pm中是否存在文件夹OID为--》" + pFolderId + "----->" + flag);
@@ -144,21 +145,21 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			if (flag) {
 				Debug.P("pmPart-->" + pmoid);
 				if (pmPart != null) {
-					Debug.P("update pmpart --->"+pmoid);
-					if (StringUtils.isNotEmpty(pmoid)){
-			    	    updatePMPart(pmoid, wtPart);
+					Debug.P("update pmpart --->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						updatePMPart(pmoid, wtPart);
 					}
-				}else{
+				} else {
 					pmPart = (PMPart) partPersistence.newInstance();
 					pmPart.setFolderIdByPLMId(pFolderId);
 					ObjectId objectId = null;
-					Debug.P("半成品--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("半成品--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
-				//	pmPart.set_id(objectId);
+					// pmPart.set_id(objectId);
 					pmPart.setPLMId(partOid);
 					pmPart.setCommonName(wtPart.getName());
 					pmPart.setObjectNumber(wtPart.getNumber());
@@ -179,8 +180,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 								weight));
 					pmPart.setProductNumber(partiba.getIBAValue("Product_NO") == null ? ""
 							: partiba.getIBAValue("Product_NO"));
-					String masterid=wtPart.getMaster().getPersistInfo().toString();
-					Debug.P("masterid------>"+masterid);
+					String masterid = wtPart.getMaster().getPersistInfo()
+							.toString();
+					Debug.P("masterid------>" + masterid);
 					Map plmData = new HashMap();
 					pmPart.SetMasterId(masterid);
 					plmData.put("number", wtPart.getNumber());
@@ -191,10 +193,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
 							: partiba.getIBAValue("Material"));
 					pmPart.setValue("IsSync", true);
-					
-					
-					  String docInfo=pmPart.serialize();
-					  pmoid=InsterOrUpdatePMDoc(docInfo);					
+
+					String docInfo = pmPart.serialize();
+					pmoid = InsterOrUpdatePMDoc(docInfo);
 					WriteResult wresult = pmPart.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
@@ -223,7 +224,6 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		}
 	}
 
-	
 	private static String getObjectOid(WTObject object) {
 		return object.getPersistInfo().getObjectIdentifier().getStringValue();
 	}
@@ -306,12 +306,12 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					plmData.put("plmmid", "wt.part.WTPart:"
 							+ wtPart.getIterationInfo().getBranchId());
 					Debug.P(plmData);
-					
+
 					ObjectId objectId = null;
-					Debug.P("成品--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("成品--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
 					pmProduct.set_id(objectId);
@@ -459,10 +459,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmMaterial.setFolderIdByPLMId(pFolderId);
 					pmMaterial.setPLMId(partOid);
 					ObjectId objectId = null;
-					Debug.P("pmMaterial--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("pmMaterial--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
 					Map plmData = new HashMap();
@@ -611,10 +611,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
 					ObjectId objectId = null;
-					Debug.P("PMSupplyment--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("PMSupplyment--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
 					pmSupplyment.set_id(objectId);
@@ -728,29 +728,31 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.getIterationIdentifier().getValue()));
 					pmcad.setPhase(cadiba.getIBAValue("PHASE") == null ? ""
 							: cadiba.getIBAValue("PHASE"));
-                    String contentMD5=GenericUtil.getMd5ByFile(epmdoc);
-                    Debug.P("contentMD5----->"+contentMD5);
+					String contentMD5 = GenericUtil.getMd5ByFile(epmdoc);
+					Debug.P("contentMD5----->" + contentMD5);
 					pmcad.setContentMD5(contentMD5);
 					pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
 							: cadiba.getIBAValue("Material_NO"));
 					pmcad.setPartType0(part_type == null ? "" : part_type);
 					ObjectId objectId = null;
-					Debug.P("PMCADDocument--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("PMCADDocument--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
-//					pmcad.set_id(objectId);
+					// pmcad.set_id(objectId);
 					pmcad.setValue("IsSync", true);
 					pmcad.setOwner(epmdoc.getCreatorName());
 					pmcad.setValue("cadName", epmdoc.getCADName());
-					String masterid=epmdoc.getMaster().getPersistInfo().toString();
+					String masterid = epmdoc.getMaster().getPersistInfo()
+							.toString();
 					pmcad.SetMasterId(masterid);
-					 String docInfo=pmcad.serialize();
-					  pmoid=InsterOrUpdatePMDoc(docInfo);	
-//					WriteResult wresult = pmcad.doInsert();
-//					String error = wresult.getError();
+					pmcad.initData();
+					String docInfo = pmcad.serialize();
+					pmoid = InsterOrUpdatePMDoc(docInfo);
+					// WriteResult wresult = pmcad.doInsert();
+					// String error = wresult.getError();
 					if (StringUtils.isEmpty(pmoid)) {
 						cadiba.setIBAValue("PMId", pmoid);
 						cadiba.setIBAValue("CyncData", Utils.getDate());
@@ -848,10 +850,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
 					ObjectId objectId = null;
-					Debug.P("pmPackage--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("pmPackage--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
 					pmPackage.set_id(objectId);
@@ -965,10 +967,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.getIBAValue("Material_Group") == null ? ""
 							: partiba.getIBAValue("Material_Group"));
 					ObjectId objectId = null;
-					Debug.P("pmJigTools--》pmoid----->"+pmoid);
-					if(StringUtils.isNotEmpty(pmoid)){
-						objectId= new ObjectId(pmoid);
-					}else{
+					Debug.P("pmJigTools--》pmoid----->" + pmoid);
+					if (StringUtils.isNotEmpty(pmoid)) {
+						objectId = new ObjectId(pmoid);
+					} else {
 						objectId = new ObjectId();
 					}
 					pmJigTools.set_id(objectId);
@@ -1715,15 +1717,17 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		reader.close();
 		connection.disconnect();
 	}
-	
+
 	/**
 	 * 调用PM的sevlet进行插入和更新PM对象
+	 * 
 	 * @param docInfo
 	 * @return
 	 * @throws Exception
 	 */
-	public static String InsterOrUpdatePMDoc(String docInfo)throws Exception{
-		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE + "?id=" + docInfo;
+	public static String InsterOrUpdatePMDoc(String docInfo) throws Exception {
+		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE + "?id="
+				+ docInfo;
 		Debug.P(urls);
 		URL url = new URL(urls);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -1733,8 +1737,8 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		String result;
 		System.out.println("InsterOrUpdatePMDoc----------start--- ");
 		result = reader.readLine();
-			Debug.P("result----->"+result);
-		
+		Debug.P("result----->" + result);
+
 		System.out.println(" InsterOrUpdatePMDoc--------ends ");
 		reader.close();
 		connection.disconnect();
@@ -1958,10 +1962,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		} else {
 			List<WTDocument> docList = new ArrayList<WTDocument>();
 			docList = EPMDocUtil.getAllDocument();
-			int i=0;
+			int i = 0;
 			for (WTDocument document : docList) {
 				i++;
-				Debug.P("----------------index-----------》"+i);
+				Debug.P("----------------index-----------》" + i);
 				getPMDocument(document);
 			}
 			Debug.P("-----------------同步WTDocument完毕！--------------");
@@ -1973,7 +1977,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 	 * 如果存在，则修改WC端文档的状态，修改PM端文档的版本
 	 * 
 	 * @param document
-	 * @throws Exception  
+	 * @throws Exception
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
@@ -1982,7 +1986,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		PMDocument pmdoc = null;
 		DocumentPersistence docper = null;
 		String stateName = "";
-		String state="";
+		String state = "";
 		docper = ModelServiceFactory.getInstance(codebasePath).get(
 				DocumentPersistence.class);
 		String plmId = document.getPersistInfo().getObjectIdentifier()
@@ -1992,23 +1996,26 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		} catch (NullPointerException e) {
 			pmdoc = null;
 		}
-		state=document.getState().getState().getStringValue();
-		Debug.P("文档-----》" + document.getNumber()+"---状态-----》"+state+"---pmdoc----------->" + pmdoc != null);
+		state = document.getState().getState().getStringValue();
+		Debug.P("文档-----》" + document.getNumber() + "---状态-----》" + state
+				+ "---pmdoc----------->" + pmdoc != null);
 		if (pmdoc == null) {
 			Debug.P("删除文档-------------》" + document.getNumber());
 			PersistenceHelper.manager.delete(document);
 		} else {
 			stateName = pmdoc.getStatus();
-			Debug.P("更新WC文档-----》" + document.getNumber()+"更新PM文档-----》" + pmdoc.getObjectNumber()+"----stateName------->"+stateName);
+			Debug.P("更新WC文档-----》" + document.getNumber() + "更新PM文档-----》"
+					+ pmdoc.getObjectNumber() + "----stateName------->"
+					+ stateName);
 			pmdoc.setMajorVid(document.getVersionIdentifier().getValue());
 			pmdoc.setSecondVid(Integer.valueOf(document
 					.getIterationIdentifier().getValue()));
 			pmdoc.setValue("IsSync", plmId);
-			    WriteResult result = pmdoc.doUpdate();
-				document = (WTDocument) GenericUtil.changeState(document,
-						stateMap.get(stateName));
-				PersistenceHelper.manager.refresh(document);
-		}  
+			WriteResult result = pmdoc.doUpdate();
+			document = (WTDocument) GenericUtil.changeState(document,
+					stateMap.get(stateName));
+			PersistenceHelper.manager.refresh(document);
+		}
 	}
 
 	public static void initPMDocument(String startTime) throws Exception {
@@ -2023,221 +2030,239 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				e.printStackTrace();
 			}
 		} else {
-		
-		String lastOid="";
-		WTPart part =null;
-		WTDocument document =null;
-		EPMDocument epmdoc=null;
-		PMDocument pmdoc = null;
-		PMCADDocument pmcad = null;
-		PMJigTools pmJigTools = null;
-		PMPart pmPart = null;	
-		PMMaterial pmMaterial = null;
-		PMPackage pmPackage = null;
-		PMProduct pmProduct = null;
-		BasicDocument bd = null;
-		BasicPart bp = null;
-		PMSupplyment pmSupplyment = null;
-		
-		CADDocumentPersistence cadDoc = (CADDocumentPersistence) ModelServiceFactory.getInstance(codebasePath)
-				.get(CADDocumentPersistence.class);
-		DocumentPersistence docper = (DocumentPersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(DocumentPersistence.class);
-		JigToolsPersistence jigTolls = (JigToolsPersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(JigToolsPersistence.class);
-		PartPersistence pmparts = (PartPersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(PartPersistence.class);
-		MaterialPersistence material = (MaterialPersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(MaterialPersistence.class);
-		PackagePersistence packages = (PackagePersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(PackagePersistence.class);
-		ProductPersistence pmproduct = (ProductPersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(ProductPersistence.class);
-		SupplymentPersistence supplyment = (SupplymentPersistence)ModelServiceFactory.getInstance(codebasePath)
-				.get(SupplymentPersistence.class);
-		
-		//获取PM中所有的document对象包含EPMdoc,Document,Part
-		Map<String, String> docMap = cadDoc.getInitDocumentList();
-		Debug.P("docMap.size--------------------->"+docMap.size());
-		String oid="";
-		String pmType="";
-		Iterator<?> iter = docMap.keySet().iterator();
-		int i=0;
-		while(iter.hasNext()){
-			i++;
-			oid=iter.next().toString();
-			pmType=docMap.get(oid);
-			Debug.P("oid----->"+oid+"----pmType---->"+pmType+"------->"+i);
-			if(pmType.equals("epmdocument")){
-				try{
-				 epmdoc =(EPMDocument) GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				}
-				 bd=cadDoc.getByPLMId(oid);
-				if(epmdoc==null){
-					bd.setValue("IsSync", false);
-					bd.doUpdate();
-				}else{
-                       epmdoc=(EPMDocument) Utils.getWCObject(EPMDocument.class, epmdoc.getNumber());						
-                       lastOid=getObjectOid(epmdoc);
-                       if(!oid.equals(lastOid)){
-                    	   bd.setValue("IsSync", lastOid);
-                    	   bd.doUpdate();
-                       }                     
-				}
-			}else if(pmType.equals("wtdocument")){
-				try{
-					document=(WTDocument)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				}
-				bd=docper.getByPLMId(oid);
-				if(document==null){
-					bd.setValue("IsSync", false);
-					bd.doUpdate();  
-				}else{ 
-					document=(WTDocument) Utils.getWCObject(WTDocument.class, document.getNumber());						
-                     lastOid=getObjectOid(document);
-                     if(!oid.equals(lastOid)){
-                    	 bd.setValue("IsSync", lastOid);
-                    	 bd.doUpdate();
-                     }
-				}
-			}else if(pmType.equals("pmjigtools")){
-				try{
-					part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				}
-				 bp=(BasicPart) jigTolls.getByPLMId(oid);
-				 if(part==null){
-					 bp.setValue("IsSync", false);
-					 bp.doUpdate();  
-					}else{ 
-						part=(WTPart) Utils.getWCObject(WTPart.class, part.getNumber());						
-	                     lastOid=getObjectOid(part);
-	                     if(!oid.equals(lastOid)){
-	                    	 bp.setValue("IsSync", lastOid);
-	                    	 bp.doUpdate();
-	                     }
+
+			String lastOid = "";
+			WTPart part = null;
+			WTDocument document = null;
+			EPMDocument epmdoc = null;
+			PMDocument pmdoc = null;
+			PMCADDocument pmcad = null;
+			PMJigTools pmJigTools = null;
+			PMPart pmPart = null;
+			PMMaterial pmMaterial = null;
+			PMPackage pmPackage = null;
+			PMProduct pmProduct = null;
+			BasicDocument bd = null;
+			BasicPart bp = null;
+			PMSupplyment pmSupplyment = null;
+
+			CADDocumentPersistence cadDoc = (CADDocumentPersistence) ModelServiceFactory
+					.getInstance(codebasePath)
+					.get(CADDocumentPersistence.class);
+			DocumentPersistence docper = (DocumentPersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(DocumentPersistence.class);
+			JigToolsPersistence jigTolls = (JigToolsPersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(JigToolsPersistence.class);
+			PartPersistence pmparts = (PartPersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(PartPersistence.class);
+			MaterialPersistence material = (MaterialPersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(MaterialPersistence.class);
+			PackagePersistence packages = (PackagePersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(PackagePersistence.class);
+			ProductPersistence pmproduct = (ProductPersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(ProductPersistence.class);
+			SupplymentPersistence supplyment = (SupplymentPersistence) ModelServiceFactory
+					.getInstance(codebasePath).get(SupplymentPersistence.class);
+
+			// 获取PM中所有的document对象包含EPMdoc,Document,Part
+			Map<String, String> docMap = cadDoc.getInitDocumentList();
+			Debug.P("docMap.size--------------------->" + docMap.size());
+			String oid = "";
+			String pmType = "";
+			Iterator<?> iter = docMap.keySet().iterator();
+			int i = 0;
+			while (iter.hasNext()) {
+				i++;
+				oid = iter.next().toString();
+				pmType = docMap.get(oid);
+				Debug.P("oid----->" + oid + "----pmType---->" + pmType
+						+ "------->" + i);
+				if (pmType.equals("epmdocument")) {
+					try {
+						epmdoc = (EPMDocument) GenericUtil.REF_FACTORY
+								.getReference(oid).getObject();
+					} catch (Exception e) {
+						part = null;
 					}
-				 
+					bd = cadDoc.getByPLMId(oid);
+					if (epmdoc == null) {
+						bd.setValue("IsSync", false);
+						bd.doUpdate();
+					} else {
+						epmdoc = (EPMDocument) Utils.getWCObject(
+								EPMDocument.class, epmdoc.getNumber());
+						lastOid = getObjectOid(epmdoc);
+						if (!oid.equals(lastOid)) {
+							bd.setValue("IsSync", lastOid);
+							bd.doUpdate();
+						}
+					}
+				} else if (pmType.equals("wtdocument")) {
+					try {
+						document = (WTDocument) GenericUtil.REF_FACTORY
+								.getReference(oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bd = docper.getByPLMId(oid);
+					if (document == null) {
+						bd.setValue("IsSync", false);
+						bd.doUpdate();
+					} else {
+						document = (WTDocument) Utils.getWCObject(
+								WTDocument.class, document.getNumber());
+						lastOid = getObjectOid(document);
+						if (!oid.equals(lastOid)) {
+							bd.setValue("IsSync", lastOid);
+							bd.doUpdate();
+						}
+					}
+				} else if (pmType.equals("pmjigtools")) {
+					try {
+						part = (WTPart) GenericUtil.REF_FACTORY.getReference(
+								oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bp = (BasicPart) jigTolls.getByPLMId(oid);
+					if (part == null) {
+						bp.setValue("IsSync", false);
+						bp.doUpdate();
+					} else {
+						part = (WTPart) Utils.getWCObject(WTPart.class,
+								part.getNumber());
+						lastOid = getObjectOid(part);
+						if (!oid.equals(lastOid)) {
+							bp.setValue("IsSync", lastOid);
+							bp.doUpdate();
+						}
+					}
+
+				} else if (pmType.equals("pmmaterial")) {
+					try {
+						part = (WTPart) GenericUtil.REF_FACTORY.getReference(
+								oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bp = material.getByPLMId(oid);
+					if (part == null) {
+						bp.setValue("IsSync", false);
+						bp.doUpdate();
+					} else {
+						part = (WTPart) Utils.getWCObject(WTPart.class,
+								part.getNumber());
+						lastOid = getObjectOid(part);
+						if (!oid.equals(lastOid)) {
+							bp.setValue("IsSync", lastOid);
+							bp.doUpdate();
+						}
+					}
+				} else if (pmType.equals("pmpackage")) {
+					try {
+						part = (WTPart) GenericUtil.REF_FACTORY.getReference(
+								oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bp = packages.getByPLMId(oid);
+					if (part == null) {
+						bp.setValue("IsSync", false);
+						bp.doUpdate();
+					} else {
+						part = (WTPart) Utils.getWCObject(WTPart.class,
+								part.getNumber());
+						lastOid = getObjectOid(part);
+						if (!oid.equals(lastOid)) {
+							bp.setValue("IsSync", lastOid);
+							bp.doUpdate();
+						}
+					}
+				} else if (pmType.equals("pmpart")) {
+					try {
+						part = (WTPart) GenericUtil.REF_FACTORY.getReference(
+								oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bp = pmparts.getByPLMId(oid);
+					if (part == null) {
+						bp.setValue("IsSync", false);
+						bp.doUpdate();
+					} else {
+						part = (WTPart) Utils.getWCObject(WTPart.class,
+								part.getNumber());
+						lastOid = getObjectOid(part);
+						if (!oid.equals(lastOid)) {
+							bp.setValue("IsSync", lastOid);
+							bp.doUpdate();
+						}
+					}
+				} else if (pmType.equals("pmproduct")) {
+					try {
+						part = (WTPart) GenericUtil.REF_FACTORY.getReference(
+								oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bp = pmproduct.getByPLMId(oid);
+					if (part == null) {
+						bp.setValue("IsSync", false);
+						bp.doUpdate();
+					} else {
+						part = (WTPart) Utils.getWCObject(WTPart.class,
+								part.getNumber());
+						lastOid = getObjectOid(part);
+						if (!oid.equals(lastOid)) {
+							bp.setValue("IsSync", lastOid);
+							bp.doUpdate();
+						}
+					}
+				} else if (pmType.equals("pmsupplyment")) {
+					try {
+						part = (WTPart) GenericUtil.REF_FACTORY.getReference(
+								oid).getObject();
+					} catch (Exception e) {
+						part = null;
+					}
+					bp = supplyment.getByPLMId(oid);
+					if (part == null) {
+						bp.setValue("IsSync", false);
+						bp.doUpdate();
+					} else {
+						part = (WTPart) Utils.getWCObject(WTPart.class,
+								part.getNumber());
+						lastOid = getObjectOid(part);
+						if (!oid.equals(lastOid)) {
+							bp.setValue("IsSync", lastOid);
+							bp.doUpdate();
+						}
+					}
+				}
 			}
-			else if(pmType.equals("pmmaterial")){
-				try{
-					part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				}
-				 bp  =material.getByPLMId(oid);
-				 if(part==null){
-					 bp.setValue("IsSync", false);
-					 bp.doUpdate();  
-					}else{ 
-						part=(WTPart) Utils.getWCObject(WTPart.class, part.getNumber());						
-	                     lastOid=getObjectOid(part);
-	                     if(!oid.equals(lastOid)){
-	                    	 bp.setValue("IsSync", lastOid);
-	                    	 bp.doUpdate();
-	                     }
-					}
-			}else if(pmType.equals("pmpackage")){
-				try{
-					part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				}
-				 bp =packages.getByPLMId(oid);
-				 if(part==null){
-					 bp.setValue("IsSync", false);
-					 bp.doUpdate();  
-					}else{ 
-						part=(WTPart) Utils.getWCObject(WTPart.class, part.getNumber());						
-	                     lastOid=getObjectOid(part);
-	                     if(!oid.equals(lastOid)){
-	                    	 bp.setValue("IsSync", lastOid);
-	                    	 bp.doUpdate();
-	                     }
-					}
-			}else if(pmType.equals("pmpart")){
-				try{
-					part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				}
-				 bp=pmparts.getByPLMId(oid);
-				 if(part==null){
-					 bp.setValue("IsSync", false);
-					 bp.doUpdate();  
-					}else{ 
-						part=(WTPart) Utils.getWCObject(WTPart.class, part.getNumber());						
-	                     lastOid=getObjectOid(part);
-	                     if(!oid.equals(lastOid)){
-	                    	 bp.setValue("IsSync", lastOid);
-	                    	 bp.doUpdate();
-	                     }
-					}
-			}else if(pmType.equals("pmproduct")){
-				try{
-					part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				} 
-				 bp =  pmproduct.getByPLMId(oid);
-				 if(part==null){
-					 bp.setValue("IsSync", false);
-					 bp.doUpdate();  
-					}else{ 
-						part=(WTPart) Utils.getWCObject(WTPart.class, part.getNumber());						
-	                     lastOid=getObjectOid(part);
-	                     if(!oid.equals(lastOid)){
-	                    	 bp.setValue("IsSync", lastOid);
-	                    	 bp.doUpdate();
-	                     }
-					}
-			}else if(pmType.equals("pmsupplyment")){
-				try{ 
-				part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-				}catch(Exception e){
-					part=null;
-				} 
-				bp=supplyment.getByPLMId(oid);
-				 if(part==null){
-					 bp.setValue("IsSync", false);
-					 bp.doUpdate();  
-					}else{ 
-						part=(WTPart) Utils.getWCObject(WTPart.class, part.getNumber());						
-	                     lastOid=getObjectOid(part);
-	                     if(!oid.equals(lastOid)){
-	                    	 bp.setValue("IsSync", lastOid);
-	                    	 bp.doUpdate();
-	                     }
-					}
-			}
-		}
 		}
 	}
-	
-	public static void getPMDocument(String oid,String pmType) throws Exception{
-		if(StringUtils.isNotEmpty(pmType)){
-			if(pmType.equals("epmdocument")){
-				EPMDocument epmdoc =EPMUtil.getEPMDocumentByOid(oid);
-				if(epmdoc!=null){
-					
-				}else{
-					
+
+	public static void getPMDocument(String oid, String pmType)
+			throws Exception {
+		if (StringUtils.isNotEmpty(pmType)) {
+			if (pmType.equals("epmdocument")) {
+				EPMDocument epmdoc = EPMUtil.getEPMDocumentByOid(oid);
+				if (epmdoc != null) {
+
+				} else {
+
 				}
-			}else if(pmType.equals("wtdocument")){
-				WTDocument document =(WTDocument)GenericUtil.REF_FACTORY.getReference(oid).getObject();
-			}else if(pmType.equals("wtpart")){
-				WTPart part =(WTPart)GenericUtil.REF_FACTORY.getReference(oid).getObject();
+			} else if (pmType.equals("wtdocument")) {
+				WTDocument document = (WTDocument) GenericUtil.REF_FACTORY
+						.getReference(oid).getObject();
+			} else if (pmType.equals("wtpart")) {
+				WTPart part = (WTPart) GenericUtil.REF_FACTORY
+						.getReference(oid).getObject();
 			}
 		}
-		
+
 	}
-	
-	
 
 	private static Map<String, String> stateMap = new HashMap<String, String>();
 	static {
@@ -2302,13 +2327,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 	public static void main(String[] args) throws Exception {
 		Debug.P("------>>>>Start Sysnch>>>>>>>>");
-		 SynchEPMDocument2PM(Utils.getDate());//同步图纸
-//		 SynchWTPart2PM(Utils.getDate());//同步部件
-//		
-//		 initPMDocument(Utils.getDate());
-//		 SynchDocument2PM(Utils.getDate());// 同步文档
-//		 PMDeliverable pmd = new PMDeliverable();
-//		 pmd.initDeli(codebasePath);
+		SynchEPMDocument2PM(Utils.getDate());// 同步图纸
+		// SynchWTPart2PM(Utils.getDate());//同步部件
+		//
+		// initPMDocument(Utils.getDate());
+		// SynchDocument2PM(Utils.getDate());// 同步文档
+		// PMDeliverable pmd = new PMDeliverable();
+		// pmd.initDeli(codebasePath);
 		Debug.P("------>>>>End Sysnch>>>>>>>>");
 	}
 

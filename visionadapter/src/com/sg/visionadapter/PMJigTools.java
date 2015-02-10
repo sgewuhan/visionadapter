@@ -32,4 +32,9 @@ public final class PMJigTools extends BasicPart {
 		put(EDITOR, "editor.document.material");
 		return super.doInsert();
 	}
+
+	@Override
+	protected void setEditor() {
+		put(EDITOR, "editor.document.material");
+	}
 }
