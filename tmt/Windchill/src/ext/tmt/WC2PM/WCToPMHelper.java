@@ -1739,7 +1739,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		result = reader.readLine();
 		Debug.P("result----->" + result);
 
-		System.out.println(" InsterOrUpdatePMDoc--------ends ");
+		System.out.println("InsterOrUpdatePMDoc--------ends ");
 		reader.close();
 		connection.disconnect();
 		return result;
