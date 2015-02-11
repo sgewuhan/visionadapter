@@ -193,12 +193,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
 							: partiba.getIBAValue("Material"));
 					pmPart.setValue("IsSync", true);
+					pmPart.initPlmData();
 
 					String docInfo = pmPart.serialize();
 					pmoid = InsterOrUpdatePMDoc(docInfo);
-					WriteResult wresult = pmPart.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
+					// WriteResult wresult = pmPart.doInsert();
+					// String error = wresult.getError();
+					if (StringUtils.isEmpty(pmoid)) {
 						partiba.setIBAValue("PMId", pmoid);
 						String data = Utils.getDate();
 						Debug.P(data);
@@ -347,7 +348,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 									: partiba.getIBAValue("Material"));
 					pmProduct.setOwner(wtPart.getCreatorName());
 					pmProduct.setValue("IsSync", true);
-					WriteResult wresult = pmProduct.doInsert();
+					pmProduct.WriteResult wresult = pmProduct.doInsert();
 					String error = wresult.getError();
 					if (StringUtils.isEmpty(error)) {
 						partiba.setIBAValue("PMId", objectId.toString());
@@ -748,7 +749,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					String masterid = epmdoc.getMaster().getPersistInfo()
 							.toString();
 					pmcad.SetMasterId(masterid);
-					pmcad.initData();
+					pmcad.initPlmData();
 					String docInfo = pmcad.serialize();
 					pmoid = InsterOrUpdatePMDoc(docInfo);
 					// WriteResult wresult = pmcad.doInsert();
