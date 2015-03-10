@@ -31,4 +31,9 @@ public final class PMPackage extends BasicPart {
 		return super.doInsert();
 	}
 	
+	@Override
+	protected void setEditor() {
+		put(EDITOR, "editor.document.material");
+	}
+	
 }

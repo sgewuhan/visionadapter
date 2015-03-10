@@ -6,15 +6,15 @@ import com.mongodb.WriteResult;
 
 /**
  * 成品对象
+ * 
  * @author zhonghua
  *
  */
-public final class PMProduct extends BasicPart  {
+public final class PMProduct extends BasicPart {
 
 	private static final String FORMULAR = "formularnumber";
 	private static final String PRODUCT_NUMBER = "productnumber";
-	
-	
+
 	@Override
 	public ObjectId getProjectId() {
 		return (ObjectId) get(PROJECT_ID);
@@ -50,8 +50,6 @@ public final class PMProduct extends BasicPart  {
 		return (String) get(PROJECT_WORK_ORDER);
 	}
 
-	
-
 	/**
 	 * @return 配方号
 	 */
@@ -60,19 +58,25 @@ public final class PMProduct extends BasicPart  {
 	}
 
 	/**
-	 * @param formularNumber 配方号
+	 * @param formularNumber
+	 *            配方号
 	 */
 	public void setFormularNumber(String formularNumber) {
-		setValue(FORMULAR,formularNumber);
+		setValue(FORMULAR, formularNumber);
 	}
-	
+
 	@Override
 	public WriteResult doInsert() throws Exception {
 		put(EDITOR, "editor.document.product");
 		return super.doInsert();
 	}
-	
+
+	@Override
+	protected void setEditor() {
+		put(EDITOR, "editor.document.product");
+	}
+
 	public void setProductNumber(String productNumber) {
 		setValue(PRODUCT_NUMBER, productNumber);
-	} 
+	}
 }

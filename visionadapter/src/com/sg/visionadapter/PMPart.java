@@ -70,4 +70,9 @@ public final class PMPart extends BasicPart  implements IProductRelative{
 		return super.doInsert();
 	}
 	
+	@Override
+	protected void setEditor() {
+		put(EDITOR, "editor.document.part");
+	}
+	
 }

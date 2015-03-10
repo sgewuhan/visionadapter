@@ -4,6 +4,7 @@ import com.mongodb.WriteResult;
 
 /**
  * ¿Í¹©¼þ
+ * 
  * @author zhonghua
  *
  */
@@ -47,5 +48,10 @@ public final class PMSupplyment extends BasicPart {
 	public WriteResult doInsert() throws Exception {
 		put(EDITOR, "editor.document.supplyment");
 		return super.doInsert();
+	}
+
+	@Override
+	protected void setEditor() {
+		put(EDITOR, "editor.document.supplyment");
 	}
 }
