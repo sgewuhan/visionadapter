@@ -183,7 +183,8 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             QuantityUnit qu = null;
             try {
                 if (StringUtils.isEmpty(unit)) { unit = "ea";}
-                qu = QuantityUnit.toQuantityUnit(unit.toLowerCase());
+                if (!"PAC".equals(unit)) { unit = unit.toLowerCase();}
+                qu = QuantityUnit.toQuantityUnit(unit);
             } catch (WTInvalidParameterException e) {
                 throw new WTException(e.getMessage());
             }
