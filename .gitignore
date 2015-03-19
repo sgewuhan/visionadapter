@@ -13,3 +13,4 @@
 hs_err_pid*
 /tmt
 /tmt/*.classpath
+*.classpath
