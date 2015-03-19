@@ -18,7 +18,11 @@ import com.mongodb.DBObject;
  */
 public abstract class BasicDocument extends VisionObject {
 
+<<<<<<< HEAD
+	protected static final String CONTENTMD52 = "contentmd5";
+=======
 	protected static final String CONTENTMD5 = "contentmd5";
+>>>>>>> branch 'master' of https://github.com/sgewuhan/visionadapter.git
 
 	protected static final String FOLDER_ID = "folder_id";
 
@@ -325,11 +329,19 @@ public abstract class BasicDocument extends VisionObject {
 	}
 
 	public void setContentMD5(String contentMD5) {
+<<<<<<< HEAD
+		put(CONTENTMD52, contentMD5);
+	}
+
+	public String getContentMD5() {
+		return (String) get(CONTENTMD52);
+=======
 		put(CONTENTMD5, contentMD5);
 	}
 
 	public String getContentMD5() {
 		return (String) get(CONTENTMD5);
+>>>>>>> branch 'master' of https://github.com/sgewuhan/visionadapter.git
 
 	}
 }

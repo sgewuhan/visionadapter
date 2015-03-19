@@ -159,7 +159,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					} else {
 						objectId = new ObjectId();
 					}
-					// pmPart.set_id(objectId);
+					 pmPart.set_id(objectId);
 					pmPart.setPLMId(partOid);
 					pmPart.setCommonName(wtPart.getName());
 					pmPart.setObjectNumber(wtPart.getNumber());
@@ -729,8 +729,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							.getIterationIdentifier().getValue()));
 					pmcad.setPhase(cadiba.getIBAValue("PHASE") == null ? ""
 							: cadiba.getIBAValue("PHASE"));
+<<<<<<< HEAD
+                    String contentMD5=GenericUtil.getMd5ByFile(epmdoc);
+                    Debug.P("contentMD5----->"+contentMD5);
+=======
 					String contentMD5 = GenericUtil.getMd5ByFile(epmdoc);
 					Debug.P("contentMD5----->" + contentMD5);
+>>>>>>> branch 'master' of https://github.com/sgewuhan/visionadapter.git
 					pmcad.setContentMD5(contentMD5);
 					pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
 							: cadiba.getIBAValue("Material_NO"));
@@ -742,10 +747,22 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					} else {
 						objectId = new ObjectId();
 					}
+<<<<<<< HEAD
+//					pmcad.set_id(objectId);
+=======
 					// pmcad.set_id(objectId);
+>>>>>>> branch 'master' of https://github.com/sgewuhan/visionadapter.git
 					pmcad.setValue("IsSync", true);
 					pmcad.setOwner(epmdoc.getCreatorName());
 					pmcad.setValue("cadName", epmdoc.getCADName());
+<<<<<<< HEAD
+					String masterid=epmdoc.getMaster().getPersistInfo().toString();
+					pmcad.SetMasterId(masterid);
+					 String docInfo=pmcad.serialize();
+					  pmoid=InsterOrUpdatePMDoc(docInfo);	
+//					WriteResult wresult = pmcad.doInsert();
+//					String error = wresult.getError();
+=======
 					String masterid = epmdoc.getMaster().getPersistInfo()
 							.toString();
 					pmcad.SetMasterId(masterid);
@@ -754,6 +771,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmoid = InsterOrUpdatePMDoc(docInfo);
 					// WriteResult wresult = pmcad.doInsert();
 					// String error = wresult.getError();
+>>>>>>> branch 'master' of https://github.com/sgewuhan/visionadapter.git
 					if (StringUtils.isEmpty(pmoid)) {
 						cadiba.setIBAValue("PMId", pmoid);
 						cadiba.setIBAValue("CyncData", Utils.getDate());
@@ -1717,6 +1735,31 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		System.out.println(" Reload Permission--------ends ");
 		reader.close();
 		connection.disconnect();
+	}
+	
+	/**
+	 * 调用PM的sevlet进行插入和更新PM对象
+	 * @param docInfo
+	 * @return
+	 * @throws Exception
+	 */
+	public static String InsterOrUpdatePMDoc(String docInfo)throws Exception{
+		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE + "?id=" + docInfo;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.connect();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String result;
+		System.out.println("InsterOrUpdatePMDoc----------start--- ");
+		result = reader.readLine();
+			Debug.P("result----->"+result);
+		
+		System.out.println(" InsterOrUpdatePMDoc--------ends ");
+		reader.close();
+		connection.disconnect();
+		return result;
 	}
 
 	/**
