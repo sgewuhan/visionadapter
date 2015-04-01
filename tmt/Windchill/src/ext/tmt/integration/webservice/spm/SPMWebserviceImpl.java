@@ -467,8 +467,10 @@ public class SPMWebserviceImpl{
      */
     public static String createDocForPart(String partNumber, String workflow,String factory) throws Exception{
        Debug.P("--createDocForPart-->>>为部件创建关联文档 partNumber=[" + partNumber + "] workflow=["+ workflow + "] factory=[" + factory + "]");
+       WTPart part = hasExistObject(partNumber);
+       String resultInfo = "操作成功";
+       if(part != null){
        ResultSet resultSet = null;
-       String resultInfo = "";
        try {
     	   SessionServerHelper.manager.setAccessEnforced(false);
     	   if (partNumber != null) {
@@ -518,7 +520,6 @@ public class SPMWebserviceImpl{
     			      }
     			  }
     		   }//循环结束
-    		   resultInfo="操作成功";
     	   }
 	     } catch (Exception e) {
 		     e.printStackTrace();
@@ -529,8 +530,8 @@ public class SPMWebserviceImpl{
 	           }
 	          SessionServerHelper.manager.setAccessEnforced(true);
 	      }
-       
-    	     return resultInfo;
+       }
+       return resultInfo;
     }
 
     
