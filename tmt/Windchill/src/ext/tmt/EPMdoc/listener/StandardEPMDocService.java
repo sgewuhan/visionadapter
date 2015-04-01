@@ -35,6 +35,8 @@ import wt.vc.wip.WorkInProgressServiceEvent;
 
 /**
  * 
+ * 远程调用,在Method Server中运行EPMDocService的实现
+ * 
  * @author Eilaiwang  2014-7-28
  * 
  * @Description

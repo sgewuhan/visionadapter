@@ -11,11 +11,11 @@ import org.apache.axis.encoding.XMLType;
 import org.apache.axis.client.Call;
 import org.apache.axis.client.Service;
 
-
+@Deprecated
 public class CallWs {
 	
 	
-	
+	@Deprecated
 	public static void main(String[] args) throws Exception {
 		String targetNs="http://pm.webservice.integration.tmt.ext/";
 		String urlStr="http://lcy.yaozheng.com/Windchill/servlet/PMWebservice?wsdl";

@@ -20,6 +20,7 @@ import com.ptc.core.ui.validation.UIValidationStatus;
  * @author Administrator
  *
  */
+@Deprecated
 @SuppressWarnings("all")
 public class PartValidate extends DefaultUIComponentValidator{
 	/**

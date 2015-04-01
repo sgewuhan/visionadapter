@@ -26,6 +26,8 @@ import wt.vc.wip.WorkInProgressServiceEvent;
 
 /** 
  * 
+ * 部件监听
+ * 
  * @author Eilaiwang  2014-7-28
  * 
  * @Description

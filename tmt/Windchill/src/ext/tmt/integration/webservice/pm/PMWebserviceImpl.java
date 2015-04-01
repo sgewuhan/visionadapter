@@ -79,12 +79,14 @@ import ext.tmt.part.PartUtils;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
+import ext.tmt.utils.EPMDocUtil;
 import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.FolderUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
 import ext.tmt.utils.LWCUtil;
 import ext.tmt.utils.PartUtil;
+import ext.tmt.utils.RefUtil;
 import ext.tmt.utils.Utils;
 
 
@@ -1147,6 +1149,45 @@ public class PMWebserviceImpl implements Serializable,RemoteAccess{
 						return null;
 						dataHandler = ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
 				 }
+			}
+			      Debug.P(">>>dataHandler:"+dataHandler);
+			      return dataHandler;
+	 }
+	 
+	 public static String getRepresentation(String masterid) throws Exception{
+		   String dataHandler=null;
+			if (!RemoteMethodServer.ServerFlag) {
+				try {
+					Class aclass[] = { String.class };
+					Object aobj[] = { masterid };
+				return	(String) RemoteMethodServer.getDefault().invoke("getRepresentation",
+							PMWebserviceImpl.class.getName(),
+							null, aclass, aobj);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else{
+				Persistable persistable = RefUtil.getObjectByOid(masterid);
+				if(persistable instanceof EPMDocument){
+					EPMDocument epmDocument = (EPMDocument) persistable;
+					EPMDocument epmDoc = EPMDocUtil.getEPMDoc(epmDocument.getNumber());
+					
+				FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service
+						.getContents((ContentHolder) epmDoc);
+				// ApplicationData app = DocUtils.getPdfRep((Representable)epm);
+				// // 如果是表示法，则进行getPdfRep（）的取值
+				ContentItem item = ContentHelper
+						.getPrimary(formatcontentholder);
+				ApplicationData app = (ApplicationData) item;
+				Debug.P(app);
+				if (app == null)
+					return null;
+				dataHandler = ContentHelper.service.getDownloadURL(formatcontentholder, app).toExternalForm();
+				}
+				
+//				 Object object = searchWCObject(EPMDocument.class,pmid,Contants.PMID);
+//				 if(object instanceof EPMDocument){
+//				 }
 			}
 			      Debug.P(">>>dataHandler:"+dataHandler);
 			      return dataHandler;

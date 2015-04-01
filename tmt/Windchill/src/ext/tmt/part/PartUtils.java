@@ -29,6 +29,7 @@ import wt.vc.config.LatestConfigSpec;
  */
 public class PartUtils {
 	
+	@Deprecated
 	public static void main(String[] args) throws WTPropertyVetoException {
 		try {
 			WTPart part = getPartByNumber("0000000001");

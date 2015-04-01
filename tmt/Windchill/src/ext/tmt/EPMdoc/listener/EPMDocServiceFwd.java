@@ -8,6 +8,11 @@ import wt.services.ManagerService;
 import wt.services.ManagerServiceFactory;
 import wt.util.WTException;
 
+/**
+ * 远程调用接口,在Method Server中运行EPMDocService
+ * @author Administrator
+ *
+ */
 public class EPMDocServiceFwd
   implements RemoteAccess, EPMDocService, Serializable
 {

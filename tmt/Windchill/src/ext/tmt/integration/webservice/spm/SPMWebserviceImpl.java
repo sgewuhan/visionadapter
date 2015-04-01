@@ -483,7 +483,7 @@ public class SPMWebserviceImpl{
     			  if(StringUtils.isEmpty(spm_num)){
     				  return "物料编号为空";
     			  }
-    		      WTPart part=null;
+//    		      WTPart part=null;
 			      try {
 			    	  part= (WTPart) GenericUtil.getObjectByNumber(spm_num);
 				     } catch (Exception e) {

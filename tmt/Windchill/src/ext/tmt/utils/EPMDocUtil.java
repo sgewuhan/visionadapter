@@ -158,6 +158,11 @@ public class EPMDocUtil {
          qs= new QuerySpec(EPMDocument.class);
          SearchCondition sc = new SearchCondition(EPMDocument.class,"master>number", SearchCondition.EQUAL, number);
          qs.appendSearchCondition(sc);
+         SearchCondition latestIteration = new SearchCondition(EPMDocument.class, "iterationInfo.latest", SearchCondition.IS_TRUE);
+         qs.appendWhere(sc);
+         qs.appendAnd();
+         qs.appendWhere(latestIteration);
+         qr = new LatestConfigSpec().process(qr);
          qr= PersistenceHelper.manager.find(qs);
          
          while(qr.hasMoreElements()) {
@@ -186,6 +191,7 @@ public class EPMDocUtil {
          qs.appendWhere(sc);
          qs.appendAnd();
          qs.appendWhere(latestIteration);
+         
          qr= PersistenceHelper.manager.find(qs);
          while(qr.hasMoreElements()) {
         	 EPMDoc=(EPMDocument)qr.nextElement();

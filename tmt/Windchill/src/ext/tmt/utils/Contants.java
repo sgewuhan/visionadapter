@@ -1,5 +1,10 @@
 package ext.tmt.utils;
 
+/**
+ * 常量类
+ * @author Administrator
+ *
+ */
 public class Contants {
 	
 	
