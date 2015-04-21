@@ -1918,10 +1918,10 @@ public class DocUtils implements RemoteAccess {
 		}
 		return wtm;
 	}
-	
+
 	private void mian() throws WTException {
 		// TODO Auto-generated method stub
-           getDocByNumber("00073235");
+		getDocByNumber("00073235");
 	}
 
 }

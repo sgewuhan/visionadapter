@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -144,72 +145,58 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmPart-->" + pmoid);
-				if (pmPart != null) {
-					Debug.P("update pmpart --->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						updatePMPart(pmoid, wtPart);
-					}
-				} else {
-					pmPart = (PMPart) partPersistence.newInstance();
-					pmPart.setFolderIdByPLMId(pFolderId);
-					ObjectId objectId = null;
-					Debug.P("半成品--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					pmPart.set_id(objectId);
-					pmPart.setPLMId(partOid);
-					pmPart.setCommonName(wtPart.getName());
-					pmPart.setObjectNumber(wtPart.getNumber());
-					pmPart.setStatus(wtPart.getState().toString().toLowerCase());
-					pmPart.setCreateBy(wtPart.getCreatorName(),
-							wtPart.getCreatorFullName());
-					pmPart.setMajorVid(wtPart.getVersionIdentifier().getValue());
-					pmPart.setSecondVid(Integer.parseInt(wtPart
-							.getIterationIdentifier().getValue()));
-					pmPart.setPhase(partiba.getIBAValue("PHASE") == null ? ""
-							: partiba.getIBAValue("PHASE"));
+				pmPart = (PMPart) partPersistence.newInstance();
+				pmPart.setFolderIdByPLMId(pFolderId);
+				Debug.P("半成品--》pmoid----->" + pmoid);
+				// pmPart.set_id(objectId);
+				pmPart.setPLMId(partOid);
+				pmPart.setCommonName(wtPart.getName());
+				pmPart.setObjectNumber(wtPart.getNumber());
+				pmPart.setStatus(wtPart.getState().toString().toLowerCase());
+				pmPart.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName());
+				pmPart.setMajorVid(wtPart.getVersionIdentifier().getValue());
+				pmPart.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue()));
+				pmPart.setPhase(partiba.getIBAValue("PHASE") == null ? ""
+						: partiba.getIBAValue("PHASE"));
 
-					pmPart.setSpec(partiba.getIBAValue("Specifications") == null ? ""
-							: partiba.getIBAValue("Specifications"));
-					weight = partiba.getIBAValue("Weight");
-					if (StringUtils.isNotEmpty(weight))
-						pmPart.setWeight(NumberFormat.getInstance().parse(
-								weight));
-					pmPart.setProductNumber(partiba.getIBAValue("Product_NO") == null ? ""
-							: partiba.getIBAValue("Product_NO"));
-					String masterid = wtPart.getMaster().getPersistInfo()
-							.toString();
-					Debug.P("masterid------>" + masterid);
-					Map plmData = new HashMap();
-					pmPart.SetMasterId(masterid);
-					plmData.put("number", wtPart.getNumber());
-					plmData.put("plmmid", "wt.part.WTPart:"
-							+ wtPart.getIterationInfo().getBranchId());
-					pmPart.setPLMData(plmData);
-					pmPart.setOwner(wtPart.getCreatorName());
-					pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
-							: partiba.getIBAValue("Material"));
-					pmPart.setValue("IsSync", true);
-					pmPart.initPlmData();
+				pmPart.setSpec(partiba.getIBAValue("Specifications") == null ? ""
+						: partiba.getIBAValue("Specifications"));
+				weight = partiba.getIBAValue("Weight");
+				if (StringUtils.isNotEmpty(weight))
+					pmPart.setWeight(NumberFormat.getInstance().parse(weight));
+				pmPart.setProductNumber(partiba.getIBAValue("Product_NO") == null ? ""
+						: partiba.getIBAValue("Product_NO"));
+				String masterid = wtPart.getMaster().getPersistInfo()
+						.toString();
+				Debug.P("masterid------>" + masterid);
+				Map plmData = new HashMap();
+				pmPart.SetMasterId(masterid);
+				plmData.put("number", wtPart.getNumber());
+				plmData.put("plmmid", "wt.part.WTPart:"
+						+ wtPart.getIterationInfo().getBranchId());
+				pmPart.setPLMData(plmData);
+				pmPart.setOwner(wtPart.getCreatorName());
+				pmPart.setMaterial(partiba.getIBAValue("Material") == null ? ""
+						: partiba.getIBAValue("Material"));
+				pmPart.setValue("IsSync", true);
+				pmPart.initPlmData();
 
-					String docInfo = pmPart.serialize();
-					pmoid = InsterOrUpdatePMDoc(docInfo);
-					// WriteResult wresult = pmPart.doInsert();
-					// String error = wresult.getError();
-					if (StringUtils.isEmpty(pmoid)) {
-						partiba.setIBAValue("PMId", pmoid);
-						String data = Utils.getDate();
-						Debug.P(data);
-						partiba.setIBAValue("CyncData", data);
-						partiba.setIBAValue("PMRequest", "create");
-						partiba.updateIBAPart(wtPart);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create PMPart success");
-					}
+				String docInfo = pmPart.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+				// WriteResult wresult = pmPart.doInsert();
+				// String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					partiba.setIBAValue("PMId", pmoid);
+					String data = Utils.getDate();
+					Debug.P(data);
+					partiba.setIBAValue("CyncData", data);
+					partiba.setIBAValue("PMRequest", "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create PMPart success");
 				}
 			} else {
 				Debug.P();
@@ -295,91 +282,81 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmProduct-->" + pmProduct != null);
-				if (pmProduct != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						updatePMProductToPM(pmoid, wtPart);
-				} else {
-					pmProduct = (PMProduct) productPersistence.newInstance();
-					pmProduct.setFolderIdByPLMId(pFolderId);
-					pmProduct.setPLMId(partOid);
-					Map plmData = new HashMap();
-					plmData.put("number", wtPart.getNumber());
-					plmData.put("plmmid", "wt.part.WTPart:"
-							+ wtPart.getIterationInfo().getBranchId());
-					Debug.P(plmData);
+				pmProduct = (PMProduct) productPersistence.newInstance();
+				pmProduct.setFolderIdByPLMId(pFolderId);
+				pmProduct.setPLMId(partOid);
+				Map plmData = new HashMap();
+				plmData.put("number", wtPart.getNumber());
+				plmData.put("plmmid", "wt.part.WTPart:"
+						+ wtPart.getIterationInfo().getBranchId());
+				Debug.P(plmData);
 
-					ObjectId objectId = null;
-					Debug.P("成品--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					pmProduct.set_id(objectId);
-					pmProduct.setPLMId(wtPart.getPersistInfo()
-							.getObjectIdentifier().getStringValue());
-					pmProduct.setPLMData(plmData);
-					pmProduct.setCommonName(wtPart.getName());
-					pmProduct.setObjectNumber(wtPart.getNumber());
-					pmProduct.setProductNumber(wtPart.getNumber());
-					pmProduct.setStatus(wtPart.getState().toString()
-							.toLowerCase());
-					pmProduct.setCreateBy(wtPart.getCreatorName(),
-							wtPart.getCreatorFullName());
-					pmProduct.setMajorVid(wtPart.getVersionIdentifier()
-							.getValue());
-					pmProduct.setSecondVid(Integer.parseInt(wtPart
-							.getIterationIdentifier().getValue()));
-					pmProduct
-							.setPhase(partiba.getIBAValue("PHASE") == null ? ""
-									: partiba.getIBAValue("PHASE"));
-					pmProduct
-							.setSpec(partiba.getIBAValue("Specifications") == null ? ""
-									: partiba.getIBAValue("Specifications"));
-					weight = partiba.getIBAValue("Weight");
-					if (StringUtils.isNotEmpty(weight))
-						pmProduct.setWeight(NumberFormat.getInstance().parse(
-								weight));
-					pmProduct.setFormularNumber(partiba
-							.getIBAValue("Formula_NO") == null ? "" : partiba
-							.getIBAValue("Formula_NO"));
-					pmProduct
-							.setMaterial(partiba.getIBAValue("Material") == null ? ""
-									: partiba.getIBAValue("Material"));
-					pmProduct.setOwner(wtPart.getCreatorName());
-					pmProduct.setValue("IsSync", true);
-					WriteResult wresult = pmProduct.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						partiba.setIBAValue("PMId", objectId.toString());
-						partiba.setIBAValue("CyncData", Utils.getDate());
-						partiba.setIBAValue("PMRequest", "create");
-						partiba.updateIBAPart(wtPart);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create pmproduct success");
-						productNumToProductItem(objectId.toString());
-					}
-
-					// 回写PM成品编号
-					/*
-					 * String projectNumber = partiba
-					 * .getIBAValue(Contants.PROJECTNO); PMProject pmproject =
-					 * factory.get(PMProject.class); Debug.P("----ProjectNo:" +
-					 * projectNumber + "   PMProject:" + pmproject); ObjectId
-					 * pmProjectId = factory.get(PMProject.class)
-					 * .getProjectIdByProjectNum(projectNumber);
-					 * Debug.P("--->>>>pmProjectId:" + pmProjectId); if
-					 * (pmProjectId != null) { PMProductItem pmProd = new
-					 * PMProductItem(); pmProd =
-					 * factory.get(PMProductItem.class);
-					 * pmProd.setProductNumber(wtPart.getNumber());
-					 * pmProd.setProjectId(pmProjectId);
-					 * pmProd.setUserId("PM-RW"); pmProd.setUserName("PLM系统");
-					 * pmProd.setDate(getCurrentDate("yyyy/MM/dd HH:mm:ss"));
-					 * pmProd.doInsertProductNumToProductItem(); }
-					 */
+				Debug.P("成品--》pmoid----->" + pmoid);
+				pmProduct.setPLMId(wtPart.getPersistInfo()
+						.getObjectIdentifier().getStringValue());
+				pmProduct.setPLMData(plmData);
+				pmProduct.setCommonName(wtPart.getName());
+				pmProduct.setObjectNumber(wtPart.getNumber());
+				pmProduct.setProductNumber(wtPart.getNumber());
+				pmProduct.setStatus(wtPart.getState().toString().toLowerCase());
+				pmProduct.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName());
+				pmProduct.setMajorVid(wtPart.getVersionIdentifier().getValue());
+				pmProduct.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue()));
+				pmProduct.setPhase(partiba.getIBAValue("PHASE") == null ? ""
+						: partiba.getIBAValue("PHASE"));
+				pmProduct
+						.setSpec(partiba.getIBAValue("Specifications") == null ? ""
+								: partiba.getIBAValue("Specifications"));
+				weight = partiba.getIBAValue("Weight");
+				if (StringUtils.isNotEmpty(weight))
+					pmProduct.setWeight(NumberFormat.getInstance()
+							.parse(weight));
+				pmProduct
+						.setFormularNumber(partiba.getIBAValue("Formula_NO") == null ? ""
+								: partiba.getIBAValue("Formula_NO"));
+				pmProduct
+						.setMaterial(partiba.getIBAValue("Material") == null ? ""
+								: partiba.getIBAValue("Material"));
+				pmProduct.setOwner(wtPart.getCreatorName());
+				pmProduct.setValue("IsSync", true);
+				String masterid = wtPart.getMaster().getPersistInfo()
+						.toString();
+				pmProduct.SetMasterId(masterid);
+				pmProduct.initPlmData();
+				String docInfo = pmProduct.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+				// WriteResult wresult = pmProduct.doInsert();
+				// String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					partiba.setIBAValue("PMId", pmoid.toString());
+					partiba.setIBAValue("CyncData", Utils.getDate());
+					partiba.setIBAValue("PMRequest", "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create pmproduct success");
+					productNumToProductItem(pmoid.toString());
 				}
+
+				// 回写PM成品编号
+				/*
+				 * String projectNumber = partiba
+				 * .getIBAValue(Contants.PROJECTNO); PMProject pmproject =
+				 * factory.get(PMProject.class); Debug.P("----ProjectNo:" +
+				 * projectNumber + "   PMProject:" + pmproject); ObjectId
+				 * pmProjectId = factory.get(PMProject.class)
+				 * .getProjectIdByProjectNum(projectNumber);
+				 * Debug.P("--->>>>pmProjectId:" + pmProjectId); if (pmProjectId
+				 * != null) { PMProductItem pmProd = new PMProductItem(); pmProd
+				 * = factory.get(PMProductItem.class);
+				 * pmProd.setProductNumber(wtPart.getNumber());
+				 * pmProd.setProjectId(pmProjectId); pmProd.setUserId("PM-RW");
+				 * pmProd.setUserName("PLM系统");
+				 * pmProd.setDate(getCurrentDate("yyyy/MM/dd HH:mm:ss"));
+				 * pmProd.doInsertProductNumToProductItem(); }
+				 */
 			}
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -452,66 +429,60 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmMaterial-->" + pmMaterial != null);
-				if (pmMaterial != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						updatePMaterialToPM(pmoid, wtPart);
-				} else {
-					pmMaterial = (PMMaterial) materialPersistence.newInstance();
-					pmMaterial.setFolderIdByPLMId(pFolderId);
-					pmMaterial.setPLMId(partOid);
-					ObjectId objectId = null;
-					Debug.P("pmMaterial--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					Map plmData = new HashMap();
-					plmData.put("number", wtPart.getNumber());
-					plmData.put("plmmid", "wt.part.WTPart:"
-							+ wtPart.getIterationInfo().getBranchId());
-					pmMaterial.setPLMData(plmData);
-					pmMaterial.setCommonName(wtPart.getName());
-					pmMaterial.setObjectNumber(wtPart.getNumber());
-					pmMaterial.setStatus(wtPart.getState().toString()
-							.toLowerCase());
-					pmMaterial.setCreateBy(wtPart.getCreatorName(),
-							wtPart.getCreatorFullName());
-					pmMaterial.setMajorVid(wtPart.getVersionIdentifier()
-							.getValue());
-					pmMaterial.setSecondVid(Integer.parseInt(wtPart
-							.getIterationIdentifier().getValue()));
-					pmMaterial
-							.setPhase(partiba.getIBAValue("PHASE") == null ? ""
-									: partiba.getIBAValue("PHASE"));
+				pmMaterial = (PMMaterial) materialPersistence.newInstance();
+				pmMaterial.setFolderIdByPLMId(pFolderId);
+				pmMaterial.setPLMId(partOid);
+				Debug.P("pmMaterial--》pmoid----->" + pmoid);
+				Map plmData = new HashMap();
+				plmData.put("number", wtPart.getNumber());
+				plmData.put("plmmid", "wt.part.WTPart:"
+						+ wtPart.getIterationInfo().getBranchId());
+				pmMaterial.setPLMData(plmData);
+				pmMaterial.setCommonName(wtPart.getName());
+				pmMaterial.setObjectNumber(wtPart.getNumber());
+				pmMaterial
+						.setStatus(wtPart.getState().toString().toLowerCase());
+				pmMaterial.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName());
+				pmMaterial
+						.setMajorVid(wtPart.getVersionIdentifier().getValue());
+				pmMaterial.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue()));
+				pmMaterial.setPhase(partiba.getIBAValue("PHASE") == null ? ""
+						: partiba.getIBAValue("PHASE"));
 
-					pmMaterial
-							.setSpec(partiba.getIBAValue("Specifications") == null ? ""
-									: partiba.getIBAValue("Specifications"));
-					weight = partiba.getIBAValue("Weight");
-					if (StringUtils.isNotEmpty(weight))
-						pmMaterial.setWeight(NumberFormat.getInstance().parse(
-								weight));
-					pmMaterial.setMaterialGroup(partiba
-							.getIBAValue("Material_Group") == null ? ""
-							: partiba.getIBAValue("Material_Group"));
-					pmMaterial.set_id(objectId);
-					pmMaterial.setOwner(wtPart.getCreatorName());
-					pmMaterial
-							.setMaterial(partiba.getIBAValue("Material") == null ? ""
-									: partiba.getIBAValue("Material"));
-					pmMaterial.setValue("IsSync", true);
-					WriteResult wresult = pmMaterial.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						partiba.setIBAValue("PMId", objectId.toString());
-						partiba.setIBAValue("CyncData", Utils.getDate());
-						partiba.setIBAValue("PMRequest", "create");
-						partiba.updateIBAPart(wtPart);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create PMMaterial success");
-					}
+				pmMaterial
+						.setSpec(partiba.getIBAValue("Specifications") == null ? ""
+								: partiba.getIBAValue("Specifications"));
+				weight = partiba.getIBAValue("Weight");
+				if (StringUtils.isNotEmpty(weight))
+					pmMaterial.setWeight(NumberFormat.getInstance().parse(
+							weight));
+				pmMaterial.setMaterialGroup(partiba
+						.getIBAValue("Material_Group") == null ? "" : partiba
+						.getIBAValue("Material_Group"));
+				pmMaterial.setOwner(wtPart.getCreatorName());
+				pmMaterial
+						.setMaterial(partiba.getIBAValue("Material") == null ? ""
+								: partiba.getIBAValue("Material"));
+				pmMaterial.setValue("IsSync", true);
+				String masterid = wtPart.getMaster().getPersistInfo()
+						.toString();
+				pmMaterial.SetMasterId(masterid);
+				pmMaterial.initPlmData();
+				String docInfo = pmMaterial.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+
+				// WriteResult wresult = pmMaterial.doInsert();
+				// String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					partiba.setIBAValue("PMId", pmoid.toString());
+					partiba.setIBAValue("CyncData", Utils.getDate());
+					partiba.setIBAValue("PMRequest", "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create PMMaterial success");
 				}
 			}
 		} catch (InstantiationException e) {
@@ -571,70 +542,64 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmSupplyment-->" + pmSupplyment != null);
-				if (pmSupplyment != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						updateSupplyToPM(pmoid, wtPart);
-				} else {
-					pmSupplyment = (PMSupplyment) supplymentPersistence
-							.newInstance();
-					pmSupplyment.setFolderIdByPLMId(pFolderId);
-					pmSupplyment.setPLMId(partOid);
-					Map plmData = new HashMap();
-					plmData.put("number", wtPart.getNumber());
-					plmData.put("plmmid", "wt.part.WTPart:"
-							+ wtPart.getIterationInfo().getBranchId());
-					pmSupplyment.setPLMData(plmData);
-					pmSupplyment.setObjectNumber(wtPart.getNumber());
-					pmSupplyment.setCommonName(wtPart.getName());
-					pmSupplyment.setStatus(wtPart.getState().toString()
-							.toLowerCase());
-					pmSupplyment.setCreateBy(wtPart.getCreatorName(),
-							wtPart.getCreatorFullName());
-					pmSupplyment.setMajorVid(wtPart.getVersionIdentifier()
-							.getValue());
-					pmSupplyment.setSecondVid(Integer.parseInt(wtPart
-							.getIterationIdentifier().getValue()));
-					pmSupplyment
-							.setPhase(partiba.getIBAValue("PHASE") == null ? ""
-									: partiba.getIBAValue("PHASE"));
+				pmSupplyment = (PMSupplyment) supplymentPersistence
+						.newInstance();
+				pmSupplyment.setFolderIdByPLMId(pFolderId);
+				pmSupplyment.setPLMId(partOid);
+				Map plmData = new HashMap();
+				plmData.put("number", wtPart.getNumber());
+				plmData.put("plmmid", "wt.part.WTPart:"
+						+ wtPart.getIterationInfo().getBranchId());
+				pmSupplyment.setPLMData(plmData);
+				pmSupplyment.setObjectNumber(wtPart.getNumber());
+				pmSupplyment.setCommonName(wtPart.getName());
+				pmSupplyment.setStatus(wtPart.getState().toString()
+						.toLowerCase());
+				pmSupplyment.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName());
+				pmSupplyment.setMajorVid(wtPart.getVersionIdentifier()
+						.getValue());
+				pmSupplyment.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue()));
+				pmSupplyment.setPhase(partiba.getIBAValue("PHASE") == null ? ""
+						: partiba.getIBAValue("PHASE"));
 
-					pmSupplyment
-							.setSpec(partiba.getIBAValue("Specifications") == null ? ""
-									: partiba.getIBAValue("Specifications"));
-					weight = partiba.getIBAValue("Weight");
-					if (StringUtils.isNotEmpty(weight))
-						pmSupplyment.setWeight(NumberFormat.getInstance()
-								.parse(weight));
-					pmSupplyment.setCustomerName(partiba
-							.getIBAValue("Client_Name") == null ? "" : partiba
-							.getIBAValue("Client_Name"));
-					pmSupplyment.setMaterialGroup(partiba
-							.getIBAValue("Material_Group") == null ? ""
-							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = null;
-					Debug.P("PMSupplyment--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					pmSupplyment.set_id(objectId);
-					pmSupplyment
-							.setMaterial(partiba.getIBAValue("Material") == null ? ""
-									: partiba.getIBAValue("Material"));
-					pmSupplyment.setOwner(wtPart.getCreatorName());
-					pmSupplyment.setValue("IsSync", true);
-					WriteResult wresult = pmSupplyment.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						partiba.setIBAValue("PMId", objectId.toString());
-						partiba.setIBAValue("CyncData", Utils.getDate());
-						partiba.setIBAValue("PMRequest", "create");
-						partiba.updateIBAPart(wtPart);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create PMSupplyment success");
-					}
+				pmSupplyment
+						.setSpec(partiba.getIBAValue("Specifications") == null ? ""
+								: partiba.getIBAValue("Specifications"));
+				weight = partiba.getIBAValue("Weight");
+				if (StringUtils.isNotEmpty(weight))
+					pmSupplyment.setWeight(NumberFormat.getInstance().parse(
+							weight));
+				pmSupplyment
+						.setCustomerName(partiba.getIBAValue("Client_Name") == null ? ""
+								: partiba.getIBAValue("Client_Name"));
+				pmSupplyment.setMaterialGroup(partiba
+						.getIBAValue("Material_Group") == null ? "" : partiba
+						.getIBAValue("Material_Group"));
+				Debug.P("PMSupplyment--》pmoid----->" + pmoid);
+				pmSupplyment
+						.setMaterial(partiba.getIBAValue("Material") == null ? ""
+								: partiba.getIBAValue("Material"));
+				pmSupplyment.setOwner(wtPart.getCreatorName());
+				pmSupplyment.setValue("IsSync", true);
+				String masterid = wtPart.getMaster().getPersistInfo()
+						.toString();
+				pmSupplyment.SetMasterId(masterid);
+				pmSupplyment.initPlmData();
+				String docInfo = pmSupplyment.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+
+				// WriteResult wresult = pmSupplyment.doInsert();
+				// String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					partiba.setIBAValue("PMId", pmoid.toString());
+					partiba.setIBAValue("CyncData", Utils.getDate());
+					partiba.setIBAValue("PMRequest", "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create PMSupplyment success");
 				}
 			}
 		} catch (InstantiationException e) {
@@ -700,69 +665,57 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			String pmoid = cadiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmcad-->" + pmcad != null);
-				if (pmcad != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						updatePMCADDoc(pmoid, epmdoc);
-				} else {
-					pmcad = (PMCADDocument) cadDocPersistence.newInstance();
-					pmcad.setFolderIdByPLMId(pFolderId);
-					pmcad.setPLMId(docOid);
-					Map plmData = new HashMap();
-					plmData.put("number", epmdoc.getNumber());
-					plmData.put(
-							"AirSpringClassification",
-							cadiba.getIBAValue("AirSpringClassification") == null ? ""
-									: cadiba.getIBAValue("AirSpringClassification"));
-					plmData.put("Part_Type",
-							cadiba.getIBAValue("Part_Type") == null ? ""
-									: cadiba.getIBAValue("Part_Type"));
-					plmData.put("plmmid", "wt.epm.EPMDocument:"
-							+ epmdoc.getIterationInfo().getBranchId());
-					pmcad.setPLMData(plmData);
-					pmcad.setCommonName(epmdoc.getName());
-					pmcad.setObjectNumber(epmdoc.getNumber());
-					pmcad.setStatus(epmdoc.getState().toString().toLowerCase());
-					pmcad.setCreateBy(epmdoc.getCreatorName(),
-							epmdoc.getCreatorFullName());
-					pmcad.setMajorVid(epmdoc.getVersionIdentifier().getValue());
-					pmcad.setSecondVid(Integer.parseInt(epmdoc
-							.getIterationIdentifier().getValue()));
-					pmcad.setPhase(cadiba.getIBAValue("PHASE") == null ? ""
-							: cadiba.getIBAValue("PHASE"));
-                    String contentMD5=GenericUtil.getMd5ByFile(epmdoc);
-                    Debug.P("contentMD5----->"+contentMD5);
-					pmcad.setContentMD5(contentMD5);
-					pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
-							: cadiba.getIBAValue("Material_NO"));
-					pmcad.setPartType0(part_type == null ? "" : part_type);
-					ObjectId objectId = null;
-					Debug.P("PMCADDocument--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					// pmcad.set_id(objectId);
-					pmcad.setValue("IsSync", true);
-					pmcad.setOwner(epmdoc.getCreatorName());
-					pmcad.setValue("cadName", epmdoc.getCADName());
-					String masterid = epmdoc.getMaster().getPersistInfo()
-							.toString();
-					pmcad.SetMasterId(masterid);
-					pmcad.initPlmData();
-					String docInfo = pmcad.serialize();
-					pmoid = InsterOrUpdatePMDoc(docInfo);
-					// WriteResult wresult = pmcad.doInsert();
-					// String error = wresult.getError();
-					if (StringUtils.isEmpty(pmoid)) {
-						cadiba.setIBAValue("PMId", pmoid);
-						cadiba.setIBAValue("CyncData", Utils.getDate());
-						cadiba.setIBAValue("PMRequest", "create");
-						cadiba.updateIBAPart(epmdoc);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create PMCADDocument success");
-					}
+				pmcad = (PMCADDocument) cadDocPersistence.newInstance();
+				pmcad.setFolderIdByPLMId(pFolderId);
+				pmcad.setPLMId(docOid);
+				Map plmData = new HashMap();
+				plmData.put("number", epmdoc.getNumber());
+				plmData.put("AirSpringClassification", cadiba
+						.getIBAValue("AirSpringClassification") == null ? ""
+						: cadiba.getIBAValue("AirSpringClassification"));
+				plmData.put(
+						"Part_Type",
+						cadiba.getIBAValue("Part_Type") == null ? "" : cadiba
+								.getIBAValue("Part_Type"));
+				plmData.put("plmmid", "wt.epm.EPMDocument:"
+						+ epmdoc.getIterationInfo().getBranchId());
+				pmcad.setPLMData(plmData);
+				pmcad.setCommonName(epmdoc.getName());
+				pmcad.setObjectNumber(epmdoc.getNumber());
+				pmcad.setStatus(epmdoc.getState().toString().toLowerCase());
+				pmcad.setCreateBy(epmdoc.getCreatorName(),
+						epmdoc.getCreatorFullName());
+				pmcad.setMajorVid(epmdoc.getVersionIdentifier().getValue());
+				pmcad.setSecondVid(Integer.parseInt(epmdoc
+						.getIterationIdentifier().getValue()));
+				pmcad.setPhase(cadiba.getIBAValue("PHASE") == null ? ""
+						: cadiba.getIBAValue("PHASE"));
+				String contentMD5 = GenericUtil.getMd5ByFile(epmdoc);
+				Debug.P("contentMD5----->" + contentMD5);
+				pmcad.setContentMD5(contentMD5);
+				pmcad.setDrawingNumber(cadiba.getIBAValue("Material_NO") == null ? ""
+						: cadiba.getIBAValue("Material_NO"));
+				pmcad.setPartType0(part_type == null ? "" : part_type);
+				Debug.P("PMCADDocument--》pmoid----->" + pmoid);
+				pmcad.setValue("IsSync", true);
+				pmcad.setOwner(epmdoc.getCreatorName());
+				pmcad.setValue("cadName", epmdoc.getCADName());
+				String masterid = epmdoc.getMaster().getPersistInfo()
+						.toString();
+				pmcad.SetMasterId(masterid);
+				pmcad.initPlmData();
+				String docInfo = pmcad.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+				// WriteResult wresult = pmcad.doInsert();
+				// String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					cadiba.setIBAValue("PMId", pmoid);
+					cadiba.setIBAValue("CyncData", Utils.getDate());
+					cadiba.setIBAValue("PMRequest", "create");
+					cadiba.updateIBAPart(epmdoc);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create PMCADDocument success");
 				}
 			}
 		} catch (Exception e) {
@@ -814,66 +767,58 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmPackage-->" + pmPackage != null);
-				if (pmPackage != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						updatePMPackageToPM(pmoid, wtPart);
-				} else {
-					pmPackage = (PMPackage) packagePersistence.newInstance();
-					pmPackage.setFolderIdByPLMId(pFolderId);
-					pmPackage.setPLMId(partOid);
-					Map plmData = new HashMap();
-					plmData.put("number", wtPart.getNumber());
-					plmData.put("plmmid", "wt.part.WTPart:"
-							+ wtPart.getIterationInfo().getBranchId());
-					pmPackage.setPLMData(plmData);
-					pmPackage.setCommonName(wtPart.getName());
-					pmPackage.setObjectNumber(wtPart.getNumber());
-					pmPackage.setStatus(wtPart.getState().toString()
-							.toLowerCase());
-					pmPackage.setCreateBy(wtPart.getCreatorName(),
-							wtPart.getCreatorFullName());
-					pmPackage.setMajorVid(wtPart.getVersionIdentifier()
-							.getValue());
-					pmPackage.setSecondVid(Integer.parseInt(wtPart
-							.getIterationIdentifier().getValue()));
-					pmPackage
-							.setPhase(partiba.getIBAValue("PHASE") == null ? ""
-									: partiba.getIBAValue("PHASE"));
+				pmPackage = (PMPackage) packagePersistence.newInstance();
+				pmPackage.setFolderIdByPLMId(pFolderId);
+				pmPackage.setPLMId(partOid);
+				Map plmData = new HashMap();
+				plmData.put("number", wtPart.getNumber());
+				plmData.put("plmmid", "wt.part.WTPart:"
+						+ wtPart.getIterationInfo().getBranchId());
+				pmPackage.setPLMData(plmData);
+				pmPackage.setCommonName(wtPart.getName());
+				pmPackage.setObjectNumber(wtPart.getNumber());
+				pmPackage.setStatus(wtPart.getState().toString().toLowerCase());
+				pmPackage.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName());
+				pmPackage.setMajorVid(wtPart.getVersionIdentifier().getValue());
+				pmPackage.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue()));
+				pmPackage.setPhase(partiba.getIBAValue("PHASE") == null ? ""
+						: partiba.getIBAValue("PHASE"));
 
-					pmPackage
-							.setSpec(partiba.getIBAValue("Specifications") == null ? ""
-									: partiba.getIBAValue("Specifications"));
-					weight = partiba.getIBAValue("Weight");
-					if (StringUtils.isNotEmpty(weight))
-						pmPackage.setWeight(NumberFormat.getInstance().parse(
-								weight));
-					pmPackage.setMaterialGroup(partiba
-							.getIBAValue("Material_Group") == null ? ""
-							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = null;
-					Debug.P("pmPackage--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					pmPackage.set_id(objectId);
-					pmPackage.setOwner(wtPart.getCreatorName());
-					pmPackage
-							.setMaterial(partiba.getIBAValue("Material") == null ? ""
-									: partiba.getIBAValue("Material"));
-					pmPackage.setValue("IsSync", true);
-					WriteResult wresult = pmPackage.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						partiba.setIBAValue("PMId", objectId.toString());
-						partiba.setIBAValue("CyncData", Utils.getDate());
-						partiba.setIBAValue("PMRequest", "create");
-						partiba.updateIBAPart(wtPart);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create pmPackage success");
-					}
+				pmPackage
+						.setSpec(partiba.getIBAValue("Specifications") == null ? ""
+								: partiba.getIBAValue("Specifications"));
+				weight = partiba.getIBAValue("Weight");
+				if (StringUtils.isNotEmpty(weight))
+					pmPackage.setWeight(NumberFormat.getInstance()
+							.parse(weight));
+				pmPackage.setMaterialGroup(partiba
+						.getIBAValue("Material_Group") == null ? "" : partiba
+						.getIBAValue("Material_Group"));
+				Debug.P("pmPackage--》pmoid----->" + pmoid);
+				pmPackage.setOwner(wtPart.getCreatorName());
+				pmPackage
+						.setMaterial(partiba.getIBAValue("Material") == null ? ""
+								: partiba.getIBAValue("Material"));
+				pmPackage.setValue("IsSync", true);
+				String masterid = wtPart.getMaster().getPersistInfo()
+						.toString();
+				pmPackage.SetMasterId(masterid);
+				pmPackage.initPlmData();
+				String docInfo = pmPackage.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+
+				// WriteResult wresult = pmPackage.doInsert();
+				// String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					partiba.setIBAValue("PMId", pmoid.toString());
+					partiba.setIBAValue("CyncData", Utils.getDate());
+					partiba.setIBAValue("PMRequest", "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create pmPackage success");
 				}
 			}
 		} catch (InstantiationException e) {
@@ -931,66 +876,61 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			String pmoid = partiba.getIBAValue("PMId");
 			if (flag) {
 				Debug.P("pmJigTools-->" + pmJigTools != null);
-				if (pmJigTools != null) {
-					if (StringUtils.isNotEmpty(pmoid))
-						UpdateJigToolPartToPM(pmoid, wtPart);
-				} else {
-					pmJigTools = (PMJigTools) jigTollsPersistence.newInstance();
-					pmJigTools.setFolderIdByPLMId(pFolderId);
-					pmJigTools.setPLMId(partOid);
-					Map plmData = new HashMap();
-					plmData.put("number", wtPart.getNumber());
-					plmData.put("plmmid", "wt.part.WTPart:"
-							+ wtPart.getIterationInfo().getBranchId());
-					pmJigTools.setPLMData(plmData);
-					pmJigTools.setCommonName(wtPart.getName());
-					pmJigTools.setObjectNumber(wtPart.getNumber());
-					pmJigTools.setStatus(wtPart.getState().toString()
-							.toLowerCase());
-					pmJigTools.setCreateBy(wtPart.getCreatorName(),
-							wtPart.getCreatorFullName());
-					pmJigTools.setMajorVid(wtPart.getVersionIdentifier()
-							.getValue());
-					pmJigTools.setSecondVid(Integer.parseInt(wtPart
-							.getIterationIdentifier().getValue()));
-					pmJigTools
-							.setPhase(partiba.getIBAValue("PHASE") == null ? ""
-									: partiba.getIBAValue("PHASE"));
+				pmJigTools = (PMJigTools) jigTollsPersistence.newInstance();
+				pmJigTools.setFolderIdByPLMId(pFolderId);
+				pmJigTools.setPLMId(partOid);
+				Map plmData = new HashMap();
+				plmData.put("number", wtPart.getNumber());
+				plmData.put("plmmid", "wt.part.WTPart:"
+						+ wtPart.getIterationInfo().getBranchId());
+				pmJigTools.setPLMData(plmData);
+				pmJigTools.setCommonName(wtPart.getName());
+				pmJigTools.setObjectNumber(wtPart.getNumber());
+				pmJigTools
+						.setStatus(wtPart.getState().toString().toLowerCase());
+				pmJigTools.setCreateBy(wtPart.getCreatorName(),
+						wtPart.getCreatorFullName());
+				pmJigTools
+						.setMajorVid(wtPart.getVersionIdentifier().getValue());
+				pmJigTools.setSecondVid(Integer.parseInt(wtPart
+						.getIterationIdentifier().getValue()));
+				pmJigTools.setPhase(partiba.getIBAValue("PHASE") == null ? ""
+						: partiba.getIBAValue("PHASE"));
 
-					pmJigTools
-							.setSpec(partiba.getIBAValue("Specifications") == null ? ""
-									: partiba.getIBAValue("Specifications"));
-					weight = partiba.getIBAValue("Weight");
-					if (StringUtils.isNotEmpty(weight))
-						pmJigTools.setWeight(NumberFormat.getInstance().parse(
-								weight));
-					pmJigTools.setMaterialGroup(partiba
-							.getIBAValue("Material_Group") == null ? ""
-							: partiba.getIBAValue("Material_Group"));
-					ObjectId objectId = null;
-					Debug.P("pmJigTools--》pmoid----->" + pmoid);
-					if (StringUtils.isNotEmpty(pmoid)) {
-						objectId = new ObjectId(pmoid);
-					} else {
-						objectId = new ObjectId();
-					}
-					pmJigTools.set_id(objectId);
-					pmJigTools.setValue("IsSync", true);
-					pmJigTools.setOwner(wtPart.getCreatorName());
-					pmJigTools
-							.setMaterial(partiba.getIBAValue("Material") == null ? ""
-									: partiba.getIBAValue("Material"));
-					WriteResult wresult = pmJigTools.doInsert();
-					String error = wresult.getError();
-					if (StringUtils.isEmpty(error)) {
-						partiba.setIBAValue("PMId", objectId.toString());
-						partiba.setIBAValue("CyncData", Utils.getDate());
-						partiba.setIBAValue("PMRequest", "create");
-						partiba.updateIBAPart(wtPart);
-						reloadPermission(objectId.toString());
-						reloadDeliverable(objectId.toString());
-						Debug.P("create pmJigTools success");
-					}
+				pmJigTools
+						.setSpec(partiba.getIBAValue("Specifications") == null ? ""
+								: partiba.getIBAValue("Specifications"));
+				weight = partiba.getIBAValue("Weight");
+				if (StringUtils.isNotEmpty(weight))
+					pmJigTools.setWeight(NumberFormat.getInstance().parse(
+							weight));
+				pmJigTools.setMaterialGroup(partiba
+						.getIBAValue("Material_Group") == null ? "" : partiba
+						.getIBAValue("Material_Group"));
+				Debug.P("pmJigTools--》pmoid----->" + pmoid);
+				pmJigTools.setValue("IsSync", true);
+				pmJigTools.setOwner(wtPart.getCreatorName());
+				pmJigTools
+						.setMaterial(partiba.getIBAValue("Material") == null ? ""
+								: partiba.getIBAValue("Material"));
+
+				String masterid = wtPart.getMaster().getPersistInfo()
+						.toString();
+				pmJigTools.SetMasterId(masterid);
+				pmJigTools.initPlmData();
+				String docInfo = pmJigTools.serialize();
+				pmoid = InsterOrUpdatePMDoc(docInfo);
+				
+//				WriteResult wresult = pmJigTools.doInsert();
+//				String error = wresult.getError();
+				if (StringUtils.isEmpty(pmoid)) {
+					partiba.setIBAValue("PMId", pmoid.toString());
+					partiba.setIBAValue("CyncData", Utils.getDate());
+					partiba.setIBAValue("PMRequest", "create");
+					partiba.updateIBAPart(wtPart);
+					reloadPermission(pmoid.toString());
+					reloadDeliverable(pmoid.toString());
+					Debug.P("create pmJigTools success");
 				}
 			}
 		} catch (InstantiationException e) {
@@ -1014,7 +954,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			cadDocPersistence = (CADDocumentPersistence) ModelServiceFactory
 					.getInstance(codebasePath)
 					.get(CADDocumentPersistence.class);
-			pmcad = (PMCADDocument) cadDocPersistence.get(new ObjectId(pmoid));
+			pmcad = (PMCADDocument) cadDocPersistence.newInstance();
 			IBAUtils cadiba = new IBAUtils(epmdoc);
 			Debug.P(docOid);
 			String part_type = cadiba.getIBAValue("Part_Type");
@@ -1055,9 +995,17 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmcad.setPartType0(part_type == null ? "" : part_type);
 			pmcad.setValue("IsSync", true);
 			pmcad.setValue("cadName", epmdoc.getCADName());
-			WriteResult wresult = pmcad.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+
+			String masterid = epmdoc.getMaster().getPersistInfo()
+					.toString();
+			pmcad.SetMasterId(masterid);
+			pmcad.initPlmData();
+			String docInfo = pmcad.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+			
+//			WriteResult wresult = pmcad.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				cadiba.setIBAValue("CyncData", Utils.getDate());
 				cadiba.setIBAValue("PMRequest", "update");
 				cadiba.updateIBAPart(epmdoc);
@@ -1085,7 +1033,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			PMPart pmPart = null;
 			partPersistence = (PartPersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(PartPersistence.class);
-			pmPart = (PMPart) partPersistence.get(new ObjectId(pmoid));
+			pmPart = (PMPart) partPersistence.newInstance();
 			Debug.P("pmPart --->" + pmPart.getCommonName());
 			IBAUtils partiba = new IBAUtils(wtPart);
 			Debug.P("partiba----->" + partiba);
@@ -1118,9 +1066,16 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					: partiba.getIBAValue("Material"));
 			pmPart.setOwner(wtPart.getCreatorName());
 			pmPart.setValue("IsSync", true);
-			WriteResult wresult = pmPart.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+
+			String masterid = wtPart.getMaster().getPersistInfo()
+					.toString();
+			pmPart.SetMasterId(masterid);
+			pmPart.initPlmData();
+			String docInfo = pmPart.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+//			WriteResult wresult = pmPart.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1149,8 +1104,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			productPersistence = (ProductPersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(ProductPersistence.class);
 			try {
-				pmProduct = (PMProduct) productPersistence.get(new ObjectId(
-						pmoid));
+				pmProduct = (PMProduct) productPersistence.newInstance();
 			} catch (Exception e) {
 				Debug.P(">>>Update PMProduct PMID:" + pmoid + "在PM中不存在!");
 				return;
@@ -1189,9 +1143,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmProduct.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
 			pmProduct.setValue("IsSync", true);
-			WriteResult wresult = pmProduct.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+			String masterid = wtPart.getMaster().getPersistInfo()
+					.toString();
+			pmProduct.SetMasterId(masterid);
+			pmProduct.initPlmData();
+			String docInfo = pmProduct.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+//			WriteResult wresult = pmProduct.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1219,8 +1179,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			PMMaterial pmMaterial = null;
 			materialPersistence = (MaterialPersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(MaterialPersistence.class);
-			pmMaterial = (PMMaterial) materialPersistence.get(new ObjectId(
-					pmoid));
+			pmMaterial = (PMMaterial) materialPersistence.newInstance();
 			Debug.P("pmmaterial--->" + pmMaterial.getCommonName());
 			IBAUtils partiba = new IBAUtils(wtPart);
 			Debug.P(partOid);
@@ -1255,9 +1214,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material_Group"));
 			pmMaterial.setOwner(wtPart.getCreatorName());
 			pmMaterial.setValue("IsSync", true);
-			WriteResult wresult = pmMaterial.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+			String masterid = wtPart.getMaster().getPersistInfo()
+					.toString();
+			pmMaterial.SetMasterId(masterid);
+			pmMaterial.initPlmData();
+			String docInfo = pmMaterial.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+//			WriteResult wresult = pmMaterial.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1285,7 +1250,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 			packagePersistence = (PackagePersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(PackagePersistence.class);
-			pmPackage = (PMPackage) packagePersistence.get(new ObjectId(pmoid));
+			pmPackage = (PMPackage) packagePersistence.newInstance();
 			Debug.P("pmPackage--->" + pmPackage.getCommonName());
 			IBAUtils partiba = new IBAUtils(wtPart);
 			Debug.P(partOid);
@@ -1320,9 +1285,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material_Group"));
 			pmPackage.setOwner(wtPart.getCreatorName());
 			pmPackage.setValue("IsSync", true);
-			WriteResult wresult = pmPackage.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+			String masterid = wtPart.getMaster().getPersistInfo()
+					.toString();
+			pmPackage.SetMasterId(masterid);
+			pmPackage.initPlmData();
+			String docInfo = pmPackage.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+//			WriteResult wresult = pmPackage.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1354,8 +1325,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			PMJigTools pmJigTools = null;
 			jigTollsPersistence = (JigToolsPersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(JigToolsPersistence.class);
-			pmJigTools = (PMJigTools) jigTollsPersistence.get(new ObjectId(
-					pmoid));
+			pmJigTools = (PMJigTools) jigTollsPersistence.newInstance();
 			IBAUtils partiba = new IBAUtils(wtPart);
 			Debug.P(partOid);
 			partFolderString = wtPart.getFolderPath();
@@ -1399,9 +1369,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmJigTools.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
 			pmJigTools.setValue("IsSync", true);
-			WriteResult wresult = pmJigTools.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+			String masterid = wtPart.getMaster().getPersistInfo()
+					.toString();
+			pmJigTools.SetMasterId(masterid);
+			pmJigTools.initPlmData();
+			String docInfo = pmJigTools.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+//			WriteResult wresult = pmJigTools.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1430,7 +1406,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			supplymentPersistence = (SupplymentPersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(SupplymentPersistence.class);
 			pmSupplyment = (PMSupplyment) supplymentPersistence
-					.get(new ObjectId(pmoid));
+					.newInstance();
 			IBAUtils partiba = new IBAUtils(wtPart);
 			Map plmData = new HashMap();
 			plmData.put("number", wtPart.getNumber());
@@ -1466,9 +1442,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material"));
 			pmSupplyment.setValue("IsSync", true);
 			pmSupplyment.setOwner(wtPart.getCreatorName());
-			WriteResult wresult = pmSupplyment.doUpdate();
-			String error = wresult.getError();
-			if (StringUtils.isEmpty(error)) {
+			String masterid = wtPart.getMaster().getPersistInfo()
+					.toString();
+			pmSupplyment.SetMasterId(masterid);
+			pmSupplyment.initPlmData();
+			String docInfo = pmSupplyment.serialize();
+			pmoid = InsterOrUpdatePMDoc(docInfo);
+//			WriteResult wresult = pmSupplyment.doUpdate();
+//			String error = wresult.getError();
+			if (StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1718,26 +1700,39 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		reader.close();
 		connection.disconnect();
 	}
-	
+
 	/**
 	 * 调用PM的sevlet进行插入和更新PM对象
+	 * 
 	 * @param docInfo
 	 * @return
 	 * @throws Exception
 	 */
-	public static String InsterOrUpdatePMDoc(String docInfo)throws Exception{
-		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE + "?id=" + docInfo;
+	public static String InsterOrUpdatePMDoc(String docInfo) throws Exception {
+		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE ;
 		Debug.P(urls);
 		URL url = new URL(urls);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		connection.connect();
+		
+		connection.setConnectTimeout(30000);
+		connection.setReadTimeout(30000);
+		connection.setDoOutput(true);
+		connection.setDoInput(true);
+		connection.setUseCaches(false);
+		connection.setRequestMethod("POST");
+		OutputStream os = connection.getOutputStream();
+		String param = "doc=" + docInfo;
+		os.write(param.getBytes());
+		os.flush();
+		os.close();
+		
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				connection.getInputStream()));
 		String result;
 		System.out.println("InsterOrUpdatePMDoc----------start--- ");
 		result = reader.readLine();
-			Debug.P("result----->"+result);
-		
+		Debug.P("result----->" + result);
+
 		System.out.println(" InsterOrUpdatePMDoc--------ends ");
 		reader.close();
 		connection.disconnect();
