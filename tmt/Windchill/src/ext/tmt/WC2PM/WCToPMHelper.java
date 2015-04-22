@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -168,8 +169,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 					pmPart.setWeight(NumberFormat.getInstance().parse(weight));
 				pmPart.setProductNumber(partiba.getIBAValue("Product_NO") == null ? ""
 						: partiba.getIBAValue("Product_NO"));
-				String masterid = wtPart.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(wtPart);
 				Debug.P("masterid------>" + masterid);
 				Map plmData = new HashMap();
 				pmPart.SetMasterId(masterid);
@@ -187,7 +187,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				pmoid = InsterOrUpdatePMDoc(docInfo);
 				// WriteResult wresult = pmPart.doInsert();
 				// String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+				if (!StringUtils.isEmpty(pmoid)) {
 					partiba.setIBAValue("PMId", pmoid);
 					String data = Utils.getDate();
 					Debug.P(data);
@@ -321,15 +321,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 								: partiba.getIBAValue("Material"));
 				pmProduct.setOwner(wtPart.getCreatorName());
 				pmProduct.setValue("IsSync", true);
-				String masterid = wtPart.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(wtPart);
 				pmProduct.SetMasterId(masterid);
 				pmProduct.initPlmData();
 				String docInfo = pmProduct.serialize();
 				pmoid = InsterOrUpdatePMDoc(docInfo);
 				// WriteResult wresult = pmProduct.doInsert();
 				// String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+				if (!StringUtils.isEmpty(pmoid)) {
 					partiba.setIBAValue("PMId", pmoid.toString());
 					partiba.setIBAValue("CyncData", Utils.getDate());
 					partiba.setIBAValue("PMRequest", "create");
@@ -466,8 +465,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 						.setMaterial(partiba.getIBAValue("Material") == null ? ""
 								: partiba.getIBAValue("Material"));
 				pmMaterial.setValue("IsSync", true);
-				String masterid = wtPart.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(wtPart);
 				pmMaterial.SetMasterId(masterid);
 				pmMaterial.initPlmData();
 				String docInfo = pmMaterial.serialize();
@@ -475,7 +473,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 				// WriteResult wresult = pmMaterial.doInsert();
 				// String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+				if (!StringUtils.isEmpty(pmoid)) {
 					partiba.setIBAValue("PMId", pmoid.toString());
 					partiba.setIBAValue("CyncData", Utils.getDate());
 					partiba.setIBAValue("PMRequest", "create");
@@ -583,8 +581,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 								: partiba.getIBAValue("Material"));
 				pmSupplyment.setOwner(wtPart.getCreatorName());
 				pmSupplyment.setValue("IsSync", true);
-				String masterid = wtPart.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(wtPart);
 				pmSupplyment.SetMasterId(masterid);
 				pmSupplyment.initPlmData();
 				String docInfo = pmSupplyment.serialize();
@@ -592,7 +589,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 				// WriteResult wresult = pmSupplyment.doInsert();
 				// String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+				if (!StringUtils.isEmpty(pmoid)) {
 					partiba.setIBAValue("PMId", pmoid.toString());
 					partiba.setIBAValue("CyncData", Utils.getDate());
 					partiba.setIBAValue("PMRequest", "create");
@@ -700,15 +697,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 				pmcad.setValue("IsSync", true);
 				pmcad.setOwner(epmdoc.getCreatorName());
 				pmcad.setValue("cadName", epmdoc.getCADName());
-				String masterid = epmdoc.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(epmdoc);
 				pmcad.SetMasterId(masterid);
 				pmcad.initPlmData();
 				String docInfo = pmcad.serialize();
 				pmoid = InsterOrUpdatePMDoc(docInfo);
 				// WriteResult wresult = pmcad.doInsert();
 				// String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+				if (!StringUtils.isEmpty(pmoid)) {
 					cadiba.setIBAValue("PMId", pmoid);
 					cadiba.setIBAValue("CyncData", Utils.getDate());
 					cadiba.setIBAValue("PMRequest", "create");
@@ -802,8 +798,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 						.setMaterial(partiba.getIBAValue("Material") == null ? ""
 								: partiba.getIBAValue("Material"));
 				pmPackage.setValue("IsSync", true);
-				String masterid = wtPart.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(wtPart);
 				pmPackage.SetMasterId(masterid);
 				pmPackage.initPlmData();
 				String docInfo = pmPackage.serialize();
@@ -811,7 +806,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 				// WriteResult wresult = pmPackage.doInsert();
 				// String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+				if (!StringUtils.isEmpty(pmoid)) {
 					partiba.setIBAValue("PMId", pmoid.toString());
 					partiba.setIBAValue("CyncData", Utils.getDate());
 					partiba.setIBAValue("PMRequest", "create");
@@ -914,16 +909,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 						.setMaterial(partiba.getIBAValue("Material") == null ? ""
 								: partiba.getIBAValue("Material"));
 
-				String masterid = wtPart.getMaster().getPersistInfo()
-						.toString();
+				String masterid = getObjectMasterOid(wtPart);
 				pmJigTools.SetMasterId(masterid);
 				pmJigTools.initPlmData();
 				String docInfo = pmJigTools.serialize();
 				pmoid = InsterOrUpdatePMDoc(docInfo);
-				
-//				WriteResult wresult = pmJigTools.doInsert();
-//				String error = wresult.getError();
-				if (StringUtils.isEmpty(pmoid)) {
+
+				// WriteResult wresult = pmJigTools.doInsert();
+				// String error = wresult.getError();
+				if (!StringUtils.isEmpty(pmoid)) {
 					partiba.setIBAValue("PMId", pmoid.toString());
 					partiba.setIBAValue("CyncData", Utils.getDate());
 					partiba.setIBAValue("PMRequest", "create");
@@ -996,16 +990,15 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmcad.setValue("IsSync", true);
 			pmcad.setValue("cadName", epmdoc.getCADName());
 
-			String masterid = epmdoc.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(epmdoc);
 			pmcad.SetMasterId(masterid);
 			pmcad.initPlmData();
 			String docInfo = pmcad.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-			
-//			WriteResult wresult = pmcad.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+
+			// WriteResult wresult = pmcad.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				cadiba.setIBAValue("CyncData", Utils.getDate());
 				cadiba.setIBAValue("PMRequest", "update");
 				cadiba.updateIBAPart(epmdoc);
@@ -1067,15 +1060,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmPart.setOwner(wtPart.getCreatorName());
 			pmPart.setValue("IsSync", true);
 
-			String masterid = wtPart.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(wtPart);
 			pmPart.SetMasterId(masterid);
 			pmPart.initPlmData();
 			String docInfo = pmPart.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-//			WriteResult wresult = pmPart.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+			// WriteResult wresult = pmPart.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1143,15 +1135,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmProduct.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
 			pmProduct.setValue("IsSync", true);
-			String masterid = wtPart.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(wtPart);
 			pmProduct.SetMasterId(masterid);
 			pmProduct.initPlmData();
 			String docInfo = pmProduct.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-//			WriteResult wresult = pmProduct.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+			// WriteResult wresult = pmProduct.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1214,15 +1205,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material_Group"));
 			pmMaterial.setOwner(wtPart.getCreatorName());
 			pmMaterial.setValue("IsSync", true);
-			String masterid = wtPart.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(wtPart);
 			pmMaterial.SetMasterId(masterid);
 			pmMaterial.initPlmData();
 			String docInfo = pmMaterial.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-//			WriteResult wresult = pmMaterial.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+			// WriteResult wresult = pmMaterial.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1285,15 +1275,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material_Group"));
 			pmPackage.setOwner(wtPart.getCreatorName());
 			pmPackage.setValue("IsSync", true);
-			String masterid = wtPart.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(wtPart);
 			pmPackage.SetMasterId(masterid);
 			pmPackage.initPlmData();
 			String docInfo = pmPackage.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-//			WriteResult wresult = pmPackage.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+			// WriteResult wresult = pmPackage.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1369,15 +1358,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			pmJigTools.setMaterial(partiba.getIBAValue("Material") == null ? ""
 					: partiba.getIBAValue("Material"));
 			pmJigTools.setValue("IsSync", true);
-			String masterid = wtPart.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(wtPart);
 			pmJigTools.SetMasterId(masterid);
 			pmJigTools.initPlmData();
 			String docInfo = pmJigTools.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-//			WriteResult wresult = pmJigTools.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+			// WriteResult wresult = pmJigTools.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1405,8 +1393,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			PMSupplyment pmSupplyment = null;
 			supplymentPersistence = (SupplymentPersistence) ModelServiceFactory
 					.getInstance(codebasePath).get(SupplymentPersistence.class);
-			pmSupplyment = (PMSupplyment) supplymentPersistence
-					.newInstance();
+			pmSupplyment = (PMSupplyment) supplymentPersistence.newInstance();
 			IBAUtils partiba = new IBAUtils(wtPart);
 			Map plmData = new HashMap();
 			plmData.put("number", wtPart.getNumber());
@@ -1442,15 +1429,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 							: partiba.getIBAValue("Material"));
 			pmSupplyment.setValue("IsSync", true);
 			pmSupplyment.setOwner(wtPart.getCreatorName());
-			String masterid = wtPart.getMaster().getPersistInfo()
-					.toString();
+			String masterid = getObjectMasterOid(wtPart);
 			pmSupplyment.SetMasterId(masterid);
 			pmSupplyment.initPlmData();
 			String docInfo = pmSupplyment.serialize();
 			pmoid = InsterOrUpdatePMDoc(docInfo);
-//			WriteResult wresult = pmSupplyment.doUpdate();
-//			String error = wresult.getError();
-			if (StringUtils.isEmpty(pmoid)) {
+			// WriteResult wresult = pmSupplyment.doUpdate();
+			// String error = wresult.getError();
+			if (!StringUtils.isEmpty(pmoid)) {
 				partiba.setIBAValue("CyncData", Utils.getDate());
 				partiba.setIBAValue("PMRequest", "update");
 				partiba.updateIBAPart(wtPart);
@@ -1709,11 +1695,11 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 	 * @throws Exception
 	 */
 	public static String InsterOrUpdatePMDoc(String docInfo) throws Exception {
-		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE ;
+		String urls = ModelServiceFactory.URL_DOCUMENTSERVICE;
 		Debug.P(urls);
 		URL url = new URL(urls);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-		
+
 		connection.setConnectTimeout(30000);
 		connection.setReadTimeout(30000);
 		connection.setDoOutput(true);
@@ -1721,11 +1707,13 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		connection.setUseCaches(false);
 		connection.setRequestMethod("POST");
 		OutputStream os = connection.getOutputStream();
+		docInfo= URLEncoder.encode(docInfo, "UTF-8");
 		String param = "doc=" + docInfo;
+		Debug.P(docInfo);
 		os.write(param.getBytes());
 		os.flush();
 		os.close();
-		
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(
 				connection.getInputStream()));
 		String result;

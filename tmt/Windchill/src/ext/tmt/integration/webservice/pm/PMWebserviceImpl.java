@@ -975,8 +975,7 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 						String stateName = basic_object.getStatus();
 						Debug.P("------->>>PM State:" + stateName);
 						object = GenericUtil.changeState(
-								(LifeCycleManaged) object,
-								stateMap.get(stateName));
+								(LifeCycleManaged) object, stateName);
 						PersistenceHelper.manager.refresh(object);
 						basic_object.doUpdate();
 					}
@@ -1241,8 +1240,7 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 		return object;
 	}
 
-	public static Object doSearch(Class class1, String ibavalue,
-			String ibakey) {
+	public static Object doSearch(Class class1, String ibavalue, String ibakey) {
 		Object obj = null;
 		String method = "searchWCObject";
 		String klass = PMWebserviceImpl.class.getName();

@@ -42,6 +42,18 @@ public abstract class BasicDocument extends VisionObject {
 
 	protected static final String PLM_MASTER_ID = "plmmasterid";
 
+	// PM状态
+	protected static String STATUS_PM_WORKING = "working";// 正在工作
+	protected static String STATUS_PM_APPROVE = "approving";// 审核中
+	protected static String STATUS_PM_RELEASED = "released";// 已发布
+	protected static String STATUS_PM_DESPOSED = "deposed";// 已废弃
+
+	// Windchill状态值
+	protected static String STATUS_PLM_WORKING = "working";//
+	protected static String STATUS_PLM_APPROVE = "auditing";
+	protected static String STATUS_PLM_RELEASED = "released";
+	protected static String STATUS_PLM_DESPOSED = "obsolete";
+
 	/**
 	 * 获得所在的目录id
 	 * 
@@ -176,17 +188,20 @@ public abstract class BasicDocument extends VisionObject {
 	 * @return 生命周期状态
 	 */
 	public String getStatus() {
-		return (String) get(STATUS);
+		String pmStatus = (String) get(STATUS);
+		String plmStatus = getPLMStatus(pmStatus);
+		return plmStatus;
 	}
 
 	/**
 	 * 设置生命周期状态
 	 * 
-	 * @param status
+	 * @param plmStatus
 	 */
-	public void setStatus(String status) {
-		setValue(STATUS, status);
-		put(STATUS, status);
+	public void setStatus(String plmStatus) {
+		String pmStatus = getPMStatus(plmStatus);
+		setValue(STATUS, pmStatus);
+		put(STATUS, pmStatus);
 	}
 
 	/**
@@ -330,5 +345,37 @@ public abstract class BasicDocument extends VisionObject {
 
 	public String getContentMD5() {
 		return (String) get(CONTENTMD5);
+	}
+
+	private String getPLMStatus(String pmStatus) {
+		if (pmStatus != null) {
+			pmStatus = pmStatus.toLowerCase();
+			if (STATUS_PM_APPROVE.equals(pmStatus)) {
+				return STATUS_PLM_APPROVE.toUpperCase();
+			}
+			if (STATUS_PM_RELEASED.equals(pmStatus)) {
+				return STATUS_PLM_RELEASED.toUpperCase();
+			}
+			if (STATUS_PM_DESPOSED.equals(pmStatus)) {
+				return STATUS_PLM_DESPOSED.toUpperCase();
+			}
+		}
+		return STATUS_PLM_WORKING.toUpperCase();
+	}
+
+	private String getPMStatus(String plmStatus) {
+		if (plmStatus != null) {
+			plmStatus = plmStatus.toLowerCase();
+			if (STATUS_PLM_APPROVE.equals(plmStatus)) {
+				return STATUS_PM_APPROVE;
+			}
+			if (STATUS_PLM_RELEASED.equals(plmStatus)) {
+				return STATUS_PM_RELEASED;
+			}
+			if (STATUS_PLM_DESPOSED.equals(plmStatus)) {
+				return STATUS_PM_DESPOSED;
+			}
+		}
+		return STATUS_PM_WORKING;
 	}
 }
