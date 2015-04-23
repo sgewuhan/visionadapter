@@ -1,14 +1,5 @@
 package com.ptc.windchill.uwgm.common.autoassociate;
 
-import com.ptc.core.logging.Log;
-import com.ptc.core.logging.LogFactory;
-import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
-import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
-import com.ptc.windchill.uwgm.common.util.PrintHelper;
-
-import ext.tmt.utils.Debug;
-import ext.tmt.utils.EPMDocUtil;
-
 import java.util.Map;
 
 import wt.epm.EPMDocument;
@@ -20,9 +11,17 @@ import wt.fc.collections.WTKeyedMap;
 import wt.inf.container.WTContainer;
 import wt.part.WTPart;
 import wt.pom.UniquenessException;
-import wt.util.*;
+import wt.util.WTException;
+import wt.util.WTMessage;
+import wt.util.WTPropertyVetoException;
 import wt.vc.VersionControlException;
 import wt.vc.views.ViewReference;
+
+import com.ptc.core.logging.Log;
+import com.ptc.core.logging.LogFactory;
+import com.ptc.windchill.cadx.common.util.WorkspaceUtilities;
+import com.ptc.windchill.uwgm.common.associate.AssociatePartDescriptor;
+import com.ptc.windchill.uwgm.common.util.PrintHelper;
 
 // Referenced classes of package com.ptc.windchill.uwgm.common.autoassociate:
 //            WTPartSearchHelper, AutoAssociatePartFinderCreator, AutoAssociateHelper, WTPartUtilities
@@ -170,16 +169,13 @@ public class DefaultAutoAssociatePartFinderCreator implements
 						"com.ptc.windchill.uwgm.common.autoassociate.autoassociateResource",
 						"77", new Object[] { s1 });
 			throw new WTException(wtmessage);
-		} else if ("本图".equals(s1)) {
+		} 
+		if ("本图".equals(s1)) {
 			log.debug((new StringBuilder())
 					.append("Create number is 本图  part!---------------"));
 			return null;
-		} else {
-			Debug.P("------WTPartUtilities.createNewPart------>>>>Ready Create");
-			WTPart part = WTPartUtilities
-					.createNewPart(associatepartdescriptor);
-			return part;
-		}
+		} 
+		return WTPartUtilities.createNewPart(associatepartdescriptor);
 	}
 
 	private static final Log log = LogFactory

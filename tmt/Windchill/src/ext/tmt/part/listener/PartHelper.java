@@ -57,7 +57,7 @@ public class PartHelper
 {
   private static final long serialVersionUID = 2304592616754675533L;
   private static final String MATER_NO = "Material_NO";
-
+  
   public static void listenerWTPart(WTPart wtPart, String eventType)
     throws Exception
   {
@@ -69,7 +69,6 @@ public class PartHelper
     String types = "";
     boolean flag = true;
     flag = SessionServerHelper.manager.setAccessEnforced(false);
-    String pmoid;
     try
     {
       partType = DocUtils.getType(wtPart);
@@ -152,18 +151,19 @@ public class PartHelper
           }
           partType = DocUtils.getType(wtPart);
           Debug.P(partNumber + "------------------->" + partType);
-          if (partType.contains("com.plm.SemiFinishedProduct"))
+          if (partType.contains("com.plm.SemiFinishedProduct")) {
             WCToPMHelper.CreatePartToPM(wtPart);
-          else if (partType.contains("com.plm.Product"))
+          } else if (partType.contains("com.plm.Product")) {
             WCToPMHelper.CreatePMProductToPM(wtPart);
-          else if (partType.contains("Material"))
+          } else if (partType.contains("Material")) {
             WCToPMHelper.CreatePMaterialToPM(wtPart);
-          else if (partType.contains("com.plm.GuestPart"))
+          } else if (partType.contains("com.plm.GuestPart")) {
             WCToPMHelper.CreateSupplyToPM(wtPart);
-          else if (partType.contains("com.plm.PackingMaterialPart"))
+          } else if (partType.contains("com.plm.PackingMaterialPart")) {
             WCToPMHelper.CreatePMPackageToPM(wtPart);
-          else if (partType.contains("com.plm.ToolPart"))
+          } else if (partType.contains("com.plm.ToolPart")) {
             WCToPMHelper.CreateJigToolPartToPM(wtPart);
+          }
         }
         else if (partType.contains("com.plm.Product"))
         {
@@ -185,9 +185,8 @@ public class PartHelper
             return;
           }
           Debug.P("产品前缀----》" + prefix);
-          int i;
           if (prefix.toUpperCase().trim().contains("TX111")) {
-            i = 9000;
+            int i = 9000;
             do {
               partNumber = prefix + StringUtil.int2String(i, 4);
               if (PartUtil.getPartByNumber(partNumber) == null) {
@@ -198,7 +197,7 @@ public class PartHelper
             }  while (i < 9999);
             changePartNumber(wtPart, newNumber);
           } else {
-            i = 0;
+            int i = 0;
             do {
               if ((prefix.toUpperCase().trim().equals("TXA6")) || (prefix.toUpperCase().trim().equals("TXA7")) || (prefix.toUpperCase().trim().equals("TXA8")))
                 partNumber = prefix + StringUtil.int2String(i, 5);
@@ -397,18 +396,19 @@ public class PartHelper
         }
         partType = DocUtils.getType(wtPart);
         Debug.P(partType);
-        if (partType.contains("com.plm.SemiFinishedProduct"))
+        if (partType.contains("com.plm.SemiFinishedProduct")) {
           WCToPMHelper.CreatePartToPM(wtPart);
-        else if (partType.contains("com.plm.Product"))
+        } else if (partType.contains("com.plm.Product")) {
           WCToPMHelper.CreatePMProductToPM(wtPart);
-        else if (partType.contains("Material"))
+        } else if (partType.contains("Material")) {
           WCToPMHelper.CreatePMaterialToPM(wtPart);
-        else if (partType.contains("com.plm.GuestPart"))
+        } else if (partType.contains("com.plm.GuestPart")) {
           WCToPMHelper.CreateSupplyToPM(wtPart);
-        else if (partType.contains("com.plm.PackingMaterialPart"))
+        } else if (partType.contains("com.plm.PackingMaterialPart")) {
           WCToPMHelper.CreatePMPackageToPM(wtPart);
-        else if (partType.contains("com.plm.ToolPart"))
+        } else if (partType.contains("com.plm.ToolPart")) {
           WCToPMHelper.CreateJigToolPartToPM(wtPart);
+        }
       }
       if ((StringUtils.isNotEmpty(sync)) && (eventType.equals("UPDATE"))) {
         if (partType.equals("wt.part.WTPart")) {
@@ -417,12 +417,13 @@ public class PartHelper
           Debug.P("1-->" + epmdoc);
           if (epmdoc == null) {
             epmdoc = EPMDocUtil.getEPMDocByNumber(wtPart.getNumber());
-          }
+        }
           Debug.P("2-->" + epmdoc);
           if (epmdoc != null) {
             epmIba = new IBAUtils(epmdoc);
             epmPartType = epmIba.getIBAValue("Part_Type");
           }
+
           if (StringUtils.isNotEmpty(epmPartType)) {
             epmPartType = epmPartType.replaceAll(" ", "").trim();
           }
@@ -438,6 +439,7 @@ public class PartHelper
             else {
               throw new Exception("检入图纸时，只允许自动创建半成品！");
             }
+
             Debug.P(types);
             if (types.contains("Product")) {
               partType = DocUtils.getDfmDocumentType(types).getIntHid();
@@ -454,7 +456,6 @@ public class PartHelper
           }
         }
       }
-
       if ((StringUtils.isNotEmpty(sync)) && (eventType.equals("POST_STORE"))) {
         pmoid = iba.getIBAValue("PMId");
         Debug.P("POST_STORE-------------pmoid----------->" + pmoid);
@@ -462,17 +463,17 @@ public class PartHelper
         wtPart = PartUtils.getPartByNumber(wtPart.getNumber());
         if (WorkInProgressHelper.isCheckedOut(wtPart))
         {
-          if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.SemiFinishedProduct")))
+          if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.SemiFinishedProduct"))) {
             WCToPMHelper.updatePMPart(pmoid, wtPart);
-          else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.Product")))
+          } else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.Product"))) {
             WCToPMHelper.updatePMProductToPM(pmoid, wtPart);
-          else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("Material")))
+          } else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("Material"))) {
             WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
-          else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.GuestPart")))
+          } else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.GuestPart"))) {
             WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
-          else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.PackingMaterialPart")))
+          } else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.PackingMaterialPart"))) {
             WCToPMHelper.updatePMPackageToPM(pmoid, wtPart);
-          else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.ToolPart"))) {
+          } else if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.ToolPart"))) {
             WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
           }
         }
@@ -488,15 +489,20 @@ public class PartHelper
         Debug.P("POST_CHECKIN-----------pmoid----------->" + pmoid);
         if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.SemiFinishedProduct"))) {
           WCToPMHelper.updatePMPart(pmoid, wtPart);
-         } if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.Product"))) {
+        }
+        if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.Product"))) {
           WCToPMHelper.updatePMProductToPM(pmoid, wtPart);
-         } if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("Material"))) {
+        }
+        if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("Material"))) {
           WCToPMHelper.updatePMaterialToPM(pmoid, wtPart);
-          } if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.GuestPart"))) {
+        }
+        if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.GuestPart"))) {
           WCToPMHelper.updateSupplyToPM(pmoid, wtPart);
-         } if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.PackingMaterialPart"))) {
+        }
+        if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.PackingMaterialPart"))) {
           WCToPMHelper.updatePMPackageToPM(pmoid, wtPart);
-          } if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.ToolPart"))) {
+        }
+        if ((StringUtils.isNotEmpty(pmoid)) && (partType.contains("com.plm.ToolPart"))) {
           WCToPMHelper.UpdateJigToolPartToPM(pmoid, wtPart);
          }
           }else  if (eventType.equals(PersistenceManagerEvent.POST_DELETE)) {
@@ -528,6 +534,7 @@ public class PartHelper
     finally {
       SessionServerHelper.manager.setAccessEnforced(flag); 
       }
+      SessionServerHelper.manager.setAccessEnforced(flag);
   }
 
   public static boolean findNewPartNum(String newPartNum)

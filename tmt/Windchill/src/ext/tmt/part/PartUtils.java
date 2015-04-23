@@ -1,7 +1,5 @@
 package ext.tmt.part;
 
-import ext.tmt.utils.Debug;
-import ext.tmt.utils.IBAUtils;
 import wt.doc.WTDocument;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
@@ -13,7 +11,6 @@ import wt.inf.library.WTLibrary;
 import wt.part.WTPart;
 import wt.part.WTPartHelper;
 import wt.pds.StatementSpec;
-import wt.query.QueryException;
 import wt.query.QuerySpec;
 import wt.query.SearchCondition;
 import wt.util.WTException;
@@ -21,6 +18,7 @@ import wt.util.WTPropertyVetoException;
 import wt.util.WTRuntimeException;
 import wt.vc.VersionControlHelper;
 import wt.vc.config.LatestConfigSpec;
+import ext.tmt.utils.Debug;
 
 /**
  * 操作部件的工具类

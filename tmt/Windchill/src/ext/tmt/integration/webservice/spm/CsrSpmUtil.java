@@ -182,8 +182,31 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             // 设置单位，如果没有就用ea
             QuantityUnit qu = null;
             try {
-                if (StringUtils.isEmpty(unit)) { unit = "ea";}
-                if (!"PAC".equals(unit)) { unit = unit.toLowerCase();}
+               Debug.P("----->>>unit  ID:" + unit + ";");
+        if (StringUtils.isEmpty(unit)) {
+          unit = "ea";
+        }
+        if (unit.equals("EA")) {
+          unit = unit.toLowerCase();
+        }
+        if (unit.equals("AS_NEEDED")) {
+          unit = unit.toLowerCase();
+        }
+        if (unit.equals("KG")) {
+          unit = unit.toLowerCase();
+        }
+        if (unit.equals("M")) {
+          unit = unit.toLowerCase();
+        }
+        if (unit.equals("L")) {
+          unit = unit.toLowerCase();
+        }
+        if (unit.equals("SQ_M")) {
+          unit = unit.toLowerCase();
+        }
+        if (unit.equals("CU_M")) {
+          unit = unit.toLowerCase();
+        }
                 qu = QuantityUnit.toQuantityUnit(unit);
             } catch (WTInvalidParameterException e) {
                 throw new WTException(e.getMessage());
@@ -375,6 +398,7 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
 //            Object[] values = { wtpart, name };
 //            return (String) RemoteMethodServer.getDefault().invoke(method,klass, null, types, values);
 //        }
+
         SessionServerHelper.manager.setAccessEnforced(false);
         SessionHelper.manager.setAdministrator();
         Transaction tx = null;
@@ -630,18 +654,13 @@ public class CsrSpmUtil implements RemoteAccess, Serializable {
             //更新PM对应的Windchill Doc信息
             String updocId=doc.getPersistInfo().getObjectIdentifier().getStringValue();
             String state=doc.getLifeCycleState().getDisplay();
-    		//状态转换
-    		Map<String,String> mapState=getConvertStateMap();
-    		if(mapState.size()>0){
-    			state=mapState.get(state);
-    			Debug.P(">>>>PM state:"+state);
-    		}
             pmdoc.setPLMId(updocId);
             pmdoc.setPLMData(getObjectInfo(doc));
             pmdoc.setStatus(state);
             pmdoc.setMajorVid(doc.getVersionIdentifier().getValue());
             pmdoc.setSecondVid(Integer.valueOf(doc.getIterationIdentifier().getValue()));
             updateDocContent2PM(doc,pmdoc,factory);//更新主文档内容
+//TODO 修改为新的创建方式
             pmdoc.doUpdate();
             Debug.P("----->>>>Update Content URL Success!");
             tx.commit();

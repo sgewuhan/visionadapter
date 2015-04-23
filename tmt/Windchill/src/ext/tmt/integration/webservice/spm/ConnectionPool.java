@@ -10,14 +10,13 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * SPM Webservices接口的数据库连接池
- * 操作株洲所的WC的中间表
+ * SPM Webservices接口的数据库连接池 操作株洲所的WC的中间表
+ * 
  * @author Administrator
  *
  */
 public class ConnectionPool {
 
-	
 	private String jdbcDriver = ""; // 数据库驱动
 
 	private String dbUrl = ""; // 数据 URL
