@@ -17,15 +17,15 @@ public class CADDocumentPersistence extends PersistenceService<PMCADDocument> {
 	}
 
 	/**
-	 * 通过PLMId在PM中查询CAD对象
+	 * 通过PLMMasterId在PM中查询CAD对象
 	 * 
-	 * @param PLMId
+	 * @param plmMasterId
 	 * @return
 	 */
-	public List<PMCADDocument> getPMObjectByPLMId(String PLMId) {
+	public List<PMCADDocument> getPMObjectByPLMMasterId(String plmMasterId) {
 		List<PMCADDocument> dbos = new ArrayList<PMCADDocument>();
 		DBCursor find = collection.find(new BasicDBObject().append(
-				PMCADDocument.PLM_ID, PLMId));
+				PMCADDocument.PLM_MASTER_ID, plmMasterId));
 		while (find.hasNext()) {
 			PMCADDocument cad = (PMCADDocument) find.next();
 			cad.setCollection(collection);

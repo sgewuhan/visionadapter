@@ -40,7 +40,7 @@ public abstract class BasicDocument extends VisionObject {
 
 	protected static final String PLM_CONTENT = "plmcontentvault";
 
-	protected static final String PLM_MASTER_ID = "plmmasterid";
+	public static final String PLM_MASTER_ID = "plmmasterid";
 
 	// PM状态
 	protected static String STATUS_PM_WORKING = "working";// 正在工作

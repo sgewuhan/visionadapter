@@ -15,14 +15,14 @@ public class PartPersistence extends PersistenceService<PMPart>{
 	}
 
 	/**
-	 * 通过PLMId在PM中查询Part对象
-	 * @param PLMId
+	 * 通过PLMMasterId在PM中查询Part对象
+	 * @param plmMasterId
 	 * @return
 	 */
-	public List<PMPart> getPMObjectByPLMId(String PLMId) {
+	public List<PMPart> getPMObjectByPLMMasterId(String plmMasterId) {
 		List<PMPart> dbos = new ArrayList<PMPart>();
 		DBCursor find = collection.find(new BasicDBObject().append(
-				PMPart.PLM_ID, PLMId));
+				PMPart.PLM_MASTER_ID, plmMasterId));
 		while(find.hasNext()) {
 			PMPart part = (PMPart)find.next();
 			part.setCollection(collection);

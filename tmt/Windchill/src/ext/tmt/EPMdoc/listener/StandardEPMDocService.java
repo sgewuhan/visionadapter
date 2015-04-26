@@ -49,6 +49,35 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 	// 定义事件监听器
 	private KeyedEventListener listener;
 
+	class EPMDocListener extends ServiceEventListenerAdapter {
+
+		public void notifyVetoableEvent(Object event) throws WTException ,Exception{
+			if (!(event instanceof KeyedEvent)) {
+				return;
+			}
+
+			KeyedEvent keyedEvent = (KeyedEvent) event;
+			// 获取事件目标对象
+			Object target = keyedEvent.getEventTarget();
+			// 获取事件类型
+			String eventType = keyedEvent.getEventType();
+			if (target instanceof EPMDocument) {
+				EPMDocument epm=(EPMDocument)target;
+				Debug.P("EPM eventType--->"+eventType+"---Object--->"+epm);
+				if(epm!=null){
+//					epm=EPMDocUtil.getEPMDocByNumber(epm.getNumber());
+					epm=(EPMDocument)Utils.getWCObject(EPMDocument.class, epm.getNumber());
+				}
+				EPMDocHelper.listenerEPMDoc(epm, eventType);
+//				EPMDocHelper.listenerEPMDoc1(epm, eventType);
+				//PersistenceHelper.manager.store(epm);
+			} 
+		}
+
+		public EPMDocListener(String manager_name) {
+			super(manager_name);
+		}
+	}
 	/**
 	 * @deprecated Method getConceptualClassname is deprecated
 	 */
@@ -64,7 +93,7 @@ public class StandardEPMDocService extends StandardManager implements EPMDocServ
 	}
 
 	protected void performStartupProcess() throws ManagerException {
-		this.listener = new StandardEPMDocService.EPMDocListener(this, getConceptualClassname());
+		listener = new EPMDocListener(getConceptualClassname());
 
 		// 监听VersionControlServiceEvent
 		String POST_STORE = PersistenceManagerEvent

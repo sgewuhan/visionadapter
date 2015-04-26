@@ -34,16 +34,17 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 	}
 
 	/**
-	 * 通过PLMId在PM中查询PMDocument对象
-	 * @param PLMId
+	 * 通过plmMasterId在PM中查询PMDocument对象
+	 * 
+	 * @param plmMasterId
 	 * @return
 	 */
-	public List<PMDocument> getPMObjectByPLMId(String PLMId) {
+	public List<PMDocument> getPMObjectByPLMMasterId(String plmMasterId) {
 		List<PMDocument> dbos = new ArrayList<PMDocument>();
 		DBCursor find = collection.find(new BasicDBObject().append(
-				PMDocument.PLM_ID, PLMId));
-		while(find.hasNext()) {
-			PMDocument doc = (PMDocument)find.next();
+				PMDocument.PLM_MASTER_ID, plmMasterId));
+		while (find.hasNext()) {
+			PMDocument doc = (PMDocument) find.next();
 			doc.setCollection(collection);
 			dbos.add(doc);
 		}

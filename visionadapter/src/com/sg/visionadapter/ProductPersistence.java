@@ -6,26 +6,25 @@ import java.util.List;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 
-
-public class ProductPersistence extends PersistenceService<PMProduct>{
+public class ProductPersistence extends PersistenceService<PMProduct> {
 
 	@Override
 	public String getCollectionName() {
 		return "document";
 	}
 
-	
 	/**
-	 * 通过PLMId在PM中查询Product对象
-	 * @param PLMId
+	 * 通过PLMMasterId在PM中查询Product对象
+	 * 
+	 * @param plmMasterId
 	 * @return
 	 */
-	public List<PMProduct> getPMObjectByPLMId(String PLMId) {
+	public List<PMProduct> getPMObjectByPLMMasterId(String plmMasterId) {
 		List<PMProduct> dbos = new ArrayList<PMProduct>();
 		DBCursor find = collection.find(new BasicDBObject().append(
-				PMProduct.PLM_ID, PLMId));
-		while(find.hasNext()) {
-			PMProduct product = (PMProduct)find.next();
+				PMProduct.PLM_MASTER_ID, plmMasterId));
+		while (find.hasNext()) {
+			PMProduct product = (PMProduct) find.next();
 			product.setCollection(collection);
 			dbos.add(product);
 		}
