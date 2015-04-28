@@ -1,9 +1,7 @@
 package ext.tmt.WC2PM;
 
-import java.beans.PropertyVetoException;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -12,48 +10,28 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 
-import wt.doc.WTDocument;
 import wt.enterprise.Master;
 import wt.epm.EPMDocument;
-import wt.fc.Persistable;
-import wt.fc.PersistenceHelper;
-import wt.fc.ReferenceFactory;
 import wt.fc.WTObject;
 import wt.folder.Folder;
 import wt.folder.FolderHelper;
 import wt.folder.Foldered;
 import wt.iba.value.IBAHolder;
-import wt.lifecycle.LifeCycleManaged;
 import wt.method.RemoteAccess;
 import wt.method.RemoteMethodServer;
 import wt.part.WTPart;
-import wt.util.WTException;
 import wt.util.WTProperties;
-import wt.util.WTPropertyVetoException;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
 import com.mongodb.WriteResult;
-import com.ptc.core.meta.common.TypeIdentifier;
-import com.ptc.core.meta.server.TypeIdentifierUtility;
-import com.ptc.windchill.contextBuilder.util.PersistableHelper;
 import com.sg.visionadapter.BasicDocument;
-import com.sg.visionadapter.BasicDocumentPersistence;
 import com.sg.visionadapter.BasicPart;
 import com.sg.visionadapter.CADDocumentPersistence;
 import com.sg.visionadapter.DocumentPersistence;
@@ -63,8 +41,6 @@ import com.sg.visionadapter.JigToolsPersistence;
 import com.sg.visionadapter.MaterialPersistence;
 import com.sg.visionadapter.ModelServiceFactory;
 import com.sg.visionadapter.PMCADDocument;
-import com.sg.visionadapter.PMDeliverable;
-import com.sg.visionadapter.PMDocument;
 import com.sg.visionadapter.PMFolder;
 import com.sg.visionadapter.PMJigTools;
 import com.sg.visionadapter.PMMaterial;
@@ -74,22 +50,16 @@ import com.sg.visionadapter.PMProduct;
 import com.sg.visionadapter.PMSupplyment;
 import com.sg.visionadapter.PackagePersistence;
 import com.sg.visionadapter.PartPersistence;
-import com.sg.visionadapter.PersistenceService;
 import com.sg.visionadapter.ProductPersistence;
 import com.sg.visionadapter.SupplymentPersistence;
 import com.sg.visionadapter.VisionObject;
-import com.sun.nio.sctp.SctpStandardSocketOptions.InitMaxStreams;
 
-import ext.tmt.integration.webservice.pm.ConstanUtil;
-import ext.tmt.integration.webservice.pm.PMWebserviceImpl;
 import ext.tmt.utils.Contants;
 import ext.tmt.utils.Debug;
 import ext.tmt.utils.DocUtils;
 import ext.tmt.utils.EPMDocUtil;
-import ext.tmt.utils.EPMUtil;
 import ext.tmt.utils.GenericUtil;
 import ext.tmt.utils.IBAUtils;
-import ext.tmt.utils.UserDefQueryUtil;
 import ext.tmt.utils.Utils;
 
 /**
@@ -416,7 +386,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 	}
 
 	private static boolean checkDoc(String masterid) throws Exception {
-		BasicDocumentPersistence basicDocumentPersistence = getPersistence(BasicDocumentPersistence.class);
+		DocumentPersistence basicDocumentPersistence = getPersistence(DocumentPersistence.class);
 		return basicDocumentPersistence.hasPMObjectByPLMMasterId(masterid);
 	}
 

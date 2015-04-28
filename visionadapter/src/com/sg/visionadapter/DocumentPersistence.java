@@ -66,6 +66,18 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 		}
 		return false;
 	}
+	
+	/**
+	 * 通过PLMMasterId在PM中查询BasicDocument对象
+	 * 
+	 * @param plmMasterId
+	 * @return
+	 */
+	public boolean hasPMObjectByPLMMasterId(String plmMasterId) {
+		long count = collection.count(new BasicDBObject().append(
+				PMPart.PLM_MASTER_ID, plmMasterId));
+		return count > 0;
+	}
 
 	/**
 	 * 通过PMId获取PMDocument
