@@ -1277,7 +1277,7 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 				FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service
 						.getContents((ContentHolder) object);
 				// ApplicationData app = DocUtils.getPdfRep((Representable)epm);
-				// // 如果是表示法，则进行getPdfRep（）的取值
+				// 如果是表示法，则进行getPdfRep（）的取值
 				ContentItem item = ContentHelper
 						.getPrimary(formatcontentholder);
 				ApplicationData app = (ApplicationData) item;

@@ -350,6 +350,7 @@ public abstract class VisionObject extends BasicDBObject implements
 		setPLMType();
 		setSync();
 		extendPLMData();
+		extendProjectData();
 	}
 
 	protected abstract void setEditor();
