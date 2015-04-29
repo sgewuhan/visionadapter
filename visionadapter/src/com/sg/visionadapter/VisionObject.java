@@ -315,7 +315,7 @@ public abstract class VisionObject extends BasicDBObject implements
 				.iterator();
 		while (iter.hasNext()) {
 			java.util.Map.Entry<String, Object> entry = iter.next();
-			put("_plm_" + entry.getKey(), entry.getValue());
+			setValue("_plm_" + entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -345,7 +345,7 @@ public abstract class VisionObject extends BasicDBObject implements
 				new BasicDBObject("$set", set));
 	}
 
-	public void initPlmData() {
+	public void initPlmData() throws Exception {
 		setEditor();
 		setPLMType();
 		setSync();

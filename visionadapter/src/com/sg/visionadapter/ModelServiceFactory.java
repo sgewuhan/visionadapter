@@ -38,8 +38,10 @@ public class ModelServiceFactory {
 	public static String URL_REAUTH;
 
 	public static String URL_LINKDELIVERY;
-	
+
 	public static String URL_DOCUMENTSERVICE;
+
+	public static String URL_EPMDOCUMENTSERVICE;
 
 	public static ModelServiceFactory service;
 
@@ -85,6 +87,7 @@ public class ModelServiceFactory {
 			URL_REAUTH = props.getProperty("pm.reauth"); //$NON-NLS-1$
 			URL_LINKDELIVERY = props.getProperty("pm.linkdelivery"); //$NON-NLS-1$
 			URL_DOCUMENTSERVICE = props.getProperty("pm.documentservice");
+			URL_EPMDOCUMENTSERVICE = props.getProperty("pm.epmdocumentservice");
 		} catch (Exception e) {
 		} finally {
 			if (fis != null)
