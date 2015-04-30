@@ -426,6 +426,10 @@ public abstract class VisionObject extends BasicDBObject implements
 		return put(key, val);
 	}
 
+	public Object getValue(String key) {
+		return get(key);
+	}
+
 	/**
 	 * 根据传入的文件记录返回文件提供者对象
 	 * 

@@ -67,7 +67,7 @@ public final class PMProduct extends BasicPart {
 
 	@Override
 	public WriteResult doInsert() throws Exception {
-		put(EDITOR, "editor.document.product");
+		setEditor();
 		return super.doInsert();
 	}
 

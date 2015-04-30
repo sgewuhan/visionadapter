@@ -66,7 +66,7 @@ public final class PMPart extends BasicPart  implements IProductRelative{
 
 	@Override
 	public WriteResult doInsert() throws Exception {
-		put(EDITOR, "editor.document.part");
+		setEditor();
 		return super.doInsert();
 	}
 	

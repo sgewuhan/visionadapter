@@ -27,7 +27,7 @@ public final class PMPackage extends BasicPart {
 	
 	@Override
 	public WriteResult doInsert() throws Exception {
-		put(EDITOR, "editor.document.material");
+		setEditor();
 		return super.doInsert();
 	}
 	

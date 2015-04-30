@@ -46,7 +46,7 @@ public final class PMSupplyment extends BasicPart {
 
 	@Override
 	public WriteResult doInsert() throws Exception {
-		put(EDITOR, "editor.document.supplyment");
+		setEditor();
 		return super.doInsert();
 	}
 

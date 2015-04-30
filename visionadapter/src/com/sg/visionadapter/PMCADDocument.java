@@ -13,6 +13,11 @@ import com.mongodb.WriteResult;
 public final class PMCADDocument extends BasicDocument implements
 		IProductRelative {
 
+	private static final String EDITOR_DOCUMENT_CAD = "editor.document.cad";
+	private static final String EDITOR_DOCUMENT_CAD_PREVIEW = "editor.document.cad.preview";
+
+	public static final String F_CAD_NAME = "cadName";
+
 	private static final String PART_TYPE0 = "parttype0";
 
 	private static final String PART_NUMBER = "partnumber";
@@ -102,13 +107,17 @@ public final class PMCADDocument extends BasicDocument implements
 
 	@Override
 	public WriteResult doInsert() throws Exception {
-		put(EDITOR, "editor.document.cad");
+		setEditor();
 		return super.doInsert();
 	}
 
 	@Override
 	protected void setEditor() {
-		put(EDITOR, "editor.document.cad");
+		String editor = EDITOR_DOCUMENT_CAD;
+		String cadName = (String) getValue(F_CAD_NAME);
+		if (FileUtil.canCreatePreview(cadName)) {
+			editor = EDITOR_DOCUMENT_CAD_PREVIEW;
+		}
+		put(EDITOR, editor);
 	}
-
 }

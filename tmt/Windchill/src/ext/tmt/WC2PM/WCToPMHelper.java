@@ -479,7 +479,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		initBasicDocument(pmcad, plmFolderId, number, status, majorVid,
 				secondVid, phase, masterid);
 
-		pmcad.setValue("cadName", epmdoc.getCADName());
+		pmcad.setValue(PMCADDocument.F_CAD_NAME, epmdoc.getCADName());
 		String contentMD5 = GenericUtil.getMd5ByFile(epmdoc);
 		pmcad.setContentMD5(contentMD5);
 		if (StringUtils.isNotEmpty(materialNo)) {
