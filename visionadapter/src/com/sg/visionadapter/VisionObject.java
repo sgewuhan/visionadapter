@@ -345,7 +345,7 @@ public abstract class VisionObject extends BasicDBObject implements
 				new BasicDBObject("$set", set));
 	}
 
-	public void initPlmData() {
+	public void initPlmData() throws Exception {
 		setEditor();
 		setPLMType();
 		setSync();
