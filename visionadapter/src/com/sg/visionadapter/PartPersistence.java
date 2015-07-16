@@ -28,6 +28,7 @@ public class PartPersistence extends PersistenceService<PMPart>{
 			part.setCollection(collection);
 			dbos.add(part);
 		}
+		find.close();
 		return dbos;
 	}
 }
