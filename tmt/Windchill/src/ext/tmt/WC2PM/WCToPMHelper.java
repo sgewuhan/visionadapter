@@ -430,6 +430,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		String majorVid = wtPart.getVersionIdentifier().getValue();
 		int secondVid = Integer.parseInt(wtPart.getIterationIdentifier()
 				.getValue());
+		Debug.P("版本为：" + majorVid + secondVid);
 		String masterid = getObjectMasterOid(wtPart);
 
 		String phase = ibaUtils.getIBAValue("PHASE");
@@ -604,6 +605,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			IBAUtils ibaUtils, String typle) throws Exception {
 		Debug.P("syncPM------> Start");
 		String docInfo = vo.serialize();
+		Debug.P("DocInfo---------->" + docInfo);
 		String pmoid = InsterOrUpdatePMDoc(docInfo);
 		if (!StringUtils.isEmpty(pmoid)) {
 			ibaUtils.setIBAValue("PMId", pmoid);
@@ -617,10 +619,47 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			if (vo instanceof PMProduct) {
 				productNumToProductItem(pmoid.toString());
 			}
+//			if (vo instanceof PMCADDocument) {
+//				reloadEPMDocContentVault(((PMCADDocument) vo).getMasterId());
+//			}
 			Debug.P("syncPM------> Finish success");
 		} else {
 			Debug.P("syncPM------> Finish error");
 		}
+	}
+
+	public static String reloadEPMDocContentVault(String masterid)
+			throws Exception {
+		String urls = ModelServiceFactory.URL_EPMDOCUMENTSERVICE;
+		Debug.P(urls);
+		URL url = new URL(urls);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+		connection.setConnectTimeout(30000);
+		connection.setReadTimeout(30000);
+		connection.setDoOutput(true);
+		connection.setDoInput(true);
+		connection.setUseCaches(false);
+		connection.setRequestMethod("POST");
+		OutputStream os = connection.getOutputStream();
+		masterid = URLEncoder.encode(masterid, "UTF-8");
+		String param = "masterid=" + masterid;
+		Debug.P(masterid);
+		os.write(param.getBytes());
+		os.flush();
+		os.close();
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				connection.getInputStream()));
+		String result;
+		System.out.println("reloadEPMDocContentVault----------start--- ");
+		result = reader.readLine();
+		Debug.P("result----->" + result);
+
+		System.out.println(" reloadEPMDocContentVault--------ends ");
+		reader.close();
+		connection.disconnect();
+		return result;
 	}
 
 	/**
@@ -643,6 +682,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		connection.setUseCaches(false);
 		connection.setRequestMethod("POST");
 		OutputStream os = connection.getOutputStream();
+		docInfo = docInfo.replaceAll("%", "__a__");
+		docInfo = docInfo.replaceAll("[/?]", "__b__");
+		docInfo = docInfo.replaceAll("&", "__c__");
 		docInfo = URLEncoder.encode(docInfo, "UTF-8");
 		String param = "doc=" + docInfo;
 		Debug.P(docInfo);
@@ -909,7 +951,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			}
 		}
 	}
-	
+
 	// /**
 	// * 同步WC中的EPMDocument对象，如果已同步则更新
 	// *
