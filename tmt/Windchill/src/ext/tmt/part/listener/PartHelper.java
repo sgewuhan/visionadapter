@@ -56,13 +56,14 @@ public class PartHelper implements RemoteAccess, Serializable {
 		flag = SessionServerHelper.manager.setAccessEnforced(false);
 		try {
 			partType = DocUtils.getType(wtPart);
-			IBAUtils iba = new IBAUtils(wtPart);
+			WTPart part = (WTPart) Utils.getWCObject(WTPart.class,
+					wtPart.getNumber());
+			IBAUtils iba1 = new IBAUtils(part);
 			IBAUtils epmIba = null;
 			// Debug.P("ibautils--->" + iba);
-			String sync = iba.getIBAValue("CyncData");
-			String pmoids = iba.getIBAValue("PMId");
+			String sync = iba1.getIBAValue("CyncData");
+			Debug.P("Weight--->" + iba1.getIBAValue("Weight"));
 			Debug.P("sync--->" + sync);
-			Debug.P("pmoids--->" + pmoids);
 			Debug.P("eventType---------------->" + eventType);
 			Folder docFolder = FolderHelper.service.getFolder(wtPart);
 			Debug.P("partFolder---->" + docFolder);
@@ -208,7 +209,7 @@ public class PartHelper implements RemoteAccess, Serializable {
 						} while (i < 100000);
 						changePartNumber(wtPart, newNumber);
 					}
-					wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+					// wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
 					Debug.P("----999------>>part:" + wtPart.getName()
 							+ "  partNum" + wtPart.getNumber());
 					WCToPMHelper.CreatePMProduct(wtPart);
@@ -220,6 +221,7 @@ public class PartHelper implements RemoteAccess, Serializable {
 						throw new Exception("您创建的是半产品，请将“是否为成品”的值设置为“否”！");
 					}
 					String isKHpart = "";// 空簧部件分类
+					IBAUtils iba = new IBAUtils(wtPart);
 					isKHpart = iba.getIBAValue("AirSpringClassification");
 					Debug.P("WTPart -->" + isKHpart);
 					// 如果部件上的 空簧部件分类 值为空，则从部件关联的EPMDocument上获取
@@ -240,25 +242,26 @@ public class PartHelper implements RemoteAccess, Serializable {
 							i++;
 						} while (i < 100000);
 						changePartNumber(wtPart, newNumber);
-						wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+						// wtPart =
+						// PartUtil.getPartByNumber(wtPart.getNumber());
 					}
 					Debug.P("CreatePartToPM-->");
 					WCToPMHelper.CreatePMPart(wtPart);
 				} else if (partType.contains("Material")) {
 					Debug.P("CreatePMaterialToPM-->");
-					wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+					// wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMMaterial(wtPart);
 				} else if (partType.contains("com.plm.GuestPart")) {
 					Debug.P("CreateSupplyToPM-->");
-					wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+					// wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMSupply(wtPart);
 				} else if (partType.contains("com.plm.PackingMaterialPart")) {
 					Debug.P("CreatePMPackageToPM-->");
-					wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+					// wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMPackage(wtPart);
 				} else if (partType.contains("com.plm.ToolPart")) {
 					Debug.P("CreateJigToolPartToPM--->");
-					wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+					// wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
 					WCToPMHelper.CreatePMJigToolPart(wtPart);
 				}
 			} else if ((StringUtils.isEmpty(sync))
@@ -456,10 +459,11 @@ public class PartHelper implements RemoteAccess, Serializable {
 			}
 			if ((StringUtils.isNotEmpty(sync))
 					&& (eventType.equals("POST_STORE"))) {
+				IBAUtils iba = new IBAUtils(wtPart);
 				String pmoid = iba.getIBAValue("PMId");
 				Debug.P("POST_STORE-------------pmoid----------->" + pmoid);
 
-				wtPart = PartUtils.getPartByNumber(wtPart.getNumber());
+				// wtPart = PartUtils.getPartByNumber(wtPart.getNumber());
 				if (WorkInProgressHelper.isCheckedOut(wtPart)) {
 					if ((StringUtils.isNotEmpty(pmoid))
 							&& (partType
@@ -488,13 +492,17 @@ public class PartHelper implements RemoteAccess, Serializable {
 					&& ((eventType.equals("POST_CHECKIN")) || (eventType
 							.equals("POST_MODIFY")))) {
 				String pmoid = (String) LWCUtil.getValue(wtPart, "PMId");
-				wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
+				// wtPart = PartUtil.getPartByNumber(wtPart.getNumber());
 				EPMDocument epmdoc_rel = EPMDocUtil
 						.getActiveEPMDocument(wtPart);
 				if (epmdoc_rel != null) {
 					setPartIBAValues(wtPart, epmdoc_rel);
 				}
 				Debug.P("POST_CHECKIN-----------pmoid----------->" + pmoid);
+				if (eventType.equals("POST_CHECKIN")) {
+					wtPart = (WTPart) Utils.getWCObject(WTPart.class,
+							wtPart.getNumber());
+				}
 				if ((StringUtils.isNotEmpty(pmoid))
 						&& (partType.contains("com.plm.SemiFinishedProduct"))) {
 					WCToPMHelper.updatePMPart(pmoid, wtPart);
@@ -522,6 +530,7 @@ public class PartHelper implements RemoteAccess, Serializable {
 			} else if (eventType.equals("POST_DELETE")) {
 				Debug.P("WTPart-->" + wtPart);
 				if (wtPart != null) {
+					IBAUtils iba = new IBAUtils(wtPart);
 					String pmoid = iba.getIBAValue("PMId");
 					if (StringUtils.isNotEmpty(pmoid)) {
 						Debug.P("删除部件 " + wtPart.getNumber() + " 的最新小版本，重新以 -》"
