@@ -48,6 +48,7 @@ public class DocumentPersistence extends PersistenceService<PMDocument> {
 			doc.setCollection(collection);
 			dbos.add(doc);
 		}
+		find.close();
 		return dbos;
 
 	}

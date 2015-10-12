@@ -1273,11 +1273,26 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 		} else {
 			Object object = searchWCObject(EPMDocument.class, pmid,
 					Contants.PMID);
+			Debug.P("getRepresentationByPM object type"
+					+ object.getClass().getName());
 			if (object instanceof EPMDocument) {
+				EPMDocument epmDocument = (EPMDocument) object;
+				String majorVid = epmDocument.getVersionIdentifier().getValue();
+				int secondVid = Integer.parseInt(epmDocument
+						.getIterationIdentifier().getValue());
+				Debug.P("object 版本是：" + majorVid + "." + secondVid);
+
+				EPMDocument epm = (EPMDocument) Utils.getWCObject(
+						EPMDocument.class, epmDocument.getNumber());
+				majorVid = epm.getVersionIdentifier().getValue();
+				secondVid = Integer.parseInt(epm.getIterationIdentifier()
+						.getValue());
+				Debug.P("epm 版本是：" + majorVid + "." + secondVid);
+
 				FormatContentHolder formatcontentholder = (FormatContentHolder) ContentHelper.service
-						.getContents((ContentHolder) object);
+						.getContents((ContentHolder) epm);
 				// ApplicationData app = DocUtils.getPdfRep((Representable)epm);
-				// 如果是表示法，则进行getPdfRep（）的取值
+				// // 如果是表示法，则进行getPdfRep（）的取值
 				ContentItem item = ContentHelper
 						.getPrimary(formatcontentholder);
 				ApplicationData app = (ApplicationData) item;
@@ -1374,5 +1389,6 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 		}
 		return doc;
 	}
+	
 
 }

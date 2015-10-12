@@ -619,9 +619,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 			if (vo instanceof PMProduct) {
 				productNumToProductItem(pmoid.toString());
 			}
-			if (vo instanceof PMCADDocument) {
-				reloadEPMDocContentVault(((PMCADDocument) vo).getMasterId());
-			}
+//			if (vo instanceof PMCADDocument) {
+//				reloadEPMDocContentVault(((PMCADDocument) vo).getMasterId());
+//			}
 			Debug.P("syncPM------> Finish success");
 		} else {
 			Debug.P("syncPM------> Finish error");
@@ -682,6 +682,9 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		connection.setUseCaches(false);
 		connection.setRequestMethod("POST");
 		OutputStream os = connection.getOutputStream();
+		docInfo = docInfo.replaceAll("%", "__a__");
+		docInfo = docInfo.replaceAll("[/?]", "__b__");
+		docInfo = docInfo.replaceAll("&", "__c__");
 		docInfo = URLEncoder.encode(docInfo, "UTF-8");
 		String param = "doc=" + docInfo;
 		Debug.P(docInfo);

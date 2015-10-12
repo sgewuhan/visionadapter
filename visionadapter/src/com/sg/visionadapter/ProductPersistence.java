@@ -28,6 +28,7 @@ public class ProductPersistence extends PersistenceService<PMProduct> {
 			product.setCollection(collection);
 			dbos.add(product);
 		}
+		find.close();
 		return dbos;
 	}
 }
