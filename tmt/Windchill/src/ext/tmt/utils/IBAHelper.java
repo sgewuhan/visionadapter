@@ -80,21 +80,22 @@ public class IBAHelper implements Serializable, wt.method.RemoteAccess {
 	private static String attrorg;
 
 	public static TypeDefinitionReference getTypeRef(String softType) {
-		TypeDefinitionReference	ref = TypedUtility.getTypeDefinitionReference(softType);
+		TypeDefinitionReference ref = TypedUtility
+				.getTypeDefinitionReference(softType);
 		return ref;
 	}
 
 	public static String getIBAValue(WTObject obj, String ibaName)
-	throws WTException {
+			throws WTException {
 
 		String value = null;
 		String ibaClass = "wt.iba.definition.StringDefinition";
-	
+
 		try {
 			if (obj instanceof IBAHolder) {
 				IBAHolder ibaholder = (IBAHolder) obj;
 				DefaultAttributeContainer defaultattributecontainer = getContainer(ibaholder);
-		
+
 				if (defaultattributecontainer != null) {
 					if (VERBOSE)
 						System.out
@@ -102,30 +103,32 @@ public class IBAHelper implements Serializable, wt.method.RemoteAccess {
 					AbstractValueView avv = getIBAValueView(
 							defaultattributecontainer, ibaName);
 					if (avv != null) {
-						value = IBAValueUtility.getLocalizedIBAValueDisplayString(avv,LOCALE);
+						value = IBAValueUtility
+								.getLocalizedIBAValueDisplayString(avv, LOCALE);
 						if (VERBOSE)
-							System.out
-									.println(" ** ---- " +avv.getDefinition().getClass().getName()+ " Value >>>" + value);
+							System.out.println(" ** ---- "
+									+ avv.getDefinition().getClass().getName()
+									+ " Value >>>" + value);
 					} else {
-//						if (VERBOSE)
-//							Debug.P(" ** ---- NO VALUE ");
+						// if (VERBOSE)
+						// Debug.P(" ** ---- NO VALUE ");
 					}
 				}
 			}
 		} catch (RemoteException rexp) {
-//			Debug.P(" ** !!!!! ** ERROR Getting IBS");
+			// Debug.P(" ** !!!!! ** ERROR Getting IBS");
 			rexp.printStackTrace();
 		}
-		
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getIBAStringValue()");
+
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getIBAStringValue()");
 		return value;
 	}
-	
+
 	public static double getIBAUnitValue(WTObject obj, String ibaName)
 			throws WTException {
 
-		double value =  0;
+		double value = 0;
 		String ibaClass = "wt.iba.definition.UnitDefinition";
 
 		try {
@@ -140,64 +143,65 @@ public class IBAHelper implements Serializable, wt.method.RemoteAccess {
 					AbstractValueView avv = getIBAValueView(
 							defaultattributecontainer, ibaName, ibaClass);
 					if (avv != null) {
-						value = ((UnitValueDefaultView) avv).getValue();						
+						value = ((UnitValueDefaultView) avv).getValue();
 						if (VERBOSE)
 							System.out
 									.println(" ** ---- String Value " + value);
 					} else {
-//						if (VERBOSE)
-//							Debug.P(" ** ---- NO VALUE ");
+						// if (VERBOSE)
+						// Debug.P(" ** ---- NO VALUE ");
 					}
 				}
 			}
 		} catch (RemoteException rexp) {
-//			Debug.P(" ** !!!!! ** ERROR Getting IBS");
+			// Debug.P(" ** !!!!! ** ERROR Getting IBS");
 			rexp.printStackTrace();
 		}
 
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getIBAStringValue()");
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getIBAStringValue()");
 		return value;
 	}
 
 	public static String getIBAStringValue(WTObject obj, String ibaName)
-	throws WTException {
+			throws WTException {
 
-String value = null;
-String ibaClass = "wt.iba.definition.StringDefinition";
+		String value = null;
+		String ibaClass = "wt.iba.definition.StringDefinition";
 
-try {
-	if (obj instanceof IBAHolder) {
-		IBAHolder ibaholder = (IBAHolder) obj;
-		DefaultAttributeContainer defaultattributecontainer = getContainer(ibaholder);
+		try {
+			if (obj instanceof IBAHolder) {
+				IBAHolder ibaholder = (IBAHolder) obj;
+				DefaultAttributeContainer defaultattributecontainer = getContainer(ibaholder);
 
-		if (defaultattributecontainer != null) {
-			if (VERBOSE)
-				System.out
-						.println(" -- Get the values from the container");
-			AbstractValueView avv = getIBAValueView(
-					defaultattributecontainer, ibaName, ibaClass);
-			if (avv != null) {
-				value = ((StringValueDefaultView) avv).getValue();
-				wt.iba.value.litevalue.UnitValueDefaultView s;
-				if (VERBOSE)
-					System.out
-							.println(" ** ---- String Value " + value);
-			} else {
-//				if (VERBOSE)
-//					Debug.P(" ** ---- NO VALUE ");
+				if (defaultattributecontainer != null) {
+					if (VERBOSE)
+						System.out
+								.println(" -- Get the values from the container");
+					AbstractValueView avv = getIBAValueView(
+							defaultattributecontainer, ibaName, ibaClass);
+					if (avv != null) {
+						value = ((StringValueDefaultView) avv).getValue();
+						wt.iba.value.litevalue.UnitValueDefaultView s;
+						if (VERBOSE)
+							System.out
+									.println(" ** ---- String Value " + value);
+					} else {
+						// if (VERBOSE)
+						// Debug.P(" ** ---- NO VALUE ");
+					}
+				}
 			}
+		} catch (RemoteException rexp) {
+			// Debug.P(" ** !!!!! ** ERROR Getting IBS");
+			rexp.printStackTrace();
 		}
-	}
-} catch (RemoteException rexp) {
-//	Debug.P(" ** !!!!! ** ERROR Getting IBS");
-	rexp.printStackTrace();
-}
 
-//if (VERBOSE)
-//	Debug.P(" ** END " + CLASSNAME + ".getIBAStringValue()");
-return value;
-}
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getIBAStringValue()");
+		return value;
+	}
+
 	public static double getIBAFloatValue(WTObject obj, String ibaName)
 			throws WTException {
 
@@ -221,18 +225,18 @@ return value;
 							System.out
 									.println(" ** ---- String Value " + value);
 					} else {
-//						if (VERBOSE)
-//							Debug.P(" ** ---- NO VALUE ");
+						// if (VERBOSE)
+						// Debug.P(" ** ---- NO VALUE ");
 					}
 				}
 			}
 		} catch (RemoteException rexp) {
-//			Debug.P(" ** !!!!! ** ERROR Getting IBS");
+			// Debug.P(" ** !!!!! ** ERROR Getting IBS");
 			rexp.printStackTrace();
 		}
 
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getIBAFloatValue()");
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getIBAFloatValue()");
 
 		return value;
 	}
@@ -340,16 +344,16 @@ return value;
 	public static DefaultAttributeContainer getContainer(IBAHolder ibaholder)
 			throws WTException, RemoteException {
 
-//		if (VERBOSE)
-//			Debug.P(" ** START " + CLASSNAME + ".getContainer()");
+		// if (VERBOSE)
+		// Debug.P(" ** START " + CLASSNAME + ".getContainer()");
 
 		ibaholder = IBAValueHelper.service.refreshAttributeContainer(ibaholder,
 				null, LOCALE, null);
 		DefaultAttributeContainer defaultattributecontainer = (DefaultAttributeContainer) ibaholder
 				.getAttributeContainer();
 
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getContainer()");
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getContainer()");
 
 		return defaultattributecontainer;
 	}
@@ -358,8 +362,8 @@ return value;
 			DefaultAttributeContainer dac, String ibaName, String ibaClass)
 			throws WTException {
 
-//		if (VERBOSE)
-//			Debug.P(" ** START " + CLASSNAME + ".getIBAValueView()");
+		// if (VERBOSE)
+		// Debug.P(" ** START " + CLASSNAME + ".getIBAValueView()");
 
 		AbstractValueView aabstractvalueview[] = null;
 		AbstractValueView avv = null;
@@ -373,29 +377,28 @@ return value;
 							LOCALE);
 			String thisIBAClass = (aabstractvalueview[j].getDefinition())
 					.getAttributeDefinitionClassName();
-//			if (VERBOSE)
-//				Debug.P(" ** -- IBA " + thisIBAName + " - "
-//						+ thisIBAValue + " - " + thisIBAClass);
+			// if (VERBOSE)
+			// Debug.P(" ** -- IBA " + thisIBAName + " - "
+			// + thisIBAValue + " - " + thisIBAClass);
 			if (thisIBAName.equals(ibaName) && thisIBAClass.equals(ibaClass)) {
 				avv = aabstractvalueview[j];
-//				if (VERBOSE)
-//					Debug.P(" ** -- SET ");
+				// if (VERBOSE)
+				// Debug.P(" ** -- SET ");
 				break;
 			}
 		}
 
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getIBAValueView()");
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getIBAValueView()");
 
 		return avv;
 	}
 
 	public static AbstractValueView getIBAValueView(
-			DefaultAttributeContainer dac, String ibaName)
-			throws WTException {
+			DefaultAttributeContainer dac, String ibaName) throws WTException {
 
-//		if (VERBOSE)
-//			Debug.P(" ** START " + CLASSNAME + ".getIBAValueView()");
+		// if (VERBOSE)
+		// Debug.P(" ** START " + CLASSNAME + ".getIBAValueView()");
 
 		AbstractValueView aabstractvalueview[] = null;
 		AbstractValueView avv = null;
@@ -409,34 +412,35 @@ return value;
 							LOCALE);
 			String thisIBAClass = (aabstractvalueview[j].getDefinition())
 					.getAttributeDefinitionClassName();
-//			if (VERBOSE)
-//				Debug.P(" ** -- IBA " + thisIBAName + " - "
-//						+ thisIBAValue + " - " + thisIBAClass);
+			// if (VERBOSE)
+			// Debug.P(" ** -- IBA " + thisIBAName + " - "
+			// + thisIBAValue + " - " + thisIBAClass);
 			if (thisIBAName.equals(ibaName)) {
 				avv = aabstractvalueview[j];
-//				if (VERBOSE)
-//					Debug.P(" ** -- SET ");
+				// if (VERBOSE)
+				// Debug.P(" ** -- SET ");
 				break;
 			}
 		}
 
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getIBAValueView()");
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getIBAValueView()");
 
 		return avv;
 	}
+
 	public static String getSoftType(WTObject obj) throws WTException {
 
-//		if (VERBOSE)
-//			Debug.P(" ** START " + CLASSNAME + ".getSoftType()");
+		// if (VERBOSE)
+		// Debug.P(" ** START " + CLASSNAME + ".getSoftType()");
 
 		String typename = "";
 
 		TypeIdentifier type = TypeIdentifierUtility.getTypeIdentifier(obj);
 		typename = type.getTypename();
 
-//		if (VERBOSE)
-//			Debug.P(" ** END " + CLASSNAME + ".getSoftType()");
+		// if (VERBOSE)
+		// Debug.P(" ** END " + CLASSNAME + ".getSoftType()");
 
 		return typename;
 
@@ -478,7 +482,9 @@ return value;
 				Object aobj[] = { CLASSNAME };
 				String s3 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "3", aobj)
-						+ "'" + s + "'.";
+						+ "'"
+						+ s
+						+ "'.";
 				throw new WTException(s3);
 			}
 			wt.iba.value.litevalue.AbstractValueView aabstractvalueview[] = defaultattributecontainer
@@ -487,7 +493,9 @@ return value;
 				Object aobj1[] = { CLASSNAME };
 				String s4 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "0", aobj1)
-						+ "(" + s + ").";
+						+ "("
+						+ s
+						+ ").";
 				throw new WTException(s4);
 			}
 			if (aabstractvalueview.length < 1) {
@@ -497,21 +505,21 @@ return value;
 					long l1 = long2.longValue();
 					obj2 = new IntegerValueDefaultView(
 							(IntegerDefView) attributedefdefaultview, l1);
-				}/* else if (attributedefdefaultview instanceof FloatDefView) {
-					BigDecimal bigdecimal = new BigDecimal(s1);
-					int j = NumericToolkit.countSigFigs(s1);
-					obj2 = new FloatValueDefaultView(
-							(FloatDefView) attributedefdefaultview, bigdecimal
-									.doubleValue(), j);
-				}*/
+				}/*
+				 * else if (attributedefdefaultview instanceof FloatDefView) {
+				 * BigDecimal bigdecimal = new BigDecimal(s1); int j =
+				 * NumericToolkit.countSigFigs(s1); obj2 = new
+				 * FloatValueDefaultView( (FloatDefView)
+				 * attributedefdefaultview, bigdecimal .doubleValue(), j); }
+				 */
 				else if (attributedefdefaultview instanceof FloatDefView) {
 					BigDecimal bigdecimal = new BigDecimal(s1);
-					
+
 					int j = NumericToolkit.countSigFigs(s1);
 					obj2 = new FloatValueDefaultView(
-							(FloatDefView) attributedefdefaultview, Float.parseFloat(s1), j);
-				}
-				else if (attributedefdefaultview instanceof BooleanDefView) {
+							(FloatDefView) attributedefdefaultview,
+							Float.parseFloat(s1), j);
+				} else if (attributedefdefaultview instanceof BooleanDefView) {
 					Boolean boolean2 = new Boolean(s1);
 					boolean flag1 = boolean2.booleanValue();
 					obj2 = new BooleanValueDefaultView(
@@ -537,16 +545,16 @@ return value;
 					Double double5 = new Double(stringtokenizer3.nextToken());
 					double d2 = double3.doubleValue() / double5.doubleValue();
 					obj2 = new RatioValueDefaultView(
-							(RatioDefView) attributedefdefaultview, d2, double5
-									.doubleValue());
+							(RatioDefView) attributedefdefaultview, d2,
+							double5.doubleValue());
 				} else if (attributedefdefaultview instanceof TimestampDefView) {
 					String s5 = WTProperties.getLocalProperties().getProperty(
 							"wt.method.timezone", "GMT");
 					DateHelper datehelper1 = new DateHelper(s1);
 					Timestamp timestamp1 = new Timestamp(datehelper1.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp1, 3, locale, TimeZone
-							.getTimeZone(s5));
+					WTStandardDateFormat.format(timestamp1, 3, locale,
+							TimeZone.getTimeZone(s5));
 					obj2 = new TimestampValueDefaultView(
 							(TimestampDefView) attributedefdefaultview,
 							timestamp1);
@@ -557,7 +565,9 @@ return value;
 					Object aobj3[] = { CLASSNAME };
 					String s8 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj3)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s8);
 				}
 				defaultattributecontainer
@@ -607,8 +617,8 @@ return value;
 					DateHelper datehelper = new DateHelper(s1);
 					Timestamp timestamp = new Timestamp(datehelper.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp, 3, locale, TimeZone
-							.getTimeZone(s2));
+					WTStandardDateFormat.format(timestamp, 3, locale,
+							TimeZone.getTimeZone(s2));
 					((TimestampValueDefaultView) aabstractvalueview[0])
 							.setValue(timestamp);
 				} else if (aabstractvalueview[0] instanceof URLValueDefaultView) {
@@ -617,7 +627,9 @@ return value;
 					Object aobj2[] = { CLASSNAME };
 					String s6 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj2)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s6);
 				}
 				defaultattributecontainer
@@ -627,11 +639,6 @@ return value;
 			exception.printStackTrace();
 			throw new WTException(exception);
 		}
-	
-		
-		
-	
-			
 
 		/*
 		 * 
@@ -675,21 +682,19 @@ return value;
 		 * propertyValue.getClass().getName().equalsIgnoreCase("java.lang.Float"
 		 * )) { // ���������ֵ��Double�ͻ���Float�� BigDecimal bigdecimal = new
 		 * BigDecimal(propertyValue.toString());
-		 * Debug.P(" 181 start setIBAProperty bigdecimal.toString() "
-		 * + bigdecimal.toString()); int j =
+		 * Debug.P(" 181 start setIBAProperty bigdecimal.toString() " +
+		 * bigdecimal.toString()); int j =
 		 * NumericToolkit.countSigFigs(propertyValue.toString());
-		 * Debug.P(" 182 start setIBAProperty j " + j);
-		 * FloatValueDefaultView ibaValueView = null;
-		 * Debug.P(" 183 start setIBAProperty propertyValue.toString() "
-		 * + propertyValue.toString()); ibaValueView = new
+		 * Debug.P(" 182 start setIBAProperty j " + j); FloatValueDefaultView
+		 * ibaValueView = null;
+		 * Debug.P(" 183 start setIBAProperty propertyValue.toString() " +
+		 * propertyValue.toString()); ibaValueView = new
 		 * FloatValueDefaultView((FloatDefView)getDefaultViewObject(ibaDefNode),
 		 * bigdecimal.doubleValue(), j);
-		 * Debug.P(" 184 start setIBAProperty ibaValueView.getName() "
-		 * + ibaValueView.toString());
-		 * container.addAttributeValue(ibaValueView);
-		 * Debug.P(" 185 start setIBAProperty ibaValueView.getName() "
-		 * + ibaValueView.toString()); } else
-		 * if(propertyValue.getClass().getName
+		 * Debug.P(" 184 start setIBAProperty ibaValueView.getName() " +
+		 * ibaValueView.toString()); container.addAttributeValue(ibaValueView);
+		 * Debug.P(" 185 start setIBAProperty ibaValueView.getName() " +
+		 * ibaValueView.toString()); } else if(propertyValue.getClass().getName
 		 * ().equalsIgnoreCase("java.lang.Integer") ||
 		 * propertyValue.getClass().getName().equalsIgnoreCase("java.lang.Long")
 		 * ) { // ���������ֵ��Integer�ͻ���Long�� Long long2 = new
@@ -755,8 +760,8 @@ return value;
 
 			if (WorkInProgressHelper.isWorkingCopy((Workable) part))
 				PersistenceHelper.manager.modify((Persistable) ibaholder);
-//			else
-//				PersistenceServerHelper.manager.update((Persistable) ibaholder);
+			// else
+			// PersistenceServerHelper.manager.update((Persistable) ibaholder);
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
@@ -770,7 +775,7 @@ return value;
 
 		return part;
 	}
-	
+
 	/**
 	 * Description: ����IBA���� Created on 2005-06-08
 	 * 
@@ -807,7 +812,9 @@ return value;
 				Object aobj[] = { CLASSNAME };
 				String s3 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "3", aobj)
-						+ "'" + s + "'.";
+						+ "'"
+						+ s
+						+ "'.";
 				throw new WTException(s3);
 			}
 			wt.iba.value.litevalue.AbstractValueView aabstractvalueview[] = defaultattributecontainer
@@ -816,7 +823,9 @@ return value;
 				Object aobj1[] = { CLASSNAME };
 				String s4 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "0", aobj1)
-						+ "(" + s + ").";
+						+ "("
+						+ s
+						+ ").";
 				throw new WTException(s4);
 			}
 			if (aabstractvalueview.length < 1) {
@@ -826,21 +835,21 @@ return value;
 					long l1 = long2.longValue();
 					obj2 = new IntegerValueDefaultView(
 							(IntegerDefView) attributedefdefaultview, l1);
-				}/* else if (attributedefdefaultview instanceof FloatDefView) {
-					BigDecimal bigdecimal = new BigDecimal(s1);
-					int j = NumericToolkit.countSigFigs(s1);
-					obj2 = new FloatValueDefaultView(
-							(FloatDefView) attributedefdefaultview, bigdecimal
-									.doubleValue(), j);
-				}*/
+				}/*
+				 * else if (attributedefdefaultview instanceof FloatDefView) {
+				 * BigDecimal bigdecimal = new BigDecimal(s1); int j =
+				 * NumericToolkit.countSigFigs(s1); obj2 = new
+				 * FloatValueDefaultView( (FloatDefView)
+				 * attributedefdefaultview, bigdecimal .doubleValue(), j); }
+				 */
 				else if (attributedefdefaultview instanceof FloatDefView) {
 					BigDecimal bigdecimal = new BigDecimal(s1);
-					
+
 					int j = NumericToolkit.countSigFigs(s1);
 					obj2 = new FloatValueDefaultView(
-							(FloatDefView) attributedefdefaultview, Float.parseFloat(s1), j);
-				}
-				else if (attributedefdefaultview instanceof BooleanDefView) {
+							(FloatDefView) attributedefdefaultview,
+							Float.parseFloat(s1), j);
+				} else if (attributedefdefaultview instanceof BooleanDefView) {
 					Boolean boolean2 = new Boolean(s1);
 					boolean flag1 = boolean2.booleanValue();
 					obj2 = new BooleanValueDefaultView(
@@ -866,16 +875,16 @@ return value;
 					Double double5 = new Double(stringtokenizer3.nextToken());
 					double d2 = double3.doubleValue() / double5.doubleValue();
 					obj2 = new RatioValueDefaultView(
-							(RatioDefView) attributedefdefaultview, d2, double5
-									.doubleValue());
+							(RatioDefView) attributedefdefaultview, d2,
+							double5.doubleValue());
 				} else if (attributedefdefaultview instanceof TimestampDefView) {
 					String s5 = WTProperties.getLocalProperties().getProperty(
 							"wt.method.timezone", "GMT");
 					DateHelper datehelper1 = new DateHelper(s1);
 					Timestamp timestamp1 = new Timestamp(datehelper1.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp1, 3, locale, TimeZone
-							.getTimeZone(s5));
+					WTStandardDateFormat.format(timestamp1, 3, locale,
+							TimeZone.getTimeZone(s5));
 					obj2 = new TimestampValueDefaultView(
 							(TimestampDefView) attributedefdefaultview,
 							timestamp1);
@@ -886,7 +895,9 @@ return value;
 					Object aobj3[] = { CLASSNAME };
 					String s8 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj3)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s8);
 				}
 				defaultattributecontainer
@@ -936,8 +947,8 @@ return value;
 					DateHelper datehelper = new DateHelper(s1);
 					Timestamp timestamp = new Timestamp(datehelper.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp, 3, locale, TimeZone
-							.getTimeZone(s2));
+					WTStandardDateFormat.format(timestamp, 3, locale,
+							TimeZone.getTimeZone(s2));
 					((TimestampValueDefaultView) aabstractvalueview[0])
 							.setValue(timestamp);
 				} else if (aabstractvalueview[0] instanceof URLValueDefaultView) {
@@ -946,7 +957,9 @@ return value;
 					Object aobj2[] = { CLASSNAME };
 					String s6 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj2)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s6);
 				}
 				defaultattributecontainer
@@ -982,9 +995,9 @@ return value;
 					.updateAttributeContainer(ibaholder, obj, null, null);
 			ibaholder.setAttributeContainer(attributecontainer1);
 
-		//	if (WorkInProgressHelper.isWorkingCopy((Workable) issue))
-		//		PersistenceHelper.manager.modify((Persistable) ibaholder);
-//			else
+			// if (WorkInProgressHelper.isWorkingCopy((Workable) issue))
+			// PersistenceHelper.manager.modify((Persistable) ibaholder);
+			// else
 			PersistenceServerHelper.manager.update((Persistable) ibaholder);
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -999,8 +1012,6 @@ return value;
 
 		return issue;
 	}
-		
-
 
 	public static WTDocument setIBAProperty(String propertyName,
 			Object propertyValue, WTDocument doc, Locale locale)
@@ -1028,7 +1039,9 @@ return value;
 				Object aobj[] = { CLASSNAME };
 				String s3 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "3", aobj)
-						+ "'" + s + "'.";
+						+ "'"
+						+ s
+						+ "'.";
 				throw new WTException(s3);
 			}
 			wt.iba.value.litevalue.AbstractValueView aabstractvalueview[] = defaultattributecontainer
@@ -1037,7 +1050,9 @@ return value;
 				Object aobj1[] = { CLASSNAME };
 				String s4 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "0", aobj1)
-						+ "(" + s + ").";
+						+ "("
+						+ s
+						+ ").";
 				throw new WTException(s4);
 			}
 			if (aabstractvalueview.length < 1) {
@@ -1051,8 +1066,8 @@ return value;
 					BigDecimal bigdecimal = new BigDecimal(s1);
 					int j = NumericToolkit.countSigFigs(s1);
 					obj2 = new FloatValueDefaultView(
-							(FloatDefView) attributedefdefaultview, bigdecimal
-									.doubleValue(), j);
+							(FloatDefView) attributedefdefaultview,
+							bigdecimal.doubleValue(), j);
 				} else if (attributedefdefaultview instanceof BooleanDefView) {
 					Boolean boolean2 = new Boolean(s1);
 					boolean flag1 = boolean2.booleanValue();
@@ -1079,16 +1094,16 @@ return value;
 					Double double5 = new Double(stringtokenizer3.nextToken());
 					double d2 = double3.doubleValue() / double5.doubleValue();
 					obj2 = new RatioValueDefaultView(
-							(RatioDefView) attributedefdefaultview, d2, double5
-									.doubleValue());
+							(RatioDefView) attributedefdefaultview, d2,
+							double5.doubleValue());
 				} else if (attributedefdefaultview instanceof TimestampDefView) {
 					String s5 = WTProperties.getLocalProperties().getProperty(
 							"wt.method.timezone", "GMT");
 					DateHelper datehelper1 = new DateHelper(s1);
 					Timestamp timestamp1 = new Timestamp(datehelper1.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp1, 3, locale, TimeZone
-							.getTimeZone(s5));
+					WTStandardDateFormat.format(timestamp1, 3, locale,
+							TimeZone.getTimeZone(s5));
 					obj2 = new TimestampValueDefaultView(
 							(TimestampDefView) attributedefdefaultview,
 							timestamp1);
@@ -1099,7 +1114,9 @@ return value;
 					Object aobj3[] = { CLASSNAME };
 					String s8 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj3)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s8);
 				}
 				defaultattributecontainer
@@ -1149,8 +1166,8 @@ return value;
 					DateHelper datehelper = new DateHelper(s1);
 					Timestamp timestamp = new Timestamp(datehelper.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp, 3, locale, TimeZone
-							.getTimeZone(s2));
+					WTStandardDateFormat.format(timestamp, 3, locale,
+							TimeZone.getTimeZone(s2));
 					((TimestampValueDefaultView) aabstractvalueview[0])
 							.setValue(timestamp);
 				} else if (aabstractvalueview[0] instanceof URLValueDefaultView) {
@@ -1159,7 +1176,9 @@ return value;
 					Object aobj2[] = { CLASSNAME };
 					String s6 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj2)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s6);
 				}
 				defaultattributecontainer
@@ -1169,10 +1188,9 @@ return value;
 			exception.printStackTrace();
 			throw new WTException(exception);
 		}
-		
-		
-	try {
-		
+
+		try {
+
 			IBAValueDBService ibavaluedbservice = new IBAValueDBService();
 			Object obj = defaultattributecontainer.getConstraintParameter();
 			AttributeContainer attributecontainer1 = ibavaluedbservice
@@ -1196,7 +1214,6 @@ return value;
 
 		return doc;
 	}
-
 
 	public static WTPartUsageLink setIBAProperty(String propertyName,
 			Object propertyValue, WTPartUsageLink link, Locale locale)
@@ -1224,7 +1241,9 @@ return value;
 				Object aobj[] = { CLASSNAME };
 				String s3 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "3", aobj)
-						+ "'" + s + "'.";
+						+ "'"
+						+ s
+						+ "'.";
 				throw new WTException(s3);
 			}
 			wt.iba.value.litevalue.AbstractValueView aabstractvalueview[] = defaultattributecontainer
@@ -1233,7 +1252,9 @@ return value;
 				Object aobj1[] = { CLASSNAME };
 				String s4 = WTMessage.getLocalizedMessage(
 						"wt.adapter.iba.ibaResource", "0", aobj1)
-						+ "(" + s + ").";
+						+ "("
+						+ s
+						+ ").";
 				throw new WTException(s4);
 			}
 			if (aabstractvalueview.length < 1) {
@@ -1247,8 +1268,8 @@ return value;
 					BigDecimal bigdecimal = new BigDecimal(s1);
 					int j = NumericToolkit.countSigFigs(s1);
 					obj2 = new FloatValueDefaultView(
-							(FloatDefView) attributedefdefaultview, bigdecimal
-									.doubleValue(), j);
+							(FloatDefView) attributedefdefaultview,
+							bigdecimal.doubleValue(), j);
 				} else if (attributedefdefaultview instanceof BooleanDefView) {
 					Boolean boolean2 = new Boolean(s1);
 					boolean flag1 = boolean2.booleanValue();
@@ -1275,16 +1296,16 @@ return value;
 					Double double5 = new Double(stringtokenizer3.nextToken());
 					double d2 = double3.doubleValue() / double5.doubleValue();
 					obj2 = new RatioValueDefaultView(
-							(RatioDefView) attributedefdefaultview, d2, double5
-									.doubleValue());
+							(RatioDefView) attributedefdefaultview, d2,
+							double5.doubleValue());
 				} else if (attributedefdefaultview instanceof TimestampDefView) {
 					String s5 = WTProperties.getLocalProperties().getProperty(
 							"wt.method.timezone", "GMT");
 					DateHelper datehelper1 = new DateHelper(s1);
 					Timestamp timestamp1 = new Timestamp(datehelper1.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp1, 3, locale, TimeZone
-							.getTimeZone(s5));
+					WTStandardDateFormat.format(timestamp1, 3, locale,
+							TimeZone.getTimeZone(s5));
 					obj2 = new TimestampValueDefaultView(
 							(TimestampDefView) attributedefdefaultview,
 							timestamp1);
@@ -1295,7 +1316,9 @@ return value;
 					Object aobj3[] = { CLASSNAME };
 					String s8 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj3)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s8);
 				}
 				defaultattributecontainer
@@ -1345,8 +1368,8 @@ return value;
 					DateHelper datehelper = new DateHelper(s1);
 					Timestamp timestamp = new Timestamp(datehelper.getDate()
 							.getTime());
-					WTStandardDateFormat.format(timestamp, 3, locale, TimeZone
-							.getTimeZone(s2));
+					WTStandardDateFormat.format(timestamp, 3, locale,
+							TimeZone.getTimeZone(s2));
 					((TimestampValueDefaultView) aabstractvalueview[0])
 							.setValue(timestamp);
 				} else if (aabstractvalueview[0] instanceof URLValueDefaultView) {
@@ -1355,7 +1378,9 @@ return value;
 					Object aobj2[] = { CLASSNAME };
 					String s6 = WTMessage.getLocalizedMessage(
 							"wt.adapter.iba.ibaResource", "1", aobj2)
-							+ "'" + s + "'.";
+							+ "'"
+							+ s
+							+ "'.";
 					throw new WTException(s6);
 				}
 				defaultattributecontainer
@@ -1365,19 +1390,17 @@ return value;
 			exception.printStackTrace();
 			throw new WTException(exception);
 		}
-		
-	try {
-	
+
+		try {
+
 			IBAValueDBService ibavaluedbservice = new IBAValueDBService();
 			Object obj = defaultattributecontainer.getConstraintParameter();
 			AttributeContainer attributecontainer1 = ibavaluedbservice
 					.updateAttributeContainer(ibaholder, obj, null, null);
 			ibaholder.setAttributeContainer(attributecontainer1);
 
-		
 			PersistenceServerHelper.manager.update((Persistable) ibaholder);
-			
-			
+
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
@@ -1391,9 +1414,6 @@ return value;
 
 		return link;
 	}
-	
-	
-	
 
 	/**
 	 * Description: �����ĵ���IBA���� Created on 2005-09-05
@@ -1407,16 +1427,13 @@ return value;
 	 *             RemoteExceptiontion,IllegalAccessException
 	 *             ,ClassNotFoundException,SQLException return_type WTDocument
 	 */
-/*	public static WTDocument setIBAProperty(String propertyName,
-			Object propertyValue, WTDocument doc, Locale locale)
-			throws wt.introspection.WTIntrospectionException,
-			wt.util.WTException, RemoteException {
-		if (doc == null)
-			return doc;
-		return (WTDocument) setIBAProperty(propertyName, propertyValue,
-				(WTObject) doc, locale);
-	}
-*/
+	/*
+	 * public static WTDocument setIBAProperty(String propertyName, Object
+	 * propertyValue, WTDocument doc, Locale locale) throws
+	 * wt.introspection.WTIntrospectionException, wt.util.WTException,
+	 * RemoteException { if (doc == null) return doc; return (WTDocument)
+	 * setIBAProperty(propertyName, propertyValue, (WTObject) doc, locale); }
+	 */
 	/**
 	 * Description: ����EPMDocument��IBA���� Created on 2005-09-05
 	 * 
@@ -1515,22 +1532,22 @@ return value;
 
 			// �õ����propertyName��Ӧ�Ľڵ�
 			ibaDefNode = getNode(ibaDefNodes, propertyName);
-			
-			System.out.println("ibaDefNode  "+ibaDefNode);
-			
+
+			System.out.println("ibaDefNode  " + ibaDefNode);
+
 			container.deleteAttributeValues(getDefaultViewObject(ibaDefNode));
 
-			if (propertyValue.getClass().getName().equalsIgnoreCase(
-					"java.lang.Double")
-					|| propertyValue.getClass().getName().equalsIgnoreCase(
-							"java.lang.Float")) {
+			if (propertyValue.getClass().getName()
+					.equalsIgnoreCase("java.lang.Double")
+					|| propertyValue.getClass().getName()
+							.equalsIgnoreCase("java.lang.Float")) {
 				// ���������ֵ��Double�ͻ���Float��
 				BigDecimal bigdecimal = new BigDecimal(propertyValue.toString());
 				System.out
 						.println(" 181 start setIBAProperty bigdecimal.toString() "
 								+ bigdecimal.toString());
 				int j = NumericToolkit.countSigFigs(propertyValue.toString());
-//				Debug.P(" 182 start setIBAProperty j " + j);
+				// Debug.P(" 182 start setIBAProperty j " + j);
 				FloatValueDefaultView ibaValueView = null;
 				System.out
 						.println(" 183 start setIBAProperty propertyValue.toString() "
@@ -1545,10 +1562,10 @@ return value;
 				System.out
 						.println(" 185 start setIBAProperty ibaValueView.getName() "
 								+ ibaValueView.toString());
-			} else if (propertyValue.getClass().getName().equalsIgnoreCase(
-					"java.lang.Integer")
-					|| propertyValue.getClass().getName().equalsIgnoreCase(
-							"java.lang.Long")) {
+			} else if (propertyValue.getClass().getName()
+					.equalsIgnoreCase("java.lang.Integer")
+					|| propertyValue.getClass().getName()
+							.equalsIgnoreCase("java.lang.Long")) {
 				// ���������ֵ��Integer�ͻ���Long��
 				Long long2 = new Long(propertyValue.toString());
 				long l1 = long2.longValue();
@@ -1556,8 +1573,8 @@ return value;
 				ibaValueView = new IntegerValueDefaultView(
 						(IntegerDefView) getDefaultViewObject(ibaDefNode), l1);
 				container.addAttributeValue(ibaValueView);
-			} else if (propertyValue.getClass().getName().equalsIgnoreCase(
-					"java.lang.Boolean")) {
+			} else if (propertyValue.getClass().getName()
+					.equalsIgnoreCase("java.lang.Boolean")) {
 				// ���������ֵ��Boolean��
 				Boolean boolean2 = new Boolean(propertyValue.toString());
 				boolean flag1 = boolean2.booleanValue();
@@ -1650,9 +1667,6 @@ return value;
 		return part;
 	}
 
-	
-	
-	
 	/**
 	 * Description: ��ݸ�ı�Ų������°汾��WTPart Created on 2005-06-08
 	 * 
@@ -2010,8 +2024,8 @@ return value;
 		DefaultAttributeContainer container = (DefaultAttributeContainer) ibaHolder
 				.getAttributeContainer();
 		try {
-//			if (VERBOSE)
-//				Debug.P("**** Begin set IBA ...");
+			// if (VERBOSE)
+			// Debug.P("**** Begin set IBA ...");
 			AbstractAttributeDefinizerNodeView ibaDefNode = getAttributeOrganizer(attrorg);
 			AbstractAttributeDefinizerNodeView ibaDefNodes[] = IBADefinitionHelper.service
 					.getAttributeChildren(ibaDefNode);
@@ -2020,8 +2034,8 @@ return value;
 			ibaValueView = new StringValueDefaultView(
 					(StringDefView) ibaDefView, value);
 			container.addAttributeValue(ibaValueView);
-//			if (VERBOSE)
-//				Debug.P("*** fill " + propertyName + " completed.");
+			// if (VERBOSE)
+			// Debug.P("*** fill " + propertyName + " completed.");
 		} catch (IBAValueException ibave) {
 			ibave.printStackTrace();
 		} catch (RemoteException re) {
@@ -2034,8 +2048,8 @@ return value;
 		wt.iba.value.AttributeContainer attributecontainer1 = ibavaluedbservice
 				.updateAttributeContainer(ibaHolder, obj, null, null);
 		ibaHolder.setAttributeContainer(attributecontainer1);
-//		if (VERBOSE)
-//			Debug.P("*** exit addIBA ...");
+		// if (VERBOSE)
+		// Debug.P("*** exit addIBA ...");
 		return ibaHolder;
 	}
 
@@ -2103,8 +2117,8 @@ return value;
 		DefaultAttributeContainer container = (DefaultAttributeContainer) ibaHolder
 				.getAttributeContainer();
 		try {
-//			if (VERBOSE)
-//				Debug.P("**** Begin remove IBA ...");
+			// if (VERBOSE)
+			// Debug.P("**** Begin remove IBA ...");
 			AbstractAttributeDefinizerNodeView ibaDefNode = getAttributeOrganizer(attrorg);
 			AbstractAttributeDefinizerNodeView ibaDefNodes[] = IBADefinitionHelper.service
 					.getAttributeChildren(ibaDefNode);
@@ -2123,8 +2137,8 @@ return value;
 		wt.iba.value.AttributeContainer attributecontainer1 = ibavaluedbservice
 				.updateAttributeContainer(ibaHolder, obj, null, null);
 		ibaHolder.setAttributeContainer(attributecontainer1);
-//		if (VERBOSE)
-//			Debug.P("*** exit remove ... ");
+		// if (VERBOSE)
+		// Debug.P("*** exit remove ... ");
 		return ibaHolder;
 	}
 
@@ -2138,8 +2152,8 @@ return value;
 		Locale locale = Locale.SIMPLIFIED_CHINESE;
 		if (part == null)
 			return part;
-//		if (VERBOSE)
-//			Debug.P("*** in addIBA ...");
+		// if (VERBOSE)
+		// Debug.P("*** in addIBA ...");
 		IBAHolder ibaHolder = part;
 		PersistenceServerHelper.manager.update((Persistable) ibaHolder);
 		ibaHolder = IBAValueHelper.service.refreshAttributeContainer(ibaHolder,
@@ -2171,8 +2185,8 @@ return value;
 		DefaultAttributeContainer container = (DefaultAttributeContainer) ibaHolder
 				.getAttributeContainer();
 		try {
-//			if (VERBOSE)
-//				Debug.P("**** Begin set IBA ...");
+			// if (VERBOSE)
+			// Debug.P("**** Begin set IBA ...");
 			AbstractAttributeDefinizerNodeView ibaDefNode = getAttributeOrganizer(attrorg);
 			AbstractAttributeDefinizerNodeView ibaDefNodes[] = IBADefinitionHelper.service
 					.getAttributeChildren(ibaDefNode);
@@ -2182,8 +2196,8 @@ return value;
 			ibaValueView = new StringValueDefaultView(
 					(StringDefView) ibaDefView, value);
 			container.addAttributeValue(ibaValueView);
-//			if (VERBOSE)
-//				Debug.P("*** fill " + propertyName + " completed.");
+			// if (VERBOSE)
+			// Debug.P("*** fill " + propertyName + " completed.");
 		} catch (IBAValueException ibave) {
 			ibave.printStackTrace();
 		} catch (RemoteException re) {
@@ -2196,8 +2210,8 @@ return value;
 		wt.iba.value.AttributeContainer attributecontainer1 = ibavaluedbservice
 				.updateAttributeContainer(ibaHolder, obj, null, null);
 		ibaHolder.setAttributeContainer(attributecontainer1);
-//		if (VERBOSE)
-//			Debug.P("*** exit addIBA ...");
+		// if (VERBOSE)
+		// Debug.P("*** exit addIBA ...");
 		return (WTPart) ibaHolder;
 	}
 
@@ -2241,8 +2255,8 @@ return value;
 		DefaultAttributeContainer container = (DefaultAttributeContainer) ibaHolder
 				.getAttributeContainer();
 		try {
-//			if (VERBOSE)
-//				Debug.P("**** Begin set IBA ...");
+			// if (VERBOSE)
+			// Debug.P("**** Begin set IBA ...");
 			AbstractAttributeDefinizerNodeView ibaDefNode = getAttributeOrganizer(attrorg);
 			AbstractAttributeDefinizerNodeView ibaDefNodes[] = IBADefinitionHelper.service
 					.getAttributeChildren(ibaDefNode);
@@ -2252,8 +2266,8 @@ return value;
 			ibaValueView = new IntegerValueDefaultView(
 					(IntegerDefView) ibaDefView, value);
 			container.addAttributeValue(ibaValueView);
-//			if (VERBOSE)
-//				Debug.P("*** fill " + propertyName + " completed.");
+			// if (VERBOSE)
+			// Debug.P("*** fill " + propertyName + " completed.");
 		} catch (IBAValueException ibave) {
 			ibave.printStackTrace();
 		} catch (RemoteException re) {
@@ -2266,8 +2280,8 @@ return value;
 		wt.iba.value.AttributeContainer attributecontainer1 = ibavaluedbservice
 				.updateAttributeContainer(ibaHolder, obj, null, null);
 		ibaHolder.setAttributeContainer(attributecontainer1);
-//		if (VERBOSE)
-//			Debug.P("*** exit addIBA ...");
+		// if (VERBOSE)
+		// Debug.P("*** exit addIBA ...");
 		return ibaHolder;
 	}
 
@@ -2309,8 +2323,8 @@ return value;
 		DefaultAttributeContainer container = (DefaultAttributeContainer) ibaHolder
 				.getAttributeContainer();
 		try {
-//			if (VERBOSE)
-//				Debug.P("**** Begin set IBA ...");
+			// if (VERBOSE)
+			// Debug.P("**** Begin set IBA ...");
 			AbstractAttributeDefinizerNodeView ibaDefNode = getAttributeOrganizer(attrorg);
 			AbstractAttributeDefinizerNodeView ibaDefNodes[] = IBADefinitionHelper.service
 					.getAttributeChildren(ibaDefNode);
@@ -2318,14 +2332,14 @@ return value;
 			ibaDefView = getDefaultViewObject(ibaDefNode);
 			container.deleteAttributeValues(ibaDefView);
 			String temp = String.valueOf(value);
-//			if (VERBOSE)
-//				Debug.P("value=" + value);
+			// if (VERBOSE)
+			// Debug.P("value=" + value);
 			ibaValueView = new FloatValueDefaultView((FloatDefView) ibaDefView);
 			ibaValueView.setValue(value);
 			ibaValueView.setPrecision(temp.length() - 1);
 			container.addAttributeValue(ibaValueView);
-//			if (VERBOSE)
-//				Debug.P("*** fill " + propertyName + " completed.");
+			// if (VERBOSE)
+			// Debug.P("*** fill " + propertyName + " completed.");
 		} catch (IBAValueException ibave) {
 			ibave.printStackTrace();
 		} catch (RemoteException re) {
@@ -2340,8 +2354,8 @@ return value;
 		wt.iba.value.AttributeContainer attributecontainer1 = ibavaluedbservice
 				.updateAttributeContainer(ibaHolder, obj, null, null);
 		ibaHolder.setAttributeContainer(attributecontainer1);
-//		if (VERBOSE)
-//			Debug.P("*** exit addIBA ...");
+		// if (VERBOSE)
+		// Debug.P("*** exit addIBA ...");
 		return ibaHolder;
 	}
 
@@ -2385,8 +2399,8 @@ return value;
 		DefaultAttributeContainer container = (DefaultAttributeContainer) ibaHolder
 				.getAttributeContainer();
 		try {
-//			if (VERBOSE)
-//				Debug.P("**** Begin set IBA ...");
+			// if (VERBOSE)
+			// Debug.P("**** Begin set IBA ...");
 			AbstractAttributeDefinizerNodeView ibaDefNode = getAttributeOrganizer(attrorg);
 			AbstractAttributeDefinizerNodeView ibaDefNodes[] = IBADefinitionHelper.service
 					.getAttributeChildren(ibaDefNode);
@@ -2396,8 +2410,8 @@ return value;
 			ibaValueView = new StringValueDefaultView(
 					(StringDefView) ibaDefView, value);
 			container.addAttributeValue(ibaValueView);
-//			if (VERBOSE)
-//				Debug.P("*** fill " + propertyName + " completed.");
+			// if (VERBOSE)
+			// Debug.P("*** fill " + propertyName + " completed.");
 		} catch (IBAValueException ibave) {
 			ibave.printStackTrace();
 		} catch (RemoteException re) {
@@ -2410,8 +2424,8 @@ return value;
 		wt.iba.value.AttributeContainer attributecontainer1 = ibavaluedbservice
 				.updateAttributeContainer(ibaHolder, obj, null, null);
 		ibaHolder.setAttributeContainer(attributecontainer1);
-//		if (VERBOSE)
-//			Debug.P("*** exit addIBA ...");
+		// if (VERBOSE)
+		// Debug.P("*** exit addIBA ...");
 		return ibaHolder;
 	}
 
@@ -2419,8 +2433,7 @@ return value;
 		CLASSNAME = IBAHelper.class.getName();
 		try {
 			WTProperties wtproperties = WTProperties.getLocalProperties();
-			VERBOSE = wtproperties.getProperty("ext.util.verbose",
-					false);
+			VERBOSE = wtproperties.getProperty("ext.util.verbose", false);
 
 			attrorg = wtproperties.getProperty("property.orgcontainer");
 

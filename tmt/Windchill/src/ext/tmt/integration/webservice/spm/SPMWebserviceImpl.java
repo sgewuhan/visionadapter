@@ -73,7 +73,7 @@ public class SPMWebserviceImpl{
         HashMap<String,String>  baseMap= new HashMap<String,String>();
         
         //Windchill字段映射集合
-       Map<String,String> mapDatas= getWCMappingFieldBySPM();
+       Map<String,String> mapDatas= CsrSpmUtil. getWCMappingFieldBySPM();
        Debug.P("------->>>Mapping Collection:"+mapDatas.toString());
         
         ResultSet resultSet = null;
@@ -133,14 +133,14 @@ public class SPMWebserviceImpl{
                 	 }
                     CsrSpmUtil.updatePartInfo(object,baseMap, ibaMap);
                     Debug.P("--->>Update Part Factory:"+part_fac);
-                    boolean isTMT=matchFactory(part_fac);
+                    boolean isTMT=CsrSpmUtil.matchFactory(part_fac);
                     if(!isTMT){//非新材工厂(状态设置成已废弃)
                       GenericUtil.changeState(object, SPMConsts.DESPOSED);
                     }
                     Debug.P("----->>>Update WTPart("+object.getPersistInfo().getObjectIdentifier().getStringValue()+")Success!!");
                     result= "更新物料操作成功";
                  }else{
-                	boolean iscreateTMT=matchFactory(spm_fac); 
+                	boolean iscreateTMT=CsrSpmUtil.matchFactory(spm_fac); 
                 	Debug.P("---->>>创建的物料是否属于新材工厂:"+iscreateTMT);
                 	if(iscreateTMT){//创建新材工厂
                 	  String partType=baseMap.get(SPMConsts.PART_TYPE);
@@ -213,7 +213,7 @@ public class SPMWebserviceImpl{
                                 GenericUtil.changeState((LifeCycleManaged)part, SPMConsts.DESPOSED);
                             } else {//存在新材工厂参数则删除指定参数信息
                             	Debug.P("------>>参数Factory:"+factory+"(用于删除)");
-                            	boolean isTMT=matchFactory(_factory);
+                            	boolean isTMT=CsrSpmUtil.matchFactory(_factory);
                                 if(!isTMT){//如果不存在新材的工厂则修改状态为 已作废
                                   GenericUtil.changeState((LifeCycleManaged)part, SPMConsts.DESPOSED);
                                 }
@@ -255,7 +255,7 @@ public class SPMWebserviceImpl{
         //基础属性集合
         HashMap<String,String>  baseMap= new HashMap<String,String>();
         //Windchill字段映射集合
-        Map<String,String> mapDatas= getWCMappingFieldBySPM();
+        Map<String,String> mapDatas= CsrSpmUtil.getWCMappingFieldBySPM();
         Debug.P("------->>>Mapping Collection:"+mapDatas.toString());
    	    ConnectionPool connectionPool=DBFactory.getConnectionPool();//连接池
         try {
@@ -350,7 +350,7 @@ public class SPMWebserviceImpl{
                      
              		//更新生命周期状态(如果工厂变更为非时代新材物料则设置成已作废)
               		String partFactory=(String) LWCUtil.getValue(part, SPMConsts.FACTORY);
-              		boolean isDel=matchFactory(partFactory);//与PM系统匹配
+              		boolean isDel=CsrSpmUtil.matchFactory(partFactory);//与PM系统匹配
               		if(!isDel){
               			part=(WTPart) GenericUtil.changeState(part, SPMConsts.DESPOSED);
               		}
@@ -358,7 +358,7 @@ public class SPMWebserviceImpl{
                  	}else {//扩建物料
                  		Debug.P("----->>>>>扩建TMT工厂物料:"+materNo);
                  		 String mater_factory=(String) ibaMap.get(SPMConsts.FACTORY);
-                         boolean isTmT=matchFactory(mater_factory);
+                         boolean isTmT=CsrSpmUtil.matchFactory(mater_factory);
                  		 if(isTmT){//包含时代工厂则创建
                  			Debug.P("--->>New001  扩建工厂:"+mater_factory+" 创建物料.");
                  			processorForSpm1(workflow, 1, mater_factory);
@@ -383,30 +383,6 @@ public class SPMWebserviceImpl{
     
     
 
-    /**
-     * 匹配新材工厂
-     * @param factorys
-     * @return
-     * @throws Exception
-     */
-    private  static  boolean matchFactory(String factorys) throws Exception{
-        //获取PM的工厂信息
-        List<String> fac_res=CsrSpmUtil.getAllPMFactory();
-	    Debug.P("--matchFactory-->>>时代新材的工厂:"+fac_res+"  SPM Factory:"+factorys);
-       boolean flag=false;//默认不属于时代新材
-       if(StringUtils.isNotEmpty(factorys)){
-         List<String> maters_list=Arrays.asList(factorys.split(","));
-         for (String str : maters_list) {
-			   if(fac_res.contains(str)){
-				   Debug.P("------>>>>TMT Factory:"+str);
-				   flag=true;
-				   break;
-			   }
-		   }
-       }
-         return flag;
-    }
-    
 //    
 //    /**
 //     * 获取创建该部件时的workflow
@@ -732,37 +708,6 @@ public class SPMWebserviceImpl{
     }
        
        
-       /**
-        * 根据中间表的信息查询配置文件中与之对应的Windchill属性名称
-        * @param field
-        * @return
-        * @throws Exception
-        */
-       private static String MAPPINGWCCONFIG_PATH="codebase" + File.separator + "ext"
-   			+ File.separator + "tmt" + File.separator + "integration"
-   			+ File.separator + "webservice" + File.separator +"spm"+ File.separator+ "SPMMapping.properties";
-       private static Map<String,String> getWCMappingFieldBySPM()throws Exception{
-    		Properties prop=new Properties();
-    		Map<String,String> mappingMap=new HashMap<String,String>();
-    	    String wthome = (String) (WTProperties.getLocalProperties()).getProperty("wt.home", "");
-			String tempPath = wthome + File.separator + MAPPINGWCCONFIG_PATH;
-			Debug.P("-------->>Mapping FilePath:"+tempPath);
-			FileInputStream fis = new FileInputStream(tempPath);
-			prop.load(new InputStreamReader(fis, "UTF-8"));
-			prop.load(fis);
-			if(prop!=null){
-			   Iterator<?> ite=prop.entrySet().iterator();
-				while(ite.hasNext()){
-					Entry entry=(Entry) ite.next();
-					String proName = (String) entry.getKey();
-					String value = (String) entry.getValue();
-					mappingMap.put(proName, value);
-				}
-			}
-			  fis.close();
-			  return mappingMap;
-       }
-
        
        
    
