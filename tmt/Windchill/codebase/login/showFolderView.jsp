@@ -8,7 +8,7 @@
 
 <title>Windchill</title>
 <%
-  String user = "pm-rw";//request.getParameter("username");
+  String user = "pmrw";//request.getParameter("username");
   String pass = "PM.plm2014";//request.getParameter("password");
 
   //String containerName=new String(request.getParameter("containerName").getBytes("ISO-8859-1"),"UTF-8");
