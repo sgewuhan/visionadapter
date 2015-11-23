@@ -93,7 +93,7 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 
 	private static String DEFAULT = "/Default";
 
-	private static String VMUSER = "PM-RW";
+	private static String VMUSER = "PMRW";
 
 	private static Map<String, String> stateMap = new HashMap<String, String>();
 	static {
@@ -1390,5 +1390,4 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 		return doc;
 	}
 	
-
 }
