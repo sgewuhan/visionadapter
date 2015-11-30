@@ -53,13 +53,13 @@ public class SPMWebservice extends JaxWsWebService {
 		return SPMWebserviceImpl.checkPartFromLibrary(partNumber);
 	}
 
-	@WebMethod(operationName = "PlmTechFileInfoToBPS")
-	public String PlmTechFileInfoToBPS(String inputXml) throws Exception {
+	@WebMethod(operationName = "MaterialDocInterface")
+	public String MaterialDocInterface(String inputXml) throws Exception {
 		return DocProcessor.processor(inputXml);
 	}
 
-	@WebMethod(operationName = "BacthMaterialApply")
-	public String BacthMaterialApply(String inputXml) throws Exception {
+	@WebMethod(operationName = "Material_Interface")
+	public String Material_Interface(String inputXml) throws Exception {
 		return PartProcessor.processor(inputXml);
 	}
 
