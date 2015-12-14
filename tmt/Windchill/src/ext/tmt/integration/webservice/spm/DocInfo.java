@@ -43,6 +43,7 @@ public class DocInfo {
 	private WTPart part = null;
 
 	public DocInfo() {
+		_data = new BasicDBObject();
 		partInfo = new PartInfo();
 	}
 
@@ -147,14 +148,13 @@ public class DocInfo {
 			throw new Exception("创建物料相关文档时，主内容不能为空，请检查。");
 		}
 
-		if (StringUtils.isEmpty(getType())) {
-			throw new Exception("创建物料相关文档时，必须填写需创建的文档类型，请检查。");
-		}
+//		if (StringUtils.isEmpty(getType())) {
+//			throw new Exception("创建物料相关文档时，必须填写需创建的文档类型，请检查。");
+//		}
 
 		part = partInfo.getWTPart();
 		if (part == null) {
-			throw new Exception("在新材PLM系统中未查询到编号为" + getPartNumber()
-					+ "的部件，无法执行物料文档创建处理，请检查。");
+			return;
 		}
 	}
 
@@ -162,9 +162,8 @@ public class DocInfo {
 		if (part == null) {
 			part = partInfo.getWTPart();
 			if (part == null) {
-				throw new Exception("在新材PLM系统中未查询到编号为" + getPartNumber()
-						+ "的部件，无法执行物料文档创建处理，请检查。");
 			}
+			return;
 		}
 		Transaction tx = null;
 		String folderPath = part.getFolderPath();
@@ -178,8 +177,8 @@ public class DocInfo {
 		try {
 			tx = new Transaction();
 			tx.start();
-			WTContainer container = GenericUtil
-					.getWTContainerByName(part.getContainerName());
+			WTContainer container = GenericUtil.getWTContainerByName(part
+					.getContainerName());
 			if (StringUtils.isEmpty(documentType)) {
 				documentType = SPMConsts.DEFAULT_DOC_TYPE;
 			}

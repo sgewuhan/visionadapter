@@ -187,7 +187,8 @@ public class PartInfo {
 		}
 		String weight = getWeight();
 		if (StringUtils.isEmpty(weight)) {
-			throw new Exception("在PLM系统中创建部件时重量不能为空，请检查。");
+			setWeight("0");
+			// throw new Exception("在PLM系统中创建部件时重量不能为空，请检查。");
 		}
 		String model = getModel();
 		if (StringUtils.isEmpty(model)) {
@@ -402,10 +403,8 @@ public class PartInfo {
 		if (part == null) {
 			if (isTMTFactory) {
 				doInsertWTPart();
-				return;
 			}
-			throw new WTException("在PLM系统中未查询到编号为" + number
-					+ "的部件，无法执行更新处理，请检查。");
+			return;
 		}
 
 		if (WorkInProgressHelper.isCheckedOut(part)) {
@@ -454,8 +453,7 @@ public class PartInfo {
 
 	public void doRemoveWTPart() throws Exception {
 		if (part == null) {
-			throw new WTException("在PLM系统中未查询到编号为" + getNumber()
-					+ "的部件，无法执行工厂删除处理，请检查。");
+			return;
 		}
 		SessionHelper.manager.setAdministrator();
 		String factory = null;

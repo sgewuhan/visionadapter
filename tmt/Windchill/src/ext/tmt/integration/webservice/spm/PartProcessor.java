@@ -6,6 +6,7 @@ import java.text.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.DocumentException;
 
+import ext.tmt.utils.Debug;
 import wt.method.RemoteMethodServer;
 import wt.pom.Transaction;
 import wt.util.WTException;
@@ -14,7 +15,7 @@ import wt.util.WTPropertyVetoException;
 public class PartProcessor {
 
 	public static String processor(String inputXml) {
-		String result = "";
+		String result = XMLUtils.creatResultXmlDoc(true, "创建成功");
 		if (!RemoteMethodServer.ServerFlag) {
 			String CLASSNAME = PartProcessor.class.getName();
 			String method = "processor";
@@ -31,7 +32,9 @@ public class PartProcessor {
 		}
 		Transaction tran = null;
 		try {
+			Debug.P("开始重构XML");
 			Object obj = XMLUtils.analysisXML(inputXml);
+			Debug.P("重构XML完成");
 			if (obj == null) {
 				result = XMLUtils.creatResultXmlDoc(false, "新材PLM系统封装出错，请检查。");
 				return result;
@@ -44,13 +47,13 @@ public class PartProcessor {
 			tran.start();
 
 			PartInfo partInfo = (PartInfo) obj;
+			Debug.P("PartInfo number:" + partInfo.getNumber() + " name: "
+					+ partInfo.getName());
 
 			String operation = partInfo.getOperation();
 			if (StringUtils.equals(operation, PartInfo.OPERATION_CREATE)) {
 				if (partInfo.checkTMTFactory()) {
 					partInfo.doSaveWTPart();
-				} else {
-					result = XMLUtils.creatResultXmlDoc(false, "非新材物料，不进行创建！");
 				}
 			} else if (StringUtils.equals(operation, PartInfo.OPERATION_UPDATE)) {
 				partInfo.doSaveWTPart();

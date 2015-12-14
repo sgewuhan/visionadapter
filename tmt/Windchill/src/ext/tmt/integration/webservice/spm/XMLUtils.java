@@ -9,6 +9,7 @@ import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
+import ext.tmt.utils.Debug;
 import wt.query.QueryException;
 import wt.util.WTException;
 
@@ -123,8 +124,7 @@ public class XMLUtils {
 					String att_Value_Element_data = StringUtils
 							.trimToEmpty((String) att_Value_Element.getData());
 					if (StringUtils.isEmpty(att_Value_Element_data)) {
-						errorMsg = "传入属性值为空，请检查。";
-						return creatResultXmlDoc(false, errorMsg);
+						continue;
 					}
 
 					if (StringUtils.equals(att_Name_Element_data,
@@ -245,12 +245,14 @@ public class XMLUtils {
 			} else if (StringUtils.equals(name, DocInfo.F_PRODUCTNUMBER)) {
 				docInfo.setProductNumber((String) element.getData());
 			} else if (StringUtils.equals(name, DocInfo.F_PRIMARY_LOCATION)) {
+				Debug.P((String) element.getData());
 				docInfo.setPrimaryLocation((String) element.getData());
 			} else if (StringUtils.equals(name, DocInfo.F_ATT_LOCATION)) {
 				docInfo.addAttLocations((String) element.getData());
 			} else if (StringUtils.equals(name, DocInfo.F_CREATOR)) {
 				docInfo.setCreator((String) element.getData());
 			} else if (StringUtils.equals(name, DocInfo.F_TYPE)) {
+				Debug.P((String) element.getData());
 				docInfo.setType((String) element.getData());
 			} else if (StringUtils.equals(name, DocInfo.F_XIAFA)) {
 				docInfo.setXiafa((Boolean) element.getData());
