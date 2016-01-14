@@ -442,10 +442,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		Map plmData = getPLMData(number, "wt.part.WTPart:" + branchId,
 				airSpringClassification, partType);
 
-		initVisionObject(basicDoc, partOid, plmData, commonName, creatorName,
-				creatorFullName);
 		initBasicDocument(basicDoc, plmFolderId, number, status, majorVid,
 				secondVid, phase, masterid);
+		initVisionObject(basicDoc, partOid, plmData, commonName, creatorName,
+				creatorFullName);
 		Debug.P("initPart------> Finish");
 
 	}
@@ -474,10 +474,10 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		Map plmData = getPLMData(number, "wt.epm.EPMDocument:" + branchId,
 				airSpringClassification, partType);
 
-		initVisionObject(pmcad, docOid, plmData, commonName, creatorName,
-				creatorFullName);
 		initBasicDocument(pmcad, plmFolderId, number, status, majorVid,
 				secondVid, phase, masterid);
+		initVisionObject(pmcad, docOid, plmData, commonName, creatorName,
+				creatorFullName);
 
 		pmcad.setValue(PMCADDocument.F_CAD_NAME, epmdoc.getCADName());
 		String contentMD5 = GenericUtil.getMd5ByFile(epmdoc);

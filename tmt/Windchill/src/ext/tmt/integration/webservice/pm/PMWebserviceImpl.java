@@ -21,9 +21,15 @@ import wt.content.FormatContentHolder;
 import wt.doc.WTDocument;
 import wt.enterprise.RevisionControlled;
 import wt.epm.EPMDocument;
+import wt.epm.build.EPMBuildHistory;
+import wt.fc.ObjectReference;
 import wt.fc.Persistable;
 import wt.fc.PersistenceHelper;
 import wt.fc.QueryResult;
+import wt.fc.collections.WTArrayList;
+import wt.fc.collections.WTCollection;
+import wt.fc.collections.WTValuedHashMap;
+import wt.fc.collections.WTValuedMap;
 import wt.folder.Folder;
 import wt.folder.FolderEntry;
 import wt.folder.FolderHelper;
@@ -142,14 +148,17 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 	 */
 	private static void createFolderEntry(String objectId) throws Exception {
 		Folder folderResult = null;
+		Debug.P("" + objectId);
 		// 首先得到PM Folder对象
 		if (objectId == null) {
 			throw new IllegalArgumentException("----Args PMID is Null");
 		}
 		ModelServiceFactory factory = ModelServiceFactory
 				.getInstance(codebasePath);
+		Debug.P("" + factory);
 		FolderPersistence folderPersistence = factory
 				.get(FolderPersistence.class);
+		Debug.P("" + folderPersistence);
 		PMFolder pmfolder = folderPersistence.get(new ObjectId(objectId));// PM文件夹对象
 		checkNull(pmfolder);
 		boolean iscreate = pmfolder.getPLMId() == null ? true : false;
@@ -879,69 +888,174 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 			try {
 				SessionHelper.manager.setAdministrator();
 				if (!StringUtils.isEmpty(wc_id)) {
-					Persistable object = GenericUtil.getPersistableByOid(wc_id);
-					if (object != null) {
-						object = getLastObjectByNum(object);
-						Folder folder = FolderHelper.service
-								.getFolder((FolderEntry) object);
-						Persistable newobject = VersionControlHelper.service
-								.newVersion((Versioned) object);
-						FolderHelper.assignLocation((FolderEntry) newobject,
-								folder);
-						PersistenceHelper.manager.save(newobject);
-						GenericUtil.changeState((LifeCycleManaged) newobject,
-								ConstanUtil.WC_INWORK);
-						PersistenceHelper.manager.refresh(newobject);
-						if (newobject instanceof EPMDocument) {
-							EPMDocument empdoc = (EPMDocument) newobject;
-							Debug.P("EPMDocument ---->" + empdoc.getNumber()
-									+ "  new version--->"
-									+ empdoc.getVersionIdentifier().getValue());
-							basic_object.setPLMId(empdoc.getPersistInfo()
-									.getObjectIdentifier().getStringValue());
-							basic_object.setMajorVid(empdoc
-									.getVersionIdentifier().getValue());
-							basic_object.setSecondVid(Integer.valueOf(empdoc
-									.getIterationIdentifier().getValue()));
-							basic_object.setValue("syncdate", Utils.getDate());
-						} else if (newobject instanceof WTPart) {
-							WTPart part = (WTPart) newobject;
-							Debug.P("WTPart ---->" + part.getNumber()
-									+ "  new version--->"
-									+ part.getVersionIdentifier().getValue());
-							basic_object.setPLMId(part.getPersistInfo()
-									.getObjectIdentifier().getStringValue());
-							basic_object.setMajorVid(part
-									.getVersionIdentifier().getValue());
-							basic_object.setSecondVid(Integer.valueOf(part
-									.getIterationIdentifier().getValue()));
-							basic_object.setValue("syncdate", Utils.getDate());
-						} else if (newobject instanceof WTDocument) {
-							WTDocument doc = (WTDocument) newobject;
-							Debug.P("WTDocument ---->" + doc.getNumber()
-									+ "  new version--->"
-									+ doc.getVersionIdentifier().getValue());
-							basic_object.setPLMId(doc.getPersistInfo()
-									.getObjectIdentifier().getStringValue());
-							basic_object.setMajorVid(doc.getVersionIdentifier()
-									.getValue());
-							basic_object.setSecondVid(Integer.valueOf(doc
-									.getIterationIdentifier().getValue()));
-							basic_object.setValue("syncdate", Utils.getDate());
+
+					Persistable object1 = GenericUtil
+							.getPersistableByOid(wc_id);
+					if (object1 != null) {
+						// 得到Windchill对象
+						object1 = getLastObjectByNum(object1);
+
+						// 得到要进版对象集合
+						WTCollection wtcol = new WTArrayList();
+						wtcol.add(object1);
+						if (object1 instanceof EPMDocument) {
+							QueryResult qr2 = PersistenceHelper.manager
+									.navigate((EPMDocument) object1,
+											EPMBuildHistory.BUILT_ROLE,
+											EPMBuildHistory.class, true);
+							while (qr2.hasMoreElements()) {
+								Persistable part = (Persistable) qr2
+										.nextElement();
+								part = getLastObjectByNum(part);
+								Persistable[] persistables = wtcol
+										.toArray(new Persistable[0]);
+								boolean b = true;
+								for (Persistable persistable : persistables) {
+									if (persistable
+											.getPersistInfo()
+											.getObjectIdentifier()
+											.getStringValue()
+											.equals(part.getPersistInfo()
+													.getObjectIdentifier()
+													.getStringValue())) {
+										b = false;
+									}
+								}
+								if (b) {
+									wtcol.add(part);
+								}
+							}
 						}
-						basic_object.doUpdate();
+
+						// 进版
+						WTValuedMap map = VersionControlHelper.service
+								.newVersions(wtcol);
+
+						// 得到进版后对象存放文件夹数组,key=Persistable,value=Folder
+						WTValuedHashMap localWTValuedHashMap = createWTFolder(
+								wtcol, map);
+
+						// 设置文件夹
+						FolderHelper.assignLocations(localWTValuedHashMap);
+
+						// 保存
+						PersistenceHelper.manager.store(map.wtValues());
+
+						// 同步PM
+						for (Persistable object : wtcol
+								.toArray(new Persistable[0])) {
+							Persistable newobject = ((ObjectReference) map
+									.get(object)).getObject();
+							// FolderHelper.assignLocation(
+							// (FolderEntry) newobject, folder);
+							// PersistenceHelper.manager.save(newobject);
+							GenericUtil.changeState(
+									(LifeCycleManaged) newobject,
+									ConstanUtil.WC_INWORK);
+							PersistenceHelper.manager.refresh(newobject);
+							if (newobject instanceof EPMDocument) {
+								EPMDocument empdoc = (EPMDocument) newobject;
+								IBAUtils partiba = new IBAUtils(empdoc);
+								String pmid = partiba.getIBAValue("PMId");
+								BasicDocument empdocObject = ModelServiceFactory
+										.getInstance(codebasePath)
+										.getBasicDocumentById(pmid);
+								Debug.P("EPMDocument ---->"
+										+ empdoc.getNumber()
+										+ "  new version--->"
+										+ empdoc.getVersionIdentifier()
+												.getValue());
+								empdocObject
+										.setPLMId(empdoc.getPersistInfo()
+												.getObjectIdentifier()
+												.getStringValue());
+								empdocObject.setMajorVid(empdoc
+										.getVersionIdentifier().getValue());
+								empdocObject.setSecondVid(Integer
+										.valueOf(empdoc
+												.getIterationIdentifier()
+												.getValue()));
+								empdocObject.setValue("syncdate",
+										Utils.getDate());
+								empdocObject.doUpdate();
+							} else if (newobject instanceof WTPart) {
+								WTPart part = (WTPart) newobject;
+								IBAUtils partiba = new IBAUtils(part);
+								String pmid = partiba.getIBAValue("PMId");
+								BasicDocument partObject = ModelServiceFactory
+										.getInstance(codebasePath)
+										.getBasicDocumentById(pmid);
+								Debug.P("WTPart ---->"
+										+ part.getNumber()
+										+ "  new version--->"
+										+ part.getVersionIdentifier()
+												.getValue());
+								partObject
+										.setPLMId(part.getPersistInfo()
+												.getObjectIdentifier()
+												.getStringValue());
+								partObject.setMajorVid(part
+										.getVersionIdentifier().getValue());
+								partObject.setSecondVid(Integer.valueOf(part
+										.getIterationIdentifier().getValue()));
+								partObject
+										.setValue("syncdate", Utils.getDate());
+								partObject.doUpdate();
+							} else if (newobject instanceof WTDocument) {
+								WTDocument doc = (WTDocument) newobject;
+								IBAUtils partiba = new IBAUtils(doc);
+								String pmid = partiba.getIBAValue("PMId");
+								BasicDocument docObject = ModelServiceFactory
+										.getInstance(codebasePath)
+										.getBasicDocumentById(pmid);
+								Debug.P("WTDocument ---->" + doc.getNumber()
+										+ "  new version--->"
+										+ doc.getVersionIdentifier().getValue());
+								docObject
+										.setPLMId(doc.getPersistInfo()
+												.getObjectIdentifier()
+												.getStringValue());
+								docObject.setMajorVid(doc
+										.getVersionIdentifier().getValue());
+								docObject.setSecondVid(Integer.valueOf(doc
+										.getIterationIdentifier().getValue()));
+								docObject.setValue("syncdate", Utils.getDate());
+								docObject.doUpdate();
+							}
+						}
 					}
 				}
+			} catch(WTException e){
+				e.printStackTrace();
+				basic_object.doSetErrorMessage(10, "PLM 修订(" + wc_id
+						+ ")升级版本异常!"+e.getWTMessage());
+				throw new Exception(e.getWTMessage().toString());
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				basic_object.doSetErrorMessage(10, "PLM 修订(" + wc_id
-						+ ")升级版本异常!");
+						+ ")升级版本异常!"+e.getMessage());
 				throw new Exception(e.getMessage());
 			} finally {
 				SessionHelper.manager.setAuthenticatedPrincipal(VMUSER);
 			}
 		}
 
+	}
+
+	private static WTValuedHashMap createWTFolder(WTCollection wtcol,
+			WTValuedMap map) throws WTException {
+		WTValuedHashMap localWTValuedHashMap = new WTValuedHashMap();
+		Persistable[] persistables = wtcol.toArray(new Persistable[0]);
+		for (Persistable persistable : persistables) {
+			Folder folder = FolderHelper.service
+					.getFolder((FolderEntry) persistable);
+
+			localWTValuedHashMap.put(
+					((ObjectReference) map.get(persistable)).getObject(),
+					folder);
+		}
+		return localWTValuedHashMap;
 	}
 
 	/**
@@ -1389,5 +1503,5 @@ public class PMWebserviceImpl implements Serializable, RemoteAccess {
 		}
 		return doc;
 	}
-	
+
 }
