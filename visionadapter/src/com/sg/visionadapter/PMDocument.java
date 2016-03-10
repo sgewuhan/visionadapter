@@ -161,7 +161,7 @@ public final class PMDocument extends BasicDocument {
 			String fileName, DB db, InputStream in) throws IOException {
 		DBObject content = new BasicDBObject().append(F_ID, objectId)
 				.append(NAME_SPACE, nameSpace).append(FILE_NAME, fileName)
-				.append(DB, db.toString());
+				.append(DB, db.getName());
 		DBObject metaData = new BasicDBObject().append("fvid", 0)
 				.append("caid", "PM-RW").append("caname", "PLMϵͳ");
 		BasicBSONList contents = new BasicBSONList();
