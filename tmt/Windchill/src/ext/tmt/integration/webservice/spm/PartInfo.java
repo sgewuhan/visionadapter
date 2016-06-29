@@ -1,6 +1,7 @@
 package ext.tmt.integration.webservice.spm;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,7 +166,11 @@ public class PartInfo {
 
 	@SuppressWarnings("unchecked")
 	public List<String> getDeleteFactory() {
-		return (List<String>) _data.get("DELETE_FACTORY");
+		List<String> list = (List<String>) _data.get("DELETE_FACTORY");
+		if (list == null) {
+			list = new ArrayList<String>();
+		}
+		return list;
 	}
 
 	public void setValue(String name, String value) {
@@ -192,7 +197,8 @@ public class PartInfo {
 		}
 		String model = getModel();
 		if (StringUtils.isEmpty(model)) {
-			throw new Exception("在PLM系统中创建部件时型号规格不能为空，请检查。");
+			setModel("");
+			//throw new Exception("在PLM系统中创建部件时型号规格不能为空，请检查。");
 		}
 		String factory = getFactory();
 		if (StringUtils.isEmpty(factory)) {
@@ -286,6 +292,9 @@ public class PartInfo {
 								.getStringValue() + "  ;FolderPath:"
 						+ folder.getFolderPath());
 				FolderHelper.assignLocation(wtpart, folder);
+			} else {
+				tx.rollback();
+				return null;
 			}
 			// 视图
 			View view = ViewHelper.service.getView(SPMConsts.DESIGN_VIEW);
@@ -304,27 +313,22 @@ public class PartInfo {
 				Debug.P("----->>>unit  ID:" + unit + ";");
 				if (StringUtils.isEmpty(unit)) {
 					unit = "ea";
-				}
-				if (unit.equals("EA")) {
+				}else if (unit.equals("EA")) {
 					unit = unit.toLowerCase();
-				}
-				if (unit.equals("AS_NEEDED")) {
+				} else if (unit.equals("AS_NEEDED")) {
 					unit = unit.toLowerCase();
-				}
-				if (unit.equals("KG")) {
+				} else if (unit.equals("KG")) {
 					unit = unit.toLowerCase();
-				}
-				if (unit.equals("M")) {
+				} else if (unit.equals("M")) {
 					unit = unit.toLowerCase();
-				}
-				if (unit.equals("L")) {
+				} else if (unit.equals("L")) {
 					unit = unit.toLowerCase();
-				}
-				if (unit.equals("SQ_M")) {
+				} else if (unit.equals("SQ_M")) {
 					unit = unit.toLowerCase();
-				}
-				if (unit.equals("CU_M")) {
+				} else if (unit.equals("CU_M")) {
 					unit = unit.toLowerCase();
+				} else {
+					
 				}
 				qu = QuantityUnit.toQuantityUnit(unit);
 			} catch (WTInvalidParameterException e) {
@@ -333,11 +337,15 @@ public class PartInfo {
 			if (qu != null) {
 				wtpart.setDefaultUnit(qu);
 			}
-
 			Map<String, Object> ibaMap = getIBAMap(configMap);
-
+			ibaMap.remove(null);
 			// 设置IBA属性
-			LWCUtil.setValueBeforeStore(wtpart, ibaMap);
+			if (ibaMap.size() > 0) {
+				try {
+					LWCUtil.setValueBeforeStore(wtpart, ibaMap);
+				} catch (Exception e) {
+				}
+			}
 			tx.commit();
 			tx = null;
 		} catch (IOException e) {
@@ -358,14 +366,16 @@ public class PartInfo {
 		Set<String> keySet = _data.keySet();
 		for (String key : keySet) {
 			String ibaName = configMap.get(key);
-			if (!key.equals(F_CSR_WULIAOLEIXING)
+			if (ibaName != null && !key.equals(F_CSR_WULIAOLEIXING)
 					&& StringUtils.isNotEmpty(ibaName)) {
 				String value = getValue(key);
 				ibaMap.put(ibaName.trim(), value == null ? "" : value.trim());
 			}
 		}
-		ibaMap.put(configMap.get(SPMConsts.MATERIAL_PATH),
-				getValue(F_WLXIAOLEI));
+		String type = configMap.get(SPMConsts.MATERIAL_PATH);
+		if (type != null) {
+			ibaMap.put(type, getValue(F_WLXIAOLEI));
+		}
 		return ibaMap;
 	}
 
@@ -383,18 +393,22 @@ public class PartInfo {
 	public void doInsertWTPart() throws Exception {
 		SessionHelper.manager.setAdministrator();
 		if (part == null) {
-			createNewWTPart();
+			part = createNewWTPart();
 		}
 
-		part = (WTPart) PersistenceHelper.manager.save(part);
+		Debug.P("Part: " + part);
+		if (part != null) {
+			part = (WTPart) PersistenceHelper.manager.save(part);
 
-		Debug.P("------>>>Create WTPart:"
-				+ part.getPersistInfo().getObjectIdentifier().getStringValue()
-				+ " Part FolderPath:(" + part.getFolderPath() + ")Success!!!");
+			Debug.P("------>>>Create WTPart:"
+					+ part.getPersistInfo().getObjectIdentifier()
+							.getStringValue() + " Part FolderPath:("
+					+ part.getFolderPath() + ")Success!!!");
 
 		part = (WTPart) PersistenceHelper.manager.refresh(part);
 
 		GenericUtil.changeState((LifeCycleManaged) part, SPMConsts.RELEASED);
+		}
 	}
 
 	public void doUpdateWTPart() throws Exception {
@@ -494,5 +508,18 @@ public class PartInfo {
 			GenericUtil
 					.changeState((LifeCycleManaged) part, SPMConsts.DESPOSED);
 		}
+	}
+
+	public boolean checkIsTMT() {
+		String partType = getType();
+		if (StringUtils.isNotEmpty(partType)) {
+			if (partType.contains(SPMConsts.RAWMATERIAL)
+					|| partType.contains(SPMConsts.SUPPLYMENT)
+					|| partType.contains(SPMConsts.PACKINGPART)
+					|| partType.contains(SPMConsts.TOOLPART)) {// 备品备件
+				return true;
+			}
+		}
+		return false;
 	}
 }

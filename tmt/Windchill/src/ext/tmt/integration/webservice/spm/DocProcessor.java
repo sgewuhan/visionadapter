@@ -6,11 +6,12 @@ import java.rmi.RemoteException;
 
 import org.dom4j.DocumentException;
 
-import ext.tmt.utils.Debug;
+
 import wt.method.RemoteMethodServer;
 import wt.pom.Transaction;
 import wt.query.QueryException;
 import wt.util.WTException;
+import ext.tmt.utils.Debug;
 
 public class DocProcessor {
 
@@ -21,6 +22,7 @@ public class DocProcessor {
 	 * @return
 	 */
 	public static String processor(String inputXml) {
+		Debug.P("接受XML："+inputXml);
 		String result = XMLUtils.creatResultXmlDoc(true, "创建成功");
 		if (!RemoteMethodServer.ServerFlag) {
 			String CLASSNAME = DocProcessor.class.getName();

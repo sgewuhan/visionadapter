@@ -166,11 +166,17 @@ public class DocInfo {
 			return;
 		}
 		Transaction tx = null;
+        String name = part.getName();
+		Debug.P("----->>>WTPART:" + name);
 		String folderPath = part.getFolderPath();
+		if(folderPath.contains(name)) { 
+			folderPath = folderPath.substring(0,folderPath.lastIndexOf(name));
+			Debug.P("----->>>FolderPath去掉文件名后:" + folderPath);
+		} else {
 		folderPath = folderPath.substring(0, folderPath.lastIndexOf("/"));
+		}
 		String documentType = SPMConsts.DEFAULT_DOC_TYPE;// 文档类型
 		String number = genDocNumber(part, getType());
-		String name = part.getName();
 		String fileContent = getPrimaryLocation();// 主文档路径
 		boolean flagAccess = SessionServerHelper.manager
 				.setAccessEnforced(false);

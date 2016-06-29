@@ -392,7 +392,7 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 
 	private static void initVisionObject(VisionObject vo, String docOid,
 			Map plmData, String commonName, String creatorName,
-			String creatorFullName) throws Exception {
+			String creatorFullName) {
 		vo.setPLMId(docOid);
 		vo.setPLMData(plmData);
 		vo.setCommonName(commonName);
@@ -442,10 +442,12 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		Map plmData = getPLMData(number, "wt.part.WTPart:" + branchId,
 				airSpringClassification, partType);
 
-		initBasicDocument(basicDoc, plmFolderId, number, status, majorVid,
-				secondVid, phase, masterid);
 		initVisionObject(basicDoc, partOid, plmData, commonName, creatorName,
 				creatorFullName);
+		initBasicDocument(basicDoc, plmFolderId, number, status, majorVid,
+				secondVid, phase, masterid);
+
+
 		Debug.P("initPart------> Finish");
 
 	}
@@ -474,12 +476,14 @@ public class WCToPMHelper implements RemoteAccess, Serializable {
 		Map plmData = getPLMData(number, "wt.epm.EPMDocument:" + branchId,
 				airSpringClassification, partType);
 
-		initBasicDocument(pmcad, plmFolderId, number, status, majorVid,
-				secondVid, phase, masterid);
 		initVisionObject(pmcad, docOid, plmData, commonName, creatorName,
 				creatorFullName);
+		initBasicDocument(pmcad, plmFolderId, number, status, majorVid,
+				secondVid, phase, masterid);
 
-		pmcad.setValue(PMCADDocument.F_CAD_NAME, epmdoc.getCADName());
+
+
+		pmcad.setValue("cadName", epmdoc.getCADName());
 		String contentMD5 = GenericUtil.getMd5ByFile(epmdoc);
 		pmcad.setContentMD5(contentMD5);
 		if (StringUtils.isNotEmpty(materialNo)) {

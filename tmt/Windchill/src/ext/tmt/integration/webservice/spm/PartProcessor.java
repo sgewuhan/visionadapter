@@ -15,6 +15,7 @@ import wt.util.WTPropertyVetoException;
 public class PartProcessor {
 
 	public static String processor(String inputXml) {
+		Debug.P("接受XML："+inputXml);
 		String result = XMLUtils.creatResultXmlDoc(true, "创建成功");
 		if (!RemoteMethodServer.ServerFlag) {
 			String CLASSNAME = PartProcessor.class.getName();
@@ -32,7 +33,7 @@ public class PartProcessor {
 		}
 		Transaction tran = null;
 		try {
-			Debug.P("开始重构XML");
+			Debug.P("开始重构XML: " + inputXml);
 			Object obj = XMLUtils.analysisXML(inputXml);
 			Debug.P("重构XML完成");
 			if (obj == null) {
@@ -47,20 +48,21 @@ public class PartProcessor {
 			tran.start();
 
 			PartInfo partInfo = (PartInfo) obj;
-			Debug.P("PartInfo number:" + partInfo.getNumber() + " name: "
-					+ partInfo.getName());
-
-			String operation = partInfo.getOperation();
-			if (StringUtils.equals(operation, PartInfo.OPERATION_CREATE)) {
-				if (partInfo.checkTMTFactory()) {
+			Debug.P("PartInfo number:" + partInfo.getNumber());
+			// 判断是需要进入新材PLM
+			if (partInfo.checkIsTMT()) {
+				String operation = partInfo.getOperation();
+				if (StringUtils.equals(operation, PartInfo.OPERATION_CREATE)) {
+					if (partInfo.checkTMTFactory()) {
+						partInfo.doSaveWTPart();
+					}
+				} else if (StringUtils.equals(operation,
+						PartInfo.OPERATION_UPDATE)) {
 					partInfo.doSaveWTPart();
+				} else if (StringUtils.equals(operation,
+						PartInfo.OPERATION_DELETE)) {
+					partInfo.doRemoveWTPart();
 				}
-			} else if (StringUtils.equals(operation, PartInfo.OPERATION_UPDATE)) {
-				partInfo.doSaveWTPart();
-			} else if (StringUtils.equals(operation, PartInfo.OPERATION_DELETE)) {
-				partInfo.doRemoveWTPart();
-			} else {
-
 			}
 
 			tran.commit();

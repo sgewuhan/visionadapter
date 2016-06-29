@@ -3,6 +3,7 @@ package ext.tmt.integration.webservice.spm;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -49,7 +50,7 @@ public class XMLUtils {
 		}
 		try {
 			partInfo.checkAndSetBpsWorkflowId(StringUtils.trimToEmpty(
-					(String) bps_workflow_id.getData()).trim());
+					unescapeXml((String) bps_workflow_id.getData())).trim());
 		} catch (Exception e) {
 			return creatResultXmlDoc(false, e);
 		}
@@ -60,8 +61,10 @@ public class XMLUtils {
 			errorMsg = "传入处理类型节点（OPERATION）为空，请检查。";
 			return creatResultXmlDoc(false, errorMsg);
 		}
-		String operation_data = StringUtils.trimToEmpty((String) operation
-				.getData());
+		String operation_data = StringUtils
+				.trimToEmpty(unescapeXml((String) operation.getData()));
+
+
 		try {
 			partInfo.checkAndSetOperation(operation_data.trim());
 		} catch (Exception e) {
@@ -77,8 +80,9 @@ public class XMLUtils {
 			return creatResultXmlDoc(false, errorMsg);
 		}
 		try {
-			partInfo.checkAndSetNumber(operatoin_Element.attributeValue(
-					PartInfo.F_NUMBER).trim());
+			partInfo.checkAndSetNumber(unescapeXml(
+					operatoin_Element.attributeValue(PartInfo.F_NUMBER)).trim());
+
 		} catch (Exception e) {
 			return creatResultXmlDoc(false, e);
 		}
@@ -97,7 +101,8 @@ public class XMLUtils {
 
 			String element_Name = element.getName();
 			if (StringUtils.equals(element_Name, PartInfo.F_DELETE_FACTORY)) {
-				String delete_factory_data = (String) element.getData();
+				String delete_factory_data = unescapeXml((String) element
+						.getData());
 				if (StringUtils.isEmpty(delete_factory_data)) {
 					errorMsg = "传入已删除工厂值为空，请检查。";
 					return creatResultXmlDoc(false, errorMsg);
@@ -110,7 +115,8 @@ public class XMLUtils {
 					return creatResultXmlDoc(false, errorMsg);
 				} else {
 					String att_Name_Element_data = StringUtils
-							.trimToEmpty((String) att_Name_Element.getData());
+							.trimToEmpty(unescapeXml((String) att_Name_Element
+									.getData()));
 					if (StringUtils.isEmpty(att_Name_Element_data)) {
 						errorMsg = "传入属性名称值为空，请检查。";
 						return creatResultXmlDoc(false, errorMsg);
@@ -122,7 +128,8 @@ public class XMLUtils {
 						return creatResultXmlDoc(false, errorMsg);
 					}
 					String att_Value_Element_data = StringUtils
-							.trimToEmpty((String) att_Value_Element.getData());
+							.trimToEmpty(unescapeXml((String) att_Value_Element
+									.getData()));
 					if (StringUtils.isEmpty(att_Value_Element_data)) {
 						continue;
 					}
@@ -149,6 +156,12 @@ public class XMLUtils {
 		}
 
 		return partInfo;
+	}
+
+	private static String unescapeXml(String inputXml) {
+		inputXml = StringEscapeUtils.unescapeXml(inputXml);
+		Debug.P("反转义完成：" + inputXml);
+		return inputXml;
 	}
 
 	private static String creatResultXmlDoc(boolean isSucussed, Exception e) {
@@ -202,7 +215,7 @@ public class XMLUtils {
 		}
 		try {
 			docInfo.checkAndSetBpsWorkflowId(StringUtils.trimToEmpty(
-					(String) bps_workflow_id.getData()).trim());
+					unescapeXml((String) bps_workflow_id.getData())).trim());
 		} catch (Exception e) {
 			return creatResultXmlDoc(false, e);
 		}
@@ -213,8 +226,8 @@ public class XMLUtils {
 			errorMsg = "传入处理类型节点（OPERATION）为空，请检查。";
 			return creatResultXmlDoc(false, errorMsg);
 		}
-		String operation_data = StringUtils.trimToEmpty((String) operation
-				.getData());
+		String operation_data = StringUtils.trimToEmpty(unescapeXml((String) operation
+				.getData()));
 		try {
 			docInfo.checkAndSetOperation(operation_data.trim());
 		} catch (Exception e) {
@@ -230,8 +243,8 @@ public class XMLUtils {
 			return creatResultXmlDoc(false, errorMsg);
 		}
 		try {
-			docInfo.checkAndSetPartNumber(operatoin_Element.attributeValue(
-					DocInfo.F_PART_NUMBER).trim());
+			docInfo.checkAndSetPartNumber(unescapeXml(operatoin_Element.attributeValue(
+					DocInfo.F_PART_NUMBER)).trim());
 		} catch (Exception e) {
 			return creatResultXmlDoc(false, e);
 		}
@@ -241,19 +254,19 @@ public class XMLUtils {
 			Element element = it.next();
 			String name = element.getName();
 			if (StringUtils.equals(name, DocInfo.F_JSGGSNUMBER)) {
-				docInfo.setJsggsNumber((String) element.getData());
+				docInfo.setJsggsNumber(unescapeXml((String) element.getData()));
 			} else if (StringUtils.equals(name, DocInfo.F_PRODUCTNUMBER)) {
-				docInfo.setProductNumber((String) element.getData());
+				docInfo.setProductNumber(unescapeXml((String) element.getData()));
 			} else if (StringUtils.equals(name, DocInfo.F_PRIMARY_LOCATION)) {
 				Debug.P((String) element.getData());
-				docInfo.setPrimaryLocation((String) element.getData());
+				docInfo.setPrimaryLocation(unescapeXml((String) element.getData()));
 			} else if (StringUtils.equals(name, DocInfo.F_ATT_LOCATION)) {
-				docInfo.addAttLocations((String) element.getData());
+				docInfo.addAttLocations(unescapeXml((String) element.getData()));
 			} else if (StringUtils.equals(name, DocInfo.F_CREATOR)) {
-				docInfo.setCreator((String) element.getData());
+				docInfo.setCreator(unescapeXml((String) element.getData()));
 			} else if (StringUtils.equals(name, DocInfo.F_TYPE)) {
-				Debug.P((String) element.getData());
-				docInfo.setType((String) element.getData());
+				Debug.P(unescapeXml((String) element.getData()));
+				docInfo.setType(unescapeXml((String) element.getData()));
 			} else if (StringUtils.equals(name, DocInfo.F_XIAFA)) {
 				docInfo.setXiafa((Boolean) element.getData());
 			} else {
